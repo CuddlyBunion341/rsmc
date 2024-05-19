@@ -18,7 +18,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                resolution: WindowResolution::new(720.0, 720.0),
+                resolution: WindowResolution::new(1920.0, 1080.0).with_scale_factor_override(1.0),
                 present_mode: bevy::window::PresentMode::Immediate,
                 ..default()
             }),
@@ -30,7 +30,7 @@ fn main() {
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         .add_plugins(PerfUiPlugin)
-        .add_systems(Startup, setup)
+        .add_systems(Startup, (setup, setup_world))
         .run();
 }
 
@@ -43,7 +43,6 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     commands.spawn(PerfUiCompleteBundle::default());
-
 
     commands.spawn(PointLightBundle {
         transform: Transform::from_xyz(5.0, 5.0, 0.0),
@@ -65,8 +64,8 @@ fn setup(
         },
         transform: Transform::from_rotation(Quat::from_euler(
             EulerRot::ZYX,
-            0.1,
-            PI / 2.,
+            0.3,
+            PI / 2. + 0.3,
             -PI / 4.,
         )),
         cascade_shadow_config: CascadeShadowConfigBuilder {
@@ -86,6 +85,4 @@ fn setup(
             Vec3::new(0., 0., 0.),
             Vec3::Y,
         ));
-
-    setup_world(commands, meshes, materials);
 }
