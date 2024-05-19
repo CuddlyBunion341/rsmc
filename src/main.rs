@@ -1,4 +1,5 @@
 use bevy::{
+    pbr::{light_consts, CascadeShadowConfigBuilder, NotShadowCaster, NotShadowReceiver},
     prelude::*,
     reflect::TypePath,
     render::{
@@ -7,8 +8,17 @@ use bevy::{
     },
     window::WindowResolution,
 };
+use bevy::{prelude::*, render::mesh::PlaneMeshBuilder};
+use smooth_bevy_cameras::{
+    controllers::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin},
+    LookTransformPlugin,
+};
+use smooth_bevy_cameras::{LookTransform, LookTransformBundle, Smoother};
+
 use cgmath::{Matrix4, Rad, Vector3};
 use iyes_perf_ui::prelude::*;
+use noise::{NoiseFn, Perlin, Seedable};
+use std::f32::consts::PI;
 
 fn main() {
     App::new()
@@ -20,12 +30,12 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins(MaterialPlugin::<CustomMaterial>::default())
+        .add_plugins(LookTransformPlugin)
+        .add_plugins(FpsCameraPlugin::default())
         .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         .add_plugins(PerfUiPlugin)
-        .add_systems(Update, (animate, camera_controller))
         .add_systems(Startup, setup)
         .run();
 }
@@ -36,21 +46,23 @@ struct MyCube;
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<CustomMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     commands.spawn(PerfUiCompleteBundle::default());
 
-    let chunk_size = 38;
+    let perlin = Perlin::new(1);
+    let chunk_size = 32;
 
     for x in 0..chunk_size {
         for z in 0..chunk_size {
             let mesh = meshes.add(Cuboid::default());
+            let height = perlin.get([x as f64 / 10.0, z as f64 / 10.0]) * 3.0;
             let transform = Transform::from_xyz(
                 (x - chunk_size / 2) as f32,
-                0.0,
+                height.floor() as f32,
                 (z - chunk_size / 2) as f32,
             );
-            let material = materials.add(CustomMaterial {});
+            let material = materials.add(StandardMaterial { ..default() });
 
             commands.spawn((
                 MaterialMeshBundle {
@@ -64,65 +76,45 @@ fn setup(
         }
     }
 
-    let camera_and_light_transform =
-        Transform::from_xyz(0.0, 50.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y);
-
-    // Camera in 3D space.
-    commands.spawn(Camera3dBundle {
-        transform: camera_and_light_transform,
+    commands.spawn(PointLightBundle {
+        transform: Transform::from_xyz(5.0, 5.0, 0.0),
+        point_light: PointLight {
+            intensity: 0.0,
+            range: 500.0,
+            color: Color::WHITE,
+            shadows_enabled: true,
+            ..default()
+        },
         ..default()
     });
-}
 
-#[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
-struct CustomMaterial {}
-
-impl Material for CustomMaterial {
-    fn fragment_shader() -> ShaderRef {
-        "shaders/animate_shader.wgsl".into()
-    }
-}
-
-fn animate(time: Res<Time>, mut query: Query<(&mut Transform, &MyCube)>) {
-    let rotation_change = time.delta_seconds() * 5.0;
-
-    for (mut transform, cube) in query.iter_mut() {
-        transform.rotate(Quat::from_rotation_y(Rad(rotation_change).0));
-    }
-}
-
-fn camera_controller(
-    time: Res<Time>,
-    keys: Res<ButtonInput<KeyCode>>,
-    mut query: Query<(&mut Transform, &Camera)>,
-) {
-    for (mut transform, camera) in query.iter_mut() {
-        let mut translation = Vec3::ZERO;
-
-        if keys.pressed(KeyCode::KeyW) {
-            translation += Vec3::X;
+    commands.spawn(DirectionalLightBundle {
+        directional_light: DirectionalLight {
+            illuminance: light_consts::lux::OVERCAST_DAY,
+            shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform::from_rotation(Quat::from_euler(
+            EulerRot::ZYX,
+            0.1,
+            PI / 2.,
+            -PI / 4.,
+        )),
+        cascade_shadow_config: CascadeShadowConfigBuilder {
+            first_cascade_far_bound: 7.0,
+            maximum_distance: 25.0,
+            ..default()
         }
-        if keys.pressed(KeyCode::KeyA) {
-            translation -= Vec3::Z;
-        }
-        if keys.pressed(KeyCode::KeyS) {
-            translation -= Vec3::X;
-        }
-        if keys.pressed(KeyCode::KeyD) {
-            translation += Vec3::Z;
-        }
+        .into(),
+        ..default()
+    });
 
-        if keys.pressed(KeyCode::Space) {
-            translation += Vec3::Y;
-        }
-
-        if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight) {
-            translation -= Vec3::Y;
-        }
-
-        if translation != Vec3::ZERO {
-            let translation = translation.normalize() * 4.0 * time.delta_seconds();
-            transform.translation += translation;
-        }
-    }
+    commands
+        .spawn(Camera3dBundle::default())
+        .insert(FpsCameraBundle::new(
+            FpsCameraController::default(),
+            Vec3::new(-2.0, 5.0, 5.0),
+            Vec3::new(0., 0., 0.),
+            Vec3::Y,
+        ));
 }
