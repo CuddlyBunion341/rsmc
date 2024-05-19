@@ -6,3 +6,10 @@ edition = "2021"
 [dependencies]
 bevy = "0.13.2"
 iyes_perf_ui = "0.2.3"
+
+[profile.release]
+opt-level = 3
+codegen-units = 1
+incremental = false
+debug = false
+
