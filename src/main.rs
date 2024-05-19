@@ -12,6 +12,7 @@ use iyes_perf_ui::prelude::*;
 use std::f32::consts::PI;
 use world::setup_world;
 
+mod mesher;
 mod world;
 
 fn main() {

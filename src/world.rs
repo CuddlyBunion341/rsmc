@@ -8,6 +8,7 @@ use bevy::{
 };
 use noise::{NoiseFn, Perlin};
 
+use crate::mesher::*;
 use crate::MyCube;
 
 pub fn setup_world(
@@ -20,8 +21,10 @@ pub fn setup_world(
 
     for x in 0..chunk_size {
         for z in 0..chunk_size {
-            let mesh = meshes.add(Cuboid::default());
             let height = perlin.get([x as f64 / 10.0, z as f64 / 10.0]) * 3.0;
+
+            let mesh = meshes.add(create_cube_mesh(0., 0., 0., 0b111111));
+
             let transform = Transform::from_xyz(
                 (x - chunk_size / 2) as f32,
                 height.floor() as f32,
