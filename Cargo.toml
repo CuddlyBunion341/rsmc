@@ -7,3 +7,6 @@ edition = "2021"
 bevy = "0.13.2"
 cgmath = "0.18.0"
 iyes_perf_ui = "0.2.3"
+
+[profile.release]
+opt-level = 3
