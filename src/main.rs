@@ -1,24 +1,18 @@
 use bevy::{
-    pbr::{light_consts, CascadeShadowConfigBuilder, NotShadowCaster, NotShadowReceiver},
+    pbr::{light_consts, CascadeShadowConfigBuilder},
     prelude::*,
-    reflect::TypePath,
-    render::{
-        camera,
-        render_resource::{AsBindGroup, ShaderRef},
-    },
     window::WindowResolution,
 };
-use bevy::{prelude::*, render::mesh::PlaneMeshBuilder};
 use smooth_bevy_cameras::{
     controllers::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin},
     LookTransformPlugin,
 };
-use smooth_bevy_cameras::{LookTransform, LookTransformBundle, Smoother};
 
-use cgmath::{Matrix4, Rad, Vector3};
 use iyes_perf_ui::prelude::*;
-use noise::{NoiseFn, Perlin, Seedable};
 use std::f32::consts::PI;
+use world::setup_world;
+
+mod world;
 
 fn main() {
     App::new()
@@ -50,31 +44,6 @@ fn setup(
 ) {
     commands.spawn(PerfUiCompleteBundle::default());
 
-    let perlin = Perlin::new(1);
-    let chunk_size = 32;
-
-    for x in 0..chunk_size {
-        for z in 0..chunk_size {
-            let mesh = meshes.add(Cuboid::default());
-            let height = perlin.get([x as f64 / 10.0, z as f64 / 10.0]) * 3.0;
-            let transform = Transform::from_xyz(
-                (x - chunk_size / 2) as f32,
-                height.floor() as f32,
-                (z - chunk_size / 2) as f32,
-            );
-            let material = materials.add(StandardMaterial { ..default() });
-
-            commands.spawn((
-                MaterialMeshBundle {
-                    mesh,
-                    transform,
-                    material,
-                    ..default()
-                },
-                MyCube,
-            ));
-        }
-    }
 
     commands.spawn(PointLightBundle {
         transform: Transform::from_xyz(5.0, 5.0, 0.0),
@@ -117,4 +86,6 @@ fn setup(
             Vec3::new(0., 0., 0.),
             Vec3::Y,
         ));
+
+    setup_world(commands, meshes, materials);
 }
