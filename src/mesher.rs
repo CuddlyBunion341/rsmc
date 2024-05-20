@@ -3,6 +3,8 @@ use bevy::render::{
     render_asset::RenderAssetUsages,
 };
 
+use crate::chunk::{Chunk, CHUNK_SIZE};
+
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Mesh {
     let GeometryData {
         position,
@@ -55,6 +57,39 @@ pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8) -> GeometryD
         normal,
         indices,
     }
+}
+
+pub fn create_chunk_mesh(chunk: Chunk) -> Mesh {
+    let mut geometry_data = GeometryData {
+        position: Vec::new(),
+        uv: Vec::new(),
+        normal: Vec::new(),
+        indices: Vec::new(),
+    };
+
+    for x in 0..CHUNK_SIZE {
+        for y in 0..CHUNK_SIZE {
+            for z in 0..CHUNK_SIZE {
+                if (chunk.get(x as usize, y as usize, z as usize) & 0b111111) == 0 {
+                    continue;
+                }
+
+                let cube_data = create_cube_geometry_data(x as f32, y as f32, z as f32, 0b111111);
+
+                geometry_data.position.extend(cube_data.position);
+                geometry_data.uv.extend(cube_data.uv);
+                geometry_data.normal.extend(cube_data.normal);
+                geometry_data.indices.extend(
+                    cube_data
+                        .indices
+                        .iter()
+                        .map(|i| i + geometry_data.position.len() as u32),
+                );
+            }
+        }
+    }
+
+    create_cube_mesh_from_data(geometry_data)
 }
 
 #[derive(Debug, Clone, Copy)]

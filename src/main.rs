@@ -15,6 +15,7 @@ use world::setup_world;
 mod chunk;
 mod mesher;
 mod world;
+mod generator;
 
 fn main() {
     App::new()
