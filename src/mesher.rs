@@ -84,11 +84,11 @@ pub fn create_chunk_mesh(chunk: Chunk) -> Mesh {
 
                 let mut mask = 0b111111;
 
-                update_mask(&chunk, &mut mask, 0b000001, x, y + 1, z);
-                update_mask(&chunk, &mut mask, 0b000010, x, y - 1, z);
+                // update_mask(&chunk, &mut mask, 0b000001, x, y + 1, z);
+                // update_mask(&chunk, &mut mask, 0b000010, x, y - 1, z);
 
-                update_mask(&chunk, &mut mask, 0b000100, x + 1, y, z);
-                update_mask(&chunk, &mut mask, 0b001000, x - 1, y, z);
+                // update_mask(&chunk, &mut mask, 0b000100, x + 1, y, z);
+                // update_mask(&chunk, &mut mask, 0b001000, x - 1, y, z);
 
                 let cube_data = create_cube_geometry_data(x as f32, y as f32, z as f32, mask);
 
