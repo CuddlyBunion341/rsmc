@@ -44,9 +44,9 @@ pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8, block_id: u8
         let face_vertices = face_vertices(*face);
         for vertex in face_vertices.iter() {
             position.push([
-                vertex.position[0] + x * 2.0,
-                vertex.position[1] + y * 2.0,
-                vertex.position[2] + z * 2.0,
+                vertex.position[0] * 0.5 + x + 0.5,
+                vertex.position[1] * 0.5 + y + 0.5,
+                vertex.position[2] * 0.5 + z + 0.5,
             ]);
 
             let block_uvs = get_block_face_uvs(block_id, *face).unwrap();

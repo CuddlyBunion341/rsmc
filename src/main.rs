@@ -116,7 +116,7 @@ fn raycast(
     let (mut highlight_transform, _) = highlight_query.single_mut();
     highlight_transform.translation = intersections
         .first()
-        .map(|(_, intersection)| intersection.position())
+        .map(|(_, intersection)| (intersection.position() - intersection.normal()).floor() + 0.5)
         .unwrap_or_else(|| Vec3::ZERO);
 }
 
@@ -128,15 +128,12 @@ fn add_highlight_cube(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mesh = Cuboid::new(1.0, 1.0, 1.0);
+    let mesh = Cuboid::new(1.01, 1.01, 1.01);
 
     commands
         .spawn(PbrBundle {
             mesh: meshes.add(mesh),
-            material: materials.add(StandardMaterial {
-                base_color: Color::rgb(0.0, 1.0, 0.0),
-                ..default()
-            }),
+            material: materials.add(Color::rgba(1.0, 1.0, 1.0, 0.5)),
             transform: Transform::from_xyz(0.0, 0.0, -7.0),
             ..default()
         })

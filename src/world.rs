@@ -37,9 +37,9 @@ pub fn setup_world(
             let mesh = create_chunk_mesh(chunk);
 
             let transform = Transform::from_xyz(
-                (x - render_distance / 2) as f32 * CHUNK_SIZE as f32 * 2.0,
+                (x - render_distance / 2) as f32 * CHUNK_SIZE as f32,
                 0.0,
-                (z - render_distance / 2) as f32 * CHUNK_SIZE as f32 * 2.0,
+                (z - render_distance / 2) as f32 * CHUNK_SIZE as f32,
             );
 
             let material = materials.add(StandardMaterial {
