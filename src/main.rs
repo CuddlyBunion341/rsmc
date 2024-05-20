@@ -1,6 +1,8 @@
 use bevy::{
+    ecs::entity,
     pbr::{light_consts, CascadeShadowConfigBuilder},
     prelude::*,
+    utils::hashbrown::Equivalent,
     window::WindowResolution,
 };
 use bevy_mod_raycast::prelude::*;
@@ -41,7 +43,7 @@ fn main() {
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         .add_plugins(PerfUiPlugin)
-        .add_systems(Startup, (setup, setup_world))
+        .add_systems(Startup, (setup, setup_world, add_highlight_cube))
         .add_systems(Update, raycast)
         .run();
 }
@@ -86,18 +88,57 @@ fn setup(mut commands: Commands) {
         ));
 }
 
-const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -7.0);
+const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 
 // query camera position and direction
 fn raycast(
     mut raycast: Raycast,
     mut gizmos: Gizmos,
     query: Query<&Transform, With<FpsCameraController>>,
+    mut highlight_query: Query<(&mut Transform, &HighlightCube), Without<FpsCameraController>>,
 ) {
-    for transform in query.iter() {
-        let pos = transform.translation;
-        let dir = transform.rotation.mul_vec3(Vec3::Z).normalize();
-        let dir = dir * RAY_DIST.z;
-        raycast.debug_cast_ray(Ray3d::new(pos, dir), &default(), &mut gizmos);
-    }
+    let camera_transform = query.single();
+    let filter = |entity| !highlight_query.contains(entity);
+
+    let pos = camera_transform.translation;
+    let dir = camera_transform.rotation.mul_vec3(Vec3::Z).normalize();
+    let dir = dir * RAY_DIST.z;
+
+    let intersections = raycast.debug_cast_ray(
+        Ray3d::new(pos, dir),
+        &RaycastSettings {
+            filter: &filter,
+            ..default()
+        },
+        &mut gizmos,
+    );
+
+    let (mut highlight_transform, _) = highlight_query.single_mut();
+    highlight_transform.translation = intersections
+        .first()
+        .map(|(_, intersection)| intersection.position())
+        .unwrap_or_else(|| Vec3::ZERO);
+}
+
+#[derive(Component)]
+struct HighlightCube;
+
+fn add_highlight_cube(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let mesh = Cuboid::new(1.0, 1.0, 1.0);
+
+    commands
+        .spawn(PbrBundle {
+            mesh: meshes.add(mesh),
+            material: materials.add(StandardMaterial {
+                base_color: Color::rgb(0.0, 1.0, 0.0),
+                ..default()
+            }),
+            transform: Transform::from_xyz(0.0, 0.0, -7.0),
+            ..default()
+        })
+        .insert(HighlightCube);
 }
