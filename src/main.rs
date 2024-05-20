@@ -19,7 +19,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                resolution: WindowResolution::new(1920.0, 1080.0).with_scale_factor_override(1.0),
+                resolution: WindowResolution::new(1920.0, 1080.0).with_scale_factor_override(2.0),
                 present_mode: bevy::window::PresentMode::Immediate,
                 ..default()
             }),

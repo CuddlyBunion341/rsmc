@@ -3,12 +3,14 @@ use bevy::render::{
     render_asset::RenderAssetUsages,
 };
 
-pub fn create_cube_mesh_from_data(
-    position: Vec<[f32; 3]>,
-    uv: Vec<[f32; 2]>,
-    normal: Vec<[f32; 3]>,
-    indices: Vec<u32>,
-) -> Mesh {
+pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Mesh {
+    let GeometryData {
+        position,
+        uv,
+        normal,
+        indices,
+    } = geometry_data;
+
     Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
@@ -21,7 +23,11 @@ pub fn create_cube_mesh_from_data(
 
 #[rustfmt::skip]
 pub fn create_cube_mesh(x: f32, y: f32, z: f32, faces: u8) -> Mesh {
-    // use faces as bitfield to determine which faces to include (Top, Bottom, Right, Left, Back, Forward)
+    let geometry_data = create_cube_geometry_data(x, y, z, faces);
+    create_cube_mesh_from_data(geometry_data)
+}
+
+pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8) -> GeometryData {
     let mut position = Vec::new();
     let mut uv = Vec::new();
     let mut normal = Vec::new();
@@ -42,12 +48,19 @@ pub fn create_cube_mesh(x: f32, y: f32, z: f32, faces: u8) -> Mesh {
             }
 
             let offsets = [0, 1, 2, 2, 1, 3];
-            offsets.iter().for_each(|offset| { indices.push(index_offset + offset); });
+            offsets.iter().for_each(|offset| {
+                indices.push(index_offset + offset);
+            });
             index_offset += 4;
         }
     });
 
-    create_cube_mesh_from_data(position, uv, normal, indices)
+    GeometryData {
+        position,
+        uv,
+        normal,
+        indices,
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -73,6 +86,13 @@ struct Vertex {
     position: [f32; 3],
     uv: [f32; 2],
     normal: [f32; 3],
+}
+
+pub struct GeometryData {
+    pub position: Vec<[f32; 3]>,
+    pub uv: Vec<[f32; 2]>,
+    pub normal: Vec<[f32; 3]>,
+    pub indices: Vec<u32>,
 }
 
 #[rustfmt::skip]
