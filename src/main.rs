@@ -43,22 +43,10 @@ struct MyCube;
 fn setup(mut commands: Commands) {
     commands.spawn(PerfUiCompleteBundle::default());
 
-    commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(5.0, 5.0, 0.0),
-        point_light: PointLight {
-            intensity: 0.0,
-            range: 500.0,
-            color: Color::WHITE,
-            shadows_enabled: true,
-            ..default()
-        },
-        ..default()
-    });
-
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
             illuminance: light_consts::lux::OVERCAST_DAY,
-            shadows_enabled: true,
+            shadows_enabled: false,
             ..default()
         },
         transform: Transform::from_rotation(Quat::from_euler(
@@ -80,7 +68,7 @@ fn setup(mut commands: Commands) {
         .spawn(Camera3dBundle::default())
         .insert(FpsCameraBundle::new(
             FpsCameraController {
-                translate_sensitivity: 5.0,
+                translate_sensitivity: 10.0,
                 ..default()
             },
             Vec3::new(-2.0, 5.0, 5.0),

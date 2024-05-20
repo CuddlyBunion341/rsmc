@@ -31,24 +31,26 @@ pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8) -> GeometryD
     let mut index_offset = 0;
 
     CUBE_FACES.iter().enumerate().for_each(|(i, face)| {
-        if faces & (1 << i) != 0 {
-            let face_vertices = face_vertices(*face);
-            for vertex in face_vertices.iter() {
-                position.push([
-                    vertex.position[0] + x,
-                    vertex.position[1] + y,
-                    vertex.position[2] + z,
-                ]);
-                uv.push(vertex.uv);
-                normal.push(vertex.normal);
-            }
-
-            let offsets = [0, 1, 2, 2, 1, 3];
-            offsets.iter().for_each(|offset| {
-                indices.push(index_offset + offset);
-            });
-            index_offset += 4;
+        if faces & (1 << i) == 0 {
+            return;
         }
+
+        let face_vertices = face_vertices(*face);
+        for vertex in face_vertices.iter() {
+            position.push([
+                vertex.position[0] + x * 2.0,
+                vertex.position[1] + y * 2.0,
+                vertex.position[2] + z * 2.0,
+            ]);
+            uv.push(vertex.uv);
+            normal.push(vertex.normal);
+        }
+
+        let offsets = [0, 1, 2, 2, 1, 3];
+        offsets.iter().for_each(|offset| {
+            indices.push(index_offset + offset);
+        });
+        index_offset += 4;
     });
 
     GeometryData {
@@ -70,11 +72,25 @@ pub fn create_chunk_mesh(chunk: Chunk) -> Mesh {
     for x in 0..CHUNK_SIZE {
         for y in 0..CHUNK_SIZE {
             for z in 0..CHUNK_SIZE {
-                if (chunk.get(x as usize, y as usize, z as usize) & 0b111111) == 0 {
+                if chunk.get(x as usize, y as usize, z as usize) == 0 {
                     continue;
                 }
 
-                let cube_data = create_cube_geometry_data(x as f32, y as f32, z as f32, 0b111111);
+                fn update_mask(chunk: &Chunk, mask: &mut u8, value: u8, x: i32, y: i32, z: i32) {
+                    if chunk.get(x as usize, y as usize, z as usize) == 1 {
+                        *mask ^= value;
+                    }
+                }
+
+                let mut mask = 0b111111;
+
+                update_mask(&chunk, &mut mask, 0b000001, x, y + 1, z);
+                update_mask(&chunk, &mut mask, 0b000010, x, y - 1, z);
+
+                update_mask(&chunk, &mut mask, 0b000100, x + 1, y, z);
+                update_mask(&chunk, &mut mask, 0b001000, x - 1, y, z);
+
+                let cube_data = create_cube_geometry_data(x as f32, y as f32, z as f32, mask);
 
                 geometry_data.position.extend(cube_data.position);
                 geometry_data.uv.extend(cube_data.uv);

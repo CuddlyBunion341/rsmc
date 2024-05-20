@@ -15,26 +15,23 @@ impl Generator {
     }
 
     pub fn generate_chunk(&self, chunk: &mut Chunk) {
-        for x in -1..CHUNK_SIZE {
-            for y in -1..CHUNK_SIZE {
-                for z in -1..CHUNK_SIZE {
-                    let density = self.perlin.get([
-                        x as f64 / CHUNK_SIZE as f64,
-                        y as f64 / CHUNK_SIZE as f64,
-                        z as f64 / CHUNK_SIZE as f64,
-                    ]) * 0.5;
-                    let block = Generator::block_from_density(density);
-                    chunk.set((x + 1) as usize, (y + 1) as usize, (z + 1) as usize, block)
+        let chunk_origin = chunk.position * CHUNK_SIZE as f32;
+        let frequency = 0.03;
+
+        for x in -1..=CHUNK_SIZE {
+            for y in -1..=CHUNK_SIZE {
+                for z in -1..=CHUNK_SIZE {
+                    let height = self.perlin.get([
+                        (x as f64 + chunk_origin.x as f64) * frequency,
+                        (z as f64 + chunk_origin.z as f64) * frequency,
+                    ]) * 20.0;
+
+                    let height = height.floor() as i32;
+                    if (y + chunk_origin.y as i32) < height {
+                        chunk.set(x as usize, y as usize, z as usize, 1);
+                    }
                 }
             }
-        }
-    }
-
-    pub fn block_from_density(density: f64) -> u8 {
-        if density > 0.0 {
-            1
-        } else {
-            0
         }
     }
 }
