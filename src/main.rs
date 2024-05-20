@@ -13,6 +13,7 @@ use iyes_perf_ui::prelude::*;
 use std::f32::consts::PI;
 use world::setup_world;
 
+mod blocks;
 mod chunk;
 mod generator;
 mod mesher;
@@ -39,7 +40,7 @@ fn main() {
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         .add_plugins(PerfUiPlugin)
-        .add_systems(Startup, (setup, setup_world, add_iron_ore))
+        .add_systems(Startup, (setup, setup_world))
         .run();
 }
 
@@ -81,40 +82,4 @@ fn setup(mut commands: Commands) {
             Vec3::new(0., 0., 0.),
             Vec3::Y,
         ));
-}
-
-pub fn add_iron_ore(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    let texture_handle = asset_server.load("textures/copper_block.png");
-    let normal_texture_handle = asset_server.load("textures/copper_block_n.png");
-    let specular_texture_handle = asset_server.load("textures/copper_block_s.png");
-
-    let mut cube_mesh =
-        create_cube_mesh_from_data(create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111));
-    let _ = cube_mesh.generate_tangents();
-
-    for x in 0..16 {
-        for z in 0..16 {
-            commands.spawn((
-                MaterialMeshBundle {
-                    mesh: meshes.add(cube_mesh.clone()),
-                    transform: Transform::from_xyz(x as f32 * 2.0, 30.0, z as f32 * 2.0),
-                    material: materials.add(StandardMaterial {
-                        metallic: 1.0,
-                        perceptual_roughness: 0.0,
-                        base_color_texture: Some(texture_handle.clone()),
-                        normal_map_texture: Some(normal_texture_handle.clone()),
-                        metallic_roughness_texture: Some(specular_texture_handle.clone()),
-                        ..default()
-                    }),
-                    ..default()
-                },
-                MyCube,
-            ));
-        }
-    }
 }

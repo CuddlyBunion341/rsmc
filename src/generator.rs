@@ -27,11 +27,22 @@ impl Generator {
                     ]) * 20.0;
 
                     let height = height.floor() as i32;
-                    if (y + chunk_origin.y as i32) < height {
-                        chunk.set(x as usize, y as usize, z as usize, 1);
-                    }
+                    let block = Self::block_from_height(y as i32, height);
+                    chunk.set(x as usize, y as usize, z as usize, block);
                 }
             }
+        }
+    }
+
+    fn block_from_height(y: i32, height: i32) -> u8 {
+        if y == height {
+            1
+        } else if y < height && y > height - 4 {
+            2
+        } else if y < height {
+            3
+        } else {
+            0
         }
     }
 }

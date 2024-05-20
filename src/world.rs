@@ -4,9 +4,6 @@ use crate::{chunk::Chunk, generator::Generator, MyCube};
 use bevy::asset::AssetServer;
 use bevy::ecs::system::Res;
 use bevy::math::Vec3;
-use bevy::pbr::Material;
-use bevy::reflect::Reflect;
-use bevy::render::texture;
 use bevy::{
     asset::Assets,
     ecs::system::{Commands, ResMut},
@@ -26,8 +23,7 @@ pub fn setup_world(
 
     let render_distance = 16;
 
-    let texture_handle = asset_server.load("textures/stone.png");
-    let normal_texture_handle = asset_server.load("textures/stone_n.png");
+    let texture_handle = asset_server.load("textures/texture_atlas.png");
 
     for x in 0..render_distance {
         for z in 0..render_distance {
@@ -48,7 +44,6 @@ pub fn setup_world(
 
             let material = materials.add(StandardMaterial {
                 base_color_texture: Some(texture_handle.clone()),
-                normal_map_texture: Some(normal_texture_handle.clone()),
                 ..default()
             });
 
@@ -63,20 +58,4 @@ pub fn setup_world(
             ));
         }
     }
-
-    let mut cube_mesh =
-        create_cube_mesh_from_data(create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111));
-    cube_mesh.generate_tangents();
-
-    commands.spawn(MaterialMeshBundle {
-        mesh: meshes.add(cube_mesh),
-        transform: Transform::from_xyz(0.0, 30.0, 0.0),
-        material: materials.add(StandardMaterial {
-            perceptual_roughness: 0.0,
-            base_color_texture: Some(texture_handle.clone()),
-            normal_map_texture: Some(normal_texture_handle.clone()),
-            ..default()
-        }),
-        ..default()
-    });
 }

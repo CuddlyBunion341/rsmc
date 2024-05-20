@@ -3,7 +3,10 @@ use bevy::render::{
     render_asset::RenderAssetUsages,
 };
 
-use crate::chunk::{Chunk, CHUNK_SIZE};
+use crate::{
+    blocks::get_block_face_uvs,
+    chunk::{Chunk, CHUNK_SIZE},
+};
 
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Mesh {
     let GeometryData {
@@ -23,7 +26,7 @@ pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Mesh {
     .with_inserted_indices(Indices::U32(indices))
 }
 
-pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8) -> GeometryData {
+pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8, block_id: u8) -> GeometryData {
     let mut position = Vec::new();
     let mut uv = Vec::new();
     let mut normal = Vec::new();
@@ -42,7 +45,12 @@ pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8) -> GeometryD
                 vertex.position[1] + y * 2.0,
                 vertex.position[2] + z * 2.0,
             ]);
-            uv.push(vertex.uv);
+
+            let block_uvs = get_block_face_uvs(block_id, *face).unwrap();
+            uv.push([
+                block_uvs[0] + vertex.uv[0] * 0.25,
+                block_uvs[1] + vertex.uv[1] * 0.25,
+            ]);
             normal.push(vertex.normal);
         }
 
@@ -72,7 +80,9 @@ pub fn create_chunk_mesh(chunk: Chunk) -> Mesh {
     for x in 0..CHUNK_SIZE {
         for y in 0..CHUNK_SIZE {
             for z in 0..CHUNK_SIZE {
-                if chunk.get(x as usize, y as usize, z as usize) == 0 {
+                let block_id = chunk.get(x as usize, y as usize, z as usize);
+
+                if block_id == 0 {
                     continue;
                 }
 
@@ -90,7 +100,8 @@ pub fn create_chunk_mesh(chunk: Chunk) -> Mesh {
                 // update_mask(&chunk, &mut mask, 0b000100, x + 1, y, z);
                 // update_mask(&chunk, &mut mask, 0b001000, x - 1, y, z);
 
-                let cube_data = create_cube_geometry_data(x as f32, y as f32, z as f32, mask);
+                let cube_data =
+                    create_cube_geometry_data(x as f32, y as f32, z as f32, mask, block_id);
 
                 geometry_data.position.extend(cube_data.position);
                 geometry_data.uv.extend(cube_data.uv);
@@ -109,7 +120,7 @@ pub fn create_chunk_mesh(chunk: Chunk) -> Mesh {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum CubeFace {
+pub enum CubeFace {
     Top,
     Bottom,
     Right,
