@@ -54,6 +54,11 @@ fn main() {
 #[derive(Component)]
 struct MyCube;
 
+#[derive(Component)]
+pub struct MyChunk {
+    pub position: [i32; 3],
+}
+
 fn setup(mut commands: Commands) {
     commands.spawn(PerfUiCompleteBundle::default());
 
@@ -99,6 +104,7 @@ fn raycast(
     mut gizmos: Gizmos,
     query: Query<&Transform, With<FpsCameraController>>,
     mut highlight_query: Query<(&mut Transform, &HighlightCube), Without<FpsCameraController>>,
+    chunk_manager: ResMut<ChunkManager>,
 ) {
     let camera_transform = query.single();
     let filter = |entity| !highlight_query.contains(entity);
@@ -117,10 +123,13 @@ fn raycast(
     );
 
     let (mut highlight_transform, _) = highlight_query.single_mut();
-    highlight_transform.translation = intersections
+    let selected_position = intersections
         .first()
         .map(|(_, intersection)| (intersection.position() - intersection.normal()).floor() + 0.5)
         .unwrap_or_else(|| Vec3::ZERO);
+    highlight_transform.translation = selected_position;
+
+    let chunk = chunk_manager.get_chunk(selected_position);
 }
 
 #[derive(Component)]
