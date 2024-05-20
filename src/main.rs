@@ -13,9 +13,9 @@ use std::f32::consts::PI;
 use world::setup_world;
 
 mod chunk;
+mod generator;
 mod mesher;
 mod world;
-mod generator;
 
 fn main() {
     App::new()
@@ -79,7 +79,10 @@ fn setup(mut commands: Commands) {
     commands
         .spawn(Camera3dBundle::default())
         .insert(FpsCameraBundle::new(
-            FpsCameraController::default(),
+            FpsCameraController {
+                translate_sensitivity: 5.0,
+                ..default()
+            },
             Vec3::new(-2.0, 5.0, 5.0),
             Vec3::new(0., 0., 0.),
             Vec3::Y,
