@@ -43,6 +43,10 @@ pub fn setup_world(
             );
 
             let material = materials.add(StandardMaterial {
+                perceptual_roughness: 0.5,
+                reflectance: 0.0,
+                unlit: false,
+                specular_transmission: 0.0,
                 base_color_texture: Some(texture_handle.clone()),
                 ..default()
             });

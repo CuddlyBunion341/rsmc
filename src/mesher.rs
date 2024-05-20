@@ -1,6 +1,9 @@
-use bevy::render::{
-    mesh::{Indices, Mesh, PrimitiveTopology},
-    render_asset::RenderAssetUsages,
+use bevy::{
+    log::info,
+    render::{
+        mesh::{Indices, Mesh, PrimitiveTopology},
+        render_asset::RenderAssetUsages,
+    },
 };
 
 use crate::{
@@ -100,18 +103,21 @@ pub fn create_chunk_mesh(chunk: Chunk) -> Mesh {
                 // update_mask(&chunk, &mut mask, 0b000100, x + 1, y, z);
                 // update_mask(&chunk, &mut mask, 0b001000, x - 1, y, z);
 
+                // update_mask(&chunk, &mut mask, 0b010000, x, y, z + 1);
+                // update_mask(&chunk, &mut mask, 0b100000, x, y, z - 1);
+
                 let cube_data =
                     create_cube_geometry_data(x as f32, y as f32, z as f32, mask, block_id);
 
-                geometry_data.position.extend(cube_data.position);
-                geometry_data.uv.extend(cube_data.uv);
-                geometry_data.normal.extend(cube_data.normal);
                 geometry_data.indices.extend(
                     cube_data
                         .indices
                         .iter()
                         .map(|i| i + geometry_data.position.len() as u32),
                 );
+                geometry_data.position.extend(cube_data.position);
+                geometry_data.uv.extend(cube_data.uv);
+                geometry_data.normal.extend(cube_data.normal);
             }
         }
     }

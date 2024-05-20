@@ -716,6 +716,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_mod_raycast"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ca646aeaab4a170e1f3e8284b925e2f990eb18616e95d7826c873c8e26ee945"
+dependencies = [
+ "bevy_app",
+ "bevy_asset",
+ "bevy_derive",
+ "bevy_ecs",
+ "bevy_gizmos",
+ "bevy_math",
+ "bevy_reflect",
+ "bevy_render",
+ "bevy_sprite",
+ "bevy_transform",
+ "bevy_utils",
+ "bevy_window",
+ "crossbeam-channel",
+]
+
+[[package]]
 name = "bevy_pbr"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2014,6 +2035,7 @@ name = "hello-bevy"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy_mod_raycast",
  "cgmath",
  "iyes_perf_ui",
  "noise",

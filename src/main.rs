@@ -3,6 +3,7 @@ use bevy::{
     prelude::*,
     window::WindowResolution,
 };
+use bevy_mod_raycast::prelude::*;
 use mesher::{create_cube_geometry_data, create_cube_mesh_from_data};
 use smooth_bevy_cameras::{
     controllers::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin},
@@ -41,6 +42,7 @@ fn main() {
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         .add_plugins(PerfUiPlugin)
         .add_systems(Startup, (setup, setup_world))
+        .add_systems(Update, raycast)
         .run();
 }
 
@@ -64,7 +66,7 @@ fn setup(mut commands: Commands) {
         )),
         cascade_shadow_config: CascadeShadowConfigBuilder {
             first_cascade_far_bound: 7.0,
-            maximum_distance: 25.0,
+            maximum_distance: 256.0,
             ..default()
         }
         .into(),
@@ -82,4 +84,15 @@ fn setup(mut commands: Commands) {
             Vec3::new(0., 0., 0.),
             Vec3::Y,
         ));
+}
+
+const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -7.0);
+
+fn raycast(mut raycast: Raycast, mut gizmos: Gizmos, time: Res<Time>) {
+    let t = time.elapsed_seconds();
+    let pos = Vec3::new(t.sin(), (t * 1.5).cos() * 2.0, t.cos()) * 1.5 + RAY_DIST;
+    let dir = (RAY_DIST - pos).normalize();
+    // This is all that is needed to raycast into the world! You can also use the normal, non-debug
+    // version (raycast.cast_ray) when you don't need to visualize the ray or intersections.
+    raycast.debug_cast_ray(Ray3d::new(pos, dir), &default(), &mut gizmos);
 }
