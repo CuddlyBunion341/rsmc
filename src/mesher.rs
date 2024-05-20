@@ -41,7 +41,7 @@ pub fn create_cube_mesh(x: f32, y: f32, z: f32, faces: u8) -> Mesh {
                 normal.push(vertex.normal);
             }
 
-            let offsets = [0, 1, 2, 0, 2, 3];
+            let offsets = [0, 1, 2, 2, 1, 3];
             offsets.iter().for_each(|offset| { indices.push(index_offset + offset); });
             index_offset += 4;
         }
