@@ -72,7 +72,7 @@ pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8, block_id: u8
     }
 }
 
-pub fn create_chunk_mesh(chunk: Chunk) -> Mesh {
+pub fn create_chunk_mesh(chunk: &Chunk) -> Mesh {
     let mut geometry_data = GeometryData {
         position: Vec::new(),
         uv: Vec::new(),

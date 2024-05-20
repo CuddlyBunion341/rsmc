@@ -6,6 +6,7 @@ use bevy::{
     window::WindowResolution,
 };
 use bevy_mod_raycast::prelude::*;
+use chunk_manager::ChunkManager;
 use mesher::{create_cube_geometry_data, create_cube_mesh_from_data};
 use smooth_bevy_cameras::{
     controllers::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin},
@@ -18,6 +19,7 @@ use world::setup_world;
 
 mod blocks;
 mod chunk;
+mod chunk_manager;
 mod generator;
 mod mesher;
 mod world;
@@ -43,6 +45,7 @@ fn main() {
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         .add_plugins(PerfUiPlugin)
+        .insert_resource(ChunkManager::new())
         .add_systems(Startup, (setup, setup_world, add_highlight_cube))
         .add_systems(Update, raycast)
         .run();

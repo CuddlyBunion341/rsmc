@@ -1,4 +1,5 @@
 use crate::chunk::CHUNK_SIZE;
+use crate::chunk_manager::ChunkManager;
 use crate::mesher::*;
 use crate::{chunk::Chunk, generator::Generator, MyCube};
 use bevy::asset::AssetServer;
@@ -18,6 +19,7 @@ pub fn setup_world(
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    chunk_manager: ResMut<ChunkManager>,
 ) {
     let generator = Generator::new(0);
 
@@ -25,41 +27,35 @@ pub fn setup_world(
 
     let texture_handle = asset_server.load("textures/texture_atlas.png");
 
-    for x in 0..render_distance {
-        for z in 0..render_distance {
-            let mut chunk = Chunk::new(Vec3 {
-                x: x as f32,
-                y: 0.0,
-                z: z as f32,
-            });
+    let mut chunks = chunk_manager.instantiate_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
 
-            generator.generate_chunk(&mut chunk);
-            let mesh = create_chunk_mesh(chunk);
+    chunks.iter_mut().for_each(|chunk| {
+        generator.generate_chunk(chunk);
+        let mesh = create_chunk_mesh(chunk);
 
-            let transform = Transform::from_xyz(
-                (x - render_distance / 2) as f32 * CHUNK_SIZE as f32,
-                0.0,
-                (z - render_distance / 2) as f32 * CHUNK_SIZE as f32,
-            );
+        let transform = Transform::from_xyz(
+            chunk.position.x * CHUNK_SIZE as f32,
+            0.0,
+            chunk.position.z * CHUNK_SIZE as f32,
+        );
 
-            let material = materials.add(StandardMaterial {
-                perceptual_roughness: 0.5,
-                reflectance: 0.0,
-                unlit: false,
-                specular_transmission: 0.0,
-                base_color_texture: Some(texture_handle.clone()),
+        let material = materials.add(StandardMaterial {
+            perceptual_roughness: 0.5,
+            reflectance: 0.0,
+            unlit: false,
+            specular_transmission: 0.0,
+            base_color_texture: Some(texture_handle.clone()),
+            ..default()
+        });
+
+        commands.spawn((
+            MaterialMeshBundle {
+                mesh: meshes.add(mesh),
+                transform,
+                material,
                 ..default()
-            });
-
-            commands.spawn((
-                MaterialMeshBundle {
-                    mesh: meshes.add(mesh),
-                    transform,
-                    material,
-                    ..default()
-                },
-                MyCube,
-            ));
-        }
-    }
+            },
+            MyCube,
+        ));
+    });
 }
