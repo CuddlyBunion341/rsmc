@@ -21,12 +21,6 @@ pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Mesh {
     .with_inserted_indices(Indices::U32(indices))
 }
 
-#[rustfmt::skip]
-pub fn create_cube_mesh(x: f32, y: f32, z: f32, faces: u8) -> Mesh {
-    let geometry_data = create_cube_geometry_data(x, y, z, faces);
-    create_cube_mesh_from_data(geometry_data)
-}
-
 pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8) -> GeometryData {
     let mut position = Vec::new();
     let mut uv = Vec::new();

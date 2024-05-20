@@ -12,6 +12,7 @@ use iyes_perf_ui::prelude::*;
 use std::f32::consts::PI;
 use world::setup_world;
 
+mod chunk;
 mod mesher;
 mod world;
 
@@ -38,11 +39,7 @@ fn main() {
 #[derive(Component)]
 struct MyCube;
 
-fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+fn setup(mut commands: Commands) {
     commands.spawn(PerfUiCompleteBundle::default());
 
     commands.spawn(PointLightBundle {
