@@ -49,7 +49,7 @@ pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8, block_id: u8
             let block_uvs = get_block_face_uvs(block_id, *face).unwrap();
             uv.push([
                 block_uvs[0] + vertex.uv[0] * 0.25,
-                block_uvs[1] + vertex.uv[1] * 0.25,
+                block_uvs[1] + (1.0 - vertex.uv[1]) * 0.25,
             ]);
             normal.push(vertex.normal);
         }
