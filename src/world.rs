@@ -1,10 +1,11 @@
-use crate::chunk::CHUNK_SIZE;
+use crate::chunk::{Chunk, CHUNK_SIZE};
 use crate::chunk_manager::ChunkManager;
+use crate::mesher::*;
 use crate::{generator::Generator, MyCube};
-use crate::{mesher::*};
-use bevy::asset::AssetServer;
+use bevy::asset::{self, AssetServer, Handle};
 use bevy::ecs::system::Res;
 use bevy::math::Vec3;
+use bevy::render::texture::Image;
 use bevy::{
     asset::Assets,
     ecs::system::{Commands, ResMut},
@@ -25,39 +26,55 @@ pub fn setup_world(
 
     let render_distance = 16;
 
-    let texture_handle = asset_server.load("textures/texture_atlas.png");
-
     let mut chunks = ChunkManager::instantiate_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
 
     for chunk in &mut chunks {
         generator.generate_chunk(chunk);
         let mesh = create_chunk_mesh(&chunk);
-
-        let transform = Transform::from_xyz(
-            chunk.position.x * CHUNK_SIZE as f32,
-            0.0,
-            chunk.position.z * CHUNK_SIZE as f32,
+        add_chunk_objects(
+            &mut commands,
+            &asset_server,
+            &mut meshes,
+            &mut materials,
+            chunk,
         );
-
-        let material = materials.add(StandardMaterial {
-            perceptual_roughness: 0.5,
-            reflectance: 0.0,
-            unlit: false,
-            specular_transmission: 0.0,
-            base_color_texture: Some(texture_handle.clone()),
-            ..default()
-        });
-
-        commands.spawn((
-            MaterialMeshBundle {
-                mesh: meshes.add(mesh),
-                transform,
-                material,
-                ..default()
-            },
-            MyCube,
-        ));
     }
 
     chunk_manager.insert_chunks(chunks);
+}
+
+pub fn add_chunk_objects(
+    commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    chunk: &Chunk,
+) {
+    let texture_handle: Handle<Image> = asset_server.load("textures/texture_atlas.png");
+    let mesh = create_chunk_mesh(&chunk);
+
+    let transform = Transform::from_xyz(
+        chunk.position.x * CHUNK_SIZE as f32,
+        0.0,
+        chunk.position.z * CHUNK_SIZE as f32,
+    );
+
+    let material = materials.add(StandardMaterial {
+        perceptual_roughness: 0.5,
+        reflectance: 0.0,
+        unlit: false,
+        specular_transmission: 0.0,
+        base_color_texture: Some(texture_handle.clone()),
+        ..default()
+    });
+
+    commands.spawn((
+        MaterialMeshBundle {
+            mesh: meshes.add(mesh),
+            transform,
+            material,
+            ..default()
+        },
+        MyCube,
+    ));
 }
