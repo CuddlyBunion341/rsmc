@@ -4,6 +4,7 @@ use bevy::{
     window::WindowResolution,
 };
 use chunk_manager::ChunkManager;
+use input::handle_mouse_events;
 use raycaster::{add_highlight_cube, raycast, SelectedPosition};
 use smooth_bevy_cameras::{
     controllers::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin},
@@ -18,6 +19,7 @@ mod blocks;
 mod chunk;
 mod chunk_manager;
 mod generator;
+mod input;
 mod mesher;
 mod raycaster;
 mod world;
@@ -46,7 +48,7 @@ fn main() {
         .insert_resource(ChunkManager::new())
         .insert_resource(SelectedPosition(None))
         .add_systems(Startup, (setup, setup_world, add_highlight_cube))
-        .add_systems(Update, raycast)
+        .add_systems(Update, (raycast, handle_mouse_events))
         .run();
 }
 
