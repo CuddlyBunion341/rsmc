@@ -24,7 +24,8 @@ impl Generator {
                     let height = self.perlin.get([
                         (x as f64 + chunk_origin.x as f64) * frequency,
                         (z as f64 + chunk_origin.z as f64) * frequency,
-                    ]) * 20.0;
+                    ]) * 10.0
+                        + 5.0;
 
                     let height = height.floor() as i32;
                     let block = Self::block_from_height(y as i32, height);
