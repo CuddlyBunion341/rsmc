@@ -46,7 +46,7 @@ impl ChunkManager {
     }
 
     pub fn get_chunk(&self, position: Vec3) -> Option<&Chunk> {
-        self.chunks
-            .get(&[position.x as i32, position.y as i32, position.z as i32])
+        let Vec3 { x, y, z } = position.floor();
+        self.chunks.get(&[x as i32, y as i32, z as i32])
     }
 }

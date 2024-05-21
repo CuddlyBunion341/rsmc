@@ -125,11 +125,32 @@ fn raycast(
     let (mut highlight_transform, _) = highlight_query.single_mut();
     let selected_position = intersections
         .first()
-        .map(|(_, intersection)| (intersection.position() - intersection.normal()).floor() + 0.5)
+        .map(|(_, intersection)| {
+            (intersection.position() - intersection.normal() * 0.5).floor() + 0.5
+        })
         .unwrap_or_else(|| Vec3::ZERO);
     highlight_transform.translation = selected_position;
 
     let chunk = chunk_manager.get_chunk(selected_position);
+    match chunk {
+        Some(chunk) => {
+            let chunk_position = Vec3::new(
+                chunk.position[0] as f32 * chunk::CHUNK_SIZE as f32,
+                chunk.position[1] as f32 * chunk::CHUNK_SIZE as f32,
+                chunk.position[2] as f32 * chunk::CHUNK_SIZE as f32,
+            );
+            let local_position = selected_position - chunk_position;
+            let block_id = chunk.get(
+                local_position.x as usize,
+                local_position.y as usize,
+                local_position.z as usize,
+            );
+            println!("Block ID: {}", block_id);
+        }
+        None => {
+            println!("No chunk found");
+        }
+    }
 }
 
 #[derive(Component)]
