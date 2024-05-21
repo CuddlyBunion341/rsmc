@@ -4,6 +4,7 @@ use crate::{chunk::Chunk, generator::Generator, MyCube};
 use crate::{mesher::*, MyChunk};
 use bevy::asset::AssetServer;
 use bevy::ecs::system::Res;
+use bevy::log::info;
 use bevy::math::Vec3;
 use bevy::{
     asset::Assets,
@@ -56,13 +57,6 @@ pub fn setup_world(
                 ..default()
             },
             MyCube,
-            MyChunk {
-                position: [
-                    chunk.position.x as i32,
-                    chunk.position.y as i32,
-                    chunk.position.z as i32,
-                ],
-            },
         ));
     }
 

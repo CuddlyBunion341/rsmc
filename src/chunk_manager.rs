@@ -3,7 +3,7 @@ use std::{
     collections::HashMap,
 };
 
-use bevy::{ecs::system::Resource, math::Vec3};
+use bevy::{ecs::system::Resource, log::info, math::Vec3};
 
 use crate::chunk::{Chunk, CHUNK_SIZE};
 
@@ -25,7 +25,11 @@ impl ChunkManager {
 
         for x in 0..render_distance {
             for z in 0..render_distance {
-                let chunk_position = Vec3::new(position.x as f32, position.y, position.z as f32);
+                let chunk_position = Vec3::new(
+                    (x - render_distance / 2) as f32 + position.x,
+                    0.0,
+                    (z - render_distance / 2) as f32 + position.z,
+                );
                 let chunk = Chunk::new(chunk_position);
                 chunks.push(chunk);
             }

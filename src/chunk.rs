@@ -15,7 +15,7 @@ impl Chunk {
     pub fn new(position: Vec3) -> Self {
         Self {
             data: [0; CHUNK_LENGTH],
-            position: position,
+            position,
         }
     }
 
