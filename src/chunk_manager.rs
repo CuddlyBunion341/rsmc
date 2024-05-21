@@ -1,10 +1,14 @@
-use std::collections::HashMap;
+use std::{
+    borrow::{Borrow, BorrowMut},
+    collections::HashMap,
+};
 
 use bevy::{ecs::system::Resource, math::Vec3};
 
 use crate::chunk::{Chunk, CHUNK_SIZE};
 
 #[derive(Resource)]
+
 pub struct ChunkManager {
     pub chunks: HashMap<[i32; 3], Chunk>,
 }
@@ -16,37 +20,40 @@ impl ChunkManager {
         }
     }
 
-    pub fn instantiate_chunks(&self, position: Vec3, render_distance: i32) -> Vec<Chunk> {
-        let mut chunks = Vec::new();
+    pub fn instantiate_chunks(position: Vec3, render_distance: i32) -> Vec<Chunk> {
+        let mut chunks: Vec<Chunk> = Vec::new();
 
         for x in 0..render_distance {
             for z in 0..render_distance {
-                let chunk_position = Vec3 {
-                    x: x as f32 + position.x - render_distance as f32 / 2.0,
-                    y: 0.0,
-                    z: z as f32 + position.z - render_distance as f32 / 2.0,
-                };
-
-                let chunk = self.get_chunk(chunk_position);
-                if chunk.is_none() {
-                    chunks.push(Chunk::new(chunk_position));
-                }
+                let chunk_position = Vec3::new(position.x as f32, position.y, position.z as f32);
+                let chunk = Chunk::new(chunk_position);
+                chunks.push(chunk);
             }
         }
 
         chunks
     }
 
-    pub fn block_to_chunk_position(position: Vec3) -> Vec3 {
-        Vec3 {
-            x: (position.x / CHUNK_SIZE as f32).floor(),
-            y: (position.y / CHUNK_SIZE as f32).floor(),
-            z: (position.z / CHUNK_SIZE as f32).floor(),
+    pub fn insert_chunks(&mut self, chunks: Vec<Chunk>) {
+        for chunk in chunks {
+            self.chunks
+                .insert(Self::position_to_key(chunk.position), chunk);
         }
     }
 
-    pub fn get_chunk(&self, position: Vec3) -> Option<&Chunk> {
+    pub fn position_to_key(position: Vec3) -> [i32; 3] {
+        [position.x as i32, position.y as i32, position.z as i32]
+    }
+
+    pub fn set_chunk(&mut self, position: Vec3, chunk: Chunk) {
+        let Vec3 { x, y, z } = position;
+
+        self.chunks.insert([x as i32, y as i32, z as i32], chunk);
+    }
+
+    pub fn get_chunk(&mut self, position: Vec3) -> Option<&mut Chunk> {
         let Vec3 { x, y, z } = position.floor();
-        self.chunks.get(&[x as i32, y as i32, z as i32])
+
+        self.chunks.get_mut(&[x as i32, y as i32, z as i32])
     }
 }

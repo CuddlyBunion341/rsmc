@@ -17,6 +17,8 @@ use iyes_perf_ui::prelude::*;
 use std::f32::consts::PI;
 use world::setup_world;
 
+use crate::chunk::CHUNK_SIZE;
+
 mod blocks;
 mod chunk;
 mod chunk_manager;
@@ -104,7 +106,7 @@ fn raycast(
     mut gizmos: Gizmos,
     query: Query<&Transform, With<FpsCameraController>>,
     mut highlight_query: Query<(&mut Transform, &HighlightCube), Without<FpsCameraController>>,
-    chunk_manager: ResMut<ChunkManager>,
+    mut chunk_manager: ResMut<ChunkManager>,
 ) {
     let camera_transform = query.single();
     let filter = |entity| !highlight_query.contains(entity);
@@ -131,7 +133,13 @@ fn raycast(
         .unwrap_or_else(|| Vec3::ZERO);
     highlight_transform.translation = selected_position;
 
-    let chunk = chunk_manager.get_chunk(selected_position);
+    println!(
+        "Position: {} {} {}",
+        selected_position.x, selected_position.y, selected_position.z
+    );
+
+    let chunk_position = selected_position / CHUNK_SIZE as f32;
+    let chunk = chunk_manager.get_chunk(chunk_position);
     match chunk {
         Some(chunk) => {
             let chunk_position = Vec3::new(
@@ -139,11 +147,21 @@ fn raycast(
                 chunk.position[1] as f32 * chunk::CHUNK_SIZE as f32,
                 chunk.position[2] as f32 * chunk::CHUNK_SIZE as f32,
             );
-            let local_position = selected_position - chunk_position;
+            let local_position = (selected_position - chunk_position).floor();
+            println!(
+                "localpos: {} {} {}",
+                local_position.x, local_position.y, local_position.z
+            );
             let block_id = chunk.get(
                 local_position.x as usize,
                 local_position.y as usize,
                 local_position.z as usize,
+            );
+            chunk.set(
+                local_position.x as usize,
+                local_position.y as usize,
+                local_position.z as usize,
+                0,
             );
             println!("Block ID: {}", block_id);
         }

@@ -19,7 +19,7 @@ pub fn setup_world(
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    chunk_manager: ResMut<ChunkManager>,
+    mut chunk_manager: ResMut<ChunkManager>,
 ) {
     let generator = Generator::new(0);
 
@@ -27,11 +27,11 @@ pub fn setup_world(
 
     let texture_handle = asset_server.load("textures/texture_atlas.png");
 
-    let mut chunks = chunk_manager.instantiate_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
+    let mut chunks = ChunkManager::instantiate_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
 
-    chunks.iter_mut().for_each(|chunk| {
+    for chunk in &mut chunks {
         generator.generate_chunk(chunk);
-        let mesh = create_chunk_mesh(chunk);
+        let mesh = create_chunk_mesh(&chunk);
 
         let transform = Transform::from_xyz(
             chunk.position.x * CHUNK_SIZE as f32,
@@ -64,5 +64,7 @@ pub fn setup_world(
                 ],
             },
         ));
-    });
+    }
+
+    chunk_manager.insert_chunks(chunks);
 }
