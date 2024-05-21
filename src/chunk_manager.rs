@@ -1,11 +1,10 @@
 use std::{
-    borrow::{Borrow, BorrowMut},
     collections::HashMap,
 };
 
-use bevy::{ecs::system::Resource, log::info, math::Vec3};
+use bevy::{ecs::system::Resource, math::Vec3};
 
-use crate::chunk::{Chunk, CHUNK_SIZE};
+use crate::chunk::{Chunk};
 
 #[derive(Resource)]
 

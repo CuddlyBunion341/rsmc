@@ -15,10 +15,6 @@ use bevy::{
 use bevy_mod_raycast::immediate::{Raycast, RaycastSettings};
 use smooth_bevy_cameras::controllers::fps::FpsCameraController;
 
-use crate::{
-    chunk::{self, CHUNK_SIZE},
-    chunk_manager::ChunkManager,
-};
 
 #[derive(Resource, Deref, DerefMut)]
 pub struct SelectedPosition(pub Option<Vec3>);

@@ -1,26 +1,16 @@
 use bevy::{
-    asset::Assets,
     ecs::{
-        component::Component,
         event::EventReader,
-        query::{With, Without},
-        system::{Commands, Query, Res, ResMut, Resource},
+        system::{Res, ResMut},
     },
-    gizmos::gizmos::Gizmos,
     input::mouse::{MouseButton, MouseButtonInput},
-    math::{primitives::Cuboid, Ray3d, Vec3},
-    pbr::{PbrBundle, StandardMaterial},
-    prelude::{default, Deref, DerefMut},
-    render::{color::Color, mesh::Mesh},
-    transform::components::Transform,
+    math::Vec3,
 };
-use bevy_mod_raycast::immediate::{Raycast, RaycastSettings};
-use smooth_bevy_cameras::controllers::fps::FpsCameraController;
 
 use crate::{
     chunk::{self, CHUNK_SIZE},
     chunk_manager::ChunkManager,
-    raycaster::{HighlightCube, SelectedPosition},
+    raycaster::SelectedPosition,
 };
 
 pub fn handle_mouse_events(

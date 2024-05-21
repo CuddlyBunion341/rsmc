@@ -1,5 +1,4 @@
 use bevy::{
-    log::info,
     render::{
         mesh::{Indices, Mesh, PrimitiveTopology},
         render_asset::RenderAssetUsages,
@@ -95,7 +94,7 @@ pub fn create_chunk_mesh(chunk: &Chunk) -> Mesh {
                     }
                 }
 
-                let mut mask = 0b111111;
+                let mask = 0b111111;
 
                 // update_mask(&chunk, &mut mask, 0b000001, x, y + 1, z);
                 // update_mask(&chunk, &mut mask, 0b000010, x, y - 1, z);
