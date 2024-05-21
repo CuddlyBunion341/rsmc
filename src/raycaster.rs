@@ -15,9 +15,11 @@ use bevy::{
 use bevy_mod_raycast::immediate::{Raycast, RaycastSettings};
 use smooth_bevy_cameras::controllers::fps::FpsCameraController;
 
-
 #[derive(Resource, Deref, DerefMut)]
 pub struct SelectedPosition(pub Option<Vec3>);
+
+#[derive(Resource, Deref, DerefMut)]
+pub struct SelectedNormal(pub Option<Vec3>);
 
 const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 
@@ -28,6 +30,7 @@ pub fn raycast(
     query: Query<&Transform, With<FpsCameraController>>,
     mut highlight_query: Query<(&mut Transform, &HighlightCube), Without<FpsCameraController>>,
     mut selected_position: ResMut<SelectedPosition>,
+    mut selected_normal: ResMut<SelectedNormal>,
 ) {
     let camera_transform = query.single();
     let filter = |entity| !highlight_query.contains(entity);
@@ -51,6 +54,9 @@ pub fn raycast(
         .map(|(_, intersection)| (intersection.position() - intersection.normal() * 0.5).floor());
 
     selected_position.0 = hover_position.clone();
+    selected_normal.0 = intersections
+        .first()
+        .map(|(_, intersection)| intersection.normal());
 
     if hover_position.is_none() {
         highlight_transform.translation = Vec3::new(-100.0, -100.0, -100.0);
