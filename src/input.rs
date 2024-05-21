@@ -1,19 +1,23 @@
 use bevy::{
     asset::{AssetServer, Assets},
     ecs::{
+        entity::Entity,
         event::EventReader,
-        system::{Commands, Res, ResMut},
+        query::Without,
+        system::{Commands, Query, Res, ResMut},
     },
     input::mouse::{MouseButton, MouseButtonInput},
     math::Vec3,
     pbr::StandardMaterial,
     render::mesh::Mesh,
+    transform::components::Transform,
 };
 
 use crate::{
     chunk::{self, CHUNK_SIZE},
     chunk_manager::ChunkManager,
-    raycaster::SelectedPosition,
+    mesher::ChunkMesh,
+    raycaster::{HighlightCube, SelectedPosition},
     world::add_chunk_objects,
 };
 
@@ -25,6 +29,7 @@ pub fn handle_mouse_events(
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut mesh_query: Query<(Entity, &ChunkMesh)>,
 ) {
     if (selected_position.0).is_none() {
         return;
@@ -38,13 +43,23 @@ pub fn handle_mouse_events(
             let chunk = chunk_from_selection(position, chunk_manager.as_mut());
 
             match chunk_from_selection(position, chunk_manager.as_mut()) {
-                Some(chunk) => add_chunk_objects(
-                    &mut commands,
-                    &asset_server,
-                    &mut meshes,
-                    &mut materials,
-                    chunk,
-                ),
+                Some(chunk) => {
+                    for (entity, chunk_mesh) in mesh_query.iter_mut() {
+                        if chunk_mesh.key[0] == chunk.position.x as i32
+                            && chunk_mesh.key[1] == chunk.position.y as i32
+                            && chunk_mesh.key[2] == chunk.position.z as i32
+                        {
+                            commands.entity(entity).despawn();
+                        }
+                    }
+                    add_chunk_objects(
+                        &mut commands,
+                        &asset_server,
+                        &mut meshes,
+                        &mut materials,
+                        chunk,
+                    );
+                }
                 None => {
                     println!("No chunk found");
                 }

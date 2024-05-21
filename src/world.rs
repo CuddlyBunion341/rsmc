@@ -76,5 +76,12 @@ pub fn add_chunk_objects(
             ..default()
         },
         MyCube,
+        ChunkMesh {
+            key: [
+                chunk.position.x as i32,
+                chunk.position.y as i32,
+                chunk.position.z as i32,
+            ],
+        },
     ));
 }
