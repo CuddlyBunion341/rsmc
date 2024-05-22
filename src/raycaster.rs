@@ -64,38 +64,6 @@ pub fn raycast(
     }
 
     highlight_transform.translation = hover_position.unwrap() + 0.5;
-
-    // let chunk_position = hover_position / CHUNK_SIZE as f32;
-    // let chunk = chunk_manager.get_chunk(chunk_position);
-    // match chunk {
-    //     Some(chunk) => {
-    //         let chunk_position = Vec3::new(
-    //             chunk.position[0] as f32 * chunk::CHUNK_SIZE as f32,
-    //             chunk.position[1] as f32 * chunk::CHUNK_SIZE as f32,
-    //             chunk.position[2] as f32 * chunk::CHUNK_SIZE as f32,
-    //         );
-    //         let local_position = (hover_position - chunk_position).floor();
-    //         println!(
-    //             "localpos: {} {} {}",
-    //             local_position.x, local_position.y, local_position.z
-    //         );
-    //         let block_id = chunk.get(
-    //             local_position.x as usize,
-    //             local_position.y as usize,
-    //             local_position.z as usize,
-    //         );
-    //         // chunk.set(
-    //         //     local_position.x as usize,
-    //         //     local_position.y as usize,
-    //         //     local_position.z as usize,
-    //         //     0,
-    //         // );
-    //         println!("Block ID: {}", block_id);
-    //     }
-    //     None => {
-    //         println!("No chunk found");
-    //     }
-    // }
 }
 
 #[derive(Component)]
