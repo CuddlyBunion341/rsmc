@@ -15,7 +15,7 @@ use bevy::{
 };
 
 use crate::{
-    chunk::{self, CHUNK_SIZE},
+    chunk::{self, Chunk, CHUNK_SIZE},
     chunk_manager::ChunkManager,
     mesher::ChunkMesh,
     raycaster::{HighlightCube, SelectedNormal, SelectedPosition},
@@ -43,7 +43,6 @@ pub fn handle_mouse_events(
     for event in events.read() {
         if event.button == MouseButton::Left && event.state.is_pressed() {
             break_block(position, chunk_manager.as_mut());
-            let chunk = chunk_from_selection(position, chunk_manager.as_mut());
 
             match chunk_from_selection(position, chunk_manager.as_mut()) {
                 Some(chunk) => {
@@ -74,10 +73,7 @@ pub fn handle_mouse_events(
             match chunk_from_selection(position, chunk_manager.as_mut()) {
                 Some(chunk) => {
                     for (entity, chunk_mesh) in mesh_query.iter_mut() {
-                        if chunk_mesh.key[0] == chunk.position.x as i32
-                            && chunk_mesh.key[1] == chunk.position.y as i32
-                            && chunk_mesh.key[2] == chunk.position.z as i32
-                        {
+                      if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
                             commands.entity(entity).despawn();
                         }
                     }
