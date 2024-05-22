@@ -25,7 +25,7 @@ impl Generator {
                         (x as f64 + chunk_origin.x as f64) * frequency,
                         (z as f64 + chunk_origin.z as f64) * frequency,
                     ]) * 10.0
-                        + 5.0;
+                        + 8.0;
 
                     let height = height.floor() as i32;
                     let block = Self::block_from_height(y as i32, height);
