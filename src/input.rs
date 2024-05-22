@@ -3,19 +3,26 @@ use bevy::{
     ecs::{
         entity::Entity,
         event::{Event, EventReader, EventWriter},
+        query::With,
         system::{Commands, Query, Res, ResMut},
     },
-    input::mouse::{MouseButton, MouseButtonInput},
-    log::info,
+    input::{
+        keyboard::KeyboardInput,
+        mouse::{MouseButton, MouseButtonInput},
+    },
     math::Vec3,
     pbr::StandardMaterial,
-    render::mesh::Mesh,
+    render::{camera::Camera, mesh::Mesh},
+    transform::components::Transform,
 };
+use bevy_rapier3d::control;
+use smooth_bevy_cameras::controllers::fps::{FpsCameraBundle, FpsCameraController};
 
 use crate::{
     chunk::{self, Chunk, CHUNK_SIZE},
     chunk_manager::ChunkManager,
     mesher::ChunkMesh,
+    physics::ColliderUpdateEvent,
     raycaster::BlockSelection,
     world::add_chunk_objects,
 };
@@ -49,6 +56,27 @@ pub fn handle_mouse_events(
                 position: position + normal,
                 block: 3,
             });
+        }
+    }
+}
+
+pub fn handle_keyboard_events(
+    mut keyboard_events: EventReader<KeyboardInput>,
+    mut camera_query: Query<&Transform, With<FpsCameraController>>,
+    mut collider_events: EventWriter<ColliderUpdateEvent>,
+) {
+    for event in keyboard_events.read() {
+        if event.state.is_pressed() {
+            match event.key_code {
+                bevy::input::keyboard::KeyCode::Escape => std::process::exit(0),
+                bevy::input::keyboard::KeyCode::KeyC => {
+                    let controller_transform = camera_query.single();
+                    collider_events.send(ColliderUpdateEvent {
+                        position: controller_transform.translation.into(),
+                    });
+                }
+                _ => {}
+            }
         }
     }
 }

@@ -9,10 +9,10 @@ use bevy_rapier3d::{
 };
 use chunk_manager::ChunkManager;
 use input::{
-    handle_block_update_events, handle_chunk_mesh_update_events, handle_mouse_events,
-    BlockUpdateEvent, ChunkMeshUpdateEvent,
+    handle_block_update_events, handle_chunk_mesh_update_events, handle_keyboard_events,
+    handle_mouse_events, BlockUpdateEvent, ChunkMeshUpdateEvent,
 };
-use physics::setup_physics;
+use physics::{handle_collider_update, setup_physics, ColliderUpdateEvent};
 use raycaster::{add_highlight_cube, raycast, BlockSelection, SelectedNormal, SelectedPosition};
 use smooth_bevy_cameras::{
     controllers::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin},
@@ -74,10 +74,13 @@ fn main() {
                 handle_mouse_events,
                 handle_block_update_events,
                 handle_chunk_mesh_update_events,
+                handle_keyboard_events,
+                handle_collider_update,
             ),
         )
         .add_event::<BlockUpdateEvent>()
         .add_event::<ChunkMeshUpdateEvent>()
+        .add_event::<ColliderUpdateEvent>()
         .run();
 }
 
