@@ -9,8 +9,8 @@ use bevy_rapier3d::{
 };
 use chunk_manager::ChunkManager;
 use input::{
-    handle_block_break_events, handle_block_place_events, handle_chunk_mesh_update_events,
-    handle_mouse_events, BlockBreakEvent, BlockPlaceEvent, ChunkMeshUpdateEvent,
+    handle_block_update_events, handle_chunk_mesh_update_events, handle_mouse_events,
+    BlockUpdateEvent, ChunkMeshUpdateEvent,
 };
 use physics::setup_physics;
 use raycaster::{add_highlight_cube, raycast, BlockSelection, SelectedNormal, SelectedPosition};
@@ -72,13 +72,11 @@ fn main() {
             (
                 raycast,
                 handle_mouse_events,
-                handle_block_break_events,
-                handle_block_place_events,
+                handle_block_update_events,
                 handle_chunk_mesh_update_events,
             ),
         )
-        .add_event::<BlockBreakEvent>()
-        .add_event::<BlockPlaceEvent>()
+        .add_event::<BlockUpdateEvent>()
         .add_event::<ChunkMeshUpdateEvent>()
         .run();
 }

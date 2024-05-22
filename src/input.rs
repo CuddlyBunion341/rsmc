@@ -19,13 +19,8 @@ use crate::{
     raycaster::BlockSelection,
     world::add_chunk_objects,
 };
-
 #[derive(Event)]
-pub struct BlockBreakEvent {
-    pub position: Vec3,
-}
-#[derive(Event)]
-pub struct BlockPlaceEvent {
+pub struct BlockUpdateEvent {
     pub position: Vec3,
     pub block: u8,
 }
@@ -35,8 +30,7 @@ pub struct ChunkMeshUpdateEvent {
 }
 
 pub fn handle_mouse_events(
-    mut block_break_events: EventWriter<BlockBreakEvent>,
-    mut block_place_events: EventWriter<BlockPlaceEvent>,
+    mut block_update_events: EventWriter<BlockUpdateEvent>,
     mut mouse_events: EventReader<MouseButtonInput>,
     block_selection: Res<BlockSelection>,
 ) {
@@ -49,9 +43,9 @@ pub fn handle_mouse_events(
 
     for event in mouse_events.read() {
         if event.button == MouseButton::Left && event.state.is_pressed() {
-            block_break_events.send(BlockBreakEvent { position });
+            block_update_events.send(BlockUpdateEvent { position, block: 0 });
         } else if event.button == MouseButton::Right && event.state.is_pressed() {
-            block_place_events.send(BlockPlaceEvent {
+            block_update_events.send(BlockUpdateEvent {
                 position: position + normal,
                 block: 3,
             });
@@ -59,26 +53,13 @@ pub fn handle_mouse_events(
     }
 }
 
-pub fn handle_block_place_events(
+pub fn handle_block_update_events(
     mut chunk_manager: ResMut<ChunkManager>,
-    mut block_place_events: EventReader<BlockPlaceEvent>,
+    mut block_update_events: EventReader<BlockUpdateEvent>,
     mut chunk_mesh_update_events: EventWriter<ChunkMeshUpdateEvent>,
 ) {
-    for event in block_place_events.read() {
+    for event in block_update_events.read() {
         set_block(event.position, event.block, chunk_manager.as_mut());
-        chunk_mesh_update_events.send(ChunkMeshUpdateEvent {
-            position: event.position / CHUNK_SIZE as f32,
-        });
-    }
-}
-
-pub fn handle_block_break_events(
-    mut chunk_manager: ResMut<ChunkManager>,
-    mut block_break_events: EventReader<BlockBreakEvent>,
-    mut chunk_mesh_update_events: EventWriter<ChunkMeshUpdateEvent>,
-) {
-    for event in block_break_events.read() {
-        break_block(event.position, chunk_manager.as_mut());
         chunk_mesh_update_events.send(ChunkMeshUpdateEvent {
             position: event.position / CHUNK_SIZE as f32,
         });
@@ -95,7 +76,6 @@ pub fn handle_chunk_mesh_update_events(
     mut mesh_query: Query<(Entity, &ChunkMesh)>,
 ) {
     for event in chunk_mesh_update_events.read() {
-        info!("ChunkMeshUpdateEvent: {:?}", event.position);
         let chunk_option = chunk_manager.get_chunk(event.position);
         match chunk_option {
             Some(chunk) => {
@@ -125,10 +105,6 @@ fn chunk_from_selection(
 ) -> Option<&mut chunk::Chunk> {
     let chunk_position = position / CHUNK_SIZE as f32;
     chunk_manager.get_chunk(chunk_position)
-}
-
-fn break_block(position: Vec3, chunk_manager: &mut ChunkManager) {
-    set_block(position, 0, chunk_manager)
 }
 
 fn set_block(position: Vec3, block: u8, chunk_manager: &mut ChunkManager) {
