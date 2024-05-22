@@ -71,6 +71,7 @@ pub fn handle_keyboard_events(
                 bevy::input::keyboard::KeyCode::Escape => std::process::exit(0),
                 bevy::input::keyboard::KeyCode::KeyC => {
                     let controller_transform = camera_query.single();
+                    println!("Handling event: {:?}", controller_transform.translation);
                     collider_events.send(ColliderUpdateEvent {
                         position: controller_transform.translation.into(),
                     });
