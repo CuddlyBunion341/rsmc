@@ -1,4 +1,16 @@
-fn setup_physics(mut commands: Commands) {
+use bevy::{
+    ecs::system::Commands,
+    math::primitives::Cuboid,
+    pbr::{PbrBundle, StandardMaterial},
+    prelude::default,
+    transform::{components::Transform, TransformBundle},
+};
+use bevy_rapier3d::{
+    dynamics::RigidBody,
+    geometry::{Collider, Restitution},
+};
+
+pub fn setup_physics(mut commands: Commands) {
     /* Create the ground. */
     commands
         .spawn(Collider::cuboid(100.0, 0.1, 100.0))
@@ -9,5 +21,5 @@ fn setup_physics(mut commands: Commands) {
         .spawn(RigidBody::Dynamic)
         .insert(Collider::ball(0.5))
         .insert(Restitution::coefficient(0.7))
-        .insert(TransformBundle::from(Transform::from_xyz(0.0, 4.0, 0.0)));
+        .insert(TransformBundle::from(Transform::from_xyz(0.0, 8.0, 0.0)));
 }

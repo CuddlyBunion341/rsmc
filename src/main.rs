@@ -3,8 +3,13 @@ use bevy::{
     prelude::*,
     window::WindowResolution,
 };
+use bevy_rapier3d::{
+    plugin::{NoUserData, RapierPhysicsPlugin},
+    render::RapierDebugRenderPlugin,
+};
 use chunk_manager::ChunkManager;
 use input::handle_mouse_events;
+use physics::setup_physics;
 use raycaster::{add_highlight_cube, raycast, BlockSelection, SelectedNormal, SelectedPosition};
 use smooth_bevy_cameras::{
     controllers::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin},
@@ -45,6 +50,8 @@ fn main() {
         .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(PerfUiPlugin)
         .insert_resource(ChunkManager::new())
         .insert_resource(SelectedPosition(None))
@@ -53,7 +60,10 @@ fn main() {
             position: None,
             normal: None,
         })
-        .add_systems(Startup, (setup, setup_world, add_highlight_cube))
+        .add_systems(
+            Startup,
+            (setup, setup_world, add_highlight_cube, setup_physics),
+        )
         .add_systems(Update, (raycast, handle_mouse_events))
         .run();
 }
