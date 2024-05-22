@@ -63,7 +63,6 @@ pub fn handle_collider_update(
     mut query: Query<(&mut Transform, &mut MyCollider)>,
 ) {
     for event in collider_events.read() {
-        println!("ColliderUpdateEvent {:?}", event.position);
         for (mut transform, collider) in query.iter_mut() {
             print!("{:?}", collider.key);
             println!("{:?}", event.position);
@@ -73,7 +72,8 @@ pub fn handle_collider_update(
                 x: event.position[0] + relative_position.x,
                 y: event.position[1] + relative_position.y,
                 z: event.position[2] + relative_position.z,
-            };
+            }
+            .floor();
         }
     }
 }
@@ -82,9 +82,10 @@ fn relative_colider_position(key: u32) -> Vec3 {
     let x = key / (COLLIDER_GRID_SIZE * COLLIDER_GRID_SIZE);
     let y = (key % (COLLIDER_GRID_SIZE * COLLIDER_GRID_SIZE)) / COLLIDER_GRID_SIZE;
     let z = key % COLLIDER_GRID_SIZE;
+
     Vec3 {
-        x: x as f32,
-        y: y as f32,
-        z: z as f32,
+        x: x as f32 - COLLIDER_GRID_SIZE as f32 / 2.0,
+        y: y as f32 - COLLIDER_GRID_SIZE as f32 / 2.0,
+        z: z as f32 - COLLIDER_GRID_SIZE as f32 / 2.0,
     }
 }
