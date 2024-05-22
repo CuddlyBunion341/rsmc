@@ -21,6 +21,7 @@ mod chunk_manager;
 mod generator;
 mod input;
 mod mesher;
+mod physics;
 mod raycaster;
 mod world;
 

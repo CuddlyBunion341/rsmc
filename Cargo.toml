@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 bevy = "0.13.2"
 bevy_mod_raycast = "0.17.0"
+bevy_rapier3d = "0.26.0"
 cgmath = "0.18.0"
 iyes_perf_ui = "0.2.3"
 noise = "0.9.0"
