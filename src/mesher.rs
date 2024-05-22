@@ -95,21 +95,21 @@ pub fn create_chunk_mesh(chunk: &Chunk) -> Mesh {
                 }
 
                 fn update_mask(chunk: &Chunk, mask: &mut u8, value: u8, x: i32, y: i32, z: i32) {
-                    if chunk.get(x as usize, y as usize, z as usize) == 1 {
+                    if chunk.get(x as usize, y as usize, z as usize) != 0 {
                         *mask ^= value;
                     }
                 }
 
-                let mask = 0b111111;
+                let mut mask = 0b111111;
 
-                // update_mask(&chunk, &mut mask, 0b000001, x, y + 1, z);
-                // update_mask(&chunk, &mut mask, 0b000010, x, y - 1, z);
+                update_mask(&chunk, &mut mask, 0b000001, x, y + 1, z);
+                update_mask(&chunk, &mut mask, 0b000010, x, y - 1, z);
 
-                // update_mask(&chunk, &mut mask, 0b000100, x + 1, y, z);
-                // update_mask(&chunk, &mut mask, 0b001000, x - 1, y, z);
+                update_mask(&chunk, &mut mask, 0b000100, x + 1, y, z);
+                update_mask(&chunk, &mut mask, 0b001000, x - 1, y, z);
 
-                // update_mask(&chunk, &mut mask, 0b010000, x, y, z + 1);
-                // update_mask(&chunk, &mut mask, 0b100000, x, y, z - 1);
+                update_mask(&chunk, &mut mask, 0b010000, x, y, z - 1);
+                update_mask(&chunk, &mut mask, 0b100000, x, y, z + 1);
 
                 let cube_data =
                     create_cube_geometry_data(x as f32, y as f32, z as f32, mask, block_id);
