@@ -43,6 +43,12 @@ pub const BLOCKS: [Block; 5] = [
     },
 ];
 
+pub static AIR: u8 = 0;
+pub static GRASS: u8 = 1;
+pub static DIRT: u8 = 2;
+pub static STONE: u8 = 3;
+pub static BEDROCK: u8 = 4;
+
 pub fn get_texture_uvs(texture_name: &str) -> Option<[f32; 2]> {
     match texture_name {
         "grass_top" => Some([0.5, 0.0]),

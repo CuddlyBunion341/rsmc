@@ -73,7 +73,7 @@ pub fn handle_mouse_events(
             match chunk_from_selection(position, chunk_manager.as_mut()) {
                 Some(chunk) => {
                     for (entity, chunk_mesh) in mesh_query.iter_mut() {
-                      if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
+                        if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
                             commands.entity(entity).despawn();
                         }
                     }
