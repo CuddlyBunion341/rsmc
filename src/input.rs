@@ -2,10 +2,11 @@ use bevy::{
     asset::{AssetServer, Assets},
     ecs::{
         entity::Entity,
-        event::EventReader,
+        event::{Event, EventReader, EventWriter},
         system::{Commands, Query, Res, ResMut},
     },
     input::mouse::{MouseButton, MouseButtonInput},
+    log::info,
     math::Vec3,
     pbr::StandardMaterial,
     render::mesh::Mesh,
@@ -15,19 +16,29 @@ use crate::{
     chunk::{self, Chunk, CHUNK_SIZE},
     chunk_manager::ChunkManager,
     mesher::ChunkMesh,
-    raycaster::{BlockSelection},
+    raycaster::BlockSelection,
     world::add_chunk_objects,
 };
 
+#[derive(Event)]
+pub struct BlockBreakEvent {
+    pub position: Vec3,
+}
+#[derive(Event)]
+pub struct BlockPlaceEvent {
+    pub position: Vec3,
+    pub block: u8,
+}
+#[derive(Event)]
+pub struct ChunkMeshUpdateEvent {
+    pub position: Vec3,
+}
+
 pub fn handle_mouse_events(
-    mut events: EventReader<MouseButtonInput>,
+    mut block_break_events: EventWriter<BlockBreakEvent>,
+    mut block_place_events: EventWriter<BlockPlaceEvent>,
+    mut mouse_events: EventReader<MouseButtonInput>,
     block_selection: Res<BlockSelection>,
-    mut chunk_manager: ResMut<ChunkManager>,
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut mesh_query: Query<(Entity, &ChunkMesh)>,
 ) {
     if block_selection.normal.is_none() || block_selection.position.is_none() {
         return;
@@ -36,61 +47,76 @@ pub fn handle_mouse_events(
     let position = block_selection.position.unwrap();
     let normal = block_selection.normal.unwrap();
 
-    for event in events.read() {
+    for event in mouse_events.read() {
         if event.button == MouseButton::Left && event.state.is_pressed() {
-            break_block(position, chunk_manager.as_mut());
-
-            match chunk_from_selection(position, chunk_manager.as_mut()) {
-                Some(chunk) => {
-                    for (entity, chunk_mesh) in mesh_query.iter_mut() {
-                        if chunk_mesh.key[0] == chunk.position.x as i32
-                            && chunk_mesh.key[1] == chunk.position.y as i32
-                            && chunk_mesh.key[2] == chunk.position.z as i32
-                        {
-                            commands.entity(entity).despawn();
-                        }
-                    }
-                    add_chunk_objects(
-                        &mut commands,
-                        &asset_server,
-                        &mut meshes,
-                        &mut materials,
-                        chunk,
-                    );
-                }
-                None => {
-                    println!("No chunk found");
-                }
-            }
+            block_break_events.send(BlockBreakEvent { position });
         } else if event.button == MouseButton::Right && event.state.is_pressed() {
-            set_block(position + normal, 3, chunk_manager.as_mut());
-            let chunk = chunk_from_selection(position, chunk_manager.as_mut());
-
-            match chunk_from_selection(position, chunk_manager.as_mut()) {
-                Some(chunk) => {
-                    for (entity, chunk_mesh) in mesh_query.iter_mut() {
-                        if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
-                            commands.entity(entity).despawn();
-                        }
-                    }
-                    add_chunk_objects(
-                        &mut commands,
-                        &asset_server,
-                        &mut meshes,
-                        &mut materials,
-                        chunk,
-                    );
-                }
-                None => {
-                    println!("No chunk found");
-                }
-            }
+            block_place_events.send(BlockPlaceEvent {
+                position: position + normal,
+                block: 3,
+            });
         }
     }
 }
 
-fn break_block(position: Vec3, chunk_manager: &mut ChunkManager) {
-    set_block(position, 0, chunk_manager)
+pub fn handle_block_place_events(
+    mut chunk_manager: ResMut<ChunkManager>,
+    mut block_place_events: EventReader<BlockPlaceEvent>,
+    mut chunk_mesh_update_events: EventWriter<ChunkMeshUpdateEvent>,
+) {
+    for event in block_place_events.read() {
+        set_block(event.position, event.block, chunk_manager.as_mut());
+        chunk_mesh_update_events.send(ChunkMeshUpdateEvent {
+            position: event.position / CHUNK_SIZE as f32,
+        });
+    }
+}
+
+pub fn handle_block_break_events(
+    mut chunk_manager: ResMut<ChunkManager>,
+    mut block_break_events: EventReader<BlockBreakEvent>,
+    mut chunk_mesh_update_events: EventWriter<ChunkMeshUpdateEvent>,
+) {
+    for event in block_break_events.read() {
+        break_block(event.position, chunk_manager.as_mut());
+        chunk_mesh_update_events.send(ChunkMeshUpdateEvent {
+            position: event.position / CHUNK_SIZE as f32,
+        });
+    }
+}
+
+pub fn handle_chunk_mesh_update_events(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut chunk_manager: ResMut<ChunkManager>,
+    mut chunk_mesh_update_events: EventReader<ChunkMeshUpdateEvent>,
+    mut mesh_query: Query<(Entity, &ChunkMesh)>,
+) {
+    for event in chunk_mesh_update_events.read() {
+        info!("ChunkMeshUpdateEvent: {:?}", event.position);
+        let chunk_option = chunk_manager.get_chunk(event.position);
+        match chunk_option {
+            Some(chunk) => {
+                for (entity, chunk_mesh) in mesh_query.iter_mut() {
+                    if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
+                        commands.entity(entity).despawn();
+                    }
+                }
+                add_chunk_objects(
+                    &mut commands,
+                    &asset_server,
+                    &mut meshes,
+                    &mut materials,
+                    &chunk,
+                );
+            }
+            None => {
+                println!("No chunk found");
+            }
+        }
+    }
 }
 
 fn chunk_from_selection(
@@ -99,6 +125,10 @@ fn chunk_from_selection(
 ) -> Option<&mut chunk::Chunk> {
     let chunk_position = position / CHUNK_SIZE as f32;
     chunk_manager.get_chunk(chunk_position)
+}
+
+fn break_block(position: Vec3, chunk_manager: &mut ChunkManager) {
+    set_block(position, 0, chunk_manager)
 }
 
 fn set_block(position: Vec3, block: u8, chunk_manager: &mut ChunkManager) {

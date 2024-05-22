@@ -8,7 +8,10 @@ use bevy_rapier3d::{
     render::RapierDebugRenderPlugin,
 };
 use chunk_manager::ChunkManager;
-use input::handle_mouse_events;
+use input::{
+    handle_block_break_events, handle_block_place_events, handle_chunk_mesh_update_events,
+    handle_mouse_events, BlockBreakEvent, BlockPlaceEvent, ChunkMeshUpdateEvent,
+};
 use physics::setup_physics;
 use raycaster::{add_highlight_cube, raycast, BlockSelection, SelectedNormal, SelectedPosition};
 use smooth_bevy_cameras::{
@@ -64,7 +67,19 @@ fn main() {
             Startup,
             (setup, setup_world, add_highlight_cube, setup_physics),
         )
-        .add_systems(Update, (raycast, handle_mouse_events))
+        .add_systems(
+            Update,
+            (
+                raycast,
+                handle_mouse_events,
+                handle_block_break_events,
+                handle_block_place_events,
+                handle_chunk_mesh_update_events,
+            ),
+        )
+        .add_event::<BlockBreakEvent>()
+        .add_event::<BlockPlaceEvent>()
+        .add_event::<ChunkMeshUpdateEvent>()
         .run();
 }
 
