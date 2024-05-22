@@ -23,7 +23,7 @@ use crate::{
     chunk_manager::ChunkManager,
     mesher::ChunkMesh,
     physics::ColliderUpdateEvent,
-    raycaster::BlockSelection,
+    raycaster::{BlockSelection, HighlightCube},
     world::add_chunk_objects,
 };
 #[derive(Event)]
@@ -62,7 +62,7 @@ pub fn handle_mouse_events(
 
 pub fn handle_keyboard_events(
     mut keyboard_events: EventReader<KeyboardInput>,
-    mut camera_query: Query<&Transform, With<FpsCameraController>>,
+    mut camera_query: Query<&Transform, With<HighlightCube>>,
     mut collider_events: EventWriter<ColliderUpdateEvent>,
 ) {
     for event in keyboard_events.read() {
@@ -174,7 +174,7 @@ pub fn get_block(position: Vec3, chunk_manager: &mut ChunkManager) -> Option<u8>
             ))
         }
         None => {
-            println!("No chunk found");
+            println!("No chunk found for block at {:?}", position);
             None
         }
     }

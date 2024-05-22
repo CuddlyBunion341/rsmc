@@ -12,7 +12,7 @@ use input::{
     handle_block_update_events, handle_chunk_mesh_update_events, handle_keyboard_events,
     handle_mouse_events, BlockUpdateEvent, ChunkMeshUpdateEvent,
 };
-use physics::{add_coliders, handle_collider_update_events, setup_physics, ColliderUpdateEvent};
+use physics::{add_coliders, handle_collider_update_events, ColliderUpdateEvent};
 use raycaster::{add_highlight_cube, raycast, BlockSelection, SelectedNormal, SelectedPosition};
 use smooth_bevy_cameras::{
     controllers::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin},
@@ -65,13 +65,7 @@ fn main() {
         })
         .add_systems(
             Startup,
-            (
-                setup,
-                setup_world,
-                add_highlight_cube,
-                setup_physics,
-                add_coliders,
-            ),
+            (setup, setup_world, add_highlight_cube, add_coliders),
         )
         .add_systems(
             Update,
