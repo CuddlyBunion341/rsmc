@@ -18,6 +18,12 @@ use smooth_bevy_cameras::controllers::fps::FpsCameraController;
 #[derive(Resource, Deref, DerefMut)]
 pub struct SelectedPosition(pub Option<Vec3>);
 
+#[derive(Resource)]
+pub struct BlockSelection {
+    pub position: Option<Vec3>,
+    pub normal: Option<Vec3>,
+}
+
 #[derive(Resource, Deref, DerefMut)]
 pub struct SelectedNormal(pub Option<Vec3>);
 
@@ -29,8 +35,7 @@ pub fn raycast(
     mut gizmos: Gizmos,
     query: Query<&Transform, With<FpsCameraController>>,
     mut highlight_query: Query<(&mut Transform, &HighlightCube), Without<FpsCameraController>>,
-    mut selected_position: ResMut<SelectedPosition>,
-    mut selected_normal: ResMut<SelectedNormal>,
+    mut block_selection: ResMut<BlockSelection>,
 ) {
     let camera_transform = query.single();
     let filter = |entity| !highlight_query.contains(entity);
@@ -53,8 +58,8 @@ pub fn raycast(
         .first()
         .map(|(_, intersection)| (intersection.position() - intersection.normal() * 0.5).floor());
 
-    selected_position.0 = hover_position.clone();
-    selected_normal.0 = intersections
+    block_selection.position = hover_position.clone();
+    block_selection.normal = intersections
         .first()
         .map(|(_, intersection)| intersection.normal());
 

@@ -2,7 +2,7 @@ use crate::chunk::{Chunk, CHUNK_SIZE};
 use crate::chunk_manager::ChunkManager;
 use crate::mesher::*;
 use crate::{generator::Generator, MyCube};
-use bevy::asset::{self, AssetServer, Handle};
+use bevy::asset::{AssetServer, Handle};
 use bevy::ecs::system::Res;
 use bevy::math::Vec3;
 use bevy::render::texture::Image;

@@ -1,31 +1,27 @@
 use bevy::{
     asset::{AssetServer, Assets},
-    core_pipeline::prepass::NormalPrepass,
     ecs::{
         entity::Entity,
         event::EventReader,
-        query::Without,
         system::{Commands, Query, Res, ResMut},
     },
     input::mouse::{MouseButton, MouseButtonInput},
     math::Vec3,
     pbr::StandardMaterial,
     render::mesh::Mesh,
-    transform::components::Transform,
 };
 
 use crate::{
     chunk::{self, Chunk, CHUNK_SIZE},
     chunk_manager::ChunkManager,
     mesher::ChunkMesh,
-    raycaster::{HighlightCube, SelectedNormal, SelectedPosition},
+    raycaster::{BlockSelection},
     world::add_chunk_objects,
 };
 
 pub fn handle_mouse_events(
     mut events: EventReader<MouseButtonInput>,
-    selected_position: Res<SelectedPosition>,
-    selected_normal: Res<SelectedNormal>,
+    block_selection: Res<BlockSelection>,
     mut chunk_manager: ResMut<ChunkManager>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -33,12 +29,12 @@ pub fn handle_mouse_events(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut mesh_query: Query<(Entity, &ChunkMesh)>,
 ) {
-    if (selected_position.0).is_none() || (selected_normal.0).is_none() {
+    if block_selection.normal.is_none() || block_selection.position.is_none() {
         return;
     }
 
-    let position = selected_position.0.unwrap();
-    let normal = selected_normal.0.unwrap();
+    let position = block_selection.position.unwrap();
+    let normal = block_selection.normal.unwrap();
 
     for event in events.read() {
         if event.button == MouseButton::Left && event.state.is_pressed() {
