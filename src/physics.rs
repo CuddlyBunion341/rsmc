@@ -2,11 +2,9 @@ use bevy::{
     ecs::{
         component::Component,
         event::{Event, EventReader},
-        system::{Commands, Query},
+        system::{Commands, Query, Res, ResMut},
     },
-    math::{primitives::Cuboid, Vec3},
-    pbr::{PbrBundle, StandardMaterial},
-    prelude::default,
+    math::Vec3,
     transform::{components::Transform, TransformBundle},
 };
 use bevy_rapier3d::{
@@ -14,7 +12,14 @@ use bevy_rapier3d::{
     geometry::{Collider, Restitution},
 };
 
+use crate::{
+    chunk::CHUNK_SIZE,
+    chunk_manager::{self, ChunkManager},
+    input::get_block,
+};
+
 static COLLIDER_GRID_SIZE: u32 = 5;
+static COLLIDER_RESTING_POSITION: Vec3 = Vec3::new(0.0, 0.0, 0.0);
 
 #[derive(Component)]
 pub struct MyCollider {
@@ -58,22 +63,30 @@ pub struct ColliderUpdateEvent {
     pub position: [f32; 3],
 }
 
-pub fn handle_collider_update(
-    mut collider_events: EventReader<ColliderUpdateEvent>,
-    mut query: Query<(&mut Transform, &mut MyCollider)>,
+pub fn handle_collider_update_events(
+    mut collider_grid_events: EventReader<ColliderUpdateEvent>,
+    mut query: Query<(&mut Transform, &MyCollider)>,
+    mut chunk_manager: ResMut<ChunkManager>,
 ) {
-    for event in collider_events.read() {
+    for event in collider_grid_events.read() {
+        let event_position = Vec3::new(event.position[0], event.position[1], event.position[2]);
         for (mut transform, collider) in query.iter_mut() {
-            print!("{:?}", collider.key);
-            println!("{:?}", event.position);
             let relative_position = relative_colider_position(collider.key);
+            let collider_position = (event_position + relative_position).floor();
+            let block = get_block(collider_position, &mut chunk_manager);
 
-            transform.translation = Vec3 {
-                x: event.position[0] + relative_position.x,
-                y: event.position[1] + relative_position.y,
-                z: event.position[2] + relative_position.z,
+            match block {
+                Some(block) => {
+                    if block != 0 {
+                        transform.translation = collider_position;
+                    } else {
+                        transform.translation = COLLIDER_RESTING_POSITION;
+                    }
+                }
+                None => {
+                    transform.translation = COLLIDER_RESTING_POSITION;
+                }
             }
-            .floor();
         }
     }
 }

@@ -157,3 +157,25 @@ fn set_block(position: Vec3, block: u8, chunk_manager: &mut ChunkManager) {
         }
     }
 }
+
+pub fn get_block(position: Vec3, chunk_manager: &mut ChunkManager) -> Option<u8> {
+    match chunk_from_selection(position, chunk_manager) {
+        Some(chunk) => {
+            let chunk_position = Vec3::new(
+                chunk.position[0] as f32 * chunk::CHUNK_SIZE as f32,
+                chunk.position[1] as f32 * chunk::CHUNK_SIZE as f32,
+                chunk.position[2] as f32 * chunk::CHUNK_SIZE as f32,
+            );
+            let local_position = (position - chunk_position).floor();
+            Some(chunk.get(
+                local_position.x as usize,
+                local_position.y as usize,
+                local_position.z as usize,
+            ))
+        }
+        None => {
+            println!("No chunk found");
+            None
+        }
+    }
+}
