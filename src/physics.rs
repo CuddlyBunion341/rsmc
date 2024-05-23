@@ -2,7 +2,7 @@ use bevy::{
     ecs::{
         component::Component,
         event::{Event, EventReader},
-        system::{Commands, Query, Res, ResMut},
+        system::{Commands, Query, ResMut},
     },
     math::Vec3,
     transform::{components::Transform, TransformBundle},
@@ -10,8 +10,7 @@ use bevy::{
 use bevy_rapier3d::geometry::Collider;
 
 use crate::{
-    chunk::CHUNK_SIZE,
-    chunk_manager::{self, ChunkManager},
+    chunk_manager::{ChunkManager},
     input::get_block,
 };
 

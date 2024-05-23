@@ -12,11 +12,9 @@ use bevy::{
     },
     math::Vec3,
     pbr::StandardMaterial,
-    render::{camera::Camera, mesh::Mesh},
+    render::{mesh::Mesh},
     transform::components::Transform,
 };
-use bevy_rapier3d::control;
-use smooth_bevy_cameras::controllers::fps::{FpsCameraBundle, FpsCameraController};
 
 use crate::{
     chunk::{self, Chunk, CHUNK_SIZE},
@@ -62,7 +60,7 @@ pub fn handle_mouse_events(
 
 pub fn handle_keyboard_events(
     mut keyboard_events: EventReader<KeyboardInput>,
-    mut camera_query: Query<&Transform, With<HighlightCube>>,
+    camera_query: Query<&Transform, With<HighlightCube>>,
     mut collider_events: EventWriter<ColliderUpdateEvent>,
 ) {
     for event in keyboard_events.read() {

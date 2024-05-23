@@ -1,10 +1,8 @@
-use std::{
-    collections::HashMap,
-};
+use std::collections::HashMap;
 
 use bevy::{ecs::system::Resource, math::Vec3};
 
-use crate::chunk::{Chunk};
+use crate::chunk::Chunk;
 
 #[derive(Resource)]
 
