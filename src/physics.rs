@@ -7,10 +7,7 @@ use bevy::{
     math::Vec3,
     transform::{components::Transform, TransformBundle},
 };
-use bevy_rapier3d::{
-    dynamics::RigidBody,
-    geometry::{Collider, Restitution},
-};
+use bevy_rapier3d::geometry::Collider;
 
 use crate::{
     chunk::CHUNK_SIZE,

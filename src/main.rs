@@ -121,6 +121,7 @@ fn setup(mut commands: Commands) {
         .insert(FpsCameraBundle::new(
             FpsCameraController {
                 translate_sensitivity: 10.0,
+                smoothing_weight: 0.1,
                 ..default()
             },
             Vec3::new(-2.0, 5.0, 5.0),
