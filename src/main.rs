@@ -9,8 +9,9 @@ use bevy_rapier3d::{
 };
 use chunk_manager::ChunkManager;
 use input::{
-    handle_block_update_events, handle_chunk_mesh_update_events, handle_keyboard_events,
-    handle_mouse_events, BlockUpdateEvent, ChunkMeshUpdateEvent,
+    handle_block_update_events, handle_chunk_mesh_update_events, handle_fps_controller_input,
+    handle_keyboard_events, handle_mouse_events, BlockUpdateEvent, ChunkMeshUpdateEvent,
+    LastPlayerPosition,
 };
 use physics::{add_coliders, handle_collider_update_events, ColliderUpdateEvent};
 use raycaster::{add_highlight_cube, raycast, BlockSelection, SelectedNormal, SelectedPosition};
@@ -63,6 +64,7 @@ fn main() {
             position: None,
             normal: None,
         })
+        .insert_resource(LastPlayerPosition(Vec3::ZERO))
         .add_systems(
             Startup,
             (setup, setup_world, add_highlight_cube, add_coliders),
@@ -76,6 +78,7 @@ fn main() {
                 handle_chunk_mesh_update_events,
                 handle_keyboard_events,
                 handle_collider_update_events,
+                handle_fps_controller_input,
             ),
         )
         .add_event::<BlockUpdateEvent>()
