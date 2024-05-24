@@ -11,7 +11,7 @@ use bevy_rapier3d::geometry::Collider;
 
 use crate::{chunk_manager::ChunkManager, input::get_block};
 
-static COLLIDER_GRID_SIZE: u32 = 7;
+static COLLIDER_GRID_SIZE: u32 = 3;
 static COLLIDER_RESTING_POSITION: Vec3 = Vec3::new(0.0, 0.0, 0.0);
 
 #[derive(Component)]
