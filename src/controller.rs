@@ -40,6 +40,9 @@ pub fn setup_controller(mut commands: Commands, mut window: Query<&mut Window>) 
                 ..default()
             },
             FpsController {
+                upright_height: 1.25,
+                height: 1.0,
+                crouch_height: 0.8,
                 air_acceleration: 80.0,
                 ..default()
             },
