@@ -2105,7 +2105,6 @@ dependencies = [
  "cgmath",
  "iyes_perf_ui",
  "noise",
- "smooth-bevy-cameras",
 ]
 
 [[package]]
@@ -3327,16 +3326,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd538fb6910ac1099850255cf94a94df6551fbdd602454387d0adb2d1ca6dead"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "smooth-bevy-cameras"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fd87c41a0df786a4f89ef25506520d5b7d89baa295c7f06d084913e09863a32"
-dependencies = [
- "approx 0.5.1",
- "bevy",
 ]
 
 [[package]]
