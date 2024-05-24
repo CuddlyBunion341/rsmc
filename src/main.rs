@@ -35,18 +35,14 @@ fn main() {
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(FpsControllerPlugin)
-        .add_systems(Startup, setup)
-        .add_systems(
-            Update,
-            (manage_cursor, scene_colliders, display_text, respawn),
-        )
+        .add_systems(Startup, (setup, setup_scene))
+        .add_systems(Update, (manage_cursor))
         .run();
 }
 
 fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<AssetServer>) {
     let mut window = window.single_mut();
     window.title = String::from("Minimal FPS Controller Example");
-    // commands.spawn(Window { title: "Minimal FPS Controller Example".to_string(), ..default() });
 
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
@@ -58,11 +54,6 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
         ..default()
     });
 
-    // Note that we have two entities for the player
-    // One is a "logical" player that handles the physics computation and collision
-    // The other is a "render" player that is what is displayed to the user
-    // This distinction is useful for later on if you want to add multiplayer,
-    // where often time these two ideas are not exactly synced up
     let logical_entity = commands
         .spawn((
             Collider::capsule(Vec3::Y * 0.5, Vec3::Y * 1.5, 0.5),
@@ -111,99 +102,14 @@ fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<Ass
         },
         RenderPlayer { logical_entity },
     ));
-
-    commands.insert_resource(MainScene {
-        handle: assets.load("playground.glb"),
-        is_loaded: false,
-    });
-
-    commands.spawn(
-        TextBundle::from_section(
-            "",
-            TextStyle {
-                font: assets.load("fira_mono.ttf"),
-                font_size: 24.0,
-                color: Color::BLACK,
-            },
-        )
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            top: Val::Px(5.0),
-            left: Val::Px(5.0),
-            ..default()
-        }),
-    );
-
-    for x in -5..5 {
-        for z in -5..5 {
-            let pos = Vec3 {
-                x: (x as f32) * 4.0,
-                y: 30.0,
-                z: (z as f32) * 4.0,
-            };
-            spawn_block(commands.borrow_mut(), pos);
-        }
-    }
 }
 
-fn respawn(mut query: Query<(&mut Transform, &mut Velocity)>) {
-    for (mut transform, mut velocity) in &mut query {
-        if transform.translation.y > -50.0 {
-            continue;
-        }
-
-        velocity.linvel = Vec3::ZERO;
-        transform.translation = SPAWN_POINT;
-    }
-}
-
-#[derive(Resource)]
-struct MainScene {
-    handle: Handle<Gltf>,
-    is_loaded: bool,
-}
-
-fn scene_colliders(
-    mut commands: Commands,
-    mut main_scene: ResMut<MainScene>,
-    gltf_assets: Res<Assets<Gltf>>,
-    gltf_mesh_assets: Res<Assets<GltfMesh>>,
-    gltf_node_assets: Res<Assets<GltfNode>>,
-    mesh_assets: Res<Assets<Mesh>>,
-) {
-    if main_scene.is_loaded {
-        return;
-    }
-
-    let gltf = gltf_assets.get(&main_scene.handle);
-
-    if let Some(gltf) = gltf {
-        let scene = gltf.scenes.first().unwrap().clone();
-        commands.spawn(SceneBundle { scene, ..default() });
-        for node in &gltf.nodes {
-            let node = gltf_node_assets.get(node).unwrap();
-            if let Some(gltf_mesh) = node.mesh.clone() {
-                let gltf_mesh = gltf_mesh_assets.get(&gltf_mesh).unwrap();
-                for mesh_primitive in &gltf_mesh.primitives {
-                    let mesh = mesh_assets.get(&mesh_primitive.mesh).unwrap();
-                    commands.spawn((
-                        Collider::from_bevy_mesh(mesh, &ComputedColliderShape::TriMesh).unwrap(),
-                        RigidBody::Fixed,
-                        TransformBundle::from_transform(node.transform),
-                    ));
-                }
-            }
-        }
-        main_scene.is_loaded = true;
-    }
-}
-
-fn spawn_block(commands: &mut Commands, pos: Vec3) {
+fn setup_scene(mut commands: Commands) {
+    // add a ground plane
     commands.spawn((
-        Collider::cuboid(0.5, 0.5, 0.5),
-        RigidBody::Dynamic,
-        Transform::from_translation(pos),
-        Ccd { enabled: true }, // Prevent clipping when going fast
+        Collider::cuboid(10.0, 0.1, 10.0),
+        RigidBody::Fixed,
+        Transform::from_translation(Vec3::ZERO),
     ));
 }
 
@@ -226,26 +132,6 @@ fn manage_cursor(
         window.cursor.visible = true;
         for mut controller in &mut controller_query {
             controller.enable_input = false;
-        }
-    }
-}
-
-fn display_text(
-    mut controller_query: Query<(&Transform, &Velocity)>,
-    mut text_query: Query<&mut Text>,
-) {
-    for (transform, velocity) in &mut controller_query {
-        for mut text in &mut text_query {
-            text.sections[0].value = format!(
-                "vel: {:.2}, {:.2}, {:.2}\npos: {:.2}, {:.2}, {:.2}\nspd: {:.2}",
-                velocity.linvel.x,
-                velocity.linvel.y,
-                velocity.linvel.z,
-                transform.translation.x,
-                transform.translation.y,
-                transform.translation.z,
-                velocity.linvel.xz().length()
-            );
         }
     }
 }
