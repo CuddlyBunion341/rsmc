@@ -1,131 +1,117 @@
-use std::f32::consts::TAU;
+use bevy::{
+    pbr::{light_consts, CascadeShadowConfigBuilder},
+    prelude::*,
+    window::WindowResolution,
+};
+use bevy_rapier3d::{
+    plugin::{NoUserData, RapierPhysicsPlugin},
+    render::RapierDebugRenderPlugin,
+};
+use chunk_manager::ChunkManager;
+use input::{
+    handle_block_update_events, handle_chunk_mesh_update_events, handle_fps_controller_input,
+    handle_keyboard_events, handle_mouse_events, BlockUpdateEvent, ChunkMeshUpdateEvent,
+    LastPlayerPosition,
+};
+use physics::{add_coliders, handle_collider_update_events, ColliderUpdateEvent};
+use raycaster::{add_highlight_cube, raycast, BlockSelection, SelectedNormal, SelectedPosition};
 
-use bevy::{prelude::*, render::camera::Exposure, window::CursorGrabMode};
-use bevy_rapier3d::prelude::*;
+use iyes_perf_ui::prelude::*;
+use std::f32::consts::PI;
+use world::setup_world;
 
-use bevy_fps_controller::controller::*;
-
-const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+mod blocks;
+mod chunk;
+mod chunk_manager;
+mod generator;
+mod input;
+mod mesher;
+mod physics;
+mod raycaster;
+mod world;
 
 fn main() {
     App::new()
-        .insert_resource(AmbientLight {
-            color: Color::WHITE,
-            brightness: 10000.0,
-        })
-        .insert_resource(ClearColor(Color::hex("D4F5F5").unwrap()))
-        .insert_resource(RapierConfiguration {
-            gravity: Vec3::new(0., -1.6, 0.),
-            physics_pipeline_active: true,
-            force_update_from_transform_changes: false,
-            scaled_shape_subdivision: 1,
-            query_pipeline_active: true,
-            timestep_mode: TimestepMode::Fixed {
-                dt: 1.0 / 120.0,
-                substeps: 1,
-            },
-        })
-        .add_plugins(DefaultPlugins)
+        .add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        resolution: WindowResolution::new(1920.0, 1080.0)
+                            .with_scale_factor_override(2.0),
+                        present_mode: bevy::window::PresentMode::Immediate,
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .set(ImagePlugin::default_nearest()),
+        )
+        // .add_plugins(LookTransformPlugin)
+        // .add_plugins(FpsCameraPlugin::default())
+        .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
+        .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
+        .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugins(RapierDebugRenderPlugin::default())
-        .add_plugins(FpsControllerPlugin)
-        .add_systems(Startup, (setup, setup_scene))
-        .add_systems(Update, manage_cursor)
+        .add_plugins(PerfUiPlugin)
+        .insert_resource(ChunkManager::new())
+        .insert_resource(SelectedPosition(None))
+        .insert_resource(SelectedNormal(None))
+        .insert_resource(BlockSelection {
+            position: None,
+            normal: None,
+        })
+        .insert_resource(LastPlayerPosition(Vec3::ZERO))
+        .add_systems(
+            Startup,
+            (setup, setup_world, add_highlight_cube, add_coliders),
+        )
+        .add_systems(
+            Update,
+            (
+                raycast,
+                handle_mouse_events,
+                handle_block_update_events,
+                handle_chunk_mesh_update_events,
+                handle_keyboard_events,
+                handle_collider_update_events,
+                handle_fps_controller_input,
+            ),
+        )
+        .add_event::<BlockUpdateEvent>()
+        .add_event::<ChunkMeshUpdateEvent>()
+        .add_event::<ColliderUpdateEvent>()
         .run();
 }
 
-fn setup(mut commands: Commands, mut window: Query<&mut Window>) {
-    let mut window = window.single_mut();
-    window.title = String::from("Minimal FPS Controller Example");
+#[derive(Component)]
+struct MyCube;
+
+#[derive(Component)]
+pub struct MyChunk {
+    pub position: [i32; 3],
+}
+
+fn setup(mut commands: Commands) {
+    commands.spawn(PerfUiCompleteBundle::default());
 
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
-            illuminance: light_consts::lux::FULL_DAYLIGHT,
+            illuminance: light_consts::lux::OVERCAST_DAY,
             shadows_enabled: true,
             ..default()
         },
-        transform: Transform::from_xyz(4.0, 7.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_rotation(Quat::from_euler(
+            EulerRot::ZYX,
+            0.3,
+            PI / 2. + 0.3,
+            -PI / 4.,
+        )),
+        cascade_shadow_config: CascadeShadowConfigBuilder {
+            first_cascade_far_bound: 7.0,
+            maximum_distance: 256.0,
+            ..default()
+        }
+        .into(),
         ..default()
     });
-
-    let logical_entity = commands
-        .spawn((
-            Collider::capsule(Vec3::Y * 0.5, Vec3::Y * 1.5, 0.5),
-            Friction {
-                coefficient: 0.0,
-                combine_rule: CoefficientCombineRule::Min,
-            },
-            Restitution {
-                coefficient: 0.0,
-                combine_rule: CoefficientCombineRule::Min,
-            },
-            ActiveEvents::COLLISION_EVENTS,
-            Velocity::zero(),
-            RigidBody::Dynamic,
-            Sleeping::disabled(),
-            LockedAxes::ROTATION_LOCKED,
-            AdditionalMassProperties::Mass(1.0),
-            GravityScale(0.0),
-            Ccd { enabled: true }, // Prevent clipping when going fast
-            TransformBundle::from_transform(Transform::from_translation(SPAWN_POINT)),
-            LogicalPlayer,
-            FpsControllerInput {
-                pitch: -TAU / 12.0,
-                yaw: TAU * 5.0 / 8.0,
-                ..default()
-            },
-            FpsController {
-                air_acceleration: 80.0,
-                ..default()
-            },
-        ))
-        .insert(CameraConfig {
-            height_offset: 0.0,
-            radius_scale: 0.75,
-        })
-        .id();
-
-    commands.spawn((
-        Camera3dBundle {
-            projection: Projection::Perspective(PerspectiveProjection {
-                fov: TAU / 5.0,
-                ..default()
-            }),
-            exposure: Exposure::SUNLIGHT,
-            ..default()
-        },
-        RenderPlayer { logical_entity },
-    ));
-}
-
-fn setup_scene(mut commands: Commands) {
-    // add a ground plane
-    commands.spawn((
-        Collider::cuboid(10.0, 0.1, 10.0),
-        RigidBody::Fixed,
-        Transform::from_translation(Vec3::ZERO),
-    ));
-}
-
-fn manage_cursor(
-    btn: Res<ButtonInput<MouseButton>>,
-    key: Res<ButtonInput<KeyCode>>,
-    mut window_query: Query<&mut Window>,
-    mut controller_query: Query<&mut FpsController>,
-) {
-    let mut window = window_query.single_mut();
-    if btn.just_pressed(MouseButton::Left) {
-        window.cursor.grab_mode = CursorGrabMode::Locked;
-        window.cursor.visible = false;
-        for mut controller in &mut controller_query {
-            controller.enable_input = true;
-        }
-    }
-    if key.just_pressed(KeyCode::Escape) {
-        window.cursor.grab_mode = CursorGrabMode::None;
-        window.cursor.visible = true;
-        for mut controller in &mut controller_query {
-            controller.enable_input = false;
-        }
-    }
 }
