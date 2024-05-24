@@ -12,7 +12,7 @@ use bevy::{
     },
     math::Vec3,
     pbr::StandardMaterial,
-    render::{mesh::Mesh},
+    render::mesh::Mesh,
     transform::components::Transform,
 };
 
@@ -179,22 +179,4 @@ pub fn get_block(position: Vec3, chunk_manager: &mut ChunkManager) -> Option<u8>
             None
         }
     }
-}
-
-pub fn handle_fps_controller_input(// mut controller_events: EventReader<ControlEvent>,
-    // mut collider_events: EventWriter<ColliderUpdateEvent>,
-    // mut last_position: ResMut<LastPlayerPosition>,
-    // controller_query: Query<&Transform, With<FpsCameraController>>,
-) {
-    // for _ in controller_events.read() {
-    //     let camera_position = controller_query.single().translation;
-
-    //     if last_position.0.floor() != camera_position.floor() {
-    //         collider_events.send(ColliderUpdateEvent {
-    //             position: camera_position.into(),
-    //         });
-    //     }
-
-    //     last_position.0 = camera_position;
-    // }
 }

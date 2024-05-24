@@ -5,6 +5,8 @@ use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
+use crate::{input::LastPlayerPosition, physics::ColliderUpdateEvent};
+
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 40.0, 0.0);
 
 pub fn setup_controller(mut commands: Commands, mut window: Query<&mut Window>) {
@@ -81,5 +83,21 @@ pub fn manage_cursor(
         for mut controller in &mut controller_query {
             controller.enable_input = false;
         }
+    }
+}
+
+pub fn handle_controller_movement(
+    mut query: Query<(Entity, &FpsControllerInput, &Transform)>,
+    mut last_position: ResMut<LastPlayerPosition>,
+    mut collider_events: EventWriter<ColliderUpdateEvent>,
+) {
+    for (entity, input, transform) in &mut query.iter() {
+        let controller_position = transform.translation;
+        if last_position.0.floor() != controller_position.floor() {
+            collider_events.send(ColliderUpdateEvent {
+                position: controller_position.into(),
+            });
+        }
+        last_position.0 = controller_position;
     }
 }

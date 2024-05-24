@@ -9,11 +9,10 @@ use bevy_rapier3d::{
     render::RapierDebugRenderPlugin,
 };
 use chunk_manager::ChunkManager;
-use controller::{manage_cursor, setup_controller};
+use controller::{handle_controller_movement, manage_cursor, setup_controller};
 use input::{
-    handle_block_update_events, handle_chunk_mesh_update_events, handle_fps_controller_input,
-    handle_keyboard_events, handle_mouse_events, BlockUpdateEvent, ChunkMeshUpdateEvent,
-    LastPlayerPosition,
+    handle_block_update_events, handle_chunk_mesh_update_events, handle_keyboard_events,
+    handle_mouse_events, BlockUpdateEvent, ChunkMeshUpdateEvent, LastPlayerPosition,
 };
 use physics::{add_coliders, handle_collider_update_events, ColliderUpdateEvent};
 use raycaster::{add_highlight_cube, raycast, BlockSelection, SelectedNormal, SelectedPosition};
@@ -93,8 +92,8 @@ fn main() {
                 handle_chunk_mesh_update_events,
                 handle_keyboard_events,
                 handle_collider_update_events,
-                handle_fps_controller_input,
                 manage_cursor,
+                handle_controller_movement,
             ),
         )
         .add_event::<BlockUpdateEvent>()
