@@ -1,17 +1,20 @@
 use bevy::{
     asset::Assets,
+    core_pipeline::core_3d::Camera3dBundle,
     ecs::{
         component::Component,
-        system::{Commands, ResMut, Resource},
+        query::{With, Without},
+        system::{Commands, Query, ResMut, Resource},
     },
     gizmos::gizmos::Gizmos,
-    math::{primitives::Cuboid, Vec3},
+    math::{primitives::Cuboid, Ray3d, Vec3},
     pbr::{PbrBundle, StandardMaterial},
     prelude::{default, Deref, DerefMut},
-    render::{color::Color, mesh::Mesh},
+    render::{camera::Camera, color::Color, mesh::Mesh},
     transform::components::Transform,
 };
-use bevy_mod_raycast::immediate::{Raycast};
+use bevy_fps_controller::controller::FpsControllerInput;
+use bevy_mod_raycast::immediate::{Raycast, RaycastSettings};
 
 #[derive(Resource, Deref, DerefMut)]
 pub struct SelectedPosition(pub Option<Vec3>);
@@ -29,44 +32,44 @@ const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 
 // query camera position and direction
 pub fn raycast(
-    raycast: Raycast,
-    gizmos: Gizmos,
-    // query: Query<&Transform, With<FpsCameraController>>,
-    // mut highlight_query: Query<(&mut Transform, &HighlightCube), Without<FpsCameraController>>,
-    block_selection: ResMut<BlockSelection>,
+    mut raycast: Raycast,
+    mut gizmos: Gizmos,
+    mut query: Query<&Transform, With<Camera>>,
+    mut highlight_query: Query<(&mut Transform, &HighlightCube), Without<Camera>>,
+    mut block_selection: ResMut<BlockSelection>,
 ) {
-    // let camera_transform = query.single();
-    // let filter = |entity| !highlight_query.contains(entity);
+    let camera_transform = query.single();
+    let filter = |entity| !highlight_query.contains(entity);
 
-    // let pos = camera_transform.translation;
-    // let dir = camera_transform.rotation.mul_vec3(Vec3::Z).normalize();
-    // let dir = dir * RAY_DIST.z;
+    let pos = camera_transform.translation;
+    let dir = camera_transform.rotation.mul_vec3(Vec3::Z).normalize();
+    let dir = dir * RAY_DIST.z;
 
-    // let intersections = raycast.debug_cast_ray(
-    //     Ray3d::new(pos, dir),
-    //     &RaycastSettings {
-    //         filter: &filter,
-    //         ..default()
-    //     },
-    //     &mut gizmos,
-    // );
+    let intersections = raycast.debug_cast_ray(
+        Ray3d::new(pos, dir),
+        &RaycastSettings {
+            filter: &filter,
+            ..default()
+        },
+        &mut gizmos,
+    );
 
-    // let (mut highlight_transform, _) = highlight_query.single_mut();
-    // let hover_position = intersections
-    //     .first()
-    //     .map(|(_, intersection)| (intersection.position() - intersection.normal() * 0.5).floor());
+    let (mut highlight_transform, _) = highlight_query.single_mut();
+    let hover_position = intersections
+        .first()
+        .map(|(_, intersection)| (intersection.position() - intersection.normal() * 0.5).floor());
 
-    // block_selection.position = hover_position.clone();
-    // block_selection.normal = intersections
-    //     .first()
-    //     .map(|(_, intersection)| intersection.normal());
+    block_selection.position = hover_position.clone();
+    block_selection.normal = intersections
+        .first()
+        .map(|(_, intersection)| intersection.normal());
 
-    // if hover_position.is_none() {
-    //     highlight_transform.translation = Vec3::new(-100.0, -100.0, -100.0);
-    //     return;
-    // }
+    if hover_position.is_none() {
+        highlight_transform.translation = Vec3::new(-100.0, -100.0, -100.0);
+        return;
+    }
 
-    // highlight_transform.translation = hover_position.unwrap() + 0.5;
+    highlight_transform.translation = hover_position.unwrap() + 0.5;
 }
 
 #[derive(Component)]

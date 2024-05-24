@@ -56,7 +56,6 @@ pub fn setup_controller(mut commands: Commands, mut window: Query<&mut Window>) 
                 fov: TAU / 5.0,
                 ..default()
             }),
-            exposure: Exposure::SUNLIGHT,
             ..default()
         },
         RenderPlayer { logical_entity },
