@@ -1,6 +1,6 @@
 use std::f32::consts::TAU;
 
-use bevy::{prelude::*, render::camera::Exposure, window::CursorGrabMode};
+use bevy::{prelude::*, window::CursorGrabMode};
 use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
@@ -89,7 +89,7 @@ pub fn manage_cursor(
 }
 
 pub fn handle_controller_movement(
-    mut query: Query<(Entity, &FpsControllerInput, &Transform)>,
+    query: Query<(Entity, &FpsControllerInput, &Transform)>,
     mut last_position: ResMut<LastPlayerPosition>,
     mut collider_events: EventWriter<ColliderUpdateEvent>,
 ) {

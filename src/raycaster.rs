@@ -1,6 +1,5 @@
 use bevy::{
     asset::Assets,
-    core_pipeline::core_3d::Camera3dBundle,
     ecs::{
         component::Component,
         query::{With, Without},
@@ -13,7 +12,6 @@ use bevy::{
     render::{camera::Camera, color::Color, mesh::Mesh},
     transform::components::Transform,
 };
-use bevy_fps_controller::controller::FpsControllerInput;
 use bevy_mod_raycast::immediate::{Raycast, RaycastSettings};
 
 #[derive(Resource, Deref, DerefMut)]
@@ -34,7 +32,7 @@ const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 pub fn raycast(
     mut raycast: Raycast,
     mut gizmos: Gizmos,
-    mut query: Query<&Transform, With<Camera>>,
+    query: Query<&Transform, With<Camera>>,
     mut highlight_query: Query<(&mut Transform, &HighlightCube), Without<Camera>>,
     mut block_selection: ResMut<BlockSelection>,
 ) {
