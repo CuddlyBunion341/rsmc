@@ -1,12 +1,6 @@
-use std::{borrow::BorrowMut, f32::consts::TAU};
+use std::f32::consts::TAU;
 
-use bevy::{
-    gltf::{Gltf, GltfMesh, GltfNode},
-    math::Vec3Swizzles,
-    prelude::*,
-    render::camera::Exposure,
-    window::CursorGrabMode,
-};
+use bevy::{prelude::*, render::camera::Exposure, window::CursorGrabMode};
 use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
@@ -36,11 +30,11 @@ fn main() {
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(FpsControllerPlugin)
         .add_systems(Startup, (setup, setup_scene))
-        .add_systems(Update, (manage_cursor))
+        .add_systems(Update, manage_cursor)
         .run();
 }
 
-fn setup(mut commands: Commands, mut window: Query<&mut Window>, assets: Res<AssetServer>) {
+fn setup(mut commands: Commands, mut window: Query<&mut Window>) {
     let mut window = window.single_mut();
     window.title = String::from("Minimal FPS Controller Example");
 
