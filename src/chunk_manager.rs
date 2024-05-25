@@ -21,14 +21,16 @@ impl ChunkManager {
         let mut chunks: Vec<Chunk> = Vec::new();
 
         for x in 0..render_distance {
-            for z in 0..render_distance {
-                let chunk_position = Vec3::new(
-                    (x - render_distance / 2) as f32 + position.x,
-                    0.0,
-                    (z - render_distance / 2) as f32 + position.z,
-                );
-                let chunk = Chunk::new(chunk_position);
-                chunks.push(chunk);
+            for y in 0..render_distance {
+                for z in 0..render_distance {
+                    let chunk_position = Vec3::new(
+                        (x - render_distance / 2) as f32 + position.x,
+                        (y - render_distance / 2) as f32 + position.y,
+                        (z - render_distance / 2) as f32 + position.z,
+                    );
+                    let chunk = Chunk::new(chunk_position);
+                    chunks.push(chunk);
+                }
             }
         }
 
