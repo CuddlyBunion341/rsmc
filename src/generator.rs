@@ -42,10 +42,10 @@ impl Generator {
 
     fn generate_block(&self, position: Vec3) -> u8 {
         let y = position.y as f64;
-        let amplitude = 40.0;
-        let base_height = 10.0;
+        let amplitude = 60.0;
+        let base_height = 5.0;
 
-        let height = self.get_layered_2d_noise(3, position) * amplitude + base_height;
+        let height = (self.get_layered_2d_noise(3, position) + 1.0) * amplitude + base_height;
 
         if y == 0.0 {
             return BEDROCK;
