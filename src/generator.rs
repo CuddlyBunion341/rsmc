@@ -1,6 +1,6 @@
 use crate::{
     blocks::{
-        AIR, BEDROCK, BROWN_TERRACOTTA, DIRT, GRASS, RED_SAND, RED_TERRACOTTA, STONE, TERRACOTTA,
+        AIR, BEDROCK, BROWN_TERRACOTTA, RED_SAND, RED_TERRACOTTA, STONE, TERRACOTTA,
         YELLOW_TERRACOTTA,
     },
     chunk::{Chunk, CHUNK_SIZE},
@@ -82,7 +82,7 @@ impl Generator {
         let mut height = 0.0;
         let mut frequency = 0.015;
         let mut persistence = 0.5;
-        let mut lacuranity = 2.0;
+        let lacuranity = 2.0;
 
         for _ in 0..octaves {
             height += self.get_2d_noise(position * frequency) * persistence;
