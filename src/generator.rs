@@ -1,8 +1,11 @@
 use crate::{
-    blocks::{AIR, BEDROCK, DIRT, GRASS, STONE},
+    blocks::{
+        AIR, BEDROCK, BROWN_TERRACOTTA, DIRT, GRASS, RED_SAND, RED_TERRACOTTA, STONE, TERRACOTTA,
+        YELLOW_TERRACOTTA,
+    },
     chunk::{Chunk, CHUNK_SIZE},
 };
-use bevy::{math::Vec3};
+use bevy::math::Vec3;
 use noise::{NoiseFn, Perlin};
 
 pub struct Generator {
@@ -20,6 +23,9 @@ impl Generator {
 
     pub fn generate_chunk(&self, chunk: &mut Chunk) {
         let chunk_origin = chunk.position * CHUNK_SIZE as f32;
+        if chunk_origin.y < 0.0 {
+            return;
+        }
 
         for x in -1..=CHUNK_SIZE {
             for y in -1..=CHUNK_SIZE {
@@ -36,8 +42,10 @@ impl Generator {
 
     fn generate_block(&self, position: Vec3) -> u8 {
         let y = position.y as f64;
+        let amplitude = 40.0;
+        let base_height = 10.0;
 
-        let height = self.get_layered_2d_noise(3, position) * 20.0;
+        let height = self.get_layered_2d_noise(3, position) * amplitude + base_height;
 
         if y == 0.0 {
             return BEDROCK;
@@ -47,19 +55,34 @@ impl Generator {
             return AIR;
         }
 
+        if y < 5.0 && y > height - 3.0 {
+            return RED_SAND;
+        }
+
+        if y as i32 % 8 == 0 {
+            return YELLOW_TERRACOTTA;
+        }
+        if (y as i32 + 1) % 8 == 0 {
+            return RED_TERRACOTTA;
+        }
+        if (y as i32 + 2) % 8 == 0 {
+            return BROWN_TERRACOTTA;
+        }
+
         if height - y < 1.0 {
-            return GRASS;
+            return TERRACOTTA;
         }
         if height - y < 3.0 {
-            return DIRT;
+            return RED_SAND;
         }
         return STONE;
     }
 
     fn get_layered_2d_noise(&self, octaves: i32, position: Vec3) -> f64 {
         let mut height = 0.0;
-        let mut frequency = 0.03;
+        let mut frequency = 0.015;
         let mut persistence = 0.5;
+        let mut lacuranity = 2.0;
 
         for _ in 0..octaves {
             height += self.get_2d_noise(position * frequency) * persistence;
