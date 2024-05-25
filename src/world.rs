@@ -51,11 +51,17 @@ pub fn add_chunk_objects(
     chunk: &Chunk,
 ) {
     let texture_handle: Handle<Image> = asset_server.load("textures/texture_atlas.png");
-    let mesh = create_chunk_mesh(&chunk);
+    let mesh_option = create_chunk_mesh(&chunk);
+
+    if (mesh_option.is_none()) {
+        return;
+    }
+
+    let mesh = mesh_option.unwrap();
 
     let transform = Transform::from_xyz(
         chunk.position.x * CHUNK_SIZE as f32,
-        0.0,
+        chunk.position.y * CHUNK_SIZE as f32,
         chunk.position.z * CHUNK_SIZE as f32,
     );
 

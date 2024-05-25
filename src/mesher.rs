@@ -16,7 +16,7 @@ pub struct ChunkMesh {
     pub key: [i32; 3],
 }
 
-pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Mesh {
+pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
     let GeometryData {
         position,
         uv,
@@ -24,14 +24,22 @@ pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Mesh {
         indices,
     } = geometry_data;
 
-    Mesh::new(
-        PrimitiveTopology::TriangleList,
-        RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
+    if (position.is_empty() || uv.is_empty() || normal.is_empty() || indices.is_empty())
+        || (position.len() != uv.len() || uv.len() != normal.len())
+    {
+        return None;
+    }
+
+    Some(
+        Mesh::new(
+            PrimitiveTopology::TriangleList,
+            RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
+        )
+        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, position)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uv)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normal)
+        .with_inserted_indices(Indices::U32(indices)),
     )
-    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, position)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uv)
-    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normal)
-    .with_inserted_indices(Indices::U32(indices))
 }
 
 pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8, block_id: u8) -> GeometryData {
@@ -77,7 +85,7 @@ pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8, block_id: u8
     }
 }
 
-pub fn create_chunk_mesh(chunk: &Chunk) -> Mesh {
+pub fn create_chunk_mesh(chunk: &Chunk) -> Option<Mesh> {
     let mut geometry_data = GeometryData {
         position: Vec::new(),
         uv: Vec::new(),
@@ -95,12 +103,12 @@ pub fn create_chunk_mesh(chunk: &Chunk) -> Mesh {
                 }
 
                 fn update_mask(chunk: &Chunk, mask: &mut u8, value: u8, x: i32, y: i32, z: i32) {
-                    if chunk.get(x as usize, y as usize, z as usize) != 0 {
-                        *mask ^= value;
+                    if chunk.get(x as usize, y as usize, z as usize) == 0 {
+                        *mask |= value;
                     }
                 }
 
-                let mut mask = 0b111111;
+                let mut mask = 0b000000;
 
                 update_mask(&chunk, &mut mask, 0b000001, x, y + 1, z);
                 update_mask(&chunk, &mut mask, 0b000010, x, y - 1, z);
