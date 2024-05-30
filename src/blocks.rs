@@ -1,8 +1,8 @@
 use crate::mesher::CubeFace;
 
-pub struct Block<'a> {
-    pub name: &'a str,
-    pub texture_names: [&'a str; 6],
+pub struct Block {
+    pub name: &'static str,
+    pub texture_names: [&'static str; 6],
     pub is_solid: bool,
 }
 
