@@ -93,7 +93,7 @@ pub fn handle_controller_movement(
     mut last_position: ResMut<LastPlayerPosition>,
     mut collider_events: EventWriter<ColliderUpdateEvent>,
 ) {
-    for (entity, input, transform) in &mut query.iter() {
+    for (_entity, _input, transform) in &mut query.iter() {
         let controller_position = transform.translation;
         if last_position.0.floor() != controller_position.floor() {
             collider_events.send(ColliderUpdateEvent {

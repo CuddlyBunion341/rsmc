@@ -1,91 +1,5 @@
 use crate::mesher::CubeFace;
 
-pub struct Block {
-    pub name: &'static str,
-    pub texture_names: [&'static str; 6],
-    pub is_solid: bool,
-}
-
-pub const BLOCKS: [Block; 14] = [
-    Block {
-        name: "air",
-        texture_names: ["air"; 6],
-        is_solid: false,
-    },
-    Block {
-        name: "grass",
-        texture_names: [
-            "grass_top",
-            "dirt",
-            "grass_side",
-            "grass_side",
-            "grass_side",
-            "grass_side",
-        ],
-        is_solid: true,
-    },
-    Block {
-        name: "dirt",
-        texture_names: ["dirt"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "stone",
-        texture_names: ["stone"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "bedrock",
-        texture_names: ["bedrock"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "red_sand",
-        texture_names: ["red_sand"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "brown_terracotta",
-        texture_names: ["brown_terracotta"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "cyan_terracotta",
-        texture_names: ["cyan_terracotta"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "gray_terracotta",
-        texture_names: ["gray_terracotta"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "light_gray_terracotta",
-        texture_names: ["light_gray_terracotta"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "orange_terracotta",
-        texture_names: ["orange_terracotta"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "red_terracotta",
-        texture_names: ["red_terracotta"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "terracotta",
-        texture_names: ["terracotta"; 6],
-        is_solid: true,
-    },
-    Block {
-        name: "yellow_terracotta",
-        texture_names: ["yellow_terracotta"; 6],
-        is_solid: true,
-    },
-];
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BlockId {
     Air,
@@ -103,6 +17,55 @@ pub enum BlockId {
     Terracotta,
     YellowTerracotta,
 }
+
+pub struct Block {
+    pub id: BlockId,
+    pub texture_names: [&'static str; 6],
+    pub is_solid: bool,
+}
+
+macro_rules! add_block {
+    ($block_id:expr, $texture_names:expr, $is_solid:expr) => {
+        Block {
+            id: $block_id,
+            texture_names: $texture_names,
+            is_solid: $is_solid,
+        }
+    };
+}
+
+pub static BLOCKS: [Block; 15] = [
+    add_block!(BlockId::Air, ["air"; 6], false),
+    add_block!(BlockId::Air, ["air"; 6], false),
+    add_block!(
+        BlockId::Grass,
+        [
+            "grass_top",
+            "dirt",
+            "grass_side",
+            "grass_side",
+            "grass_side",
+            "grass_side",
+        ],
+        true
+    ),
+    add_block!(BlockId::Dirt, ["dirt"; 6], true),
+    add_block!(BlockId::Stone, ["stone"; 6], true),
+    add_block!(BlockId::Bedrock, ["bedrock"; 6], true),
+    add_block!(BlockId::RedSand, ["red_sand"; 6], true),
+    add_block!(BlockId::BrownTerracotta, ["brown_terracotta"; 6], true),
+    add_block!(BlockId::CyanTerracotta, ["cyan_terracotta"; 6], true),
+    add_block!(BlockId::GrayTerracotta, ["gray_terracotta"; 6], true),
+    add_block!(
+        BlockId::LightGrayTerracotta,
+        ["light_gray_terracotta"; 6],
+        true
+    ),
+    add_block!(BlockId::OrangeTerracotta, ["orange_terracotta"; 6], true),
+    add_block!(BlockId::RedTerracotta, ["red_terracotta"; 6], true),
+    add_block!(BlockId::Terracotta, ["terracotta"; 6], true),
+    add_block!(BlockId::YellowTerracotta, ["yellow_terracotta"; 6], true),
+];
 
 impl Block {
     pub fn get_texture_uvs(texture_name: &str) -> Option<[f32; 2]> {

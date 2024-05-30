@@ -1,6 +1,6 @@
 use bevy::math::Vec3;
 
-use crate::blocks::{BlockId};
+use crate::blocks::BlockId;
 
 pub const CHUNK_SIZE: i32 = 32;
 pub const PADDED_CHUNK_SIZE: i32 = CHUNK_SIZE + 2;
