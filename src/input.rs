@@ -17,6 +17,7 @@ use bevy::{
 };
 
 use crate::{
+    blocks::BlockId,
     chunk::{self, Chunk, CHUNK_SIZE},
     chunk_manager::ChunkManager,
     mesher::ChunkMesh,
@@ -27,7 +28,7 @@ use crate::{
 #[derive(Event)]
 pub struct BlockUpdateEvent {
     pub position: Vec3,
-    pub block: u8,
+    pub block: BlockId,
 }
 #[derive(Event)]
 pub struct ChunkMeshUpdateEvent {
@@ -51,11 +52,14 @@ pub fn handle_mouse_events(
 
     for event in mouse_events.read() {
         if event.button == MouseButton::Left && event.state.is_pressed() {
-            block_update_events.send(BlockUpdateEvent { position, block: 0 });
+            block_update_events.send(BlockUpdateEvent {
+                position,
+                block: BlockId::Air,
+            });
         } else if event.button == MouseButton::Right && event.state.is_pressed() {
             block_update_events.send(BlockUpdateEvent {
                 position: position + normal,
-                block: 3,
+                block: BlockId::Dirt,
             });
         }
     }
@@ -137,7 +141,7 @@ fn chunk_from_selection(
     chunk_manager.get_chunk(chunk_position)
 }
 
-fn set_block(position: Vec3, block: u8, chunk_manager: &mut ChunkManager) {
+fn set_block(position: Vec3, block: BlockId, chunk_manager: &mut ChunkManager) {
     match chunk_from_selection(position, chunk_manager) {
         Some(chunk) => {
             let chunk_position = Vec3::new(
@@ -159,7 +163,7 @@ fn set_block(position: Vec3, block: u8, chunk_manager: &mut ChunkManager) {
     }
 }
 
-pub fn get_block(position: Vec3, chunk_manager: &mut ChunkManager) -> Option<u8> {
+pub fn get_block(position: Vec3, chunk_manager: &mut ChunkManager) -> Option<BlockId> {
     match chunk_from_selection(position, chunk_manager) {
         Some(chunk) => {
             let chunk_position = Vec3::new(

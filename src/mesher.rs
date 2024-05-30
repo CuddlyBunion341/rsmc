@@ -7,7 +7,7 @@ use bevy::{
 };
 
 use crate::{
-    blocks::get_block_face_uvs,
+    blocks::{Block, BlockId},
     chunk::{Chunk, CHUNK_SIZE},
 };
 
@@ -42,7 +42,13 @@ pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
     )
 }
 
-pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8, block_id: u8) -> GeometryData {
+pub fn create_cube_geometry_data(
+    x: f32,
+    y: f32,
+    z: f32,
+    faces: u8,
+    block_id: BlockId,
+) -> GeometryData {
     let mut position = Vec::new();
     let mut uv = Vec::new();
     let mut normal = Vec::new();
@@ -62,9 +68,9 @@ pub fn create_cube_geometry_data(x: f32, y: f32, z: f32, faces: u8, block_id: u8
                 vertex.position[2] * 0.5 + z + 0.5,
             ]);
 
-            let block_uvs = get_block_face_uvs(block_id, *face).unwrap();
+            let block_uvs = Block::get_block_face_uvs(block_id, *face).unwrap();
             uv.push([
-                block_uvs[0] + vertex.uv[0] * 0.25,
+                block_uvs[0] + vertex.uv[0] * 0.25 - 0.001,
                 block_uvs[1] + (1.0 - vertex.uv[1]) * 0.25,
             ]);
             normal.push(vertex.normal);
@@ -98,12 +104,12 @@ pub fn create_chunk_mesh(chunk: &Chunk) -> Option<Mesh> {
             for z in 0..CHUNK_SIZE {
                 let block_id = chunk.get(x as usize, y as usize, z as usize);
 
-                if block_id == 0 {
+                if block_id == BlockId::Air {
                     continue;
                 }
 
                 fn update_mask(chunk: &Chunk, mask: &mut u8, value: u8, x: i32, y: i32, z: i32) {
-                    if chunk.get(x as usize, y as usize, z as usize) == 0 {
+                    if chunk.get(x as usize, y as usize, z as usize) == BlockId::Air {
                         *mask |= value;
                     }
                 }

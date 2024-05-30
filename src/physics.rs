@@ -9,7 +9,7 @@ use bevy::{
 };
 use bevy_rapier3d::geometry::Collider;
 
-use crate::{chunk_manager::ChunkManager, input::get_block};
+use crate::{blocks::BlockId, chunk_manager::ChunkManager, input::get_block};
 
 static COLLIDER_GRID_SIZE: u32 = 3;
 static COLLIDER_RESTING_POSITION: Vec3 = Vec3::new(0.0, 0.0, 0.0);
@@ -57,7 +57,7 @@ pub fn handle_collider_update_events(
 
             match block {
                 Some(block) => {
-                    if block != 0 {
+                    if block != BlockId::Air {
                         transform.translation = collider_position + 0.5;
                     } else {
                         transform.translation = COLLIDER_RESTING_POSITION;

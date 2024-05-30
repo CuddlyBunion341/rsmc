@@ -1,8 +1,5 @@
 use crate::{
-    blocks::{
-        AIR, BEDROCK, BROWN_TERRACOTTA, CYAN_TERRACOTTA, DIRT, GRASS, RED_SAND, RED_TERRACOTTA,
-        STONE, TERRACOTTA, YELLOW_TERRACOTTA,
-    },
+    blocks::BlockId,
     chunk::{Chunk, CHUNK_SIZE},
 };
 use bevy::math::Vec3;
@@ -39,7 +36,7 @@ impl Generator {
         }
     }
 
-    fn generate_block(&self, position: Vec3) -> u8 {
+    fn generate_block(&self, position: Vec3) -> BlockId {
         let mut density = 0.0;
         let mut amplitude = 1.0;
         let mut frequency = 0.04;
@@ -59,13 +56,13 @@ impl Generator {
         }
         density -= position.y as f64 * 0.02;
         if density > 0.5 {
-            CYAN_TERRACOTTA
+            BlockId::Terracotta
         } else if density > 0.40 {
-            RED_TERRACOTTA
+            BlockId::RedTerracotta
         } else if density > 0.0 {
-            CYAN_TERRACOTTA
+            BlockId::CyanTerracotta
         } else {
-            AIR
+            BlockId::Air
         }
     }
 
