@@ -8,9 +8,16 @@ bevy = "0.13.2"
 bevy_fps_controller = "0.2.5"
 bevy_mod_raycast = "0.17.0"
 bevy_rapier3d = "0.25.0"
+bevy_renet = "0.0.11"
 cgmath = "0.18.0"
 iyes_perf_ui = "0.2.3"
 noise = "0.9.0"
+renet = "0.0.15"
 
 [profile.release]
 opt-level = 3
+
+[[bin]]
+name = "client"
+path = "src/bin/client.rs"
+
