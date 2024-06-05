@@ -8,10 +8,11 @@ bevy = "0.13.2"
 bevy_fps_controller = "0.2.5"
 bevy_mod_raycast = "0.17.0"
 bevy_rapier3d = "0.25.0"
-bevy_renet = "0.0.11"
+bevy_renet = { path = "/Users/dani/.cargo/registry/src/index.crates.io-6f17d22bba15001f/bevy_renet-0.0.11" }
 cgmath = "0.18.0"
 iyes_perf_ui = "0.2.3"
 noise = "0.9.0"
+rand = "0.8.5"
 renet = "0.0.15"
 
 [profile.release]
@@ -21,3 +22,6 @@ opt-level = 3
 name = "client"
 path = "src/bin/client.rs"
 
+[[bin]]
+name = "server"
+path = "src/bin/server.rs"

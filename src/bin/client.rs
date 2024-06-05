@@ -1,3 +1,5 @@
+use bevy::log::info;
+use rand;
 use bevy::app::{App, Update};
 use bevy::DefaultPlugins;
 use bevy_renet::transport::NetcodeClientPlugin;
@@ -6,7 +8,7 @@ use renet::{ConnectionConfig, DefaultChannel, RenetClient};
 use std::net::{SocketAddrV4, UdpSocket};
 use renet::transport::{ClientAuthentication, NetcodeClientTransport};
 use bevy::ecs::system::ResMut;
-use bevy::utils::SystemTime;
+use bevy::utils::{ SystemTime};
 
 fn main() {
     let mut app = App::new();
@@ -19,9 +21,11 @@ fn main() {
     app.add_plugins(NetcodeClientPlugin);
     app.add_plugins(DefaultPlugins);
 
+    let random_int = rand::random::<u64>();
+
     let authentication = ClientAuthentication::Unsecure {
-        server_addr: std::net::SocketAddr::V4(SocketAddrV4::new(std::net::Ipv4Addr::new(127, 0, 0, 1), 12345)),
-        client_id: 0,
+        server_addr: std::net::SocketAddr::V4(SocketAddrV4::new(std::net::Ipv4Addr::new(127, 0, 0, 1), 5000)),
+        client_id: random_int,
         user_data: None,
         protocol_id: 0,
     };
@@ -33,6 +37,8 @@ fn main() {
 
     app.add_systems(Update, send_message_system);
     app.add_systems(Update, receive_message_system);
+
+    info!("Starting client {}", random_int);
 
     app.run();
 }
