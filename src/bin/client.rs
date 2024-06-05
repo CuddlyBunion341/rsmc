@@ -1,14 +1,14 @@
-use bevy::log::info;
-use rand;
 use bevy::app::{App, Update};
+use bevy::ecs::system::ResMut;
+use bevy::log::info;
+use bevy::utils::SystemTime;
 use bevy::DefaultPlugins;
 use bevy_renet::transport::NetcodeClientPlugin;
 use bevy_renet::RenetClientPlugin;
+use rand;
+use renet::transport::{ClientAuthentication, NetcodeClientTransport};
 use renet::{ConnectionConfig, DefaultChannel, RenetClient};
 use std::net::{SocketAddrV4, UdpSocket};
-use renet::transport::{ClientAuthentication, NetcodeClientTransport};
-use bevy::ecs::system::ResMut;
-use bevy::utils::{ SystemTime};
 
 fn main() {
     let mut app = App::new();
@@ -24,13 +24,18 @@ fn main() {
     let random_int = rand::random::<u64>();
 
     let authentication = ClientAuthentication::Unsecure {
-        server_addr: std::net::SocketAddr::V4(SocketAddrV4::new(std::net::Ipv4Addr::new(127, 0, 0, 1), 5000)),
+        server_addr: std::net::SocketAddr::V4(SocketAddrV4::new(
+            std::net::Ipv4Addr::new(127, 0, 0, 1),
+            5000,
+        )),
         client_id: random_int,
         user_data: None,
         protocol_id: 0,
     };
     let socket = UdpSocket::bind("127.0.0.1:0").unwrap();
-    let current_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap();
+    let current_time = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap();
     let transport = NetcodeClientTransport::new(current_time, authentication, socket).unwrap();
 
     app.insert_resource(transport);
