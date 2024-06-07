@@ -3,6 +3,8 @@ use std::{net::UdpSocket, time::SystemTime};
 use bevy::{
     app::{App, Update},
     ecs::{event::EventReader, system::ResMut},
+    log::info,
+    transform::components::Transform,
     DefaultPlugins,
 };
 use bevy_renet::{transport::NetcodeServerPlugin, RenetServerPlugin};
@@ -55,7 +57,12 @@ fn receive_message_system(mut server: ResMut<RenetServer>) {
     for client_id in server.clients_id() {
         while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
         {
-            // Handle received message
+            let server_message: [f32; 3] = bincode::deserialize(&message).unwrap();
+
+            info!(
+                "Received message from client {}: {}",
+                client_id, server_message[0]
+            )
         }
     }
 }

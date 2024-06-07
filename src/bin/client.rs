@@ -1,26 +1,23 @@
 use bevy::app::{App, Startup, Update};
-use bevy::asset::{Assets, Handle};
-use bevy::core_pipeline::core_3d::{Camera3d, Camera3dBundle};
+use bevy::asset::Assets;
+use bevy::core_pipeline::core_3d::Camera3dBundle;
 use bevy::ecs::component::Component;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::event::EventReader;
 use bevy::ecs::query::With;
-use bevy::ecs::system::{Command, Commands, Query, Res, ResMut, Resource};
+use bevy::ecs::system::{Commands, Query, ResMut, Resource};
 use bevy::input::keyboard::{KeyCode, KeyboardInput};
 use bevy::input::ButtonState;
 use bevy::log::info;
-use bevy::math::primitives::{Cuboid, Plane3d};
+use bevy::math::primitives::Cuboid;
 use bevy::math::Vec3;
-use bevy::pbr::{AmbientLight, MaterialMeshBundle, StandardMaterial};
+use bevy::pbr::{MaterialMeshBundle, StandardMaterial};
 use bevy::prelude::default;
-use bevy::reflect::Reflect;
 use bevy::render::color::Color;
-use bevy::render::mesh::shape::{Cube, Plane};
 use bevy::render::mesh::Mesh;
 use bevy::transform::components::Transform;
-use bevy::utils::{HashMap, SystemTime};
+use bevy::utils::SystemTime;
 use bevy::DefaultPlugins;
-use bevy_fps_controller::controller::FpsControllerInput;
 use bevy_renet::transport::NetcodeClientPlugin;
 use bevy_renet::RenetClientPlugin;
 use rand;
@@ -35,9 +32,6 @@ pub struct PlayerInput {
     pub forward: bool,
     pub backward: bool,
 }
-
-#[derive(Resource)]
-pub struct PlayerLobby(HashMap<u64, Transform>);
 
 #[derive(Component)]
 pub struct MyPlayer;
@@ -77,7 +71,6 @@ fn main() {
     let transport = NetcodeClientTransport::new(current_time, authentication, socket).unwrap();
 
     app.insert_resource(transport);
-    app.insert_resource(PlayerLobby(HashMap::default()));
 
     app.add_systems(Update, send_message_system);
     app.add_systems(Update, receive_message_system);
@@ -150,9 +143,14 @@ fn update_player_movement(
 
 // Systems
 
-fn send_message_system(mut client: ResMut<RenetClient>) {
-    // Send a text message to the server
-    client.send_message(DefaultChannel::ReliableOrdered, "server message");
+fn send_message_system(mut client: ResMut<RenetClient>, query: Query<&Transform, With<MyPlayer>>) {
+    let position_vector = query.single().translation;
+    let position_array = [position_vector.x, position_vector.y, position_vector.z];
+
+    client.send_message(
+        DefaultChannel::ReliableOrdered,
+        bincode::serialize(&position_array).unwrap(),
+    );
 }
 
 fn receive_message_system(mut client: ResMut<RenetClient>) {
