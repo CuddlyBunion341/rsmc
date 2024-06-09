@@ -1,22 +1,25 @@
 use std::{net::UdpSocket, time::SystemTime};
 
 use bevy::{
-    app::{App, Update},
-    ecs::{event::EventReader, system::ResMut},
-    log::info,
-    transform::components::Transform,
-    DefaultPlugins,
+    app::{App, Update}, ecs::{
+        event::EventReader,
+        system::{Res, ResMut, Resource},
+    }, log::{info}, utils::HashMap, MinimalPlugins
 };
 use bevy_renet::{transport::NetcodeServerPlugin, RenetServerPlugin};
 use renet::{
     transport::{NetcodeServerTransport, ServerAuthentication, ServerConfig},
-    ConnectionConfig, DefaultChannel, RenetServer, ServerEvent,
+    ClientId, ConnectionConfig, DefaultChannel, RenetServer, ServerEvent,
 };
+
+#[derive(Resource)]
+pub struct PlayerPositions(HashMap<ClientId, [f32; 3]>);
 
 pub fn main() {
     let mut app = App::new();
+
     app.add_plugins(RenetServerPlugin);
-    app.add_plugins(DefaultPlugins);
+    app.add_plugins(MinimalPlugins);
 
     let server = RenetServer::new(ConnectionConfig::default());
     app.insert_resource(server);
@@ -36,6 +39,7 @@ pub fn main() {
     };
     let transport = NetcodeServerTransport::new(server_config, socket).unwrap();
     app.insert_resource(transport);
+    app.insert_resource(PlayerPositions(HashMap::default()));
 
     app.add_systems(Update, send_message_system);
     app.add_systems(Update, receive_message_system);
@@ -43,13 +47,13 @@ pub fn main() {
     app.run();
 }
 
+
 // Systems
 
-fn send_message_system(mut server: ResMut<RenetServer>) {
+fn send_message_system(mut server: ResMut<RenetServer>, player_positions: Res<PlayerPositions>) {
     let channel_id = 0;
-    // Send a text message for all clients
-    // The enum DefaultChannel describe the channels used by the default configuration
-    server.broadcast_message(DefaultChannel::ReliableOrdered, "server message");
+    let payload = bincode::serialize(&player_positions.0).unwrap();
+    let message = server.broadcast_message(DefaultChannel::ReliableOrdered, payload);
 }
 
 fn receive_message_system(mut server: ResMut<RenetServer>) {
@@ -60,8 +64,8 @@ fn receive_message_system(mut server: ResMut<RenetServer>) {
             let server_message: [f32; 3] = bincode::deserialize(&message).unwrap();
 
             info!(
-                "Received message from client {}: {}",
-                client_id, server_message[0]
+                "Received message from client {}: {};{};{}",
+                client_id, server_message[0], server_message[1], server_message[2]
             )
         }
     }
