@@ -4,12 +4,6 @@ use bevy::{ecs::system::Resource, math::Vec3};
 
 use crate::chunk::Chunk;
 
-#[derive(Resource)]
-
-pub struct ChunkManager {
-    pub chunks: HashMap<[i32; 3], Chunk>,
-}
-
 impl ChunkManager {
     pub fn new() -> Self {
         Self {

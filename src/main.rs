@@ -18,7 +18,7 @@ use physics::{add_coliders, handle_collider_update_events, ColliderUpdateEvent};
 use raycaster::{add_highlight_cube, raycast, BlockSelection, SelectedNormal, SelectedPosition};
 
 use iyes_perf_ui::prelude::*;
-use std::f32::consts::PI;
+use scene::setup_scene;
 use world::setup_world;
 
 mod blocks;
@@ -31,6 +31,7 @@ mod mesher;
 mod physics;
 mod raycaster;
 mod world;
+mod scene;
 
 fn main() {
     App::new()
@@ -76,7 +77,7 @@ fn main() {
         .add_systems(
             Startup,
             (
-                setup,
+                setup_scene,
                 setup_world,
                 add_highlight_cube,
                 add_coliders,
@@ -100,37 +101,4 @@ fn main() {
         .add_event::<ChunkMeshUpdateEvent>()
         .add_event::<ColliderUpdateEvent>()
         .run();
-}
-
-#[derive(Component)]
-struct MyCube;
-
-#[derive(Component)]
-pub struct MyChunk {
-    pub position: [i32; 3],
-}
-
-fn setup(mut commands: Commands) {
-    commands.spawn(PerfUiCompleteBundle::default());
-
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            illuminance: light_consts::lux::OVERCAST_DAY,
-            shadows_enabled: true,
-            ..default()
-        },
-        transform: Transform::from_rotation(Quat::from_euler(
-            EulerRot::ZYX,
-            0.3,
-            PI / 2. + 0.3,
-            -PI / 4.,
-        )),
-        cascade_shadow_config: CascadeShadowConfigBuilder {
-            first_cascade_far_bound: 7.0,
-            maximum_distance: 256.0,
-            ..default()
-        }
-        .into(),
-        ..default()
-    });
 }

@@ -11,11 +11,6 @@ use crate::{
     chunk::{Chunk, CHUNK_SIZE},
 };
 
-#[derive(Component)]
-pub struct ChunkMesh {
-    pub key: [i32; 3],
-}
-
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
     let GeometryData {
         position,

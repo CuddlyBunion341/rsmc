@@ -14,18 +14,6 @@ use bevy::{
 };
 use bevy_mod_raycast::immediate::{Raycast, RaycastSettings};
 
-#[derive(Resource, Deref, DerefMut)]
-pub struct SelectedPosition(pub Option<Vec3>);
-
-#[derive(Resource)]
-pub struct BlockSelection {
-    pub position: Option<Vec3>,
-    pub normal: Option<Vec3>,
-}
-
-#[derive(Resource, Deref, DerefMut)]
-pub struct SelectedNormal(pub Option<Vec3>);
-
 const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 
 // query camera position and direction
@@ -69,9 +57,6 @@ pub fn raycast(
 
     highlight_transform.translation = hover_position.unwrap() + 0.5;
 }
-
-#[derive(Component)]
-pub struct HighlightCube;
 
 pub fn add_highlight_cube(
     mut commands: Commands,
