@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use bevy::{ecs::system::Resource, math::Vec3};
 
-use crate::chunk::Chunk;
+use crate::{chunk::Chunk, my_bevy::resources::ChunkManager};
 
 impl ChunkManager {
     pub fn new() -> Self {

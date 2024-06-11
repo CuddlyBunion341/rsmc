@@ -1,7 +1,8 @@
 use crate::chunk::{Chunk, CHUNK_SIZE};
-use crate::chunk_manager::ChunkManager;
 use crate::mesher::*;
-use crate::{generator::Generator, MyCube};
+use crate::my_bevy::components::{ChunkMesh, MyCube};
+use crate::my_bevy::resources::ChunkManager;
+use crate::{generator::Generator};
 use bevy::asset::{AssetServer, Handle};
 use bevy::ecs::system::Res;
 use bevy::math::Vec3;

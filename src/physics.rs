@@ -9,7 +9,7 @@ use bevy::{
 };
 use bevy_rapier3d::geometry::Collider;
 
-use crate::{blocks::BlockId, chunk_manager::ChunkManager, input::get_block};
+use crate::{blocks::BlockId, input::get_block, my_bevy::{components::MyCollider, events::ColliderUpdateEvent, resources::ChunkManager}};
 
 static COLLIDER_GRID_SIZE: u32 = 3;
 static COLLIDER_RESTING_POSITION: Vec3 = Vec3::new(0.0, 0.0, 0.0);

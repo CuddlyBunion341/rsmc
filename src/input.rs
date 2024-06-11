@@ -18,25 +18,8 @@ use bevy::{
 
 use crate::{
     blocks::BlockId,
-    chunk::{self, Chunk, CHUNK_SIZE},
-    chunk_manager::ChunkManager,
-    mesher::ChunkMesh,
-    physics::ColliderUpdateEvent,
-    raycaster::{BlockSelection, HighlightCube},
-    world::add_chunk_objects,
+    chunk::{self, Chunk, CHUNK_SIZE}, my_bevy::{components::{ChunkMesh, HighlightCube}, events::{BlockUpdateEvent, ChunkMeshUpdateEvent, ColliderUpdateEvent}, resources::{BlockSelection, ChunkManager}}, world::add_chunk_objects,
 };
-#[derive(Event)]
-pub struct BlockUpdateEvent {
-    pub position: Vec3,
-    pub block: BlockId,
-}
-#[derive(Event)]
-pub struct ChunkMeshUpdateEvent {
-    pub position: Vec3,
-}
-
-#[derive(Resource)]
-pub struct LastPlayerPosition(pub Vec3);
 
 pub fn handle_mouse_events(
     mut block_update_events: EventWriter<BlockUpdateEvent>,

@@ -5,7 +5,7 @@ use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
-use crate::{input::LastPlayerPosition, physics::ColliderUpdateEvent};
+use crate::my_bevy::{events::ColliderUpdateEvent, resources::LastPlayerPosition};
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 256.0, 0.0);
 

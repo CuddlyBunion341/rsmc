@@ -1,10 +1,12 @@
+use bevy::ecs::component::Component;
+
 #[derive(Component)]
 pub struct ChunkMesh {
     pub key: [i32; 3],
 }
 
 #[derive(Component)]
-struct MyCube;
+pub struct MyCube;
 
 #[derive(Component)]
 pub struct MyChunk {

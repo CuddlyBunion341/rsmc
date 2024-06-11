@@ -1,3 +1,4 @@
+use ::bevy::math::Vec3;
 use bevy::{
     pbr::{light_consts, CascadeShadowConfigBuilder},
     prelude::*,
@@ -8,14 +9,14 @@ use bevy_rapier3d::{
     plugin::{NoUserData, RapierConfiguration, RapierPhysicsPlugin, TimestepMode},
     render::RapierDebugRenderPlugin,
 };
-use chunk_manager::ChunkManager;
 use controller::{handle_controller_movement, manage_cursor, setup_controller};
 use input::{
     handle_block_update_events, handle_chunk_mesh_update_events, handle_keyboard_events,
-    handle_mouse_events, BlockUpdateEvent, ChunkMeshUpdateEvent, LastPlayerPosition,
+    handle_mouse_events
 };
-use physics::{add_coliders, handle_collider_update_events, ColliderUpdateEvent};
-use raycaster::{add_highlight_cube, raycast, BlockSelection, SelectedNormal, SelectedPosition};
+use my_bevy::{events::{BlockUpdateEvent, ChunkMeshUpdateEvent, ColliderUpdateEvent}, resources::{BlockSelection, ChunkManager, LastPlayerPosition, SelectedNormal, SelectedPosition}};
+use physics::{add_coliders, handle_collider_update_events};
+use raycaster::{add_highlight_cube, raycast};
 
 use iyes_perf_ui::prelude::*;
 use scene::setup_scene;
@@ -32,6 +33,8 @@ mod physics;
 mod raycaster;
 mod world;
 mod scene;
+
+mod my_bevy;
 
 fn main() {
     App::new()
