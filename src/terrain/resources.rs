@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use bevy::{ecs::system::Resource, math::Vec3};
 
-use crate::{chunk::Chunk, my_bevy::resources::ChunkManager};
+#[derive(Resource)]
+pub struct ChunkManager {
+    pub chunks: HashMap<[i32; 3], Chunk>,
+}
 
 impl ChunkManager {
     pub fn new() -> Self {

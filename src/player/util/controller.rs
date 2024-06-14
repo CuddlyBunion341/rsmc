@@ -9,7 +9,7 @@ use crate::my_bevy::{events::ColliderUpdateEvent, resources::LastPlayerPosition}
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 256.0, 0.0);
 
-pub fn setup_controller(mut commands: Commands, mut window: Query<&mut Window>) {
+pub fn setup_controller_system(mut commands: Commands, mut window: Query<&mut Window>) {
     let mut window = window.single_mut();
     window.title = String::from("Minimal FPS Controller Example");
 
@@ -65,7 +65,7 @@ pub fn setup_controller(mut commands: Commands, mut window: Query<&mut Window>) 
     ));
 }
 
-pub fn manage_cursor(
+pub fn manage_cursor_system(
     btn: Res<ButtonInput<MouseButton>>,
     key: Res<ButtonInput<KeyCode>>,
     mut window_query: Query<&mut Window>,
@@ -88,7 +88,7 @@ pub fn manage_cursor(
     }
 }
 
-pub fn handle_controller_movement(
+pub fn handle_controller_movement_system(
     query: Query<(Entity, &FpsControllerInput, &Transform)>,
     mut last_position: ResMut<LastPlayerPosition>,
     mut collider_events: EventWriter<ColliderUpdateEvent>,

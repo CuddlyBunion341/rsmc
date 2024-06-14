@@ -2,7 +2,7 @@ use crate::chunk::{Chunk, CHUNK_SIZE};
 use crate::mesher::*;
 use crate::my_bevy::components::{ChunkMesh, MyCube};
 use crate::my_bevy::resources::ChunkManager;
-use crate::{generator::Generator};
+use crate::generator::Generator;
 use bevy::asset::{AssetServer, Handle};
 use bevy::ecs::system::Res;
 use bevy::math::Vec3;
@@ -16,7 +16,7 @@ use bevy::{
     transform::components::Transform,
 };
 
-pub fn setup_world(
+pub fn setup_world_system(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -44,7 +44,7 @@ pub fn setup_world(
     chunk_manager.insert_chunks(chunks);
 }
 
-pub fn add_chunk_objects(
+fn add_chunk_objects(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
