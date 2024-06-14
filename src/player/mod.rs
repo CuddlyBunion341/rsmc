@@ -1,10 +1,16 @@
-use bevy::{app::{App, Plugin}, math::Vec3};
+use bevy::{
+    app::{App, Plugin, Startup},
+    math::Vec3,
+};
 use bevy_fps_controller::controller::FpsControllerPlugin;
-use bevy_rapier3d::{plugin::{NoUserData, RapierConfiguration, RapierPhysicsPlugin, TimestepMode}, render::RapierDebugRenderPlugin};
+use bevy_rapier3d::{
+    plugin::{NoUserData, RapierConfiguration, RapierPhysicsPlugin, TimestepMode},
+    render::RapierDebugRenderPlugin,
+};
 
 mod components;
-mod systems;
 mod resources;
+mod systems;
 
 pub struct PlayerPlugin;
 
@@ -24,5 +30,22 @@ impl Plugin for PlayerPlugin {
                 substeps: 1,
             },
         });
+        app.add_systems(
+            Startup,
+            (setup_controller_system, setup_highlight_cube_system),
+        );
+        app.add_systems(
+            Update,
+            (
+                handle_controller_movement_system,
+                manage_cursor_system,
+                handle_mouse_events_system,
+                handle_keyboard_events_system,
+                handle_block_update_events,
+                handle_chunk_mesh_update_events,
+                chunk_from_selection,
+                raycast_system,
+            ),
+        );
     }
 }

@@ -14,7 +14,7 @@ use crate::{blocks::BlockId, input::get_block, my_bevy::{components::MyCollider,
 static COLLIDER_GRID_SIZE: u32 = 3;
 static COLLIDER_RESTING_POSITION: Vec3 = Vec3::new(0.0, 0.0, 0.0);
 
-pub fn add_coliders(mut commands: Commands) {
+pub fn add_coliders_system(mut commands: Commands) {
     let collider_range = 0..COLLIDER_GRID_SIZE;
 
     for x in collider_range.clone() {
@@ -32,7 +32,7 @@ pub fn add_coliders(mut commands: Commands) {
     }
 }
 
-pub fn handle_collider_update_events(
+pub fn handle_collider_update_events_system(
     mut collider_grid_events: EventReader<ColliderUpdateEvent>,
     mut query: Query<(&mut Transform, &MyCollider)>,
     mut chunk_manager: ResMut<ChunkManager>,
