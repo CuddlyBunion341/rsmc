@@ -27,6 +27,7 @@ fn main() {
         .add_plugins(SystemInformationDiagnosticsPlugin)
         .add_plugins(PerfUiPlugin)
         .add_plugins(terrain::TerrainPlugin)
-        .add_plugins(collider::ColliderPlugin) .add_plugins(player::PlayerPlugin)
+        .add_plugins(collider::ColliderPlugin)
+        .add_plugins(player::PlayerPlugin)
         .run();
 }

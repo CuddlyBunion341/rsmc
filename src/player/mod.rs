@@ -7,7 +7,6 @@ use bevy_rapier3d::{
 };
 
 mod components;
-mod events;
 mod resources;
 mod systems;
 
@@ -15,6 +14,8 @@ use resources::*;
 use systems::*;
 
 use crate::collider::events::ColliderUpdateEvent;
+
+use self::world::handle_block_update_events;
 
 pub struct PlayerPlugin;
 
@@ -49,6 +50,7 @@ impl Plugin for PlayerPlugin {
                 handle_mouse_events_system,
                 handle_keyboard_events_system,
                 raycast_system,
+                handle_block_update_events,
             ),
         );
     }

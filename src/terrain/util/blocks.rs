@@ -34,8 +34,7 @@ macro_rules! add_block {
     };
 }
 
-pub static BLOCKS: [Block; 15] = [
-    add_block!(BlockId::Air, ["air"; 6], false),
+pub static BLOCKS: [Block; 14] = [
     add_block!(BlockId::Air, ["air"; 6], false),
     add_block!(
         BlockId::Grass,

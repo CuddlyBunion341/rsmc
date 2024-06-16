@@ -35,51 +35,40 @@ impl Generator {
     }
 
     fn generate_block(&self, position: Vec3) -> BlockId {
-        let mut density = 0.0;
-        let mut amplitude = 1.0;
-        let mut frequency = 0.04;
-        let mut persistence = 0.5;
         let base_height = -50.0;
 
-        for _ in 0..4 {
-            density += self.perlin.get([
-                position.x as f64 * frequency,
-                position.y as f64 * frequency + base_height,
-                position.z as f64 * frequency,
-            ]) * amplitude;
-
-            amplitude *= persistence;
-            frequency *= 2.0;
-            persistence *= 0.5;
-        }
+        let mut density = self.sample_3d(Vec3 {x: position.x, y: position.y + base_height, z: position.z }, 4);
         density -= position.y as f64 * 0.02;
-        if density > 0.5 {
-            BlockId::Terracotta
+        if density > 0.7 {
+            BlockId::Stone
         } else if density > 0.40 {
-            BlockId::RedTerracotta
+            BlockId::Dirt
         } else if density > 0.0 {
-            BlockId::CyanTerracotta
+            BlockId::Grass
         } else {
             BlockId::Air
         }
     }
 
-    fn get_layered_2d_noise(&self, octaves: i32, position: Vec3) -> f64 {
-        let mut height = 0.0;
-        let mut frequency = 0.015;
-        let mut persistence = 0.5;
+    fn sample_3d(&self, position: Vec3, octaves: i32) -> f64 {
+        let mut density = 0.0;
         let lacuranity = 2.0;
+        let mut frequency = 0.04;
+        let mut amplitude = 1.0;
+        let mut persistence = 0.5;
 
         for _ in 0..octaves {
-            height += self.get_2d_noise(position * frequency) * persistence;
-            frequency *= 2.0;
+            density += self.perlin.get([
+                position.x as f64 * frequency,
+                position.y as f64 * frequency,
+                position.z as f64 * frequency,
+            ]) * amplitude;
+
+            amplitude *= persistence;
+            frequency *= lacuranity;
             persistence *= 0.5;
         }
 
-        height
-    }
-
-    fn get_2d_noise(&self, position: Vec3) -> f64 {
-        self.perlin.get([position.x as f64, position.z as f64])
+        density
     }
 }
