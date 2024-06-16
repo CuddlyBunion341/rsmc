@@ -13,7 +13,6 @@ mod systems;
 
 use resources::*;
 use systems::*;
-use events::*;
 
 use crate::collider::events::ColliderUpdateEvent;
 

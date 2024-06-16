@@ -1,5 +1,4 @@
 use bevy::{
-    ecs::component::Component,
     render::{
         mesh::{Indices, Mesh, PrimitiveTopology},
         render_asset::RenderAssetUsages,
