@@ -16,10 +16,7 @@ use bevy::{
     transform::components::Transform,
 };
 
-use crate::{
-    blocks::BlockId,
-    chunk::{self, Chunk, CHUNK_SIZE}, my_bevy::{components::{ChunkMesh, HighlightCube}, events::{BlockUpdateEvent, ChunkMeshUpdateEvent, ColliderUpdateEvent}, resources::{BlockSelection, ChunkManager}}, world::add_chunk_objects,
-};
+use crate::terrain::{resources::ChunkManager, util::{blocks::BlockId, chunk}};
 
 fn set_block(position: Vec3, block: BlockId, chunk_manager: &mut ChunkManager) {
     match chunk_from_selection(position, chunk_manager) {

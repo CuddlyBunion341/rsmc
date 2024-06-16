@@ -1,4 +1,7 @@
 use bevy::ecs::component::Component;
 
 #[derive(Component)]
-pub struct HighlightCube;
+pub struct MyCollider {
+    pub key: u32,
+}
+

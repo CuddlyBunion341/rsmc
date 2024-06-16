@@ -1,10 +1,7 @@
-use crate::chunk::{Chunk, CHUNK_SIZE};
-use crate::mesher::*;
-use crate::my_bevy::components::{ChunkMesh, MyCube};
-use crate::my_bevy::resources::ChunkManager;
-use crate::generator::Generator;
 use bevy::asset::{AssetServer, Handle};
-use bevy::ecs::system::Res;
+use bevy::ecs::entity::Entity;
+use bevy::ecs::event::EventReader;
+use bevy::ecs::system::{Query, Res};
 use bevy::math::Vec3;
 use bevy::render::texture::Image;
 use bevy::{
@@ -15,6 +12,11 @@ use bevy::{
     render::mesh::Mesh,
     transform::components::Transform,
 };
+
+use super::chunk::{Chunk, CHUNK_SIZE};
+use super::generator::Generator;
+use super::mesher::create_chunk_mesh;
+use super::{ChunkManager, ChunkMesh, ChunkMeshUpdateEvent};
 
 pub fn setup_world_system(
     mut commands: Commands,
@@ -44,7 +46,41 @@ pub fn setup_world_system(
     chunk_manager.insert_chunks(chunks);
 }
 
-fn add_chunk_objects(
+pub fn handle_chunk_mesh_update_events(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut chunk_manager: ResMut<ChunkManager>,
+    mut chunk_mesh_update_events: EventReader<ChunkMeshUpdateEvent>,
+    mut mesh_query: Query<(Entity, &ChunkMesh)>,
+) {
+    for event in chunk_mesh_update_events.read() {
+        let chunk_option = chunk_manager.get_chunk(event.position);
+        match chunk_option {
+            Some(chunk) => {
+                for (entity, chunk_mesh) in mesh_query.iter_mut() {
+                    if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
+                        commands.entity(entity).despawn();
+                    }
+                }
+                add_chunk_objects(
+                    &mut commands,
+                    &asset_server,
+                    &mut meshes,
+                    &mut materials,
+                    &chunk,
+                );
+            }
+            None => {
+                println!("No chunk found");
+            }
+        }
+    }
+}
+
+
+pub fn add_chunk_objects(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
@@ -82,7 +118,6 @@ fn add_chunk_objects(
             material,
             ..default()
         },
-        MyCube,
         ChunkMesh {
             key: [
                 chunk.position.x as i32,

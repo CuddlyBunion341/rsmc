@@ -1,9 +1,7 @@
-use crate::{
-    blocks::BlockId,
-    chunk::{Chunk, CHUNK_SIZE},
-};
 use bevy::math::Vec3;
 use noise::{NoiseFn, Perlin};
+
+use super::{blocks::BlockId, chunk::{Chunk, CHUNK_SIZE}};
 
 pub struct Generator {
     pub seed: u32,

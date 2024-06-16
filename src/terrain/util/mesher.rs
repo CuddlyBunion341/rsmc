@@ -6,10 +6,7 @@ use bevy::{
     },
 };
 
-use crate::{
-    blocks::{Block, BlockId},
-    chunk::{Chunk, CHUNK_SIZE},
-};
+use super::{blocks::{Block, BlockId}, chunk::{Chunk, CHUNK_SIZE}};
 
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
     let GeometryData {
