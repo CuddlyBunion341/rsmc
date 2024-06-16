@@ -1,4 +1,4 @@
-use crate::mesher::CubeFace;
+use super::mesher::CubeFace;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BlockId {

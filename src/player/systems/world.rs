@@ -1,4 +1,4 @@
-use bevy::ecs::{event::EventReader, system::ResMut};
+use bevy::ecs::{event::{EventReader, EventWriter}, system::ResMut};
 
 use crate::terrain::{events::{BlockUpdateEvent, ChunkMeshUpdateEvent}, resources::ChunkManager, util::chunk::CHUNK_SIZE};
 

@@ -17,6 +17,8 @@ pub struct TerrainPlugin;
 impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(ChunkManager::new());
+        app.add_event::<BlockUpdateEvent>();
+        app.add_event::<ChunkMeshUpdateEvent>();
         app.add_systems(Startup, setup_world_system);
     }
 }

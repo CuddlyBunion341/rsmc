@@ -10,7 +10,6 @@ mod components;
 mod events;
 mod resources;
 mod systems;
-mod util;
 
 use resources::*;
 use systems::*;
@@ -36,8 +35,9 @@ impl Plugin for PlayerPlugin {
                 substeps: 1,
             },
         });
+        app.insert_resource(BlockSelection::new());
+        app.insert_resource(LastPlayerPosition::new());
         app.add_event::<ColliderUpdateEvent>();
-        app.add_event::<BlockUpdateEvent>();
         app.add_systems(
             Startup,
             (setup_controller_system, setup_highlight_cube_system),
@@ -49,8 +49,6 @@ impl Plugin for PlayerPlugin {
                 manage_cursor_system,
                 handle_mouse_events_system,
                 handle_keyboard_events_system,
-                handle_block_update_events,
-                handle_chunk_mesh_update_events,
                 raycast_system,
             ),
         );
