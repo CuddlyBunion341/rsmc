@@ -80,7 +80,7 @@ pub fn handle_chunk_mesh_update_events(
 }
 
 
-pub fn add_chunk_objects(
+fn add_chunk_objects(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
