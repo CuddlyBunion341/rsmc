@@ -1,11 +1,11 @@
-use bevy::{
-    render::{
-        mesh::{Indices, Mesh, PrimitiveTopology},
-        render_asset::RenderAssetUsages,
-    },
+use super::{
+    blocks::{Block, BlockId},
+    chunk::{Chunk, CHUNK_SIZE},
 };
-
-use super::{blocks::{Block, BlockId}, chunk::{Chunk, CHUNK_SIZE}};
+use bevy::render::{
+    mesh::{Indices, Mesh, PrimitiveTopology},
+    render_asset::RenderAssetUsages,
+};
 
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
     let GeometryData {
@@ -208,4 +208,3 @@ fn face_vertices(face_index: CubeFace) -> [Vertex; 4] {
         ],
     }
 }
-

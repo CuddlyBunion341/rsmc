@@ -2,10 +2,12 @@ use bevy::prelude::*;
 use bevy::window::*;
 use iyes_perf_ui::prelude::*;
 use bevy::diagnostic::*;
+use scene::setup_scene;
 
 mod terrain;
 mod player;
 mod collider;
+mod scene;
 
 fn main() {
     App::new()
@@ -29,5 +31,6 @@ fn main() {
         .add_plugins(terrain::TerrainPlugin)
         .add_plugins(collider::ColliderPlugin)
         .add_plugins(player::PlayerPlugin)
+        .add_systems(Startup, setup_scene)
         .run();
 }
