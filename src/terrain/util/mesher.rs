@@ -1,20 +1,11 @@
-use bevy::{
-    ecs::component::Component,
-    render::{
-        mesh::{Indices, Mesh, PrimitiveTopology},
-        render_asset::RenderAssetUsages,
-    },
-};
-
-use crate::{
+use super::{
     blocks::{Block, BlockId},
     chunk::{Chunk, CHUNK_SIZE},
 };
-
-#[derive(Component)]
-pub struct ChunkMesh {
-    pub key: [i32; 3],
-}
+use bevy::render::{
+    mesh::{Indices, Mesh, PrimitiveTopology},
+    render_asset::RenderAssetUsages,
+};
 
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
     let GeometryData {

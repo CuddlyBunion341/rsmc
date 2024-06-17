@@ -1,15 +1,15 @@
 use std::f32::consts::TAU;
 
-use bevy::{prelude::*, window::CursorGrabMode};
+use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use bevy_fps_controller::controller::*;
 
-use crate::{input::LastPlayerPosition, physics::ColliderUpdateEvent};
+use crate::{collider::events::ColliderUpdateEvent, player::LastPlayerPosition};
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 256.0, 0.0);
 
-pub fn setup_controller(mut commands: Commands, mut window: Query<&mut Window>) {
+pub fn setup_controller_system(mut commands: Commands, mut window: Query<&mut Window>) {
     let mut window = window.single_mut();
     window.title = String::from("Minimal FPS Controller Example");
 
@@ -65,30 +65,7 @@ pub fn setup_controller(mut commands: Commands, mut window: Query<&mut Window>) 
     ));
 }
 
-pub fn manage_cursor(
-    btn: Res<ButtonInput<MouseButton>>,
-    key: Res<ButtonInput<KeyCode>>,
-    mut window_query: Query<&mut Window>,
-    mut controller_query: Query<&mut FpsController>,
-) {
-    let mut window = window_query.single_mut();
-    if btn.just_pressed(MouseButton::Left) {
-        window.cursor.grab_mode = CursorGrabMode::Locked;
-        window.cursor.visible = false;
-        for mut controller in &mut controller_query {
-            controller.enable_input = true;
-        }
-    }
-    if key.just_pressed(KeyCode::Escape) {
-        window.cursor.grab_mode = CursorGrabMode::None;
-        window.cursor.visible = true;
-        for mut controller in &mut controller_query {
-            controller.enable_input = false;
-        }
-    }
-}
-
-pub fn handle_controller_movement(
+pub fn handle_controller_movement_system(
     query: Query<(Entity, &FpsControllerInput, &Transform)>,
     mut last_position: ResMut<LastPlayerPosition>,
     mut collider_events: EventWriter<ColliderUpdateEvent>,
@@ -103,3 +80,4 @@ pub fn handle_controller_movement(
         last_position.0 = controller_position;
     }
 }
+

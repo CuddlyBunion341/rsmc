@@ -1,25 +1,20 @@
-use bevy::{
-    ecs::{
-        component::Component,
-        event::{Event, EventReader},
-        system::{Commands, Query, ResMut},
-    },
-    math::Vec3,
-    transform::{components::Transform, TransformBundle},
-};
-use bevy_rapier3d::geometry::Collider;
+use bevy::ecs::event::EventReader;
+use bevy::transform::components::*;
+use bevy::math::*;
+use bevy::ecs::system::*;
+use bevy::transform::*;
+use bevy_rapier3d::geometry::*;
 
-use crate::{blocks::BlockId, chunk_manager::ChunkManager, input::get_block};
+use crate::terrain::resources::ChunkManager;
+use crate::terrain::util::blocks::BlockId;
+
+use super::components::MyCollider;
+use super::events::ColliderUpdateEvent;
 
 static COLLIDER_GRID_SIZE: u32 = 3;
 static COLLIDER_RESTING_POSITION: Vec3 = Vec3::new(0.0, 0.0, 0.0);
 
-#[derive(Component)]
-pub struct MyCollider {
-    pub key: u32,
-}
-
-pub fn add_coliders(mut commands: Commands) {
+pub fn setup_coliders_system(mut commands: Commands) {
     let collider_range = 0..COLLIDER_GRID_SIZE;
 
     for x in collider_range.clone() {
@@ -37,12 +32,7 @@ pub fn add_coliders(mut commands: Commands) {
     }
 }
 
-#[derive(Event)]
-pub struct ColliderUpdateEvent {
-    pub position: [f32; 3],
-}
-
-pub fn handle_collider_update_events(
+pub fn handle_collider_update_events_system(
     mut collider_grid_events: EventReader<ColliderUpdateEvent>,
     mut query: Query<(&mut Transform, &MyCollider)>,
     mut chunk_manager: ResMut<ChunkManager>,
@@ -53,7 +43,7 @@ pub fn handle_collider_update_events(
         for (mut transform, collider) in query.iter_mut() {
             let relative_position = relative_colider_position(collider.key);
             let collider_position = (event_position + relative_position).floor();
-            let block = get_block(collider_position, &mut chunk_manager);
+            let block = chunk_manager.get_block(collider_position);
 
             match block {
                 Some(block) => {
