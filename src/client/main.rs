@@ -1,36 +1,41 @@
+use bevy::diagnostic::*;
 use bevy::prelude::*;
 use bevy::window::*;
 use iyes_perf_ui::prelude::*;
-use bevy::diagnostic::*;
 use scene::setup_scene;
 
-mod terrain;
-mod player;
 mod collider;
+mod networking;
+mod player;
 mod scene;
+mod terrain;
 
 fn main() {
+    let window_plugin = WindowPlugin {
+        primary_window: Some(Window {
+            resolution: WindowResolution::new(1920.0, 1080.0).with_scale_factor_override(2.0),
+            present_mode: bevy::window::PresentMode::Immediate,
+            ..default()
+        }),
+        ..default()
+    };
+
+    let default_plugins = DefaultPlugins
+        .set(window_plugin)
+        .set(ImagePlugin::default_nearest());
+
     App::new()
-        .add_plugins(
-            DefaultPlugins
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        resolution: WindowResolution::new(1920.0, 1080.0)
-                            .with_scale_factor_override(2.0),
-                        present_mode: bevy::window::PresentMode::Immediate,
-                        ..default()
-                    }),
-                    ..default()
-                })
-                .set(ImagePlugin::default_nearest()),
-        )
-        .add_plugins(FrameTimeDiagnosticsPlugin)
-        .add_plugins(EntityCountDiagnosticsPlugin)
-        .add_plugins(SystemInformationDiagnosticsPlugin)
-        .add_plugins(PerfUiPlugin)
-        .add_plugins(terrain::TerrainPlugin)
-        .add_plugins(collider::ColliderPlugin)
-        .add_plugins(player::PlayerPlugin)
+        .add_plugins((
+            default_plugins,
+            FrameTimeDiagnosticsPlugin,
+            EntityCountDiagnosticsPlugin,
+            SystemInformationDiagnosticsPlugin,
+            PerfUiPlugin,
+            networking::NetworkingPlugin,
+            terrain::TerrainPlugin,
+            collider::ColliderPlugin,
+            player::PlayerPlugin,
+        ))
         .add_systems(Startup, setup_scene)
         .run();
 }
