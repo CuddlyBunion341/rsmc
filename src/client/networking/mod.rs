@@ -1,16 +1,14 @@
 use std::{
-    collections::HashMap,
-    net::{SocketAddrV4, UdpSocket},
+    net::{UdpSocket},
     time::SystemTime,
 };
 
-use bevy::{app::{App, Plugin, Update}, DefaultPlugins};
+use bevy::{app::{App, Plugin, Update}};
 use bevy_renet::{transport::NetcodeClientPlugin, RenetClientPlugin};
 use renet::{
     transport::{ClientAuthentication, NetcodeClientTransport},
     ConnectionConfig, RenetClient,
 };
-use std::net::SocketAddr::V4;
 
 mod systems;
 

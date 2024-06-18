@@ -1,8 +1,8 @@
 use bevy::app::*;
-use std::{collections::HashMap, net::UdpSocket, time::SystemTime};
+use std::{net::UdpSocket, time::SystemTime};
 
 use bevy::{
-    app::{App, Startup, Update}, log::LogPlugin, MinimalPlugins
+    app::{App, Update}
 };
 use bevy_renet::{transport::NetcodeServerPlugin, RenetServerPlugin};
 use renet::{

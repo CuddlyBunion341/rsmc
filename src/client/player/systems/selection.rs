@@ -50,7 +50,7 @@ pub fn raycast_system(
         .first()
         .map(|(_, intersection)| (intersection.position() - intersection.normal() * 0.5).floor());
 
-    block_selection.position = hover_position.clone();
+    block_selection.position = hover_position;
     block_selection.normal = intersections
         .first()
         .map(|(_, intersection)| intersection.normal());

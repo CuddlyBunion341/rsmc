@@ -66,9 +66,9 @@ impl ChunkManager {
         match self.chunk_from_selection(position) {
             Some(chunk) => {
                 let chunk_position = Vec3::new(
-                    chunk.position[0] as f32 * chunk::CHUNK_SIZE as f32,
-                    chunk.position[1] as f32 * chunk::CHUNK_SIZE as f32,
-                    chunk.position[2] as f32 * chunk::CHUNK_SIZE as f32,
+                    chunk.position[0] * chunk::CHUNK_SIZE as f32,
+                    chunk.position[1] * chunk::CHUNK_SIZE as f32,
+                    chunk.position[2] * chunk::CHUNK_SIZE as f32,
                 );
                 let local_position = (position - chunk_position).floor();
                 chunk.set(
@@ -88,9 +88,9 @@ impl ChunkManager {
         match self.chunk_from_selection(position) {
             Some(chunk) => {
                 let chunk_position = Vec3::new(
-                    chunk.position[0] as f32 * chunk::CHUNK_SIZE as f32,
-                    chunk.position[1] as f32 * chunk::CHUNK_SIZE as f32,
-                    chunk.position[2] as f32 * chunk::CHUNK_SIZE as f32,
+                    chunk.position[0] * chunk::CHUNK_SIZE as f32,
+                    chunk.position[1] * chunk::CHUNK_SIZE as f32,
+                    chunk.position[2] * chunk::CHUNK_SIZE as f32,
                 );
                 let local_position = (position - chunk_position).floor();
                 Some(chunk.get(
