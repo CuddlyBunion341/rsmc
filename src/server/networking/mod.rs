@@ -1,5 +1,4 @@
 use bevy::app::*;
-mod resources;
 use std::{collections::HashMap, net::UdpSocket, time::SystemTime};
 
 use bevy::{
@@ -19,7 +18,6 @@ impl Plugin for NetworkingPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(RenetServerPlugin);
 
-        // renet server
         let server = RenetServer::new(ConnectionConfig::default());
         app.insert_resource(server);
 
