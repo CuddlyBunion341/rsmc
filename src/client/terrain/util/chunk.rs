@@ -40,7 +40,7 @@ impl Chunk {
 
     pub fn key_eq_pos(key: [i32; 3], position: Vec3) -> bool {
         position.x as i32 == key[0]
-            && position.y as i32 == key[1] as i32
-            && position.z as i32 == key[2] as i32
+            && position.y as i32 == key[1]
+            && position.z as i32 == key[2]
     }
 }

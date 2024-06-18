@@ -1,4 +1,4 @@
-use std::{f32::consts::PI};
+use std::f32::consts::PI;
 
 use bevy::{ecs::system::Commands, math::{EulerRot, Quat}, pbr::{light_consts, CascadeShadowConfigBuilder, DirectionalLight, DirectionalLightBundle}, prelude::default, transform::components::Transform};
 use iyes_perf_ui::PerfUiCompleteBundle;
@@ -6,7 +6,7 @@ use iyes_perf_ui::PerfUiCompleteBundle;
 pub fn setup_scene(mut commands: Commands) {
     commands.spawn(PerfUiCompleteBundle::default());
 
-    let spawn = commands.spawn(DirectionalLightBundle {
+    commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {
             illuminance: light_consts::lux::OVERCAST_DAY,
             shadows_enabled: true,
