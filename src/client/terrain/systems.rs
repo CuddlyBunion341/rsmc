@@ -33,7 +33,6 @@ pub fn setup_world_system(
 
     for chunk in &mut chunks {
         generator.generate_chunk(chunk);
-        let mesh = create_chunk_mesh(chunk);
         add_chunk_objects(
             &mut commands,
             &asset_server,
