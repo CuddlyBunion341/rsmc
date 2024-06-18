@@ -10,6 +10,8 @@ use renet::{
     ConnectionConfig, RenetServer,
 };
 
+mod systems;
+
 const SERVER_ADDR: &str = "127.0.0.1:5000";
 
 pub struct NetworkingPlugin;
@@ -35,5 +37,7 @@ impl Plugin for NetworkingPlugin {
         };
         let transport = NetcodeServerTransport::new(server_config, socket).unwrap();
         app.insert_resource(transport);
+
+        app.add_systems(Update, systems::receive_message_system);
     }
 }
