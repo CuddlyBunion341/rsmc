@@ -1,9 +1,10 @@
 use crate::prelude::*;
 
+pub mod prelude;
+
 mod collider;
 mod networking;
 mod player;
-pub mod prelude;
 mod scene;
 mod terrain;
 use scene::setup_scene;

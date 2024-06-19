@@ -64,3 +64,4 @@ pub use std::collections::HashMap;
 pub use std::f32::consts::PI;
 pub use std::f32::consts::TAU;
 pub use std::{net::UdpSocket, time::SystemTime};
+pub use renet::DefaultChannel;
