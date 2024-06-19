@@ -1,4 +1,4 @@
-// my crate
+// my crates
 pub use crate::terrain::util::blocks::BlockId;
 pub use crate::terrain::util::chunk::CHUNK_SIZE;
 

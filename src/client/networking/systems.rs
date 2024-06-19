@@ -27,15 +27,22 @@ pub fn receive_message_system(
     }
 
     while let Some(message) = client.receive_message(DefaultChannel::ReliableUnordered) {
-        let message = bincode::deserialize(&message).unwrap();
+        let message = bincode::deserialize(&message);
 
-        match message {
-            NetworkingMessage::PlayerSync(event) => {
-                player_sync_events
-                    .send(remote_player_events::RemotePlayerSyncEvent { players: event });
-            }
-            _ => {
-                warn!("Received unknown message type.")
+        if message.is_err() {
+            error!("Failed to deserialize message.");
+            continue;
+        }
+
+        if let Ok(message) = message {
+            match message {
+                NetworkingMessage::PlayerSync(event) => {
+                    player_sync_events
+                        .send(remote_player_events::RemotePlayerSyncEvent { players: event });
+                }
+                _ => {
+                    warn!("Received unknown message type.");
+                }
             }
         }
     }

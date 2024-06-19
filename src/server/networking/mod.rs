@@ -1,4 +1,5 @@
 pub mod systems;
+pub mod messages;
 
 use crate::prelude::*;
 
@@ -29,5 +30,6 @@ impl Plugin for NetworkingPlugin {
         app.insert_resource(transport);
 
         app.add_systems(Update, networking_systems::receive_message_system);
+        app.add_systems(Update, networking_systems::handle_events_system);
     }
 }
