@@ -1,25 +1,19 @@
-use bevy::app::{App, Plugin, Startup, Update};
+use crate::prelude::*;
 
 pub mod components;
 pub mod events;
 pub mod resources;
-mod systems;
+pub mod systems;
 pub mod util;
-
-use components::*;
-use events::*;
-use resources::*;
-use systems::*;
-use util::*;
 
 pub struct TerrainPlugin;
 
 impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(ChunkManager::new());
-        app.add_event::<BlockUpdateEvent>();
-        app.add_event::<ChunkMeshUpdateEvent>();
-        app.add_systems(Startup, setup_world_system);
-        app.add_systems(Update, handle_chunk_mesh_update_events);
+        app.insert_resource(terrain_resources::ChunkManager::new());
+        app.add_event::<terrain_events::BlockUpdateEvent>();
+        app.add_event::<terrain_events::ChunkMeshUpdateEvent>();
+        app.add_systems(Startup, terrain_systems::setup_world_system);
+        app.add_systems(Update, terrain_systems::handle_chunk_mesh_update_events);
     }
 }

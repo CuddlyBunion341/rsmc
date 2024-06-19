@@ -8,3 +8,4 @@ pub use controller::*;
 pub use keyboard::*;
 pub use mouse::*;
 pub use selection::*;
+pub use world::*;

@@ -1,14 +1,12 @@
-use bevy::diagnostic::*;
-use bevy::prelude::*;
-use bevy::window::*;
-use iyes_perf_ui::prelude::*;
-use scene::setup_scene;
+use crate::prelude::*;
 
 mod collider;
 mod networking;
 mod player;
+pub mod prelude;
 mod scene;
 mod terrain;
+use scene::setup_scene;
 
 fn main() {
     let window_plugin = WindowPlugin {

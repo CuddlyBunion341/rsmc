@@ -1,4 +1,4 @@
-use bevy::{ecs::system::Resource, math::Vec3};
+use crate::prelude::*;
 
 #[derive(Resource)]
 pub struct BlockSelection {

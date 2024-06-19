@@ -1,7 +1,4 @@
-use bevy::{ecs::{event::{EventReader, EventWriter}, system::{Query, Res}}, input::{keyboard::KeyCode, mouse::{MouseButton, MouseButtonInput}, ButtonInput}, window::{CursorGrabMode, Window}};
-use bevy_fps_controller::controller::FpsController;
-
-use crate::{player::BlockSelection, terrain::{events::BlockUpdateEvent, util::blocks::BlockId}};
+use crate::prelude::*;
 
 pub fn manage_cursor_system(
     btn: Res<ButtonInput<MouseButton>>,
@@ -27,9 +24,9 @@ pub fn manage_cursor_system(
 }
 
 pub fn handle_mouse_events_system(
-    mut block_update_events: EventWriter<BlockUpdateEvent>,
+    mut block_update_events: EventWriter<terrain_events::BlockUpdateEvent>,
     mut mouse_events: EventReader<MouseButtonInput>,
-    block_selection: Res<BlockSelection>,
+    block_selection: Res<player_resources::BlockSelection>,
 ) {
     if block_selection.normal.is_none() || block_selection.position.is_none() {
         return;
@@ -40,12 +37,12 @@ pub fn handle_mouse_events_system(
 
     for event in mouse_events.read() {
         if event.button == MouseButton::Left && event.state.is_pressed() {
-            block_update_events.send(BlockUpdateEvent {
+            block_update_events.send(terrain_events::BlockUpdateEvent {
                 position,
                 block: BlockId::Air,
             });
         } else if event.button == MouseButton::Right && event.state.is_pressed() {
-            block_update_events.send(BlockUpdateEvent {
+            block_update_events.send(terrain_events::BlockUpdateEvent {
                 position: position + normal,
                 block: BlockId::Dirt,
             });

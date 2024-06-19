@@ -1,11 +1,4 @@
-use std::f32::consts::TAU;
-
-use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
-
-use bevy_fps_controller::controller::*;
-
-use crate::{collider::events::ColliderUpdateEvent, player::LastPlayerPosition};
+use crate::prelude::*;
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 256.0, 0.0);
 
@@ -67,17 +60,16 @@ pub fn setup_controller_system(mut commands: Commands, mut window: Query<&mut Wi
 
 pub fn handle_controller_movement_system(
     query: Query<(Entity, &FpsControllerInput, &Transform)>,
-    mut last_position: ResMut<LastPlayerPosition>,
-    mut collider_events: EventWriter<ColliderUpdateEvent>,
+    mut last_position: ResMut<player_resources::LastPlayerPosition>,
+    mut collider_events: EventWriter<collider_events::ColliderUpdateEvent>,
 ) {
     for (_entity, _input, transform) in &mut query.iter() {
         let controller_position = transform.translation;
         if last_position.0.floor() != controller_position.floor() {
-            collider_events.send(ColliderUpdateEvent {
+            collider_events.send(collider_events::ColliderUpdateEvent {
                 position: controller_position.into(),
             });
         }
         last_position.0 = controller_position;
     }
 }
-

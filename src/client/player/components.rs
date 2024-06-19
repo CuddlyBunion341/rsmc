@@ -1,4 +1,4 @@
-use bevy::ecs::component::Component;
+use crate::prelude::*;
 
 #[derive(Component)]
 pub struct HighlightCube;

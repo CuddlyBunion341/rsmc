@@ -1,4 +1,4 @@
-use bevy::ecs::event::Event;
+use crate::prelude::*;
 
 #[derive(Event)]
 pub struct ColliderUpdateEvent {
