@@ -1,4 +1,6 @@
 // my crates
+pub use hello_bevy as lib;
+
 pub use crate::networking::systems as networking_systems;
 
 pub use crate::player::resources as player_resources;

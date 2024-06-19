@@ -1,4 +1,4 @@
-use crate::{networking::messages::NetworkingMessage, prelude::*};
+use crate::prelude::*;
 
 pub fn broadcast_player_attributes_system(
     mut server: ResMut<RenetServer>,
@@ -11,7 +11,7 @@ pub fn broadcast_player_attributes_system(
         server.send_message(
             client_id,
             DefaultChannel::ReliableUnordered,
-            bincode::serialize(&NetworkingMessage::PlayerSync(other_player_states)).unwrap(),
+            bincode::serialize(&lib::NetworkingMessage::PlayerSync(other_player_states)).unwrap(),
         );
     }
 }

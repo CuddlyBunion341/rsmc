@@ -1,17 +1,8 @@
-use bevy::math::{Quat, Vec3};
-use serde::{Deserialize, Serialize};
-
 use crate::prelude::*;
-
-#[derive(Serialize, Deserialize, Clone)]
-pub struct PlayerState {
-    pub position: Vec3,
-    pub rotation: Quat,
-}
 
 #[derive(Resource)]
 pub struct PlayerStates {
-    pub players: HashMap<ClientId, PlayerState>,
+    pub players: HashMap<ClientId, lib::PlayerState>,
 }
 
 impl PlayerStates {

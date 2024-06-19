@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use networking_messages::NetworkingMessage;
-
 pub fn receive_message_system(
     mut client: ResMut<RenetClient>,
     mut player_spawn_events: ResMut<Events<remote_player_events::RemotePlayerSpawnedEvent>>,
@@ -12,11 +10,11 @@ pub fn receive_message_system(
         let message = bincode::deserialize(&message).unwrap();
 
         match message {
-            NetworkingMessage::PlayerJoin(event) => {
+            lib::NetworkingMessage::PlayerJoin(event) => {
                 player_spawn_events
                     .send(remote_player_events::RemotePlayerSpawnedEvent { client_id: event });
             }
-            NetworkingMessage::PlayerLeave(event) => {
+            lib::NetworkingMessage::PlayerLeave(event) => {
                 player_despawn_events
                     .send(remote_player_events::RemotePlayerDespawnedEvent { client_id: event });
             }
@@ -36,7 +34,7 @@ pub fn receive_message_system(
 
         if let Ok(message) = message {
             match message {
-                NetworkingMessage::PlayerSync(event) => {
+                lib::NetworkingMessage::PlayerSync(event) => {
                     player_sync_events
                         .send(remote_player_events::RemotePlayerSyncEvent { players: event });
                 }

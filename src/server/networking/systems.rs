@@ -4,9 +4,7 @@ use bevy::{
 };
 use bevy_log::warn;
 
-use crate::{player_resources::PlayerState, prelude::*};
-
-use super::messages::NetworkingMessage;
+use crate::prelude::*;
 
 pub fn receive_message_system(
     mut server: ResMut<RenetServer>,
@@ -30,7 +28,7 @@ pub fn receive_message_system(
         let message = some_message.unwrap();
 
         match message {
-            NetworkingMessage::PlayerUpdate(player) => {
+            lib::NetworkingMessage::PlayerUpdate(player) => {
                 player_states.players.insert(client_id, player);
             }
             _ => {
@@ -51,12 +49,12 @@ pub fn handle_events_system(
                 println!("Client {client_id} connected");
                 player_states.players.insert(
                     *client_id,
-                    PlayerState {
+                    lib::PlayerState {
                         position: Vec3::ZERO,
                         rotation: Quat::IDENTITY,
                     },
                 );
-                let message = bincode::serialize(&NetworkingMessage::PlayerJoin(*client_id)).unwrap();
+                let message = bincode::serialize(&lib::NetworkingMessage::PlayerJoin(*client_id)).unwrap();
                 server.broadcast_message_except(
                     *client_id,
                     DefaultChannel::ReliableOrdered,
@@ -66,7 +64,7 @@ pub fn handle_events_system(
             ServerEvent::ClientDisconnected { client_id, reason } => {
                 println!("Client {client_id} disconnected: {reason}");
                 player_states.players.remove(client_id);
-                let message = bincode::serialize(&NetworkingMessage::PlayerLeave(*client_id)).unwrap();
+                let message = bincode::serialize(&lib::NetworkingMessage::PlayerLeave(*client_id)).unwrap();
                 server.broadcast_message(DefaultChannel::ReliableOrdered, message);
             }
         }

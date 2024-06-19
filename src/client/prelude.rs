@@ -1,12 +1,12 @@
 // my crates
 pub use crate::terrain::util::blocks::BlockId;
 pub use crate::terrain::util::chunk::CHUNK_SIZE;
+pub use hello_bevy as lib;
 
 pub use crate::collider::components as collider_components;
 pub use crate::collider::events as collider_events;
 pub use crate::collider::systems as collider_systems;
 
-pub use crate::networking::messages as networking_messages;
 pub use crate::networking::systems as networking_systems;
 pub use crate::networking::NetworkingPlugin;
 
