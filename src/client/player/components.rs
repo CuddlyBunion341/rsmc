@@ -3,5 +3,5 @@ use crate::prelude::*;
 #[derive(Component)]
 pub struct HighlightCube;
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Player;

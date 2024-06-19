@@ -44,6 +44,7 @@ pub fn setup_controller_system(mut commands: Commands, mut window: Query<&mut Wi
             height_offset: 0.0,
             radius_scale: 0.75,
         })
+        .insert(player_components::Player)
         .id();
 
     commands.spawn((

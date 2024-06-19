@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[derive(Serialize, Deserialize)]
 pub struct PlayerState {
     pub position: Vec3,
     pub rotation: Quat,
