@@ -1,7 +1,4 @@
-use std::f32::consts::PI;
-
-use bevy::{ecs::system::Commands, math::{EulerRot, Quat}, pbr::{light_consts, CascadeShadowConfigBuilder, DirectionalLight, DirectionalLightBundle}, prelude::default, transform::components::Transform};
-use iyes_perf_ui::PerfUiCompleteBundle;
+use crate::prelude::*;
 
 pub fn setup_scene(mut commands: Commands) {
     commands.spawn(PerfUiCompleteBundle::default());

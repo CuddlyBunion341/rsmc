@@ -1,5 +1,6 @@
-use bevy::ecs::system::ResMut;
-use renet::{DefaultChannel, RenetClient};
+use renet::DefaultChannel;
+
+use crate::prelude::*;
 
 pub fn receive_message_system(
     mut client: ResMut<RenetClient>,

@@ -1,9 +1,15 @@
-use bevy::{ecs::system::Resource, math::Vec3};
+use crate::prelude::*;
 
 #[derive(Resource)]
 pub struct BlockSelection {
     pub position: Option<Vec3>,
     pub normal: Option<Vec3>,
+}
+
+impl Default for BlockSelection {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl BlockSelection {
@@ -17,6 +23,12 @@ impl BlockSelection {
 
 #[derive(Resource)]
 pub struct LastPlayerPosition(pub Vec3);
+
+impl Default for LastPlayerPosition {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl LastPlayerPosition {
     pub fn new() -> Self {

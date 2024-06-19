@@ -1,35 +1,20 @@
-use bevy::asset::{AssetServer, Handle};
-use bevy::ecs::entity::Entity;
-use bevy::ecs::event::EventReader;
-use bevy::ecs::system::{Query, Res};
-use bevy::math::Vec3;
-use bevy::render::texture::Image;
-use bevy::{
-    asset::Assets,
-    ecs::system::{Commands, ResMut},
-    pbr::{MaterialMeshBundle, StandardMaterial},
-    prelude::default,
-    render::mesh::Mesh,
-    transform::components::Transform,
-};
-
-use super::chunk::{Chunk, CHUNK_SIZE};
-use super::generator::Generator;
-use super::mesher::create_chunk_mesh;
-use super::{ChunkManager, ChunkMesh, ChunkMeshUpdateEvent};
+use crate::prelude::*;
 
 pub fn setup_world_system(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut chunk_manager: ResMut<ChunkManager>,
+    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
 ) {
-    let generator = Generator::new(0);
+    let generator = terrain_util::generator::Generator::new(0);
 
     let render_distance = 16;
 
-    let mut chunks = ChunkManager::instantiate_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
+    let mut chunks = terrain_resources::ChunkManager::instantiate_chunks(
+        Vec3::new(0.0, 0.0, 0.0),
+        render_distance,
+    );
 
     for chunk in &mut chunks {
         generator.generate_chunk(chunk);
@@ -50,16 +35,16 @@ pub fn handle_chunk_mesh_update_events(
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut chunk_manager: ResMut<ChunkManager>,
-    mut chunk_mesh_update_events: EventReader<ChunkMeshUpdateEvent>,
-    mut mesh_query: Query<(Entity, &ChunkMesh)>,
+    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
+    mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
 ) {
     for event in chunk_mesh_update_events.read() {
         let chunk_option = chunk_manager.get_chunk(event.position);
         match chunk_option {
             Some(chunk) => {
                 for (entity, chunk_mesh) in mesh_query.iter_mut() {
-                    if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
+                    if terrain_util::Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
                         commands.entity(entity).despawn();
                     }
                 }
@@ -78,16 +63,15 @@ pub fn handle_chunk_mesh_update_events(
     }
 }
 
-
 fn add_chunk_objects(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
-    chunk: &Chunk,
+    chunk: &terrain_util::Chunk,
 ) {
     let texture_handle: Handle<Image> = asset_server.load("textures/texture_atlas.png");
-    let mesh_option = create_chunk_mesh(chunk);
+    let mesh_option = terrain_util::create_chunk_mesh(chunk);
 
     if mesh_option.is_none() {
         return;
@@ -117,7 +101,7 @@ fn add_chunk_objects(
             material,
             ..default()
         },
-        ChunkMesh {
+        terrain_components::ChunkMesh {
             key: [
                 chunk.position.x as i32,
                 chunk.position.y as i32,

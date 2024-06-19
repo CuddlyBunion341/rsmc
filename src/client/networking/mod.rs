@@ -1,16 +1,6 @@
-use std::{
-    net::{UdpSocket},
-    time::SystemTime,
-};
+pub mod systems;
 
-use bevy::{app::{App, Plugin, Update}};
-use bevy_renet::{transport::NetcodeClientPlugin, RenetClientPlugin};
-use renet::{
-    transport::{ClientAuthentication, NetcodeClientTransport},
-    ConnectionConfig, RenetClient,
-};
-
-mod systems;
+use crate::prelude::*;
 
 const SERVER_ADDR: &str = "127.0.0.1:5000";
 

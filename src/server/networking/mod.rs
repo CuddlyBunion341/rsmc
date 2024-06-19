@@ -1,16 +1,6 @@
-use bevy::app::*;
-use std::{net::UdpSocket, time::SystemTime};
+pub mod systems;
 
-use bevy::{
-    app::{App, Update}
-};
-use bevy_renet::{transport::NetcodeServerPlugin, RenetServerPlugin};
-use renet::{
-    transport::{NetcodeServerTransport, ServerAuthentication, ServerConfig},
-    ConnectionConfig, RenetServer,
-};
-
-mod systems;
+use crate::prelude::*;
 
 const SERVER_ADDR: &str = "127.0.0.1:5000";
 
@@ -38,6 +28,6 @@ impl Plugin for NetworkingPlugin {
         let transport = NetcodeServerTransport::new(server_config, socket).unwrap();
         app.insert_resource(transport);
 
-        app.add_systems(Update, systems::receive_message_system);
+        app.add_systems(Update, networking_systems::receive_message_system);
     }
 }

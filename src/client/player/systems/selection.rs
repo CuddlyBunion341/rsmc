@@ -1,7 +1,4 @@
-use bevy::{asset::Assets, ecs::{query::{With, Without}, system::{Commands, Query, ResMut}}, gizmos::gizmos::Gizmos, math::{primitives::Cuboid, Ray3d, Vec3}, pbr::{PbrBundle, StandardMaterial}, prelude::default, render::{camera::Camera, color::Color, mesh::Mesh}, transform::components::Transform};
-use bevy_mod_raycast::immediate::{Raycast, RaycastSettings};
-
-use crate::player::{components::HighlightCube, BlockSelection};
+use crate::prelude::*;
 
 const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 
@@ -19,15 +16,18 @@ pub fn setup_highlight_cube_system(
             transform: Transform::from_xyz(0.0, 0.0, -7.0),
             ..default()
         })
-        .insert(HighlightCube);
+        .insert(player_components::HighlightCube);
 }
 
 pub fn raycast_system(
     mut raycast: Raycast,
     mut gizmos: Gizmos,
     query: Query<&Transform, With<Camera>>,
-    mut highlight_query: Query<(&mut Transform, &HighlightCube), Without<Camera>>,
-    mut block_selection: ResMut<BlockSelection>,
+    mut highlight_query: Query<
+        (&mut Transform, &player_components::HighlightCube),
+        Without<Camera>,
+    >,
+    mut block_selection: ResMut<player_resources::BlockSelection>,
 ) {
     let camera_transform = query.single();
     let filter = |entity| !highlight_query.contains(entity);
@@ -62,4 +62,3 @@ pub fn raycast_system(
 
     highlight_transform.translation = hover_position.unwrap() + 0.5;
 }
-
