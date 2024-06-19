@@ -3,9 +3,11 @@ pub mod keyboard;
 pub mod mouse;
 pub mod selection;
 pub mod world;
+pub mod network;
 
 pub use controller::*;
 pub use keyboard::*;
 pub use mouse::*;
 pub use selection::*;
 pub use world::*;
+pub use network::*;
