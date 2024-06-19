@@ -12,7 +12,13 @@ impl Plugin for RemotePlayerPlugin {
         app.add_event::<events::RemotePlayerSpawnedEvent>();
         app.add_event::<events::RemotePlayerDespawnedEvent>();
         app.add_event::<events::RemotePlayerSyncEvent>();
-        app.add_systems(Startup, remote_player_systems::spawn_remote_player_system);
-        app.add_systems(Update, remote_player_systems::update_remote_player_system);
+        app.add_systems(
+            Update,
+            (
+                remote_player_systems::spawn_remote_player_system,
+                remote_player_systems::update_remote_player_system,
+                remote_player_systems::despawn_remote_player_system,
+            ),
+        );
     }
 }

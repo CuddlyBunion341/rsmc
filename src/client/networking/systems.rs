@@ -33,6 +33,7 @@ pub fn receive_message_system(
         }
 
         if let Ok(message) = message {
+            debug!("Received message: {:?}", message);
             match message {
                 lib::NetworkingMessage::PlayerSync(event) => {
                     player_sync_events

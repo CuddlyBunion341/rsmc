@@ -2,7 +2,7 @@ use bevy::{
     ecs::event::EventReader,
     math::{Quat, Vec3}, utils::warn,
 };
-use bevy_log::warn;
+use bevy_log::{info, warn};
 
 use crate::prelude::*;
 
@@ -29,6 +29,7 @@ pub fn receive_message_system(
 
         match message {
             lib::NetworkingMessage::PlayerUpdate(player) => {
+                info!("Received player update from client {} {}", client_id, player.position);
                 player_states.players.insert(client_id, player);
             }
             _ => {
