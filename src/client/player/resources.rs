@@ -6,6 +6,12 @@ pub struct BlockSelection {
     pub normal: Option<Vec3>,
 }
 
+impl Default for BlockSelection {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BlockSelection {
     pub fn new() -> Self {
         Self {
@@ -17,6 +23,12 @@ impl BlockSelection {
 
 #[derive(Resource)]
 pub struct LastPlayerPosition(pub Vec3);
+
+impl Default for LastPlayerPosition {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl LastPlayerPosition {
     pub fn new() -> Self {

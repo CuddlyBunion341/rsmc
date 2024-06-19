@@ -19,6 +19,7 @@ pub use bevy::app::{App, Plugin, Startup, Update};
 pub use bevy::diagnostic::*;
 pub use bevy::math::*;
 pub use bevy::prelude::*;
+pub use bevy::render::camera::Camera;
 pub use bevy::window::*;
 pub use bevy::{
     asset::Assets,
@@ -51,14 +52,12 @@ pub use bevy::{
     },
     window::{CursorGrabMode, Window},
 };
-pub use bevy::{math::*, prelude::*, render::camera::Camera};
 pub use bevy_fps_controller::controller::FpsController;
 pub use bevy_fps_controller::controller::FpsControllerPlugin;
 pub use bevy_fps_controller::controller::*;
 pub use bevy_mod_raycast::immediate::{Raycast, RaycastSettings};
 pub use bevy_rapier3d::geometry::Collider;
 pub use bevy_rapier3d::prelude::*;
-pub use bevy_rapier3d::{dynamics::*, geometry::*};
 pub use bevy_rapier3d::{
     plugin::{NoUserData, RapierConfiguration, RapierPhysicsPlugin, TimestepMode},
     render::RapierDebugRenderPlugin,

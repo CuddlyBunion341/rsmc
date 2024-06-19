@@ -5,6 +5,12 @@ pub struct ChunkManager {
     pub chunks: HashMap<[i32; 3], terrain_util::Chunk>,
 }
 
+impl Default for ChunkManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ChunkManager {
     pub fn new() -> Self {
         Self {
