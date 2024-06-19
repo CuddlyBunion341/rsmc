@@ -8,7 +8,6 @@ pub fn handle_keyboard_events_system(
     for event in keyboard_events.read() {
         if event.state.is_pressed() {
             match event.key_code {
-                bevy::input::keyboard::KeyCode::Escape => std::process::exit(0),
                 bevy::input::keyboard::KeyCode::KeyC => {
                     let controller_transform = camera_query.single();
                     println!("Handling event: {:?}", controller_transform.translation);
