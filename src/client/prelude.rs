@@ -16,6 +16,7 @@ pub use crate::player::systems as player_systems;
 pub use crate::remote_player::components as remote_player_components;
 pub use crate::remote_player::resources as remote_player_resources;
 pub use crate::remote_player::systems as remote_player_systems;
+pub use crate::remote_player::events as remote_player_events;
 
 pub use crate::terrain::components as terrain_components;
 pub use crate::terrain::events as terrain_events;
