@@ -41,17 +41,27 @@ pub fn despawn_remote_player_system(
 
 pub fn update_remote_player_system(
     mut sync_events: EventReader<remote_player_events::RemotePlayerSyncEvent>,
+    mut spawn_events: EventWriter<remote_player_events::RemotePlayerSpawnedEvent>,
     mut query: Query<(&remote_player_components::RemotePlayer, &mut Transform)>,
 ) {
     let latest_event = sync_events.read().last();
 
     if let Some(event) = latest_event {
         for (client_id, player_state) in event.players.iter() {
+            let mut player_exists = false;
             for (remote_player, mut transform) in query.iter_mut() {
                 if remote_player.client_id == *client_id {
+                    player_exists = true;
                     transform.translation = player_state.position + Vec3::new(0.0, 0.9, 0.0);
                     transform.rotation = player_state.rotation;
                 }
+            }
+
+            if !player_exists {
+                spawn_events.send(remote_player_events::RemotePlayerSpawnedEvent {
+                    client_id: *client_id,
+                    position: player_state.position,
+                });
             }
         }
     }

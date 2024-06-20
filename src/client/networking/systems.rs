@@ -11,8 +11,10 @@ pub fn receive_message_system(
 
         match message {
             lib::NetworkingMessage::PlayerJoin(event) => {
-                player_spawn_events
-                    .send(remote_player_events::RemotePlayerSpawnedEvent { client_id: event });
+                player_spawn_events.send(remote_player_events::RemotePlayerSpawnedEvent {
+                    client_id: event,
+                    position: Vec3::ZERO,
+                });
             }
             lib::NetworkingMessage::PlayerLeave(event) => {
                 player_despawn_events
