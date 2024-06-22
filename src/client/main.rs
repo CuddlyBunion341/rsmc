@@ -5,8 +5,10 @@ pub mod prelude;
 mod collider;
 mod networking;
 mod player;
+mod remote_player;
 mod scene;
 mod terrain;
+
 use scene::setup_scene;
 
 fn main() {
@@ -34,6 +36,7 @@ fn main() {
             terrain::TerrainPlugin,
             collider::ColliderPlugin,
             player::PlayerPlugin,
+            remote_player::RemotePlayerPlugin,
         ))
         .add_systems(Startup, setup_scene)
         .run();

@@ -40,6 +40,7 @@ impl Plugin for PlayerPlugin {
                 player_systems::handle_keyboard_events_system,
                 player_systems::raycast_system,
                 player_systems::handle_block_update_events,
+                player_systems::broadcast_player_attributes_system,
             ),
         );
     }

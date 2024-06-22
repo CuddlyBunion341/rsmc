@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-const SPAWN_POINT: Vec3 = Vec3::new(0.0, 256.0, 0.0);
+const SPAWN_POINT: Vec3 = Vec3::new(0.0, 20.0, 0.0);
 
 pub fn setup_controller_system(mut commands: Commands, mut window: Query<&mut Window>) {
     let mut window = window.single_mut();
@@ -44,6 +44,7 @@ pub fn setup_controller_system(mut commands: Commands, mut window: Query<&mut Wi
             height_offset: 0.0,
             radius_scale: 0.75,
         })
+        .insert(player_components::Player)
         .id();
 
     commands.spawn((

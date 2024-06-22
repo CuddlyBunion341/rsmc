@@ -1,6 +1,7 @@
-// my crate
+// my crates
 pub use crate::terrain::util::blocks::BlockId;
 pub use crate::terrain::util::chunk::CHUNK_SIZE;
+pub use hello_bevy as lib;
 
 pub use crate::collider::components as collider_components;
 pub use crate::collider::events as collider_events;
@@ -12,6 +13,10 @@ pub use crate::networking::NetworkingPlugin;
 pub use crate::player::components as player_components;
 pub use crate::player::resources as player_resources;
 pub use crate::player::systems as player_systems;
+
+pub use crate::remote_player::components as remote_player_components;
+pub use crate::remote_player::events as remote_player_events;
+pub use crate::remote_player::systems as remote_player_systems;
 
 pub use crate::terrain::components as terrain_components;
 pub use crate::terrain::events as terrain_events;
@@ -50,8 +55,9 @@ pub use bevy_rapier3d::{plugin::*, render::RapierDebugRenderPlugin};
 // networking crates
 pub use bevy_renet::{transport::NetcodeClientPlugin, *};
 pub use renet::transport::{ClientAuthentication, NetcodeClientTransport};
-pub use renet::{ConnectionConfig, RenetClient};
+pub use renet::{ClientId, ConnectionConfig, DefaultChannel, RenetClient};
 
 // other crates
 pub use iyes_perf_ui::prelude::*;
 pub use iyes_perf_ui::PerfUiCompleteBundle;
+pub use serde::*;

@@ -26,6 +26,6 @@ impl Plugin for NetworkingPlugin {
         let transport = NetcodeClientTransport::new(current_time, authentication, socket).unwrap();
         app.insert_resource(transport);
 
-        app.add_systems(Update, systems::receive_message_system);
+        app.add_systems(Update, networking_systems::receive_message_system);
     }
 }
