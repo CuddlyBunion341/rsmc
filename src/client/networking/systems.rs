@@ -5,6 +5,7 @@ pub fn receive_message_system(
     mut player_spawn_events: ResMut<Events<remote_player_events::RemotePlayerSpawnedEvent>>,
     mut player_despawn_events: ResMut<Events<remote_player_events::RemotePlayerDespawnedEvent>>,
     mut player_sync_events: ResMut<Events<remote_player_events::RemotePlayerSyncEvent>>,
+    mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
         let message = bincode::deserialize(&message).unwrap();
@@ -21,7 +22,7 @@ pub fn receive_message_system(
                     .send(remote_player_events::RemotePlayerDespawnedEvent { client_id: event });
             }
             _ => {
-                warn!("Received unknown message type.");
+                warn!("Received unknown message type. (ReliableOrdered)");
             }
         }
     }
@@ -41,8 +42,12 @@ pub fn receive_message_system(
                     player_sync_events
                         .send(remote_player_events::RemotePlayerSyncEvent { players: event });
                 }
+                lib::NetworkingMessage::BlockUpdate { position, block } => {
+                    warn!("Client received block update message: {:?}", position);
+                    block_update_events.send(terrain_events::BlockUpdateEvent { position, block });
+                }
                 _ => {
-                    warn!("Received unknown message type.");
+                    warn!("Received unknown message type. (ReliableUnordered)");
                 }
             }
         }
