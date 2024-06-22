@@ -1,22 +1,4 @@
-use super::mesher::CubeFace;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum BlockId {
-    Air,
-    Grass,
-    Dirt,
-    Stone,
-    Bedrock,
-    RedSand,
-    BrownTerracotta,
-    CyanTerracotta,
-    GrayTerracotta,
-    LightGrayTerracotta,
-    OrangeTerracotta,
-    RedTerracotta,
-    Terracotta,
-    YellowTerracotta,
-}
+use crate::prelude::*;
 
 pub struct Block {
     pub id: BlockId,

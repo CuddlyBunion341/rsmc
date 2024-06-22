@@ -1,6 +1,4 @@
-use bevy::math::Vec3;
-
-use super::blocks::BlockId;
+use crate::prelude::*;
 
 pub const CHUNK_SIZE: i32 = 32;
 pub const PADDED_CHUNK_SIZE: i32 = CHUNK_SIZE + 2;
@@ -13,11 +11,10 @@ pub struct Chunk {
     pub position: Vec3,
 }
 
-const AIR: BlockId = BlockId::Air;
 impl Chunk {
     pub fn new(position: Vec3) -> Self {
         Self {
-            data: [AIR; CHUNK_LENGTH],
+            data: [BlockId::Air; CHUNK_LENGTH],
             position,
         }
     }
@@ -39,8 +36,6 @@ impl Chunk {
     }
 
     pub fn key_eq_pos(key: [i32; 3], position: Vec3) -> bool {
-        position.x as i32 == key[0]
-            && position.y as i32 == key[1]
-            && position.z as i32 == key[2]
+        position.x as i32 == key[0] && position.y as i32 == key[1] && position.z as i32 == key[2]
     }
 }

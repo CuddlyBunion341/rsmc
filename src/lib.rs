@@ -18,3 +18,20 @@ pub enum NetworkingMessage {
     PlayerSync(HashMap<ClientId, PlayerState>),
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum BlockId {
+    Air,
+    Grass,
+    Dirt,
+    Stone,
+    Bedrock,
+    RedSand,
+    BrownTerracotta,
+    CyanTerracotta,
+    GrayTerracotta,
+    LightGrayTerracotta,
+    OrangeTerracotta,
+    RedTerracotta,
+    Terracotta,
+    YellowTerracotta,
+}

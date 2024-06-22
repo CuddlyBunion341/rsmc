@@ -1,7 +1,7 @@
 // my crates
-pub use crate::terrain::util::blocks::BlockId;
 pub use crate::terrain::util::chunk::CHUNK_SIZE;
 pub use hello_bevy as lib;
+pub use hello_bevy::BlockId;
 
 pub use crate::collider::components as collider_components;
 pub use crate::collider::events as collider_events;
@@ -61,3 +61,13 @@ pub use renet::{ClientId, ConnectionConfig, DefaultChannel, RenetClient};
 pub use iyes_perf_ui::prelude::*;
 pub use iyes_perf_ui::PerfUiCompleteBundle;
 pub use serde::*;
+
+pub use self::terrain_util::Block;
+pub use self::terrain_util::Chunk;
+pub use bevy::render::{
+    mesh::{Indices, PrimitiveTopology},
+    render_asset::RenderAssetUsages,
+};
+pub use noise::NoiseFn;
+pub use noise::Perlin;
+pub use terrain_util::CubeFace;
