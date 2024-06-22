@@ -1,9 +1,3 @@
-use bevy::{
-    ecs::event::EventReader,
-    math::{Quat, Vec3}, utils::warn,
-};
-use bevy_log::{info, warn};
-
 use crate::prelude::*;
 
 pub fn receive_message_system(
@@ -29,7 +23,10 @@ pub fn receive_message_system(
 
         match message {
             lib::NetworkingMessage::PlayerUpdate(player) => {
-                info!("Received player update from client {} {}", client_id, player.position);
+                info!(
+                    "Received player update from client {} {}",
+                    client_id, player.position
+                );
                 player_states.players.insert(client_id, player);
             }
             _ => {
@@ -55,7 +52,8 @@ pub fn handle_events_system(
                         rotation: Quat::IDENTITY,
                     },
                 );
-                let message = bincode::serialize(&lib::NetworkingMessage::PlayerJoin(*client_id)).unwrap();
+                let message =
+                    bincode::serialize(&lib::NetworkingMessage::PlayerJoin(*client_id)).unwrap();
                 server.broadcast_message_except(
                     *client_id,
                     DefaultChannel::ReliableOrdered,
@@ -65,7 +63,8 @@ pub fn handle_events_system(
             ServerEvent::ClientDisconnected { client_id, reason } => {
                 println!("Client {client_id} disconnected: {reason}");
                 player_states.players.remove(client_id);
-                let message = bincode::serialize(&lib::NetworkingMessage::PlayerLeave(*client_id)).unwrap();
+                let message =
+                    bincode::serialize(&lib::NetworkingMessage::PlayerLeave(*client_id)).unwrap();
                 server.broadcast_message(DefaultChannel::ReliableOrdered, message);
             }
         }

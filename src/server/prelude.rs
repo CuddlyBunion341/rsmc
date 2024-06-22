@@ -12,9 +12,12 @@ pub use std::net::UdpSocket;
 pub use std::time::SystemTime;
 
 // bevy crates
-pub use bevy::app::*;
+pub use bevy::app::{App, Plugin, Startup, Update};
+pub use bevy::ecs::event::*;
 pub use bevy::ecs::system::*;
+pub use bevy::math::*;
 pub use bevy::MinimalPlugins;
+pub use bevy_log::{debug, error, info, warn};
 
 // networking crates
 pub use bevy_renet::transport::*;
