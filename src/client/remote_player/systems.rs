@@ -66,3 +66,16 @@ pub fn update_remote_player_system(
         }
     }
 }
+
+pub fn draw_gizmos(
+    mut player_gizmos: Gizmos<remote_player_components::RemotePlayerGizmos>,
+    query: Query<(&remote_player_components::RemotePlayer, &Transform)>,
+) {
+    for (_, transform) in query.iter() {
+        player_gizmos.ray(
+            transform.translation,
+            transform.rotation * Vec3::new(0.0, 0.0, -1.0),
+            Color::rgb(0.8, 0.7, 0.6),
+        );
+    }
+}
