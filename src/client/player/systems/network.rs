@@ -3,12 +3,14 @@ use crate::prelude::*;
 pub fn broadcast_player_attributes_system(
     mut client: ResMut<RenetClient>,
     query: Query<(&player_components::Player, &Transform)>,
+    camera_query: Query<(&Camera3d, &Transform)>,
 ) {
     let (_, transform) = query.single();
+    let (_, camera_transform) = camera_query.single();
 
     let player_state = lib::PlayerState {
         position: transform.translation,
-        rotation: transform.rotation
+        rotation: camera_transform.rotation,
     };
 
     client.send_message(
