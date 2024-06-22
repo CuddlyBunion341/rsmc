@@ -16,7 +16,7 @@ pub fn spawn_remote_player_system(
 
         commands.spawn((
             PbrBundle {
-                mesh: meshes.add(Cuboid::new(0.5, 1.8, 0.5)),
+                mesh: meshes.add(Cuboid::new(0.5, 0.5, 0.5)),
                 material,
                 ..default()
             },
@@ -52,7 +52,7 @@ pub fn update_remote_player_system(
             for (remote_player, mut transform) in query.iter_mut() {
                 if remote_player.client_id == *client_id {
                     player_exists = true;
-                    transform.translation = player_state.position + Vec3::new(0.0, 0.9, 0.0);
+                    transform.translation = player_state.position + Vec3::new(0.0, 1.55, 0.0);
                     transform.rotation = player_state.rotation;
                 }
             }
