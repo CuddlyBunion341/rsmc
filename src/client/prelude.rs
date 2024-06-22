@@ -16,7 +16,6 @@ pub use crate::player::systems as player_systems;
 
 pub use crate::remote_player::components as remote_player_components;
 pub use crate::remote_player::events as remote_player_events;
-pub use crate::remote_player::resources as remote_player_resources;
 pub use crate::remote_player::systems as remote_player_systems;
 
 pub use crate::terrain::components as terrain_components;
@@ -56,7 +55,7 @@ pub use bevy_rapier3d::{plugin::*, render::RapierDebugRenderPlugin};
 // networking crates
 pub use bevy_renet::{transport::NetcodeClientPlugin, *};
 pub use renet::transport::{ClientAuthentication, NetcodeClientTransport};
-pub use renet::{ClientId, ConnectionConfig, RenetClient, DefaultChannel};
+pub use renet::{ClientId, ConnectionConfig, DefaultChannel, RenetClient};
 
 // other crates
 pub use iyes_perf_ui::prelude::*;
