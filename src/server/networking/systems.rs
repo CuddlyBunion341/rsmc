@@ -3,7 +3,6 @@ use crate::prelude::*;
 pub fn receive_message_system(
     mut server: ResMut<RenetServer>,
     mut player_states: ResMut<player_resources::PlayerStates>,
-    mut server_events: EventReader<ServerEvent>,
     mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
 ) {
     for client_id in server.clients_id() {
