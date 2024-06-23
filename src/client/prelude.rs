@@ -2,6 +2,7 @@
 pub use crate::terrain::util::chunk::CHUNK_SIZE;
 pub use hello_bevy as lib;
 pub use hello_bevy::BlockId;
+pub use hello_bevy::NetworkingMessage;
 
 pub use crate::collider::components as collider_components;
 pub use crate::collider::events as collider_events;
@@ -11,6 +12,7 @@ pub use crate::networking::systems as networking_systems;
 pub use crate::networking::NetworkingPlugin;
 
 pub use crate::player::components as player_components;
+pub use crate::player::events as player_events;
 pub use crate::player::resources as player_resources;
 pub use crate::player::systems as player_systems;
 
