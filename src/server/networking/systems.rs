@@ -9,6 +9,7 @@ pub fn receive_message_system(
         let message_bytes = server.receive_message(client_id, DefaultChannel::ReliableUnordered);
 
         if message_bytes.is_none() {
+            warn!("Failed to receive message. (ReliableUnordered)");
             continue;
         }
 
