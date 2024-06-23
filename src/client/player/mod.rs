@@ -1,4 +1,5 @@
 pub mod components;
+pub mod events;
 pub mod resources;
 pub mod systems;
 
@@ -22,6 +23,7 @@ impl Plugin for PlayerPlugin {
                 substeps: 1,
             },
         });
+        app.add_event::<player_events::PlayerColliderUpdateEvent>();
         app.insert_resource(player_resources::BlockSelection::new());
         app.insert_resource(player_resources::LastPlayerPosition::new());
         app.add_systems(
@@ -41,6 +43,7 @@ impl Plugin for PlayerPlugin {
                 player_systems::raycast_system,
                 player_systems::handle_block_update_events,
                 player_systems::broadcast_player_attributes_system,
+                player_systems::handle_player_collider_events_system,
             ),
         );
     }

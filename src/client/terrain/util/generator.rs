@@ -1,7 +1,4 @@
-use bevy::math::Vec3;
-use noise::{NoiseFn, Perlin};
-
-use super::{blocks::BlockId, chunk::{Chunk, CHUNK_SIZE}};
+use crate::prelude::*;
 
 pub struct Generator {
     pub seed: u32,
@@ -37,7 +34,14 @@ impl Generator {
     fn generate_block(&self, position: Vec3) -> BlockId {
         let base_height = -50.0;
 
-        let mut density = self.sample_3d(Vec3 {x: position.x, y: position.y + base_height, z: position.z }, 4);
+        let mut density = self.sample_3d(
+            Vec3 {
+                x: position.x,
+                y: position.y + base_height,
+                z: position.z,
+            },
+            4,
+        );
         density -= position.y as f64 * 0.02;
         if density > 0.7 {
             BlockId::Stone
