@@ -9,4 +9,5 @@ pub struct ChunkMeshUpdateEvent {
 pub struct BlockUpdateEvent {
     pub position: Vec3,
     pub block: BlockId,
+    pub from_network: bool,
 }

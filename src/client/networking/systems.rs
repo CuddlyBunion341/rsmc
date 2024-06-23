@@ -44,7 +44,7 @@ pub fn receive_message_system(
                 }
                 lib::NetworkingMessage::BlockUpdate { position, block } => {
                     warn!("Client received block update message: {:?}", position);
-                    block_update_events.send(terrain_events::BlockUpdateEvent { position, block });
+                    block_update_events.send(terrain_events::BlockUpdateEvent { position, block, from_network: true});
                 }
                 _ => {
                     warn!("Received unknown message type. (ReliableUnordered)");
