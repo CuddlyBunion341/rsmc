@@ -4,6 +4,7 @@ pub fn receive_message_system(
     mut server: ResMut<RenetServer>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     mut server_events: EventReader<ServerEvent>,
+    mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
 ) {
     for client_id in server.clients_id() {
         let message_bytes = server.receive_message(client_id, DefaultChannel::ReliableUnordered);
@@ -45,6 +46,10 @@ pub fn receive_message_system(
                         "Received block update from client {} {} {:?}",
                         client_id, position, block
                     );
+                    past_block_updates
+                        .updates
+                        .push(terrain_events::BlockUpdateEvent { position, block });
+
                     server.broadcast_message_except(
                         client_id,
                         DefaultChannel::ReliableOrdered,
@@ -67,6 +72,7 @@ pub fn handle_events_system(
     mut server: ResMut<RenetServer>,
     mut server_events: EventReader<ServerEvent>,
     mut player_states: ResMut<player_resources::PlayerStates>,
+    past_block_updates: Res<terrain_resources::PastBlockUpdates>,
 ) {
     for event in server_events.read() {
         match event {
@@ -86,7 +92,15 @@ pub fn handle_events_system(
                     DefaultChannel::ReliableOrdered,
                     message,
                 );
-                // TODO: broadcast past block update events to client
+
+                for update in past_block_updates.updates.iter() {
+                    let message = bincode::serialize(&lib::NetworkingMessage::BlockUpdate {
+                        position: update.position,
+                        block: update.block,
+                    })
+                    .unwrap();
+                    server.send_message(*client_id, DefaultChannel::ReliableOrdered, message);
+                }
             }
             ServerEvent::ClientDisconnected { client_id, reason } => {
                 println!("Client {client_id} disconnected: {reason}");
