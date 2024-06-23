@@ -15,7 +15,7 @@ pub fn receive_message_system(
         let some_message = bincode::deserialize(&message_bytes.unwrap());
 
         if some_message.is_err() {
-            println!("Failed to deserialize message.");
+            warn!("Failed to deserialize message.");
             continue;
         }
 
