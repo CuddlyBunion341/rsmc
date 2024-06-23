@@ -18,8 +18,7 @@ pub fn handle_block_update_events(
 
         if !event.from_network {
             client.send_message(
-                // TODO: Change channel to ReliableOrdered
-                DefaultChannel::ReliableUnordered,
+                DefaultChannel::ReliableOrdered,
                 bincode::serialize(&NetworkingMessage::BlockUpdate {
                     position: event.position,
                     block: event.block,

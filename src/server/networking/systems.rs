@@ -20,30 +20,44 @@ pub fn receive_message_system(
         }
 
         let message = some_message.unwrap();
-        // println!("Received message: {:?}", message);
+        info!("Received message: {:?}", message);
 
         match message {
             lib::NetworkingMessage::PlayerUpdate(player) => {
-                // println!(
-                //     "Received player update from client {} {}",
-                //     client_id, player.position
-                // );
+                info!(
+                    "Received player update from client {} {}",
+                    client_id, player.position
+                );
                 player_states.players.insert(client_id, player);
             }
-            lib::NetworkingMessage::BlockUpdate { position, block } => {
-                println!(
-                    "Received block update from client {} {} {:?}",
-                    client_id, position, block
-                );
-                server.broadcast_message_except(
-                    client_id,
-                    DefaultChannel::ReliableUnordered,
-                    bincode::serialize(&lib::NetworkingMessage::BlockUpdate { position, block })
-                        .unwrap(),
-                );
-            }
             _ => {
-                warn!("Received unknown message type.");
+                warn!("Received unknown message type. (ReliableUnordered)");
+            }
+        }
+
+        while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
+        {
+            let message = bincode::deserialize(&message).unwrap();
+
+            match message {
+                lib::NetworkingMessage::BlockUpdate { position, block } => {
+                    println!(
+                        "Received block update from client {} {} {:?}",
+                        client_id, position, block
+                    );
+                    server.broadcast_message_except(
+                        client_id,
+                        DefaultChannel::ReliableOrdered,
+                        bincode::serialize(&lib::NetworkingMessage::BlockUpdate {
+                            position,
+                            block,
+                        })
+                        .unwrap(),
+                    );
+                }
+                _ => {
+                    warn!("Received unknown message type. (ReliabelOrdered)");
+                }
             }
         }
     }
