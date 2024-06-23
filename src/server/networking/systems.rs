@@ -41,7 +41,7 @@ pub fn receive_message_system(
 
             match message {
                 lib::NetworkingMessage::BlockUpdate { position, block } => {
-                    println!(
+                    info!(
                         "Received block update from client {} {} {:?}",
                         client_id, position, block
                     );
