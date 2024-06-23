@@ -64,10 +64,8 @@ pub use serde::*;
 
 pub use self::terrain_util::Block;
 pub use self::terrain_util::Chunk;
-pub use bevy::render::{
-    mesh::{Indices, PrimitiveTopology},
-    render_asset::RenderAssetUsages,
-};
+pub use bevy::render::mesh::{Indices, PrimitiveTopology};
+pub use bevy::render::render_asset::RenderAssetUsages;
 pub use noise::NoiseFn;
 pub use noise::Perlin;
 pub use terrain_util::CubeFace;
