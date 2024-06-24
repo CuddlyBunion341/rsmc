@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+// TODO: move system to terrain system
 pub fn handle_block_update_events(
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
     mut block_update_events: EventReader<terrain_events::BlockUpdateEvent>,
@@ -8,11 +9,13 @@ pub fn handle_block_update_events(
     mut client: ResMut<RenetClient>,
 ) {
     for event in block_update_events.read() {
-        chunk_manager.set_block(event.position, event.block);
+        let chunk_positions = chunk_manager.set_block(event.position, event.block);
         info!("Block update message: {:?}", event.position);
 
-        chunk_mesh_update_events.send(terrain_events::ChunkMeshUpdateEvent {
-            position: event.position / CHUNK_SIZE as f32,
+        chunk_positions.iter().for_each(|position| {
+            chunk_mesh_update_events.send(terrain_events::ChunkMeshUpdateEvent {
+                position: *position,
+            });
         });
 
         player_collider_events.send(player_events::PlayerColliderUpdateEvent);
