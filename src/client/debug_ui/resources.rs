@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 #[derive(Resource)]
 pub struct DebugUi {
-    entity: Entity,
     is_visible: bool,
     position: Vec3,
     rotation: Vec3,
@@ -10,9 +9,8 @@ pub struct DebugUi {
 }
 
 impl DebugUi {
-    pub fn new(entity: Entity) -> Self {
+    pub fn new() -> Self {
         Self {
-            entity,
             is_visible: false,
             position: Vec3::ZERO,
             rotation: Vec3::ZERO,

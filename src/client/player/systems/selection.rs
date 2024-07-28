@@ -22,10 +22,10 @@ pub fn setup_highlight_cube_system(
 pub fn raycast_system(
     mut raycast: Raycast,
     mut gizmos: Gizmos,
-    query: Query<&Transform, With<Camera>>,
+    query: Query<&Transform, With<Camera3d>>,
     mut highlight_query: Query<
         (&mut Transform, &player_components::HighlightCube),
-        Without<Camera>,
+        Without<Camera3d>,
     >,
     mut block_selection: ResMut<player_resources::BlockSelection>,
 ) {
