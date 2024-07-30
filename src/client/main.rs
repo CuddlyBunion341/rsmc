@@ -3,6 +3,7 @@ use crate::prelude::*;
 pub mod prelude;
 
 mod collider;
+mod debug_ui;
 mod networking;
 mod player;
 mod remote_player;
@@ -37,6 +38,7 @@ fn main() {
             collider::ColliderPlugin,
             player::PlayerPlugin,
             remote_player::RemotePlayerPlugin,
+            debug_ui::DebugUiPlugin,
         ))
         .add_systems(Startup, setup_scene)
         .run();

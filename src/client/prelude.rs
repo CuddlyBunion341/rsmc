@@ -26,6 +26,10 @@ pub use crate::terrain::resources as terrain_resources;
 pub use crate::terrain::systems as terrain_systems;
 pub use crate::terrain::util as terrain_util;
 
+pub use crate::debug_ui::components as debug_ui_components;
+pub use crate::debug_ui::resources as debug_ui_resources;
+pub use crate::debug_ui::systems as debug_ui_systems;
+
 // std crates
 pub use std::collections::HashMap;
 pub use std::f32::consts::*;
