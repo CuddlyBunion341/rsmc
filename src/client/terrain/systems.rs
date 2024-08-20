@@ -9,7 +9,7 @@ pub fn setup_world_system(
 ) {
     let generator = terrain_util::generator::Generator::new(0);
 
-    let render_distance = 16;
+    let render_distance = 4;
 
     let mut chunks = terrain_resources::ChunkManager::instantiate_chunks(
         Vec3::new(0.0, 0.0, 0.0),

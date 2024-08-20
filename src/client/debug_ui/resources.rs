@@ -2,10 +2,10 @@ use crate::prelude::*;
 
 #[derive(Resource)]
 pub struct DebugUi {
-    is_visible: bool,
-    position: Vec3,
-    rotation: Vec3,
-    selected_block: Vec3,
+    pub is_visible: bool,
+    pub position: Vec3,
+    pub rotation: Vec3,
+    pub selected_block: Vec3,
 }
 
 impl DebugUi {

@@ -1,4 +1,5 @@
 pub mod controller;
+pub mod debug;
 pub mod keyboard;
 pub mod mouse;
 pub mod network;

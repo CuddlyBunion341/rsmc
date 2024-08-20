@@ -1,11 +1,20 @@
-use bevy::{
-    sprite::Anchor,
-    text::{BreakLineOn, Text2dBounds},
-};
-
 use crate::prelude::*;
 
-pub fn update_debug_ui_system(debug_ui: Res<debug_ui_resources::DebugUi>) {}
+pub fn update_debug_ui_system(
+    debug_ui: Res<debug_ui_resources::DebugUi>,
+    mut query: Query<(
+        &debug_ui_components::DebugUITextComponent,
+        &mut Text,
+    )>,
+) {
+    let (_, mut text) = query.single_mut();
+    text.sections[0].value = format!(
+        "Raycast position: {:?}\nPlayer position: {:?}\nPlayer rotation: {:?}",
+        debug_ui.selected_block,
+        debug_ui.position,
+        debug_ui.rotation,
+    );
+}
 
 pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraCode-Retina.ttf");
@@ -13,7 +22,7 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let text_style = TextStyle {
         font_size: 60.0,
         color: Color::WHITE,
-        font
+        font,
     };
 
     commands.spawn(Camera2dBundle {
@@ -24,12 +33,15 @@ pub fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     });
 
-    commands.spawn(Text2dBundle {
-        text_anchor: Anchor::TopLeft,
-        text: Text::from_section("Hello World!", text_style.clone())
-            .with_justify(JustifyText::Left),
-        ..default()
-    });
+    commands.spawn((
+        Text2dBundle {
+            // text_anchor: Anchor::TopLeft,
+            text: Text::from_section("Hello World!", text_style.clone())
+                .with_justify(JustifyText::Left),
+            ..default()
+        },
+        debug_ui_components::DebugUITextComponent(),
+    ));
 }
 
 // Player position:

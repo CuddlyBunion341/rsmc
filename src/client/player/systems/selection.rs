@@ -21,6 +21,7 @@ pub fn setup_highlight_cube_system(
 
 pub fn raycast_system(
     mut raycast: Raycast,
+    mut debug_ui: ResMut<debug_ui_resources::DebugUi>,
     mut gizmos: Gizmos,
     query: Query<&Transform, With<Camera3d>>,
     mut highlight_query: Query<
@@ -61,4 +62,6 @@ pub fn raycast_system(
     }
 
     highlight_transform.translation = hover_position.unwrap() + 0.5;
+
+    debug_ui.selected_block = block_selection.position.unwrap();
 }
