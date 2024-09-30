@@ -20,7 +20,7 @@ jobs:
     - name: Install stable toolchain
       uses: dtolnay/rust-toolchain@stable  
     - name: Install dependencies
-      run: sudo apt-get install -y -qq libasound2-dev libssl-dev libpulse-dev libdbus-1-dev portaudio19-dev 
+      run: sudo apt-get install -y -qq libudev-dev libasound2-dev libssl-dev libpulse-dev libdbus-1-dev portaudio19-dev 
     - name: Build
       run: cargo build --verbose
     - name: Run tests
