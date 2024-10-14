@@ -97,8 +97,7 @@ impl ChunkManager {
                     let x = dx as f32;
                     let y = dy as f32;
                     let z = dz as f32;
-                    let chunk_position =
-                        ((block_position + Vec3::new(x, y, z)) / CHUNK_SIZE as f32).floor();
+                    let chunk_position = ((block_position + Vec3::new(x, y, z)) / CHUNK_SIZE as f32).floor();
                     if chunk_positions
                         .iter()
                         .find(|&pos| {

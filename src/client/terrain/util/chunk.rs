@@ -21,7 +21,6 @@ impl Chunk {
 
     pub fn get(&self, x: usize, y: usize, z: usize) -> BlockId {
         self.data[Self::index(x + 1, y + 1, z + 1)]
-    }
 
     pub fn set(&mut self, x: usize, y: usize, z: usize, value: BlockId) {
         self.data[Self::index(x + 1, y + 1, z + 1)] = value;
@@ -30,7 +29,8 @@ impl Chunk {
     #[rustfmt::skip]
     pub fn index(x: usize, y: usize, z: usize) -> usize {
       if (x >= PADDED_CHUNK_SIZE as usize) || (y >= PADDED_CHUNK_SIZE as usize) || (z >= PADDED_CHUNK_SIZE as usize) {
-        panic!("Index out of bounds: ({}, {}, {})", x, y, z);
+        //panic!("Index out of bounds: ({}, {}, {})", x, y, z);
+        0;
       }
         x + PADDED_CHUNK_USIZE * (y + PADDED_CHUNK_USIZE * z)
     }

@@ -1,9 +1,6 @@
 use crate::prelude::*;
 
-pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
-    let GeometryData {
-        position,
-        uv,
+pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> { let GeometryData { position, uv,
         normal,
         indices,
     } = geometry_data;
