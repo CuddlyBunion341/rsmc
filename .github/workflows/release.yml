@@ -1,0 +1,428 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  add_binaries_to_github_release: true
+  itch_target: CuddlyBunion341/rsmc
+
+  # Before enabling LFS, please take a look at GitHub's documentation for costs and quota limits:
+  # https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage
+  use_git_lfs: true
+
+jobs:
+
+  # Build for wasm
+  release-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: install wasm-bindgen-cli
+        run: |
+          cargo install wasm-bindgen-cli
+
+      - name: Build server
+        run: |
+          cargo build --release --target wasm32-unknown-unknown --bin server
+      - name: Build client
+        run: |
+          cargo build --release --target wasm32-unknown-unknown --bin client
+
+      - name: Prepare server package
+        run: |
+          wasm-bindgen --no-typescript --out-name server --out-dir wasm/server --target web target/wasm32-unknown-unknown/release/server.wasm
+          cp -r assets wasm/server/ || true # Try to copy, but ignore if it can't copy if source directory does not exist 
+      - name: Prepare client package
+        run: |
+          wasm-bindgen --no-typescript --out-name client --out-dir wasm/client --target web target/wasm32-unknown-unknown/release/client.wasm
+          cp -r assets wasm/client/ || true # Try to copy, but ignore if it can't copy if source directory does not exist 
+
+      - name: Package server as a zip
+        working-directory: ./wasm/server
+        run: |
+          zip --recurse-paths ../../server.zip .
+      - name: Package client as a zip
+        working-directory: ./wasm/client
+        run: |
+          zip --recurse-paths ../../client.zip .
+
+      - name: Upload server binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: server.zip
+          name: wasm-server
+          retention-days: 1
+      - name: Upload client binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: client.zip
+          name: wasm-client
+          retention-days: 1
+
+      - name: Upload server binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: server.zip
+          asset_name: server-wasm-${{ steps.get_version.outputs.tag }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+      - name: Upload client binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: client.zip
+          asset_name: client-wasm-${{ steps.get_version.outputs.tag }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  # Build for Linux
+  release-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+      - name: install dependencies
+        run: |
+          sudo apt-get update; sudo apt-get install pkg-config libx11-dev libasound2-dev libudev-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
+
+      - name: Build server
+        run: |
+          cargo build --release --target x86_64-unknown-linux-gnu --bin server
+      - name: Build client
+        run: |
+          cargo build --release --target x86_64-unknown-linux-gnu --bin client
+
+      - name: Prepare server package
+        run: |
+          mkdir linux/server
+          cp target/x86_64-unknown-linux-gnu/release/server linux/server/
+          cp -r assets linux/server/ || true # Try to copy, but ignore if it can't copy if source directory does not exist
+      - name: Prepare client package
+        run: |
+          mkdir linux/client
+          cp target/x86_64-unknown-linux-gnu/release/client linux/client/
+          cp -r assets linux/client/ || true # Try to copy, but ignore if it can't copy if source directory does not exist
+
+      - name: Package server as a zip
+        working-directory: ./linux/server
+        run: |
+          zip --recurse-paths ../../server.zip .
+      - name: Package client as a zip
+        working-directory: ./linux/client
+        run: |
+          zip --recurse-paths ../../client.zip .
+
+      - name: Upload server binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: server.zip
+          name: linux-server
+          retention-days: 1
+      - name: Upload client binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: client.zip
+          name: linux-client
+          retention-days: 1
+
+      - name: Upload server binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: server.zip
+          asset_name: server-linux-${{ steps.get_version.outputs.tag }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+      - name: Upload client binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: client.zip
+          asset_name: client-linux-${{ steps.get_version.outputs.tag }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  # Build for Windows
+  release-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Build server
+        run: |
+          cargo build --release --target x86_64-pc-windows-msvc --bin server
+      - name: Build client
+        run: |
+          cargo build --release --target x86_64-pc-windows-msvc --bin client
+
+      - name: Prepare server package
+        run: |
+          mkdir windows/server
+          cp target/x86_64-pc-windows-msvc/release/server.exe windows/server/
+          mkdir assets -ea 0 # create the assets directory if it does not exist, it will get ignored in the zip if empty
+          cp -r assets windows/server/
+      - name: Prepare client package
+        run: |
+          mkdir windows/client
+          cp target/x86_64-pc-windows-msvc/release/client.exe windows/client/
+          mkdir assets -ea 0 # create the assets directory if it does not exist, it will get ignored in the zip if empty
+          cp -r assets windows/client/
+
+      - name: Package server as a zip
+        run: |
+          Compress-Archive -Path windows/server/* -DestinationPath server.zip
+      - name: Package client as a zip
+        run: |
+          Compress-Archive -Path windows/client/* -DestinationPath client.zip
+
+      - name: Upload server binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: server.zip
+          name: windows-server
+          retention-days: 1
+      - name: Upload client binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: client.zip
+          name: windows-client
+          retention-days: 1
+
+      - name: Upload server binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: server.zip
+          asset_name: server-windows-${{ steps.get_version.outputs.tag }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+      - name: Upload client binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: client.zip
+          asset_name: client-windows-${{ steps.get_version.outputs.tag }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  # Build for MacOS x86_64
+  release-macOS-intel:
+    runs-on: macOS-latest
+
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin
+      - name: Environment Setup
+        run: |
+          export CFLAGS="-fno-stack-check"
+          export MACOSX_DEPLOYMENT_TARGET="10.9"
+
+      - name: Build server
+        run: |
+          cargo build --release --target x86_64-apple-darwin --bin server
+      - name: Build client
+        run: |
+          cargo build --release --target x86_64-apple-darwin --bin client
+
+      - name: Prepare server package
+        run: |
+          mkdir -p server.app/Contents/MacOS
+          cp target/x86_64-apple-darwin/release/server server.app/Contents/MacOS/
+          cp -r assets server.app/Contents/MacOS/ || true # Try to copy, but ignore if it can't copy if source directory does not exist
+          hdiutil create -fs HFS+ -volname "server" -srcfolder server.app server-macOS-intel.dmg
+      - name: Prepare client package
+        run: |
+          mkdir -p client.app/Contents/MacOS
+          cp target/x86_64-apple-darwin/release/client client.app/Contents/MacOS/
+          cp -r assets client.app/Contents/MacOS/ || true # Try to copy, but ignore if it can't copy if source directory does not exist
+          hdiutil create -fs HFS+ -volname "client" -srcfolder client.app client-macOS-intel.dmg
+
+      - name: Upload server binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: server-macOS-intel.dmg
+          name: macOS-intel-server
+          retention-days: 1
+      - name: Upload client binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: client-macOS-intel.dmg
+          name: macOS-intel-client
+          retention-days: 1
+
+      - name: Upload server binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: server-macOS-intel.dmg
+          asset_name: server-macOS-intel-${{ steps.get_version.outputs.tag }}.dmg
+          tag: ${{ github.ref }}
+          overwrite: true
+      - name: Upload client binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: client-macOS-intel.dmg
+          asset_name: client-macOS-intel-${{ steps.get_version.outputs.tag }}.dmg
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  # Build for MacOS Apple Silicon
+  release-macOS-apple-silicon:
+    runs-on: macOS-latest
+
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - name: Environment 
+        # macOS 11 was the first version to support ARM
+        run: |
+          export MACOSX_DEPLOYMENT_TARGET="11"
+
+      - name: Build server
+        run: |
+          cargo build --release --target aarch64-apple-darwin --bin server
+      - name: Build client
+        run: |
+          cargo build --release --target aarch64-apple-darwin --bin client
+
+      - name: Prepare server package
+        run: |
+          mkdir -p server.app/Contents/MacOS
+          cp target/aarch64-apple-darwin/release/server server.app/Contents/MacOS/
+          cp -r assets server.app/Contents/MacOS/ || true # Try to copy, but ignore if it can't copy if source directory does not exist
+          hdiutil create -fs HFS+ -volname "server-macOS-apple-silicon" -srcfolder server.app server-macOS-apple-silicon.dmg
+      - name: Prepare client package
+        run: |
+          mkdir -p client.app/Contents/MacOS
+          cp target/aarch64-apple-darwin/release/client client.app/Contents/MacOS/
+          cp -r assets client.app/Contents/MacOS/ || true # Try to copy, but ignore if it can't copy if source directory does not exist
+          hdiutil create -fs HFS+ -volname "client-macOS-apple-silicon" -srcfolder client.app client-macOS-apple-silicon.dmg
+
+      - name: Upload server binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: server-macOS-apple-silicon.dmg
+          name: macOS-apple-silicon-server
+          retention-days: 1
+      - name: Upload client binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: client-macOS-apple-silicon.dmg
+          name: macOS-apple-silicon-client
+          retention-days: 1
+
+      - name: Upload server binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: server-macOS-apple-silicon.dmg
+          asset_name: server-macOS-apple-silicon-${{ steps.get_version.outputs.tag }}.dmg
+          tag: ${{ github.ref }}
+          overwrite: true
+      - name: Upload client binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: client-macOS-apple-silicon.dmg
+          asset_name: client-macOS-apple-silicon-${{ steps.get_version.outputs.tag }}.dmg
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  check-if-upload-to-itch-is-configured:
+    runs-on: ubuntu-latest
+    outputs:
+      should-upload: ${{ steps.check-env.outputs.has-itch-target }}
+    steps:
+      - id: check-env
+        run: |
+          if [[ -z "$itch_target" ]]; then
+            echo "has-itch-target=no" >> $GITHUB_OUTPUT
+          else
+            echo "has-itch-target=yes" >> $GITHUB_OUTPUT
+
+  upload-to-itch:
+    runs-on: ubuntu-latest
+    needs:
+      - check-if-upload-to-itch-is-configured
+      - release-wasm
+      - release-linux
+      - release-windows
+      - release-macOS-intel
+      - release-macOS-apple-silicon
+    if: ${{ needs.check-if-upload-to-itch-is-configured.outputs.should-upload == 'yes' }}
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./builds
+
+      - name: Install butler
+        run: |
+          curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+          unzip butler.zip
+          chmod +x butler
+          ./butler -V
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - name: Upload to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_CREDENTIALS }}
+        run: |
+          for channel in $(ls builds); do
+            ./butler push \
+                --fix-permissions \
+                --userversion="${{ steps.get_version.outputs.tag }}" \
+                builds/$channel/* \
+                ${{ env.itch_target }}:$channel
+          done
