@@ -11,25 +11,12 @@ env:
   use_git_lfs: true
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
+  build-server-ubuntu:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-        target: [wasm32-unknown-unknown, x86_64-unknown-linux-gnu, x86_64-pc-windows-msvc, x86_64-apple-darwin, aarch64-apple-darwin]
-        binary: [server, client]
-        include:
-          - os: ubuntu-latest
-            target: wasm32-unknown-unknown
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-          - os: macOS-latest
-            target: x86_64-apple-darwin
-          - os: macOS-latest
-            target: aarch64-apple-darwin
-
+        target: [wasm32-unknown-unknown, x86_64-unknown-linux-gnu]
+        binary: [server]
     steps:
       - uses: olegtarasov/get-tag@v2.1.2
         id: get_version
@@ -41,7 +28,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Install dependencies
-        if: matrix.os == 'ubuntu-latest' && matrix.target == 'x86_64-unknown-linux-gnu'
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
         run: |
           sudo apt-get update
           sudo apt-get install -y pkg-config libx11-dev libasound2-dev libudev-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
@@ -50,8 +37,108 @@ jobs:
         if: matrix.target == 'wasm32-unknown-unknown'
         run: cargo install wasm-bindgen-cli
 
+      - name: Build binary
+        run: cargo build --release --target ${{ matrix.target }} --bin ${{ matrix.binary }}
+
+      - name: Prepare package
+        run: |
+          if [ "${{ matrix.target }}" == "wasm32-unknown-unknown" ]; then
+            wasm-bindgen --no-typescript --out-name ${{ matrix.binary }} --out-dir wasm/${{ matrix.binary }} --target web target/wasm32-unknown-unknown/release/${{ matrix.binary }}.wasm
+            cp -r assets wasm/${{ matrix.binary }}/ || true
+          else
+            mkdir -p linux/${{ matrix.binary }}
+            cp target/${{ matrix.target }}/release/${{ matrix.binary }} linux/${{ matrix.binary }}/
+            cp -r assets linux/${{ matrix.binary }}/ || true
+          fi
+
+      - name: Package as a zip
+        run: |
+          if [ "${{ matrix.target }}" == "wasm32-unknown-unknown" ]; then
+            cd wasm/${{ matrix.binary }} && zip --recurse-paths ../../${{ matrix.binary }}.zip .
+          else
+            cd linux/${{ matrix.binary }} && zip --recurse-paths ../../${{ matrix.binary }}.zip .
+          fi
+
+      - name: Upload binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ matrix.binary }}.zip
+          name: ${{ matrix.target }}-${{ matrix.binary }}
+          retention-days: 1
+
+      - name: Upload binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.binary }}.zip
+          asset_name: ${{ matrix.binary }}-${{ matrix.target }}-${{ steps.get_version.outputs.tag }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  build-client-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        target: [x86_64-pc-windows-msvc]
+        binary: [client]
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build binary
+        run: cargo build --release --target ${{ matrix.target }} --bin ${{ matrix.binary }}
+
+      - name: Prepare package
+        run: |
+          mkdir -p windows/${{ matrix.binary }}
+          cp target/x86_64-pc-windows-msvc/release/${{ matrix.binary }}.exe windows/${{ matrix.binary }}/
+          mkdir assets -ea 0
+          cp -r assets windows/${{ matrix.binary }}/
+
+      - name: Package as a zip
+        run: Compress-Archive -Path windows/${{ matrix.binary }}/* -DestinationPath ${{ matrix.binary }}.zip
+
+      - name: Upload binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ matrix.binary }}.zip
+          name: ${{ matrix.target }}-${{ matrix.binary }}
+          retention-days: 1
+
+      - name: Upload binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.binary }}.zip
+          asset_name: ${{ matrix.binary }}-${{ matrix.target }}-${{ steps.get_version.outputs.tag }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  build-macos:
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        target: [x86_64-apple-darwin, aarch64-apple-darwin]
+        binary: [server, client]
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
       - name: Environment setup for MacOS
-        if: matrix.os == 'macOS-latest'
         run: |
           if [ "${{ matrix.target }}" == "x86_64-apple-darwin" ]; then
             export CFLAGS="-fno-stack-check"
@@ -65,36 +152,13 @@ jobs:
 
       - name: Prepare package
         run: |
-          if [ "${{ matrix.target }}" == "wasm32-unknown-unknown" ]; then
-            wasm-bindgen --no-typescript --out-name ${{ matrix.binary }} --out-dir wasm/${{ matrix.binary }} --target web target/wasm32-unknown-unknown/release/${{ matrix.binary }}.wasm
-            cp -r assets wasm/${{ matrix.binary }}/ || true
-          elif [ "${{ matrix.target }}" == "x86_64-pc-windows-msvc" ]; then
-            mkdir -p windows/${{ matrix.binary }}
-            cp target/x86_64-pc-windows-msvc/release/${{ matrix.binary }}.exe windows/${{ matrix.binary }}/
-            mkdir assets -ea 0
-            cp -r assets windows/${{ matrix.binary }}/
-          elif [[ "${{ matrix.target }}" == "x86_64-apple-darwin" || "${{ matrix.target }}" == "aarch64-apple-darwin" ]]; then
-            mkdir -p ${{ matrix.binary }}.app/Contents/MacOS
-            cp target/${{ matrix.target }}/release/${{ matrix.binary }} ${{ matrix.binary }}.app/Contents/MacOS/
-            cp -r assets ${{ matrix.binary }}.app/Contents/MacOS/ || true
-            hdiutil create -fs HFS+ -volname "${{ matrix.binary }}" -srcfolder ${{ matrix.binary }}.app ${{ matrix.binary }}-${{ matrix.target }}.dmg
-          else
-            mkdir -p linux/${{ matrix.binary }}
-            cp target/${{ matrix.target }}/release/${{ matrix.binary }} linux/${{ matrix.binary }}/
-            cp -r assets linux/${{ matrix.binary }}/ || true
-          fi
+          mkdir -p ${{ matrix.binary }}.app/Contents/MacOS
+          cp target/${{ matrix.target }}/release/${{ matrix.binary }} ${{ matrix.binary }}.app/Contents/MacOS/
+          cp -r assets ${{ matrix.binary }}.app/Contents/MacOS/ || true
+          hdiutil create -fs HFS+ -volname "${{ matrix.binary }}" -srcfolder ${{ matrix.binary }}.app ${{ matrix.binary }}-${{ matrix.target }}.dmg
 
       - name: Package as a zip
-        run: |
-          if [ "${{ matrix.target }}" == "wasm32-unknown-unknown" ]; then
-            cd wasm/${{ matrix.binary }} && zip --recurse-paths ../../${{ matrix.binary }}.zip .
-          elif [ "${{ matrix.target }}" == "x86_64-pc-windows-msvc" ]; then
-            Compress-Archive -Path windows/${{ matrix.binary }}/* -DestinationPath ${{ matrix.binary }}.zip
-          elif [[ "${{ matrix.target }}" == "x86_64-apple-darwin" || "${{ matrix.target }}" == "aarch64-apple-darwin" ]]; then
-            mv ${{ matrix.binary }}-${{ matrix.target }}.dmg ${{ matrix.binary }}.zip
-          else
-            cd linux/${{ matrix.binary }} && zip --recurse-paths ../../${{ matrix.binary }}.zip .
-          fi
+        run: mv ${{ matrix.binary }}-${{ matrix.target }}.dmg ${{ matrix.binary }}.zip
 
       - name: Upload binaries to artifacts
         uses: actions/upload-artifact@v3
@@ -129,9 +193,10 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - check-if-upload-to-itch-is-configured
-      - build
+      - build-server-ubuntu
+      - build-client-windows
+      - build-macos
     if: ${{ needs.check-if-upload-to-itch-is-configured.outputs.should-upload == 'yes' }}
-
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -156,4 +221,3 @@ jobs:
                 --userversion="${{ steps.get_version.outputs.tag }}" \
                 builds/$channel/* \
                 ${{ env.itch_target }}:$channel
-          done
