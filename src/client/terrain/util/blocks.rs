@@ -24,6 +24,12 @@ pub struct TextureManager {
     textures: HashMap<TextureName, TextureUV>,
 }
 
+impl Default for TextureManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TextureManager {
     pub fn new() -> Self {
         let mut textures = HashMap::new();

@@ -76,7 +76,7 @@ fn add_chunk_objects(
     texture_manager: &terrain_util::TextureManager,
 ) {
     let texture_handle: Handle<Image> = asset_server.load("textures/texture_atlas.png");
-    let mesh_option = terrain_util::create_chunk_mesh(chunk, &texture_manager);
+    let mesh_option = terrain_util::create_chunk_mesh(chunk, texture_manager);
 
     if mesh_option.is_none() {
         return;
