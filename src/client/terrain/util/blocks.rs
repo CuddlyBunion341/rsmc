@@ -90,24 +90,52 @@ pub static BLOCKS: [Block; 14] = [
     add_block!(BlockId::Stone, [TextureName::Stone; 6], true),
     add_block!(BlockId::Bedrock, [TextureName::Bedrock; 6], true),
     add_block!(BlockId::RedSand, [TextureName::RedSand; 6], true),
-    add_block!(BlockId::BrownTerracotta, [TextureName::BrownTerracotta; 6], true),
-    add_block!(BlockId::CyanTerracotta, [TextureName::CyanTerracotta; 6], true),
-    add_block!(BlockId::GrayTerracotta, [TextureName::GrayTerracotta; 6], true),
+    add_block!(
+        BlockId::BrownTerracotta,
+        [TextureName::BrownTerracotta; 6],
+        true
+    ),
+    add_block!(
+        BlockId::CyanTerracotta,
+        [TextureName::CyanTerracotta; 6],
+        true
+    ),
+    add_block!(
+        BlockId::GrayTerracotta,
+        [TextureName::GrayTerracotta; 6],
+        true
+    ),
     add_block!(
         BlockId::LightGrayTerracotta,
         [TextureName::LightGrayTerracotta; 6],
         true
     ),
-    add_block!(BlockId::OrangeTerracotta, [TextureName::OrangeTerracotta; 6], true),
-    add_block!(BlockId::RedTerracotta, [TextureName::RedTerracotta; 6], true),
+    add_block!(
+        BlockId::OrangeTerracotta,
+        [TextureName::OrangeTerracotta; 6],
+        true
+    ),
+    add_block!(
+        BlockId::RedTerracotta,
+        [TextureName::RedTerracotta; 6],
+        true
+    ),
     add_block!(BlockId::Terracotta, [TextureName::Terracotta; 6], true),
-    add_block!(BlockId::YellowTerracotta, [TextureName::YellowTerracotta; 6], true),
+    add_block!(
+        BlockId::YellowTerracotta,
+        [TextureName::YellowTerracotta; 6],
+        true
+    ),
 ];
 
 type TextureUV = [f32; 2];
 
 impl Block {
-    pub fn get_block_face_uvs(block_id: BlockId, face: CubeFace, texture_manager: &TextureManager) -> Option<[f32; 2]> {
+    pub fn get_block_face_uvs(
+        block_id: BlockId,
+        face: CubeFace,
+        texture_manager: &TextureManager,
+    ) -> Option<[f32; 2]> {
         let block = &BLOCKS[block_id as usize];
         let texture_name = block.texture_names[face as usize];
         texture_manager.get_texture_uv(texture_name).copied()

@@ -112,8 +112,14 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                 update_mask(chunk, &mut mask, 0b010000, x, y, z - 1);
                 update_mask(chunk, &mut mask, 0b100000, x, y, z + 1);
 
-                let cube_data =
-                    create_cube_geometry_data(x as f32, y as f32, z as f32, mask, block_id, texture_manager);
+                let cube_data = create_cube_geometry_data(
+                    x as f32,
+                    y as f32,
+                    z as f32,
+                    mask,
+                    block_id,
+                    texture_manager,
+                );
 
                 geometry_data.indices.extend(
                     cube_data

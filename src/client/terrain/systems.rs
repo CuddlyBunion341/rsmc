@@ -6,7 +6,7 @@ pub fn setup_world_system(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
-    texture_manager: ResMut<terrain_util::TextureManager>
+    texture_manager: ResMut<terrain_util::TextureManager>,
 ) {
     let generator = terrain_util::generator::Generator::new(0);
 
@@ -25,7 +25,7 @@ pub fn setup_world_system(
             &mut meshes,
             &mut materials,
             chunk,
-            &texture_manager
+            &texture_manager,
         );
     }
 
@@ -40,7 +40,7 @@ pub fn handle_chunk_mesh_update_events(
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
-    texture_manager: ResMut<terrain_util::TextureManager>
+    texture_manager: ResMut<terrain_util::TextureManager>,
 ) {
     for event in chunk_mesh_update_events.read() {
         let chunk_option = chunk_manager.get_chunk(event.position);
@@ -57,7 +57,7 @@ pub fn handle_chunk_mesh_update_events(
                     &mut meshes,
                     &mut materials,
                     chunk,
-                    &texture_manager
+                    &texture_manager,
                 );
             }
             None => {
