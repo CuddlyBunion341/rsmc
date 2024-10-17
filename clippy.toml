@@ -1,0 +1,2 @@
+[lints.clippy]
+too-many-arguments-threshold = 10
