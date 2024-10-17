@@ -8,7 +8,6 @@ name: Release
 on: [push]
 
 env:
-  # update with the name of the main binary
   binary: client
   add_binaries_to_github_release: true
   use_git_lfs: true
@@ -62,7 +61,6 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
 
-  # Build for Linux
   release-linux:
     runs-on: ubuntu-latest
 
@@ -111,7 +109,6 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
 
-  # Build for Windows
   release-windows:
     runs-on: windows-latest
 
@@ -157,7 +154,6 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
 
-  # Build for MacOS x86_64
   release-macOS-intel:
     runs-on: macOS-latest
 
@@ -203,7 +199,6 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
 
-  # Build for MacOS Apple Silicon
   release-macOS-apple-silicon:
     runs-on: macOS-latest
 
@@ -217,7 +212,6 @@ jobs:
         with:
           targets: aarch64-apple-darwin
       - name: Environment 
-        # macOS 11 was the first version to support ARM
         run: |
           export MACOSX_DEPLOYMENT_TARGET="11"
 
