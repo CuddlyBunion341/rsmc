@@ -1,6 +1,6 @@
 // my crates
-pub use hello_bevy as lib;
-pub use hello_bevy::BlockId;
+pub use rsmc as lib;
+pub use rsmc::BlockId;
 
 pub use crate::networking::systems as networking_systems;
 
