@@ -1,9 +1,11 @@
 name: Release
 
-on:
-  push:
-    tags:
-      - '*'
+# on:
+#   push:
+#     tags:
+#       - '*'
+# TODO: remove temporary push
+on: [push]
 
 env:
   add_binaries_to_github_release: true
