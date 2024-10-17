@@ -6,6 +6,7 @@ pub fn setup_world_system(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    texture_manager: ResMut<terrain_util::TextureManager>,
 ) {
     let generator = terrain_util::generator::Generator::new(0);
 
@@ -24,12 +25,14 @@ pub fn setup_world_system(
             &mut meshes,
             &mut materials,
             chunk,
+            &texture_manager,
         );
     }
 
     chunk_manager.insert_chunks(chunks);
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn handle_chunk_mesh_update_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -38,6 +41,7 @@ pub fn handle_chunk_mesh_update_events(
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
+    texture_manager: ResMut<terrain_util::TextureManager>,
 ) {
     for event in chunk_mesh_update_events.read() {
         let chunk_option = chunk_manager.get_chunk(event.position);
@@ -54,6 +58,7 @@ pub fn handle_chunk_mesh_update_events(
                     &mut meshes,
                     &mut materials,
                     chunk,
+                    &texture_manager,
                 );
             }
             None => {
@@ -69,9 +74,10 @@ fn add_chunk_objects(
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
     chunk: &terrain_util::Chunk,
+    texture_manager: &terrain_util::TextureManager,
 ) {
     let texture_handle: Handle<Image> = asset_server.load("textures/texture_atlas.png");
-    let mesh_option = terrain_util::create_chunk_mesh(chunk);
+    let mesh_option = terrain_util::create_chunk_mesh(chunk, texture_manager);
 
     if mesh_option.is_none() {
         return;
