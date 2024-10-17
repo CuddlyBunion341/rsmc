@@ -2189,25 +2189,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hello-bevy"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_fps_controller",
- "bevy_log",
- "bevy_mod_raycast",
- "bevy_rapier3d",
- "bevy_renet",
- "bincode",
- "cgmath",
- "iyes_perf_ui",
- "noise",
- "rand",
- "renet",
- "serde",
-]
-
-[[package]]
 name = "hermit-abi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3342,6 +3323,25 @@ dependencies = [
  "bitflags 2.5.0",
  "serde",
  "serde_derive",
+]
+
+[[package]]
+name = "rsmc"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_fps_controller",
+ "bevy_log",
+ "bevy_mod_raycast",
+ "bevy_rapier3d",
+ "bevy_renet",
+ "bincode",
+ "cgmath",
+ "iyes_perf_ui",
+ "noise",
+ "rand",
+ "renet",
+ "serde",
 ]
 
 [[package]]

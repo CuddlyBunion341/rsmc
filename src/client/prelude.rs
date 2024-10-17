@@ -1,8 +1,8 @@
 // my crates
 pub use crate::terrain::util::chunk::CHUNK_SIZE;
-pub use hello_bevy as lib;
-pub use hello_bevy::BlockId;
-pub use hello_bevy::NetworkingMessage;
+pub use rsmc as lib;
+pub use rsmc::BlockId;
+pub use rsmc::NetworkingMessage;
 
 pub use crate::collider::components as collider_components;
 pub use crate::collider::events as collider_events;
