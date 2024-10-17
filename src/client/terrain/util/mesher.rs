@@ -1,3 +1,5 @@
+use terrain_util::TextureManager;
+
 use crate::prelude::*;
 
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
@@ -32,6 +34,7 @@ pub fn create_cube_geometry_data(
     z: f32,
     faces: u8,
     block_id: BlockId,
+    texture_manager: &TextureManager,
 ) -> GeometryData {
     let mut position = Vec::new();
     let mut uv = Vec::new();
@@ -52,7 +55,7 @@ pub fn create_cube_geometry_data(
                 vertex.position[2] * 0.5 + z + 0.5,
             ]);
 
-            let block_uvs = Block::get_block_face_uvs(block_id, *face).unwrap();
+            let block_uvs = Block::get_block_face_uvs(block_id, *face, &texture_manager).unwrap();
             uv.push([
                 block_uvs[0] + vertex.uv[0] * 0.25 - 0.001,
                 block_uvs[1] + (1.0 - vertex.uv[1]) * 0.25,
@@ -75,7 +78,7 @@ pub fn create_cube_geometry_data(
     }
 }
 
-pub fn create_chunk_mesh(chunk: &Chunk) -> Option<Mesh> {
+pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Option<Mesh> {
     let mut geometry_data = GeometryData {
         position: Vec::new(),
         uv: Vec::new(),
@@ -110,7 +113,7 @@ pub fn create_chunk_mesh(chunk: &Chunk) -> Option<Mesh> {
                 update_mask(chunk, &mut mask, 0b100000, x, y, z + 1);
 
                 let cube_data =
-                    create_cube_geometry_data(x as f32, y as f32, z as f32, mask, block_id);
+                    create_cube_geometry_data(x as f32, y as f32, z as f32, mask, block_id, &texture_manager);
 
                 geometry_data.indices.extend(
                     cube_data
