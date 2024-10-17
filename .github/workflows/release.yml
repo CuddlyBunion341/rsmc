@@ -1,0 +1,210 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  add_binaries_to_github_release: true
+  use_git_lfs: true
+
+jobs:
+  release-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        binary: [client, server]
+
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+      - name: install dependencies
+        run: |
+          sudo apt-get update; sudo apt-get install pkg-config libx11-dev libasound2-dev libudev-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
+
+      - name: Build
+        run: |
+          cargo build --release --target x86_64-unknown-linux-gnu --bin ${{ matrix.binary }}
+
+      - name: Prepare package
+        run: |
+          mkdir linux
+          cp target/x86_64-unknown-linux-gnu/release/${{ matrix.binary }} linux/
+          cp -r assets linux/ || true # Try to copy, but ignore if it can't copy if source directory does not exist
+
+      - name: Package as a zip
+        working-directory: ./linux
+        run: |
+          zip --recurse-paths ../${{ matrix.binary }}.zip .
+
+      - name: Upload binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ matrix.binary }}.zip
+          name: linux-${{ matrix.binary }}
+          retention-days: 1
+
+      - name: Upload binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.binary }}.zip
+          asset_name: ${{ matrix.binary }}-linux-${{ steps.get_version.outputs.tag }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  release-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        binary: [client, server]
+
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Build
+        run: |
+          cargo build --release --target x86_64-pc-windows-msvc --bin ${{ matrix.binary }}
+
+      - name: Prepare package
+        run: |
+          mkdir windows
+          cp target/x86_64-pc-windows-msvc/release/${{ matrix.binary }}.exe windows/
+          mkdir assets -ea 0 # create the assets directory if it does not exist, it will get ignored in the zip if empty
+          cp -r assets windows/
+
+      - name: Package as a zip
+        run: |
+          Compress-Archive -Path windows/* -DestinationPath ${{ matrix.binary }}.zip
+
+      - name: Upload binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ matrix.binary }}.zip
+          name: windows-${{ matrix.binary }}
+          retention-days: 1
+
+      - name: Upload binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.binary }}.zip
+          asset_name: ${{ matrix.binary }}-windows-${{ steps.get_version.outputs.tag }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  release-macOS-intel:
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        binary: [client, server]
+
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin
+      - name: Environment Setup
+        run: |
+          export CFLAGS="-fno-stack-check"
+          export MACOSX_DEPLOYMENT_TARGET="10.9"
+
+      - name: Build
+        run: |
+          cargo build --release --target x86_64-apple-darwin --bin ${{ matrix.binary }}
+
+      - name: Prepare Package
+        run: |
+          mkdir -p ${{ matrix.binary }}.app/Contents/MacOS
+          cp target/x86_64-apple-darwin/release/${{ matrix.binary }} ${{ matrix.binary }}.app/Contents/MacOS/
+          cp -r assets ${{ matrix.binary }}.app/Contents/MacOS/ || true # Try to copy, but ignore if it can't copy if source directory does not exist
+          hdiutil create -fs HFS+ -volname "${{ matrix.binary }}" -srcfolder ${{ matrix.binary }}.app ${{ matrix.binary }}-macOS-intel.dmg
+
+      - name: Upload binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ matrix.binary }}-macOS-intel.dmg
+          name: macOS-intel-${{ matrix.binary }}
+          retention-days: 1
+
+      - name: Upload binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file:  ${{ matrix.binary }}-macOS-intel.dmg
+          asset_name: ${{ matrix.binary }}-macOS-intel-${{ steps.get_version.outputs.tag }}.dmg
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  release-macOS-apple-silicon:
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        binary: [client, server]
+
+    steps:
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: get_version
+      - uses: actions/checkout@v4
+        with:
+          lfs: ${{ env.use_git_lfs }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - name: Environment 
+        run: |
+          export MACOSX_DEPLOYMENT_TARGET="11"
+
+      - name: Build
+        run: |
+          cargo build --release --target aarch64-apple-darwin --bin ${{ matrix.binary }}
+
+      - name: Prepare Package
+        run: |
+          mkdir -p ${{ matrix.binary }}.app/Contents/MacOS
+          cp target/aarch64-apple-darwin/release/${{ matrix.binary }} ${{ matrix.binary }}.app/Contents/MacOS/
+          cp -r assets ${{ matrix.binary }}.app/Contents/MacOS/ || true # Try to copy, but ignore if it can't copy if source directory does not exist
+      - name: Create DMG
+        run: |
+          hdiutil create -fs HFS+ -volname "${{ matrix.binary }}-macOS-apple-silicon" -srcfolder ${{ matrix.binary }}.app ${{ matrix.binary }}-macOS-apple-silicon.dmg
+
+      - name: Verify DMG
+        run: |
+          hdiutil verify ${{ matrix.binary }}-macOS-apple-silicon.dmg
+      - name: Upload binaries to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ matrix.binary }}-macOS-apple-silicon.dmg
+          name: macOS-apple-silicon-${{ matrix.binary }}
+          retention-days: 1
+
+      - name: Upload binaries to release
+        if: ${{ env.add_binaries_to_github_release == 'true' }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.binary }}-macOS-apple-silicon.dmg
+          asset_name: ${{ matrix.binary }}-macOS-apple-silicon-${{ steps.get_version.outputs.tag }}.dmg
+          tag: ${{ github.ref }}
+          overwrite: true

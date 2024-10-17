@@ -4,4 +4,3 @@ use bevy::ecs::component::Component;
 pub struct ChunkMesh {
     pub key: [i32; 3],
 }
-
