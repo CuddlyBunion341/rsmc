@@ -32,6 +32,7 @@ pub fn setup_world_system(
     chunk_manager.insert_chunks(chunks);
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn handle_chunk_mesh_update_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
