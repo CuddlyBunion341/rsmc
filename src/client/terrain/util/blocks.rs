@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Hash, Eq, PartialEq, Copy, Clone)]
-enum TextureName {
+pub enum TextureName {
     Air,
     Stone,
     Dirt,
