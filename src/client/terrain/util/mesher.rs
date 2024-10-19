@@ -86,16 +86,16 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
         indices: Vec::new(),
     };
 
-    for x in 0..CHUNK_SIZE {
-        for y in 0..CHUNK_SIZE {
-            for z in 0..CHUNK_SIZE {
+    for x in 1..CHUNK_SIZE - 1 { 
+        for y in 1..CHUNK_SIZE - 1 { 
+            for z in 1..CHUNK_SIZE - 1 { 
                 let block_id = chunk.get(x as usize, y as usize, z as usize);
 
                 if block_id == BlockId::Air {
                     continue;
                 }
 
-                fn update_mask(chunk: &Chunk, mask: &mut u8, value: u8, x: i32, y: i32, z: i32) {
+                fn update_mask(chunk: &Chunk, mask: &mut u8, value: u8, x: usize, y: usize, z: usize) {
                     if chunk.get(x as usize, y as usize, z as usize) == BlockId::Air {
                         *mask |= value;
                     }

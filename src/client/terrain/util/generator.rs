@@ -19,9 +19,9 @@ impl Generator {
             return;
         }
 
-        for x in -1..=CHUNK_SIZE {
-            for y in -1..=CHUNK_SIZE {
-                for z in -1..=CHUNK_SIZE {
+        for x in 0..=CHUNK_SIZE + 1 {
+            for y in 0..=CHUNK_SIZE + 1 {
+                for z in 0..=CHUNK_SIZE + 1 {
                     let local_position = Vec3::new(x as f32, y as f32, z as f32);
                     let block_position = chunk_origin + local_position;
                     let block = self.generate_block(block_position);

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-pub const CHUNK_SIZE: i32 = 32;
-pub const PADDED_CHUNK_SIZE: i32 = CHUNK_SIZE + 2;
+pub const CHUNK_SIZE: usize = 32;
+pub const PADDED_CHUNK_SIZE: usize = CHUNK_SIZE + 2;
 pub const PADDED_CHUNK_USIZE: usize = PADDED_CHUNK_SIZE as usize;
 pub const CHUNK_LENGTH: usize =
     (PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE) as usize;
@@ -20,11 +20,11 @@ impl Chunk {
     }
 
     pub fn get(&self, x: usize, y: usize, z: usize) -> BlockId {
-        self.data[Self::index(x + 1, y + 1, z + 1)]
+        self.data[Self::index(x, y, z)]
     }
 
     pub fn set(&mut self, x: usize, y: usize, z: usize, value: BlockId) {
-        self.data[Self::index(x + 1, y + 1, z + 1)] = value;
+        self.data[Self::index(x, y, z)] = value;
     }
 
     #[rustfmt::skip]
