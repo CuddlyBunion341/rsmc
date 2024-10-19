@@ -25,7 +25,7 @@ impl Generator {
                     let local_position = Vec3::new(x as f32, y as f32, z as f32);
                     let block_position = chunk_origin + local_position;
                     let block = self.generate_block(block_position);
-                    chunk.set(x as usize, y as usize, z as usize, block);
+                    chunk.set_unpadded(x as usize, y as usize, z as usize, block);
                 }
             }
         }

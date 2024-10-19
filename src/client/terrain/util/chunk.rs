@@ -20,12 +20,22 @@ impl Chunk {
     }
 
     pub fn get(&self, x: usize, y: usize, z: usize) -> BlockId {
+        self.get_unpadded(x + 1, y + 1, z + 1)
+    }
+
+
+    pub fn get_unpadded(&self, x: usize, y: usize, z: usize) -> BlockId {
         self.data[Self::index(x, y, z)]
     }
 
     pub fn set(&mut self, x: usize, y: usize, z: usize, value: BlockId) {
+        self.set_unpadded(x + 1, y + 1, z + 1, value);
+    }
+
+    pub fn set_unpadded(&mut self, x: usize, y: usize, z: usize, value: BlockId) {
         self.data[Self::index(x, y, z)] = value;
     }
+
 
     #[rustfmt::skip]
     pub fn index(x: usize, y: usize, z: usize) -> usize {
