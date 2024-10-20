@@ -5,6 +5,7 @@ pub const PADDED_CHUNK_SIZE: usize = CHUNK_SIZE + 2;
 pub const PADDED_CHUNK_USIZE: usize = PADDED_CHUNK_SIZE;
 pub const CHUNK_LENGTH: usize = PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE;
 
+#[derive(Clone)]
 pub struct Chunk {
     pub data: [BlockId; CHUNK_LENGTH],
     pub position: Vec3,
@@ -44,5 +45,11 @@ impl Chunk {
 
     pub fn key_eq_pos(key: [i32; 3], position: Vec3) -> bool {
         position.x as i32 == key[0] && position.y as i32 == key[1] && position.z as i32 == key[2]
+    }
+}
+
+impl Default for Chunk {
+    fn default() -> Self {
+        Self::new(Vec3::ZERO)
     }
 }
