@@ -34,7 +34,6 @@ impl Chunk {
         self.data[Self::index(x, y, z)] = value;
     }
 
-
     #[rustfmt::skip]
     pub fn index(x: usize, y: usize, z: usize) -> usize {
       if (x >= PADDED_CHUNK_SIZE) || (y >= PADDED_CHUNK_SIZE) || (z >= PADDED_CHUNK_SIZE) {
