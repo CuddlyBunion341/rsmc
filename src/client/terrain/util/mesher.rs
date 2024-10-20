@@ -86,10 +86,10 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
         indices: Vec::new(),
     };
 
-    for x in 0..CHUNK_SIZE {
-        for y in 0..CHUNK_SIZE {
-            for z in 0..CHUNK_SIZE {
-                let block_id = chunk.get(x, y, z);
+    for x in 1..CHUNK_SIZE + 1 {
+        for y in 1..CHUNK_SIZE + 1 {
+            for z in 1..CHUNK_SIZE + 1 {
+                let block_id = chunk.get_unpadded(x, y, z);
 
                 if block_id == BlockId::Air {
                     continue;
@@ -103,7 +103,7 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                     y: usize,
                     z: usize,
                 ) {
-                    if chunk.get(x, y, z) == BlockId::Air {
+                    if chunk.get_unpadded(x, y, z) == BlockId::Air {
                         *mask |= value;
                     }
                 }
@@ -120,9 +120,9 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                 update_mask(chunk, &mut mask, 0b100000, x, y, z + 1);
 
                 let cube_data = create_cube_geometry_data(
-                    x as f32,
-                    y as f32,
-                    z as f32,
+                    (x - 1) as f32,
+                    (y - 1) as f32,
+                    (z - 1) as f32,
                     mask,
                     block_id,
                     texture_manager,
