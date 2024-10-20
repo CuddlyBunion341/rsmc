@@ -19,13 +19,13 @@ impl Generator {
             return;
         }
 
-        for x in -1..=CHUNK_SIZE {
-            for y in -1..=CHUNK_SIZE {
-                for z in -1..=CHUNK_SIZE {
+        for x in 0..CHUNK_SIZE + 2 {
+            for y in 0..CHUNK_SIZE + 2 {
+                for z in 0..CHUNK_SIZE + 2 {
                     let local_position = Vec3::new(x as f32, y as f32, z as f32);
                     let block_position = chunk_origin + local_position;
                     let block = self.generate_block(block_position);
-                    chunk.set(x as usize, y as usize, z as usize, block);
+                    chunk.set_unpadded(x, y, z, block);
                 }
             }
         }

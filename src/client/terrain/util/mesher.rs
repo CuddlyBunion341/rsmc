@@ -89,14 +89,21 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
     for x in 0..CHUNK_SIZE {
         for y in 0..CHUNK_SIZE {
             for z in 0..CHUNK_SIZE {
-                let block_id = chunk.get(x as usize, y as usize, z as usize);
+                let block_id = chunk.get(x, y, z);
 
                 if block_id == BlockId::Air {
                     continue;
                 }
 
-                fn update_mask(chunk: &Chunk, mask: &mut u8, value: u8, x: i32, y: i32, z: i32) {
-                    if chunk.get(x as usize, y as usize, z as usize) == BlockId::Air {
+                fn update_mask(
+                    chunk: &Chunk,
+                    mask: &mut u8,
+                    value: u8,
+                    x: usize,
+                    y: usize,
+                    z: usize,
+                ) {
+                    if chunk.get(x, y, z) == BlockId::Air {
                         *mask |= value;
                     }
                 }
