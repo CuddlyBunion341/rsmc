@@ -6,7 +6,7 @@ pub const PADDED_CHUNK_USIZE: usize = PADDED_CHUNK_SIZE;
 pub const CHUNK_LENGTH: usize = PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE;
 
 #[derive(Clone)]
- pub struct Chunk {
+pub struct Chunk {
     pub data: [BlockId; CHUNK_LENGTH],
     pub position: Vec3,
 }

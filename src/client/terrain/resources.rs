@@ -126,7 +126,10 @@ mod tests {
         let position = Vec3::new(0.0, 0.0, 0.0);
         let render_distance = 2;
         let chunks = ChunkManager::instantiate_chunks(position, render_distance);
-        assert_eq!(chunks.len(), (render_distance * render_distance * render_distance) as usize);
+        assert_eq!(
+            chunks.len(),
+            (render_distance * render_distance * render_distance) as usize
+        );
     }
 
     #[test]
@@ -137,7 +140,10 @@ mod tests {
         let chunks = ChunkManager::instantiate_chunks(position, render_distance);
 
         chunk_manager.insert_chunks(chunks);
-        assert_eq!(chunk_manager.chunks.len(), (render_distance * render_distance * render_distance) as usize);
+        assert_eq!(
+            chunk_manager.chunks.len(),
+            (render_distance * render_distance * render_distance) as usize
+        );
     }
 
     #[test]

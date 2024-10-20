@@ -226,7 +226,12 @@ mod tests {
     #[test]
     fn test_create_cube_mesh_from_data() {
         let geometry_data = GeometryData {
-            position: vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]],
+            position: vec![
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ],
             uv: vec![[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
             normal: vec![[0.0, 0.0, 1.0]; 4],
             indices: vec![0, 1, 2, 2, 3, 0],
@@ -239,7 +244,8 @@ mod tests {
     #[test]
     fn test_create_cube_geometry_data() {
         let texture_manager = TextureManager::new();
-        let geometry_data = create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111, BlockId::Stone, &texture_manager);
+        let geometry_data =
+            create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111, BlockId::Stone, &texture_manager);
 
         assert_eq!(geometry_data.position.len(), 6 * 4);
         assert_eq!(geometry_data.uv.len(), 6 * 4);

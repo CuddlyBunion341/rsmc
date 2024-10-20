@@ -107,6 +107,6 @@ mod tests {
         let position = Vec3::new(0.0, 0.0, 0.0);
         let density = generator.sample_3d(position, 4);
 
-        assert!(density >= 0.0 && density <= 1.0);
+        assert!((0.0..=1.0).contains(&density));
     }
 }
