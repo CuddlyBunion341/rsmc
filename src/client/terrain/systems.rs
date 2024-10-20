@@ -77,8 +77,8 @@ fn add_chunk_objects(
     texture_manager: &terrain_util::TextureManager,
 ) {
     if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
-        let material = create_chunk_material(asset_server, materials);
-        spawn_chunk(commands, meshes, material, mesh, chunk);
+        let material = create_chunk_material(asset_server, &mut ResMut::reborrow(materials));
+        spawn_chunk(commands, &mut ResMut::reborrow(meshes), material, mesh, chunk);
     }
 }
 
@@ -91,8 +91,9 @@ fn create_chunk_mesh(
 
 fn create_chunk_material(
     asset_server: &Res<AssetServer>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
+    materials: &mut Mut<Assets<StandardMaterial>>,
 ) -> Handle<StandardMaterial> {
+    // use Mut instead of ResMut because of https://github.com/bevyengine/bevy/issues/11765
     let texture_handle: Handle<Image> = asset_server.load("textures/texture_atlas.png");
     materials.add(StandardMaterial {
         perceptual_roughness: 0.5,
@@ -106,7 +107,7 @@ fn create_chunk_material(
 
 fn spawn_chunk(
     commands: &mut Commands,
-    meshes: &mut ResMut<Assets<Mesh>>,
+    meshes: &mut Mut<Assets<Mesh>>,
     material: Handle<StandardMaterial>,
     mesh: Mesh,
     chunk: &terrain_util::Chunk,
@@ -134,3 +135,56 @@ fn spawn_chunk(
     ));
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::asset::AssetPlugin;
+
+    fn setup_app() -> App {
+        let mut app = App::new();
+        app
+            .add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default());
+        app
+    }
+
+    #[test]
+    fn test_create_chunk_material() {
+        let mut app = setup_app();
+        let world = &mut app.world;
+        
+        world.insert_resource(Assets::<StandardMaterial>::default());
+
+        let asset_server = world.get_resource_ref::<AssetServer>().unwrap();
+        let mut materials = world.get_resource_mut::<Assets<StandardMaterial>>().unwrap();
+
+        let material = create_chunk_material(&asset_server, &mut materials);
+        assert!(materials.get(&material).is_some());
+    }
+
+    #[test]
+    fn test_spawn_chunk() {
+        let mut app = setup_app();
+        let world = &mut app.world;
+        let mut command_queue = CommandQueue::default();
+        let mut commands = Commands::new(&mut command_queue, world);
+
+        world.insert_resource(Assets::<StandardMaterial>::default());
+        world.insert_resource(Assets::<Mesh>::default());
+
+        let asset_server = world.get_resource_ref::<AssetServer>().unwrap();
+        let mut materials = world.get_resource_ref::<Assets<StandardMaterial>>().unwrap();
+        let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
+
+        let chunk = terrain_util::Chunk::default();
+        let mesh = create_chunk_mesh(&chunk, &terrain_util::TextureManager::default()).unwrap();
+        let material = create_chunk_material(&asset_server, &mut materials);
+
+        spawn_chunk(&mut commands, &mut meshes, material, mesh, &chunk);
+
+        command_queue.apply(world);
+
+        let query = world.query::<&terrain_components::ChunkMesh>();
+        assert_eq!(query.iter(world).count(), 1);
+    }
+}
