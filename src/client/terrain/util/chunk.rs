@@ -47,3 +47,9 @@ impl Chunk {
         position.x as i32 == key[0] && position.y as i32 == key[1] && position.z as i32 == key[2]
     }
 }
+
+impl Default for Chunk {
+    fn default() -> Self {
+        Self::new(Vec3::ZERO)
+    }
+}

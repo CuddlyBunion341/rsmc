@@ -76,43 +76,61 @@ fn add_chunk_objects(
     chunk: &terrain_util::Chunk,
     texture_manager: &terrain_util::TextureManager,
 ) {
-    let texture_handle: Handle<Image> = asset_server.load("textures/texture_atlas.png");
-    let mesh_option = terrain_util::create_chunk_mesh(chunk, texture_manager);
-
-    if mesh_option.is_none() {
-        return;
+    if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
+        let material = create_chunk_material(asset_server, materials);
+        spawn_chunk(commands, meshes, material, mesh, chunk);
     }
+}
 
-    let mesh = mesh_option.unwrap();
+fn create_chunk_mesh(
+    chunk: &terrain_util::Chunk,
+    texture_manager: &terrain_util::TextureManager,
+) -> Option<Mesh> {
+    terrain_util::create_chunk_mesh(chunk, texture_manager)
+}
 
-    let transform = Transform::from_xyz(
-        chunk.position.x * CHUNK_SIZE as f32,
-        chunk.position.y * CHUNK_SIZE as f32,
-        chunk.position.z * CHUNK_SIZE as f32,
-    );
-
-    let material = materials.add(StandardMaterial {
+fn create_chunk_material(
+    asset_server: &Res<AssetServer>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+) -> Handle<StandardMaterial> {
+    let texture_handle: Handle<Image> = asset_server.load("textures/texture_atlas.png");
+    materials.add(StandardMaterial {
         perceptual_roughness: 0.5,
         reflectance: 0.0,
         unlit: false,
         specular_transmission: 0.0,
         base_color_texture: Some(texture_handle.clone()),
         ..default()
-    });
+    })
+}
+
+fn spawn_chunk(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    material: Handle<StandardMaterial>,
+    mesh: Mesh,
+    chunk: &terrain_util::Chunk,
+) {
+    let transform = Transform::from_xyz(
+        chunk.position.x * CHUNK_SIZE as f32,
+        chunk.position.y * CHUNK_SIZE as f32,
+        chunk.position.z * CHUNK_SIZE as f32,
+    );
 
     commands.spawn((
-        MaterialMeshBundle {
-            mesh: meshes.add(mesh),
-            transform,
-            material,
-            ..default()
-        },
-        terrain_components::ChunkMesh {
-            key: [
-                chunk.position.x as i32,
-                chunk.position.y as i32,
-                chunk.position.z as i32,
-            ],
-        },
+            MaterialMeshBundle {
+                mesh: meshes.add(mesh),
+                transform,
+                material,
+                ..default()
+            },
+            terrain_components::ChunkMesh {
+                key: [
+                    chunk.position.x as i32,
+                    chunk.position.y as i32,
+                    chunk.position.z as i32,
+                ],
+            },
     ));
 }
+
