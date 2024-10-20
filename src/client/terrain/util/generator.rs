@@ -76,3 +76,37 @@ impl Generator {
         density
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_generator_new() {
+        let seed = 42;
+        let generator = Generator::new(seed);
+        assert_eq!(generator.seed, seed);
+    }
+
+    #[test]
+    fn test_generate_chunk() {
+        let seed = 42;
+        let generator = Generator::new(seed);
+        let mut chunk = Chunk::new(Vec3::new(0.0, 0.0, 0.0));
+
+        generator.generate_chunk(&mut chunk);
+
+        assert_ne!(chunk.get(0, 0, 0), BlockId::Air);
+    }
+
+    #[test]
+    fn test_sample_3d() {
+        let seed = 42;
+        let generator = Generator::new(seed);
+
+        let position = Vec3::new(0.0, 0.0, 0.0);
+        let density = generator.sample_3d(position, 4);
+
+        assert!(density >= 0.0 && density <= 1.0);
+    }
+}
