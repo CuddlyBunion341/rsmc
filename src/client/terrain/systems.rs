@@ -151,8 +151,8 @@ mod tests {
     #[test]
     fn test_create_chunk_material() {
         let mut app = setup_app();
-        let world = &mut app.world;
-        
+        let mut world = app.world;
+
         world.insert_resource(Assets::<StandardMaterial>::default());
 
         let asset_server = world.get_resource_ref::<AssetServer>().unwrap();
@@ -161,6 +161,7 @@ mod tests {
         let material = create_chunk_material(&asset_server, &mut materials);
         assert!(materials.get(&material).is_some());
     }
+
 
     #[test]
     fn test_spawn_chunk() {
@@ -173,7 +174,7 @@ mod tests {
         world.insert_resource(Assets::<Mesh>::default());
 
         let asset_server = world.get_resource_ref::<AssetServer>().unwrap();
-        let mut materials = world.get_resource_ref::<Assets<StandardMaterial>>().unwrap();
+        let mut materials = world.get_resource_mut::<Assets<StandardMaterial>>().unwrap();
         let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
 
         let chunk = terrain_util::Chunk::default();
