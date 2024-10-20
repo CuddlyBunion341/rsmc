@@ -86,9 +86,9 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
         indices: Vec::new(),
     };
 
-    for x in 1..CHUNK_SIZE - 1 {
-        for y in 1..CHUNK_SIZE - 1 {
-            for z in 1..CHUNK_SIZE - 1 {
+    for x in 0..CHUNK_SIZE {
+        for y in 0..CHUNK_SIZE {
+            for z in 0..CHUNK_SIZE {
                 let block_id = chunk.get(x, y, z);
 
                 if block_id == BlockId::Air {
