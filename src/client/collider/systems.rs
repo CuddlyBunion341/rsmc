@@ -13,10 +13,10 @@ pub fn setup_coliders_system(mut commands: Commands) {
                 commands
                     .spawn(Collider::cuboid(0.5, 0.5, 0.5))
                     .insert(TransformBundle::from(Transform::from_xyz(
-                        x as f32, y as f32, z as f32,
+                                x as f32, y as f32, z as f32,
                     )))
                     .insert(collider_components::MyCollider { key });
-            }
+                }
         }
     }
 }
@@ -61,3 +61,28 @@ fn relative_colider_position(key: u32) -> Vec3 {
         z: z as f32 - (COLLIDER_GRID_SIZE / 2) as f32,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn setup_app() -> App {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins);
+        app
+    }
+
+    #[test]
+    fn test_setup_coliders_system() {
+        let mut app = setup_app();
+        app.add_systems(Startup, setup_coliders_system);
+
+        app.update();
+
+            let mut colliders_query = app.world.query::<&collider_components::MyCollider>();
+            let colliders_count = colliders_query.iter(&app.world).count();
+
+        assert_eq!(colliders_count, 3 * 3 * 3);
+
+    }
+}
+
