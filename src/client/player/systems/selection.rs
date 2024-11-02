@@ -62,3 +62,32 @@ pub fn raycast_system(
 
     highlight_transform.translation = hover_position.unwrap() + 0.5;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_highlight_cube_spawned() {
+        let mut app = App::new();
+
+        app.add_plugins(MinimalPlugins)
+            .add_systems(Startup, setup_highlight_cube_system)
+            .insert_resource(Assets::<Mesh>::default())
+            .insert_resource(Assets::<StandardMaterial>::default());
+
+        app.update();
+
+        let highlight_cube_exists = app
+            .world
+            .query::<&player_components::HighlightCube>()
+            .iter(&app.world)
+            .count()
+            > 0;
+
+        assert!(
+            highlight_cube_exists,
+            "HighlightCube was not spawned into the world"
+        );
+    }
+}
