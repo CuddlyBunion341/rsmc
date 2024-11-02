@@ -143,9 +143,8 @@ fn spawn_chunk(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use bevy::asset::AssetPlugin;
-
+    // use super::*;
+    // use bevy::asset::AssetPlugin;
     // fn setup_app() -> App {
     //     let mut app = App::new();
     //     app.add_plugins(MinimalPlugins)

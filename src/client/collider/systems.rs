@@ -13,10 +13,10 @@ pub fn setup_coliders_system(mut commands: Commands) {
                 commands
                     .spawn(Collider::cuboid(0.5, 0.5, 0.5))
                     .insert(TransformBundle::from(Transform::from_xyz(
-                                x as f32, y as f32, z as f32,
+                        x as f32, y as f32, z as f32,
                     )))
                     .insert(collider_components::MyCollider { key });
-                }
+            }
         }
     }
 }
@@ -78,11 +78,9 @@ mod tests {
 
         app.update();
 
-            let mut colliders_query = app.world.query::<&collider_components::MyCollider>();
-            let colliders_count = colliders_query.iter(&app.world).count();
+        let mut colliders_query = app.world.query::<&collider_components::MyCollider>();
+        let colliders_count = colliders_query.iter(&app.world).count();
 
         assert_eq!(colliders_count, 3 * 3 * 3);
-
     }
 }
-
