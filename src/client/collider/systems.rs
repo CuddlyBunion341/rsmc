@@ -13,10 +13,10 @@ pub fn setup_coliders_system(mut commands: Commands) {
                 commands
                     .spawn(Collider::cuboid(0.5, 0.5, 0.5))
                     .insert(TransformBundle::from(Transform::from_xyz(
-                        x as f32, y as f32, z as f32,
+                                x as f32, y as f32, z as f32,
                     )))
                     .insert(collider_components::MyCollider { key });
-            }
+                }
         }
     }
 }
@@ -64,6 +64,8 @@ fn relative_colider_position(key: u32) -> Vec3 {
 
 #[cfg(test)]
 mod tests {
+    use collider_events::ColliderUpdateEvent;
+
     use super::*;
     fn setup_app() -> App {
         let mut app = App::new();
@@ -82,5 +84,28 @@ mod tests {
         let colliders_count = colliders_query.iter(&app.world).count();
 
         assert_eq!(colliders_count, 3 * 3 * 3);
+    }
+
+    #[test]
+    fn test_handle_collider_update_events_system() {
+        let mut app = App::new();
+
+        app.add_event::<collider_events::ColliderUpdateEvent>();
+        app.add_systems(Update, handle_collider_update_events_system);
+
+        let collider_id = app
+            .world
+            .spawn((Transform { translation: Vec3 {x: 0.0, y: 0.0, z: 0.0}, ..Default::default()}, collider_components::MyCollider { key: 0 } ))
+            .id();
+
+        app.world.send_event(ColliderUpdateEvent {
+            position: [0.0, 0.0, 0.0],
+        });
+
+        app.update();
+
+        let mut collider_query = app.world.query::<(&Transform, &collider_components::MyCollider)>();
+        let (collider_transform, _) = collider_query.single(&app.world);
+        assert_eq!(collider_transform.translation, Vec3 {x: 0.0, y: 0.0, z: 0.0});
     }
 }
