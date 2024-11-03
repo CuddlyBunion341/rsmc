@@ -92,20 +92,26 @@ mod tests {
 
         app.add_event::<collider_events::ColliderUpdateEvent>();
         app.add_systems(Update, handle_collider_update_events_system);
+        app.insert_resource(terrain_resources::ChunkManager::new());
 
-        let collider_id = app
+        app
             .world
-            .spawn((Transform { translation: Vec3 {x: 0.0, y: 0.0, z: 0.0}, ..Default::default()}, collider_components::MyCollider { key: 0 } ))
-            .id();
+            .spawn((Transform { translation: Vec3 {x: 0.0, y: 0.0, z: 0.0}, ..Default::default()}, collider_components::MyCollider { key: 0 } ));
+
+        let block = BlockId::Dirt;
+        let mut resource = app.world.get_resource_mut::<terrain_resources::ChunkManager>().unwrap();
+        let chunks = terrain_resources::ChunkManager::instantiate_chunks(Vec3 {x: 0.0, y: 0.0, z: 0.0}, 1);
+        resource.insert_chunks(chunks);
+        resource.set_block(Vec3 {x: 9.0, y: 9.0, z: 9.0}, block);
 
         app.world.send_event(ColliderUpdateEvent {
-            position: [0.0, 0.0, 0.0],
+            position: [10.0, 10.0, 10.0],
         });
 
         app.update();
 
         let mut collider_query = app.world.query::<(&Transform, &collider_components::MyCollider)>();
         let (collider_transform, _) = collider_query.single(&app.world);
-        assert_eq!(collider_transform.translation, Vec3 {x: 0.0, y: 0.0, z: 0.0});
+        assert_eq!(Vec3 {x: 9.5, y: 9.5, z: 9.5}, collider_transform.translation);
     }
 }
