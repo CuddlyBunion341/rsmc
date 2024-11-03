@@ -77,7 +77,6 @@ fn add_chunk_objects(
     texture_manager: &terrain_util::TextureManager,
 ) {
     if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
-        texture_handle = 
         let texture_handle = obtain_texture_handle(&asset_server).clone();
         let material = create_chunk_material(texture_handle, &mut ResMut::reborrow(materials));
         spawn_chunk(commands, &mut ResMut::reborrow(meshes), material, mesh, chunk);
@@ -137,95 +136,4 @@ fn spawn_chunk(
             ],
         },
     ));
-}
-
-#[cfg(test)]
-mod tests {
-    // use super::*;
-    // use bevy::asset::AssetPlugin;
-    // fn setup_app() -> App {
-    //     let mut app = App::new();
-    //     app.add_plugins(MinimalPlugins)
-    //         .add_plugins(AssetPlugin::default());
-    //     app
-    // }
-    //
-    // #[test]
-    // fn test_setup_world_system() {
-    //     let mut app = setup_app();
-    //
-    //     app.insert_resource(terrain_resources::ChunkManager::new());
-    //     app.insert_resource(terrain_util::TextureManager::new());
-    //             app.insert_resource(AssetServer::new(AssetSources {sources: std::collections::HashMap:<'static>::new(),  }, AssetServerMode::Processed, false));
-    //
-    //     app.add_systems(Startup, setup_world_system);
-    //     app.update();
-    //
-    //     let mut chunk_manager = app.world.get_resource_mut::<terrain_resources::ChunkManager>().unwrap();
-    //     let chunk = chunk_manager.get_chunk(Vec3 { x: 0.0, y: 0.0, z: 0.0});
-    //
-    //     assert!(chunk.is_some());
-    // }
-    use super::*;
-    use bevy::asset::AssetPlugin;
-
-    fn setup_app() -> App {
-        let mut app = App::new();
-        app
-            .add_plugins(MinimalPlugins)
-            .add_plugins(AssetPlugin::default());
-        app
-    }
-
-    #[test]
-    fn test_create_chunk_material() {
-        let app = setup_app();
-        let mut world = app.world;
-
-        world.insert_resource(Assets::<StandardMaterial>::default());
-
-        let asset_server = world.get_resource_ref::<AssetServer>().unwrap();
-
-        let texture_handle = obtain_texture_handle(&asset_server).clone();
-
-        let mut materials = world.get_resource_mut::<Assets<StandardMaterial>>().unwrap();
-
-        let material = create_chunk_material(texture_handle, &mut materials);
-        assert!(materials.get(&material).is_some());
-    }
-
-
-    #[test]
-    fn test_spawn_chunk() {
-        let mut app = setup_app();
-        let world = &mut app.world;
-        let mut command_queue = CommandQueue::default();
-        let mut commands = Commands::new(&mut command_queue, world);
-
-        world.insert_resource(Assets::<StandardMaterial>::default());
-        world.insert_resource(Assets::<Mesh>::default());
-
-        let asset_server = world.get_resource_ref::<AssetServer>().unwrap();
-        let mut materials = world.get_resource_mut::<Assets<StandardMaterial>>().unwrap();
-        let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
-
-        let chunk = terrain_util::Chunk::default();
-        let mesh = create_chunk_mesh(&chunk, &terrain_util::TextureManager::default()).unwrap();
-
-        let texture_handle = obtain_texture_handle(&asset_server).clone();
-
-        let material = create_chunk_material(texture_handle, &mut materials);
-
-        spawn_chunk(&mut commands, &mut meshes, material, mesh, &chunk);
-
-        command_queue.apply(world);
-
-        let mut query = world.query::<&terrain_components::ChunkMesh>();
-        assert_eq!(query.iter(world).count(), 1);
-    }
-
-    #[test]
-    fn test_setup_world_system() {
-
-    }
 }
