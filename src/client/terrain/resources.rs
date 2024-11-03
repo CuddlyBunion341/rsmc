@@ -110,3 +110,65 @@ impl ChunkManager {
         self.get_chunk(chunk_position)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_chunk_manager_new() {
+        let chunk_manager = ChunkManager::new();
+        assert!(chunk_manager.chunks.is_empty());
+    }
+
+    #[test]
+    fn test_instantiate_chunks() {
+        let position = Vec3::new(0.0, 0.0, 0.0);
+        let render_distance = 2;
+        let chunks = ChunkManager::instantiate_chunks(position, render_distance);
+        assert_eq!(
+            chunks.len(),
+            (render_distance * render_distance * render_distance) as usize
+        );
+    }
+
+    #[test]
+    fn test_insert_chunks() {
+        let mut chunk_manager = ChunkManager::new();
+        let position = Vec3::new(0.0, 0.0, 0.0);
+        let render_distance = 2;
+        let chunks = ChunkManager::instantiate_chunks(position, render_distance);
+
+        chunk_manager.insert_chunks(chunks);
+        assert_eq!(
+            chunk_manager.chunks.len(),
+            (render_distance * render_distance * render_distance) as usize
+        );
+    }
+
+    #[test]
+    fn test_set_and_get_chunk() {
+        let mut chunk_manager = ChunkManager::new();
+        let position = Vec3::new(0.0, 0.0, 0.0);
+        let chunk = Chunk::new(position);
+
+        chunk_manager.set_chunk(position, chunk.clone());
+        let retrieved_chunk = chunk_manager.get_chunk(position).unwrap();
+        assert_eq!(retrieved_chunk.position, chunk.position);
+    }
+
+    #[test]
+    fn test_set_and_get_block() {
+        let mut chunk_manager = ChunkManager::new();
+        let position = Vec3::new(0.0, 0.0, 0.0);
+        let chunk = Chunk::new(position);
+
+        chunk_manager.set_chunk(position, chunk);
+        let block_position = Vec3::new(1.0, 1.0, 1.0);
+        let block_id = BlockId::Stone;
+
+        chunk_manager.set_block(block_position, block_id);
+        let retrieved_block = chunk_manager.get_block(block_position).unwrap();
+        assert_eq!(retrieved_block, block_id);
+    }
+}

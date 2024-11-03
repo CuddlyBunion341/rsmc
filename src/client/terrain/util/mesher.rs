@@ -217,3 +217,56 @@ fn face_vertices(face_index: CubeFace) -> [Vertex; 4] {
         ],
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use terrain_util::TextureManager;
+
+    #[test]
+    fn test_create_cube_mesh_from_data() {
+        let geometry_data = GeometryData {
+            position: vec![
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ],
+            uv: vec![[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
+            normal: vec![[0.0, 0.0, 1.0]; 4],
+            indices: vec![0, 1, 2, 2, 3, 0],
+        };
+
+        let mesh = create_cube_mesh_from_data(geometry_data);
+        assert!(mesh.is_some());
+    }
+
+    #[test]
+    fn test_create_cube_geometry_data() {
+        let texture_manager = TextureManager::new();
+        let geometry_data =
+            create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111, BlockId::Stone, &texture_manager);
+
+        assert_eq!(geometry_data.position.len(), 6 * 4);
+        assert_eq!(geometry_data.uv.len(), 6 * 4);
+        assert_eq!(geometry_data.normal.len(), 6 * 4);
+        assert_eq!(geometry_data.indices.len(), 6 * 6);
+    }
+
+    #[test]
+    fn test_create_chunk_mesh() {
+        let texture_manager = TextureManager::new();
+        let mut chunk = Chunk::new(Vec3::new(0.0, 0.0, 0.0));
+
+        for x in 1..CHUNK_SIZE + 1 {
+            for y in 1..CHUNK_SIZE + 1 {
+                for z in 1..CHUNK_SIZE + 1 {
+                    chunk.set_unpadded(x, y, z, BlockId::Stone);
+                }
+            }
+        }
+
+        let mesh = create_chunk_mesh(&chunk, &texture_manager);
+        assert!(mesh.is_some());
+    }
+}
