@@ -77,9 +77,15 @@ fn add_chunk_objects(
     texture_manager: &terrain_util::TextureManager,
 ) {
     if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
-        let texture_handle = obtain_texture_handle(&asset_server).clone();
+        let texture_handle = obtain_texture_handle(asset_server).clone();
         let material = create_chunk_material(texture_handle, &mut ResMut::reborrow(materials));
-        spawn_chunk(commands, &mut ResMut::reborrow(meshes), material, mesh, chunk);
+        spawn_chunk(
+            commands,
+            &mut ResMut::reborrow(meshes),
+            material,
+            mesh,
+            chunk,
+        );
     }
 }
 

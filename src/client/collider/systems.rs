@@ -13,10 +13,10 @@ pub fn setup_coliders_system(mut commands: Commands) {
                 commands
                     .spawn(Collider::cuboid(0.5, 0.5, 0.5))
                     .insert(TransformBundle::from(Transform::from_xyz(
-                                x as f32, y as f32, z as f32,
+                        x as f32, y as f32, z as f32,
                     )))
                     .insert(collider_components::MyCollider { key });
-                }
+            }
         }
     }
 }
@@ -94,15 +94,40 @@ mod tests {
         app.add_systems(Update, handle_collider_update_events_system);
         app.insert_resource(terrain_resources::ChunkManager::new());
 
-        app
-            .world
-            .spawn((Transform { translation: Vec3 {x: 0.0, y: 0.0, z: 0.0}, ..Default::default()}, collider_components::MyCollider { key: 0 } ));
+        app.world.spawn((
+            Transform {
+                translation: Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+                ..Default::default()
+            },
+            collider_components::MyCollider { key: 0 },
+        ));
 
         let block = BlockId::Dirt;
-        let mut resource = app.world.get_resource_mut::<terrain_resources::ChunkManager>().unwrap();
-        let chunks = terrain_resources::ChunkManager::instantiate_chunks(Vec3 {x: 0.0, y: 0.0, z: 0.0}, 1);
+        let mut resource = app
+            .world
+            .get_resource_mut::<terrain_resources::ChunkManager>()
+            .unwrap();
+        let chunks = terrain_resources::ChunkManager::instantiate_chunks(
+            Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            1,
+        );
         resource.insert_chunks(chunks);
-        resource.set_block(Vec3 {x: 9.0, y: 9.0, z: 9.0}, block);
+        resource.set_block(
+            Vec3 {
+                x: 9.0,
+                y: 9.0,
+                z: 9.0,
+            },
+            block,
+        );
 
         app.world.send_event(ColliderUpdateEvent {
             position: [10.0, 10.0, 10.0],
@@ -110,8 +135,17 @@ mod tests {
 
         app.update();
 
-        let mut collider_query = app.world.query::<(&Transform, &collider_components::MyCollider)>();
+        let mut collider_query = app
+            .world
+            .query::<(&Transform, &collider_components::MyCollider)>();
         let (collider_transform, _) = collider_query.single(&app.world);
-        assert_eq!(Vec3 {x: 9.5, y: 9.5, z: 9.5}, collider_transform.translation);
+        assert_eq!(
+            Vec3 {
+                x: 9.5,
+                y: 9.5,
+                z: 9.5
+            },
+            collider_transform.translation
+        );
     }
 }
