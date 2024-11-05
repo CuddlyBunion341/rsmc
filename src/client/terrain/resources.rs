@@ -38,10 +38,14 @@ impl ChunkManager {
         chunks
     }
 
+    pub fn insert_chunk(&mut self, chunk: lib::Chunk) {
+        self.chunks
+            .insert(Self::position_to_key(chunk.position), chunk);
+    }
+
     pub fn insert_chunks(&mut self, chunks: Vec<lib::Chunk>) {
         for chunk in chunks {
-            self.chunks
-                .insert(Self::position_to_key(chunk.position), chunk);
+            self.insert_chunk(chunk);
         }
     }
 
@@ -93,9 +97,9 @@ impl ChunkManager {
                 );
                 let local_position = (position - chunk_position).floor();
                 Some(chunk.get(
-                    local_position.x as usize,
-                    local_position.y as usize,
-                    local_position.z as usize,
+                        local_position.x as usize,
+                        local_position.y as usize,
+                        local_position.z as usize,
                 ))
             }
             None => {

@@ -6,7 +6,7 @@ pub fn receive_message_system(
     mut player_despawn_events: ResMut<Events<remote_player_events::RemotePlayerDespawnedEvent>>,
     mut player_sync_events: ResMut<Events<remote_player_events::RemotePlayerSyncEvent>>,
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
-    chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
         let message = bincode::deserialize(&message).unwrap();
@@ -21,6 +21,10 @@ pub fn receive_message_system(
             lib::NetworkingMessage::PlayerLeave(event) => {
                 player_despawn_events
                     .send(remote_player_events::RemotePlayerDespawnedEvent { client_id: event });
+            }
+            lib::NetworkingMessage::ChunkResponse(chunk) => {
+                debug!("Client received chunk response message for: {:?}", chunk.position);
+                chunk_manager.insert_chunk(chunk);
             }
             lib::NetworkingMessage::BlockUpdate { position, block } => {
                 debug!("Client received block update message: {:?}", position);
