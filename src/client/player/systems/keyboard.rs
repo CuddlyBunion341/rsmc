@@ -10,7 +10,7 @@ pub fn handle_keyboard_events_system(
             let controller_transform = camera_query.single();
             println!("Handling event: {:?}", controller_transform.translation);
             collider_events.send(collider_events::ColliderUpdateEvent {
-                position: controller_transform.translation.into(),
+                grid_center_position: controller_transform.translation.into(),
             });
         }
     }

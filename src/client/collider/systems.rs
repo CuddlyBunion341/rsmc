@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 static COLLIDER_GRID_SIZE: u32 = 3;
-static COLLIDER_RESTING_POSITION: Vec3 = Vec3::new(0.0, 0.0, 0.0);
+static COLLIDER_RESTING_POSITION: Vec3 = Vec3::ZERO;
 
 pub fn setup_coliders_system(mut commands: Commands) {
     let collider_range = 0..COLLIDER_GRID_SIZE;
@@ -9,13 +9,18 @@ pub fn setup_coliders_system(mut commands: Commands) {
     for x in collider_range.clone() {
         for y in collider_range.clone() {
             for z in collider_range.clone() {
-                let key = x * COLLIDER_GRID_SIZE * COLLIDER_GRID_SIZE + y * COLLIDER_GRID_SIZE + z;
                 commands
                     .spawn(Collider::cuboid(0.5, 0.5, 0.5))
                     .insert(TransformBundle::from(Transform::from_xyz(
                         x as f32, y as f32, z as f32,
                     )))
-                    .insert(collider_components::MyCollider { key });
+                    .insert(collider_components::BlockCollider {
+                        relative_position: Vec3 {
+                            x: x as f32,
+                            y: y as f32,
+                            z: z as f32,
+                        },
+                    });
             }
         }
     }
@@ -23,14 +28,18 @@ pub fn setup_coliders_system(mut commands: Commands) {
 
 pub fn handle_collider_update_events_system(
     mut collider_grid_events: EventReader<collider_events::ColliderUpdateEvent>,
-    mut query: Query<(&mut Transform, &collider_components::MyCollider)>,
+    mut query: Query<(&mut Transform, &collider_components::BlockCollider)>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
 ) {
     for event in collider_grid_events.read() {
-        let event_position =
-            Vec3::new(event.position[0], event.position[1], event.position[2]).floor();
+        let event_position = Vec3::new(
+            event.grid_center_position[0],
+            event.grid_center_position[1],
+            event.grid_center_position[2],
+        )
+        .floor();
         for (mut transform, collider) in query.iter_mut() {
-            let relative_position = relative_colider_position(collider.key);
+            let relative_position = collider.relative_position;
             let collider_position = (event_position + relative_position).floor();
             let block = chunk_manager.get_block(collider_position);
 
@@ -47,18 +56,6 @@ pub fn handle_collider_update_events_system(
                 }
             }
         }
-    }
-}
-
-fn relative_colider_position(key: u32) -> Vec3 {
-    let x = key / (COLLIDER_GRID_SIZE * COLLIDER_GRID_SIZE);
-    let y = (key % (COLLIDER_GRID_SIZE * COLLIDER_GRID_SIZE)) / COLLIDER_GRID_SIZE;
-    let z = key % COLLIDER_GRID_SIZE;
-
-    Vec3 {
-        x: x as f32 - (COLLIDER_GRID_SIZE / 2) as f32,
-        y: y as f32 - (COLLIDER_GRID_SIZE / 2) as f32,
-        z: z as f32 - (COLLIDER_GRID_SIZE / 2) as f32,
     }
 }
 
@@ -80,7 +77,7 @@ mod tests {
 
         app.update();
 
-        let mut colliders_query = app.world.query::<&collider_components::MyCollider>();
+        let mut colliders_query = app.world.query::<&collider_components::BlockCollider>();
         let colliders_count = colliders_query.iter(&app.world).count();
 
         assert_eq!(colliders_count, 3 * 3 * 3);
@@ -103,7 +100,13 @@ mod tests {
                 },
                 ..Default::default()
             },
-            collider_components::MyCollider { key: 0 },
+            collider_components::BlockCollider {
+                relative_position: Vec3 {
+                    x: 1.0,
+                    y: 2.0,
+                    z: 3.0,
+                },
+            },
         ));
 
         let block = BlockId::Dirt;
@@ -122,28 +125,28 @@ mod tests {
         resource.insert_chunks(chunks);
         resource.set_block(
             Vec3 {
-                x: 9.0,
-                y: 9.0,
-                z: 9.0,
+                x: 6.0,
+                y: 7.0,
+                z: 8.0,
             },
             block,
         );
 
         app.world.send_event(ColliderUpdateEvent {
-            position: [10.0, 10.0, 10.0],
+            grid_center_position: [5.0, 5.0, 5.0],
         });
 
         app.update();
 
         let mut collider_query = app
             .world
-            .query::<(&Transform, &collider_components::MyCollider)>();
+            .query::<(&Transform, &collider_components::BlockCollider)>();
         let (collider_transform, _) = collider_query.single(&app.world);
         assert_eq!(
             Vec3 {
-                x: 9.5,
-                y: 9.5,
-                z: 9.5
+                x: 6.5,
+                y: 7.5,
+                z: 8.5
             },
             collider_transform.translation
         );
