@@ -1,5 +1,7 @@
 pub mod systems;
 
+use renet::{ChannelConfig, SendType};
+
 use crate::prelude::*;
 
 const SERVER_ADDR: &str = "127.0.0.1:5000";
@@ -9,7 +11,36 @@ impl Plugin for NetworkingPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((RenetClientPlugin, NetcodeClientPlugin));
 
-        let client = RenetClient::new(ConnectionConfig::default());
+        let channel_config_unreliable = ChannelConfig {
+            channel_id: 0,
+            max_memory_usage_bytes: 1000 * 1024 * 1024,
+            send_type: SendType::Unreliable,
+        };
+
+        let channel_config_reliable_ordered = ChannelConfig {
+            channel_id: 1,
+            max_memory_usage_bytes: 1000 * 1024 * 1024,
+            send_type: SendType::ReliableOrdered {
+                resend_time: Duration::from_millis(300),
+            },
+        };
+
+        let channel_config_reliable_unordered = ChannelConfig {
+            channel_id: 2,
+            max_memory_usage_bytes: 1000 * 1024 * 1024,
+            send_type: SendType::ReliableUnordered {
+                resend_time: Duration::from_millis(300),
+            },
+        };
+
+        let client = RenetClient::new(ConnectionConfig {
+            client_channels_config: Vec::from([
+                channel_config_unreliable,
+                channel_config_reliable_ordered,
+                channel_config_reliable_unordered,
+            ]),
+            ..Default::default()
+        });
         app.insert_resource(client);
 
         let client_id = rand::random::<u64>();
