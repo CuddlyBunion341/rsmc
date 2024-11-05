@@ -97,9 +97,9 @@ impl ChunkManager {
                 );
                 let local_position = (position - chunk_position).floor();
                 Some(chunk.get(
-                        local_position.x as usize,
-                        local_position.y as usize,
-                        local_position.z as usize,
+                    local_position.x as usize,
+                    local_position.y as usize,
+                    local_position.z as usize,
                 ))
             }
             None => {

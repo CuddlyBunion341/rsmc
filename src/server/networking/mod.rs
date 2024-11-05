@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 pub mod systems;
 
 use crate::prelude::*;
@@ -27,6 +29,32 @@ impl Plugin for NetworkingPlugin {
         };
         let transport = NetcodeServerTransport::new(server_config, socket).unwrap();
         app.insert_resource(transport);
+
+        let send_type_unreliable = SendType::Unreliable;
+        let send_type_reliable_ordered = SendType::ReliableOrdered {
+            resend_time: Duration::from_millis(300),
+        };
+        let send_type_reliable_unordered = SendType::ReliableUnordered {
+            resend_time: Duration::from_millis(300),
+        };
+
+        let channel_config_unreliable = ChannelConfig {
+            channel_id: 0,
+            max_memory_usage_bytes: 5 * 1024 * 1024, // 5 megabytes
+            send_type: send_type_unreliable,
+        };
+
+        let channel_config_reliable_ordered = ChannelConfig {
+            channel_id: 1,
+            max_memory_usage_bytes: 5 * 1024 * 1024, // 5 megabytes
+            send_type: send_type_reliable_ordered,
+        };
+
+        let channel_config_reliable_unordered = ChannelConfig {
+            channel_id: 2,
+            max_memory_usage_bytes: 5 * 1024 * 1024, // 5 megabytes
+            send_type: send_type_reliable_unordered,
+        };
 
         app.add_systems(Update, networking_systems::receive_message_system);
         app.add_systems(Update, networking_systems::handle_events_system);
