@@ -14,7 +14,7 @@ pub fn setup_coliders_system(mut commands: Commands) {
                     .insert(TransformBundle::from(Transform::from_xyz(
                         x as f32, y as f32, z as f32,
                     )))
-                    .insert(collider_components::MyCollider {
+                    .insert(collider_components::BlockCollider {
                         relative_position: Vec3 {
                             x: x as f32,
                             y: y as f32,
@@ -28,7 +28,7 @@ pub fn setup_coliders_system(mut commands: Commands) {
 
 pub fn handle_collider_update_events_system(
     mut collider_grid_events: EventReader<collider_events::ColliderUpdateEvent>,
-    mut query: Query<(&mut Transform, &collider_components::MyCollider)>,
+    mut query: Query<(&mut Transform, &collider_components::BlockCollider)>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
 ) {
     for event in collider_grid_events.read() {
@@ -77,7 +77,7 @@ mod tests {
 
         app.update();
 
-        let mut colliders_query = app.world.query::<&collider_components::MyCollider>();
+        let mut colliders_query = app.world.query::<&collider_components::BlockCollider>();
         let colliders_count = colliders_query.iter(&app.world).count();
 
         assert_eq!(colliders_count, 3 * 3 * 3);
@@ -100,7 +100,7 @@ mod tests {
                 },
                 ..Default::default()
             },
-            collider_components::MyCollider {
+            collider_components::BlockCollider {
                 relative_position: Vec3 {
                     x: 1.0,
                     y: 2.0,
@@ -140,7 +140,7 @@ mod tests {
 
         let mut collider_query = app
             .world
-            .query::<(&Transform, &collider_components::MyCollider)>();
+            .query::<(&Transform, &collider_components::BlockCollider)>();
         let (collider_transform, _) = collider_query.single(&app.world);
         assert_eq!(
             Vec3 {
