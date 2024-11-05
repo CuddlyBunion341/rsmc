@@ -1,12 +1,16 @@
 use crate::prelude::*;
 
+use serde::{Deserialize, Serialize};
+use serde_big_array::BigArray;
+
 pub const CHUNK_SIZE: usize = 32;
 pub const PADDED_CHUNK_SIZE: usize = CHUNK_SIZE + 2;
 pub const PADDED_CHUNK_USIZE: usize = PADDED_CHUNK_SIZE;
 pub const CHUNK_LENGTH: usize = PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE;
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Chunk {
+    #[serde(with = "BigArray")]
     pub data: [BlockId; CHUNK_LENGTH],
     pub position: Vec3,
 }
@@ -37,9 +41,9 @@ impl Chunk {
 
     #[rustfmt::skip]
     pub fn index(x: usize, y: usize, z: usize) -> usize {
-      if (x >= PADDED_CHUNK_SIZE) || (y >= PADDED_CHUNK_SIZE) || (z >= PADDED_CHUNK_SIZE) {
-        panic!("Index out of bounds: ({}, {}, {})", x, y, z);
-      }
+        if (x >= PADDED_CHUNK_SIZE) || (y >= PADDED_CHUNK_SIZE) || (z >= PADDED_CHUNK_SIZE) {
+            panic!("Index out of bounds: ({}, {}, {})", x, y, z);
+        }
         x + PADDED_CHUNK_USIZE * (y + PADDED_CHUNK_USIZE * z)
     }
 
