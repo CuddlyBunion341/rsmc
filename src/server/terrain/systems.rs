@@ -1,9 +1,6 @@
 use crate::prelude::*;
 
-pub fn setup_world_system(
-    mut commands: Commands,
-    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
-) {
+pub fn setup_world_system(mut chunk_manager: ResMut<terrain_resources::ChunkManager>) {
     let generator = terrain_util::generator::Generator::new(0);
 
     let render_distance = 16;

@@ -1,4 +1,5 @@
 // my crates
+pub use crate::terrain::util::chunk::CHUNK_SIZE;
 pub use rsmc as lib;
 pub use rsmc::BlockId;
 
@@ -10,6 +11,7 @@ pub use crate::player::systems as player_systems;
 pub use crate::terrain::events as terrain_events;
 pub use crate::terrain::resources as terrain_resources;
 pub use crate::terrain::systems as terrain_systems;
+pub use crate::terrain::util as terrain_util;
 
 // std crates
 pub use std::collections::HashMap;
@@ -30,3 +32,8 @@ pub use bevy_renet::RenetServerPlugin;
 pub use renet::transport::*;
 pub use renet::DefaultChannel;
 pub use renet::*;
+
+pub use self::terrain_util::Block;
+pub use self::terrain_util::Chunk;
+pub use noise::NoiseFn;
+pub use noise::Perlin;

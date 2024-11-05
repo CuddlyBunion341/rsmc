@@ -2,8 +2,6 @@ use crate::prelude::*;
 
 use terrain_events::BlockUpdateEvent;
 
-use crate::prelude::*;
-
 #[derive(Resource)]
 pub struct PastBlockUpdates {
     pub updates: Vec<BlockUpdateEvent>,
