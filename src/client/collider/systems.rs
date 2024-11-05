@@ -28,7 +28,7 @@ pub fn handle_collider_update_events_system(
 ) {
     for event in collider_grid_events.read() {
         let event_position =
-            Vec3::new(event.position[0], event.position[1], event.position[2]).floor();
+            Vec3::new(event.grid_center_position[0], event.grid_center_position[1], event.grid_center_position[2]).floor();
         for (mut transform, collider) in query.iter_mut() {
             let relative_position = relative_colider_position(collider.key);
             let collider_position = (event_position + relative_position).floor();
@@ -130,7 +130,7 @@ mod tests {
         );
 
         app.world.send_event(ColliderUpdateEvent {
-            position: [10.0, 10.0, 10.0],
+            grid_center_position: [10.0, 10.0, 10.0],
         });
 
         app.update();

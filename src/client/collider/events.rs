@@ -2,5 +2,5 @@ use crate::prelude::*;
 
 #[derive(Event)]
 pub struct ColliderUpdateEvent {
-    pub position: [f32; 3],
+    pub grid_center_position: [f32; 3],
 }
