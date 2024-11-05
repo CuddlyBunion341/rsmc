@@ -4,6 +4,7 @@ pub fn receive_message_system(
     mut server: ResMut<RenetServer>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
+    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
 ) {
     for client_id in server.clients_id() {
         let message_bytes = server.receive_message(client_id, DefaultChannel::ReliableUnordered);
@@ -30,6 +31,34 @@ pub fn receive_message_system(
                     client_id, player.position
                 );
                 player_states.players.insert(client_id, player);
+            }
+            lib::NetworkingMessage::ChunkRequest {
+                position,
+                client_id,
+            } => {
+                info!(
+                    "Received chunk request at {} from client {}",
+                    position, client_id
+                );
+
+                let chunk = chunk_manager.get_chunk(position);
+
+                match chunk {
+                    Some(chunk) => {
+                        let message = bincode::serialize(chunk).unwrap();
+                        server.send_message(client_id, DefaultChannel::ReliableUnordered, message);
+                    }
+                    None => {
+                        let mut chunk = terrain_util::Chunk::new(position);
+
+                        let generator = terrain_util::generator::Generator::new(0);
+
+                        generator.generate_chunk(&mut chunk);
+
+                        let message = bincode::serialize(&chunk).unwrap();
+                        server.send_message(client_id, DefaultChannel::ReliableUnordered, message);
+                    }
+                }
             }
             _ => {
                 warn!("Received unknown message type. (ReliableUnordered)");

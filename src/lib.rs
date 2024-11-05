@@ -16,6 +16,7 @@ pub enum NetworkingMessage {
     PlayerLeave(ClientId),
     PlayerUpdate(PlayerState),
     PlayerSync(HashMap<ClientId, PlayerState>),
+    ChunkRequest { position: Vec3, client_id: ClientId },
     BlockUpdate { position: Vec3, block: BlockId },
 }
 
