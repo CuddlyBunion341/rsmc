@@ -21,11 +21,7 @@ pub fn receive_message_system(
             lib::NetworkingMessage::PlayerLeave(event) => {
                 player_despawn_events
                     .send(remote_player_events::RemotePlayerDespawnedEvent { client_id: event });
-            }
-            lib::NetworkingMessage::ChunkResponse(chunk) => {
-                debug!("Client received chunk response message for: {:?}", chunk.position);
-                chunk_manager.insert_chunk(chunk);
-            }
+                }
             lib::NetworkingMessage::BlockUpdate { position, block } => {
                 debug!("Client received block update message: {:?}", position);
                 block_update_events.send(terrain_events::BlockUpdateEvent {
@@ -51,10 +47,14 @@ pub fn receive_message_system(
         if let Ok(message) = message {
             debug!("Received message: {:?}", message);
             match message {
+                lib::NetworkingMessage::ChunkResponse(chunk) => {
+                    debug!("Client received chunk response message for: {:?}", chunk.position);
+                    chunk_manager.insert_chunk(chunk);
+                }
                 lib::NetworkingMessage::PlayerSync(event) => {
                     player_sync_events
                         .send(remote_player_events::RemotePlayerSyncEvent { players: event });
-                }
+                    }
                 _ => {
                     warn!("Received unknown message type. (ReliableUnordered)");
                 }
