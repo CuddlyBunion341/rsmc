@@ -68,7 +68,7 @@ pub fn handle_controller_movement_system(
         let controller_position = transform.translation;
         if last_position.0.floor() != controller_position.floor() {
             collider_events.send(collider_events::ColliderUpdateEvent {
-                position: controller_position.into(),
+                grid_center_position: controller_position.into(),
             });
         }
         last_position.0 = controller_position;

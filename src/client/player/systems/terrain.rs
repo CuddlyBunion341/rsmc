@@ -43,7 +43,7 @@ pub fn handle_player_collider_events_system(
         let player_position = transform.translation.floor();
 
         collider_events.send(collider_events::ColliderUpdateEvent {
-            position: player_position.into(),
+            grid_center_position: player_position.into(),
         });
     }
 }
