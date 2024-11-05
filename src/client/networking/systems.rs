@@ -6,6 +6,7 @@ pub fn receive_message_system(
     mut player_despawn_events: ResMut<Events<remote_player_events::RemotePlayerDespawnedEvent>>,
     mut player_sync_events: ResMut<Events<remote_player_events::RemotePlayerSyncEvent>>,
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
+    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
         let message = bincode::deserialize(&message).unwrap();

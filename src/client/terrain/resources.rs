@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Resource)]
 pub struct ChunkManager {
-    pub chunks: HashMap<[i32; 3], terrain_util::Chunk>,
+    pub chunks: HashMap<[i32; 3], lib::Chunk>,
 }
 
 impl Default for ChunkManager {
@@ -18,8 +18,8 @@ impl ChunkManager {
         }
     }
 
-    pub fn instantiate_chunks(position: Vec3, render_distance: i32) -> Vec<terrain_util::Chunk> {
-        let mut chunks: Vec<terrain_util::Chunk> = Vec::new();
+    pub fn instantiate_chunks(position: Vec3, render_distance: i32) -> Vec<lib::Chunk> {
+        let mut chunks: Vec<lib::Chunk> = Vec::new();
 
         for x in 0..render_distance {
             for y in 0..render_distance {
@@ -29,7 +29,7 @@ impl ChunkManager {
                         (y - render_distance / 2) as f32 + position.y,
                         (z - render_distance / 2) as f32 + position.z,
                     );
-                    let chunk = terrain_util::Chunk::new(chunk_position);
+                    let chunk = lib::Chunk::new(chunk_position);
                     chunks.push(chunk);
                 }
             }
@@ -38,7 +38,7 @@ impl ChunkManager {
         chunks
     }
 
-    pub fn insert_chunks(&mut self, chunks: Vec<terrain_util::Chunk>) {
+    pub fn insert_chunks(&mut self, chunks: Vec<lib::Chunk>) {
         for chunk in chunks {
             self.chunks
                 .insert(Self::position_to_key(chunk.position), chunk);
@@ -49,13 +49,13 @@ impl ChunkManager {
         [position.x as i32, position.y as i32, position.z as i32]
     }
 
-    pub fn set_chunk(&mut self, position: Vec3, chunk: terrain_util::Chunk) {
+    pub fn set_chunk(&mut self, position: Vec3, chunk: lib::Chunk) {
         let Vec3 { x, y, z } = position;
 
         self.chunks.insert([x as i32, y as i32, z as i32], chunk);
     }
 
-    pub fn get_chunk(&mut self, position: Vec3) -> Option<&mut terrain_util::Chunk> {
+    pub fn get_chunk(&mut self, position: Vec3) -> Option<&mut lib::Chunk> {
         let Vec3 { x, y, z } = position.floor();
 
         self.chunks.get_mut(&[x as i32, y as i32, z as i32])
@@ -105,7 +105,7 @@ impl ChunkManager {
         }
     }
 
-    fn chunk_from_selection(&mut self, position: Vec3) -> Option<&mut terrain_util::Chunk> {
+    fn chunk_from_selection(&mut self, position: Vec3) -> Option<&mut lib::Chunk> {
         let chunk_position = position / CHUNK_SIZE as f32;
         self.get_chunk(chunk_position)
     }

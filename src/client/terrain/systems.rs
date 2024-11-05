@@ -1,15 +1,6 @@
 use crate::prelude::*;
 
-pub fn setup_world_system(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
-    texture_manager: ResMut<terrain_util::TextureManager>,
-) {
-    let generator = terrain_util::generator::Generator::new(0);
-
+pub fn setup_world_system(mut client: ResMut<RenetClient>) {
     let render_distance = 16;
 
     let mut chunks = terrain_resources::ChunkManager::instantiate_chunks(
@@ -18,18 +9,14 @@ pub fn setup_world_system(
     );
 
     for chunk in &mut chunks {
-        generator.generate_chunk(chunk);
-        add_chunk_objects(
-            &mut commands,
-            &asset_server,
-            &mut meshes,
-            &mut materials,
-            chunk,
-            &texture_manager,
-        );
+        client.send_message(
+            DefaultChannel::ReliableUnordered,
+            bincode::serialize(&NetworkingMessage::ChunkRequest {
+                position: chunk.position,
+            })
+            .unwrap(),
+        )
     }
-
-    chunk_manager.insert_chunks(chunks);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -48,7 +35,7 @@ pub fn handle_chunk_mesh_update_events(
         match chunk_option {
             Some(chunk) => {
                 for (entity, chunk_mesh) in mesh_query.iter_mut() {
-                    if terrain_util::Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
+                    if lib::Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
                         commands.entity(entity).despawn();
                     }
                 }
@@ -73,7 +60,7 @@ fn add_chunk_objects(
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
-    chunk: &terrain_util::Chunk,
+    chunk: &lib::Chunk,
     texture_manager: &terrain_util::TextureManager,
 ) {
     if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
@@ -90,7 +77,7 @@ fn add_chunk_objects(
 }
 
 fn create_chunk_mesh(
-    chunk: &terrain_util::Chunk,
+    chunk: &lib::Chunk,
     texture_manager: &terrain_util::TextureManager,
 ) -> Option<Mesh> {
     terrain_util::create_chunk_mesh(chunk, texture_manager)
@@ -119,7 +106,7 @@ fn spawn_chunk(
     meshes: &mut Mut<Assets<Mesh>>,
     material: Handle<StandardMaterial>,
     mesh: Mesh,
-    chunk: &terrain_util::Chunk,
+    chunk: &lib::Chunk,
 ) {
     let transform = Transform::from_xyz(
         chunk.position.x * CHUNK_SIZE as f32,

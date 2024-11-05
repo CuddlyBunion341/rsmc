@@ -32,10 +32,7 @@ pub fn receive_message_system(
                 );
                 player_states.players.insert(client_id, player);
             }
-            lib::NetworkingMessage::ChunkRequest {
-                position,
-                client_id,
-            } => {
+            lib::NetworkingMessage::ChunkRequest { position } => {
                 info!(
                     "Received chunk request at {} from client {}",
                     position, client_id
@@ -45,17 +42,23 @@ pub fn receive_message_system(
 
                 match chunk {
                     Some(chunk) => {
-                        let message = bincode::serialize(chunk).unwrap();
+                        let message = bincode::serialize(&lib::NetworkingMessage::ChunkResponse(
+                            chunk.clone(),
+                        ))
+                        .unwrap();
                         server.send_message(client_id, DefaultChannel::ReliableUnordered, message);
                     }
                     None => {
-                        let mut chunk = terrain_util::Chunk::new(position);
+                        let mut chunk = lib::Chunk::new(position);
 
                         let generator = terrain_util::generator::Generator::new(0);
 
                         generator.generate_chunk(&mut chunk);
 
-                        let message = bincode::serialize(&chunk).unwrap();
+                        let message = bincode::serialize(&lib::NetworkingMessage::ChunkResponse(
+                            chunk.clone(),
+                        ))
+                        .unwrap();
                         server.send_message(client_id, DefaultChannel::ReliableUnordered, message);
                     }
                 }

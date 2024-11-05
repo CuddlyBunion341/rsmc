@@ -1,5 +1,4 @@
 // my crates
-pub use crate::terrain::util::chunk::CHUNK_SIZE;
 pub use rsmc as lib;
 pub use rsmc::BlockId;
 
@@ -33,7 +32,7 @@ pub use renet::transport::*;
 pub use renet::DefaultChannel;
 pub use renet::*;
 
+pub use self::lib::Chunk;
 pub use self::terrain_util::Block;
-pub use self::terrain_util::Chunk;
 pub use noise::NoiseFn;
 pub use noise::Perlin;
