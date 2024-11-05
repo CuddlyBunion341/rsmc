@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 static COLLIDER_GRID_SIZE: u32 = 3;
-static COLLIDER_RESTING_POSITION: Vec3 = Vec3::new(0.0, 0.0, 0.0);
+static COLLIDER_RESTING_POSITION: Vec3 = Vec3::ZERO;
 
 pub fn setup_coliders_system(mut commands: Commands) {
     let collider_range = 0..COLLIDER_GRID_SIZE;
@@ -12,10 +12,16 @@ pub fn setup_coliders_system(mut commands: Commands) {
                 commands
                     .spawn(Collider::cuboid(0.5, 0.5, 0.5))
                     .insert(TransformBundle::from(Transform::from_xyz(
-                                x as f32, y as f32, z as f32,
+                        x as f32, y as f32, z as f32,
                     )))
-                    .insert(collider_components::MyCollider { relative_position: Vec3 {x: x as f32, y: y as f32, z: z as f32} });
-                }
+                    .insert(collider_components::MyCollider {
+                        relative_position: Vec3 {
+                            x: x as f32,
+                            y: y as f32,
+                            z: z as f32,
+                        },
+                    });
+            }
         }
     }
 }
@@ -26,8 +32,12 @@ pub fn handle_collider_update_events_system(
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
 ) {
     for event in collider_grid_events.read() {
-        let event_position =
-            Vec3::new(event.grid_center_position[0], event.grid_center_position[1], event.grid_center_position[2]).floor();
+        let event_position = Vec3::new(
+            event.grid_center_position[0],
+            event.grid_center_position[1],
+            event.grid_center_position[2],
+        )
+        .floor();
         for (mut transform, collider) in query.iter_mut() {
             let relative_position = collider.relative_position;
             let collider_position = (event_position + relative_position).floor();
@@ -82,15 +92,21 @@ mod tests {
         app.insert_resource(terrain_resources::ChunkManager::new());
 
         app.world.spawn((
-                Transform {
-                    translation: Vec3 {
-                        x: 0.0,
-                        y: 0.0,
-                        z: 0.0,
-                    },
-                    ..Default::default()
+            Transform {
+                translation: Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
                 },
-                collider_components::MyCollider { relative_position: Vec3 {x: 1.0, y: 2.0, z: 3.0}},
+                ..Default::default()
+            },
+            collider_components::MyCollider {
+                relative_position: Vec3 {
+                    x: 1.0,
+                    y: 2.0,
+                    z: 3.0,
+                },
+            },
         ));
 
         let block = BlockId::Dirt;
