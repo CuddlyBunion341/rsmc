@@ -78,7 +78,7 @@ pub mod tests {
         assert_eq!(tokens, expected_tokens);
     }
 
-#[test]
+    #[test]
     fn test_revert_buffer_tokenization() {
         let tokens = vec![
             RLEToken { symbol: 1, count: 4 },
@@ -90,5 +90,18 @@ pub mod tests {
         let expected_array = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3];
 
         assert_eq!(array, expected_array);
+    }
+
+    #[test]
+    fn test_compressed_buffer_is_smaller() {
+        let array = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3];
+        let other_array = array.clone();
+        let bytes = serialize_buffer(array);
+
+        let default_bytes = other_array.len() * std::mem::size_of::<i32>();
+        let compressed_bytes = bytes.iter().fold(0, |acc, x| acc + x.len());
+
+        assert!(compressed_bytes < default_bytes);
+
     }
 }
