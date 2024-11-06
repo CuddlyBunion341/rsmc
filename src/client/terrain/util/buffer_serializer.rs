@@ -48,6 +48,23 @@ fn tokenize_buffer(array: Vec<i32>) -> Vec<RLEToken> {
     vec
 }
 
+pub fn deserialize_buffer(bytes: Vec<Bytes>) -> Vec<i32> {
+    let mut vec = Vec::<i32>::new();
+
+    bytes.iter().for_each(|byte| {
+        let symbol_bytes = &byte[0..4];
+        let count_bytes = &byte[4..8];
+        let symbol = i32::from_le_bytes(symbol_bytes.try_into().unwrap());
+        let count = i32::from_le_bytes(count_bytes.try_into().unwrap());
+
+        for _ in 0..count {
+            vec.push(symbol);
+        }
+    });
+
+    vec
+}
+
 fn revert_buffer_tokenization(tokens: Vec<RLEToken>) -> Vec<i32> {
     let mut vec = Vec::<i32>::new();
 
@@ -102,6 +119,13 @@ pub mod tests {
         let compressed_bytes = bytes.iter().fold(0, |acc, x| acc + x.len());
 
         assert!(compressed_bytes < default_bytes);
+    }
 
+    #[test]
+    fn test_serialization_deserialization() {
+        let array = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3];
+        let bytes = serialize_buffer(array.clone());
+        let deserialized_array = deserialize_buffer(bytes);
+        assert_eq!(array, deserialized_array);
     }
 }
