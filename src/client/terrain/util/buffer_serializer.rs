@@ -26,7 +26,7 @@ fn tokenize_buffer(array: Vec<i32>) -> Vec<RLEToken> {
     let mut vec = Vec::<RLEToken>::new();
 
     let mut last_symbol = array[0];
-    let mut count = 1; 
+    let mut count = 1;
 
     for element in array.iter().skip(1) {
         if last_symbol == *element {
@@ -87,9 +87,18 @@ pub mod tests {
         let tokens = tokenize_buffer(array);
 
         let expected_tokens = vec![
-            RLEToken { symbol: 1, count: 4 },
-            RLEToken { symbol: 2, count: 3 },
-            RLEToken { symbol: 3, count: 5 },
+            RLEToken {
+                symbol: 1,
+                count: 4,
+            },
+            RLEToken {
+                symbol: 2,
+                count: 3,
+            },
+            RLEToken {
+                symbol: 3,
+                count: 5,
+            },
         ];
 
         assert_eq!(tokens, expected_tokens);
@@ -98,9 +107,18 @@ pub mod tests {
     #[test]
     fn test_revert_buffer_tokenization() {
         let tokens = vec![
-            RLEToken { symbol: 1, count: 4 },
-            RLEToken { symbol: 2, count: 3 },
-            RLEToken { symbol: 3, count: 5 },
+            RLEToken {
+                symbol: 1,
+                count: 4,
+            },
+            RLEToken {
+                symbol: 2,
+                count: 3,
+            },
+            RLEToken {
+                symbol: 3,
+                count: 5,
+            },
         ];
 
         let array = revert_buffer_tokenization(tokens);
