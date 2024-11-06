@@ -1,5 +1,6 @@
 use renet::Bytes;
 
+#[derive(Debug, PartialEq)]
 pub struct RLEToken {
     symbol: i32,
     count: i32,
@@ -47,6 +48,18 @@ fn tokenize_buffer(array: Vec<i32>) -> Vec<RLEToken> {
     vec
 }
 
+fn revert_buffer_tokenization(tokens: Vec<RLEToken>) -> Vec<i32> {
+    let mut vec = Vec::<i32>::new();
+
+    tokens.iter().for_each(|token| {
+        for _ in 0..token.count {
+            vec.push(token.symbol);
+        }
+    });
+
+    vec
+}
+
 #[cfg(test)]
 pub mod tests {
     use super::*;
@@ -56,12 +69,26 @@ pub mod tests {
         let array = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3];
         let tokens = tokenize_buffer(array);
 
-        assert_eq!(tokens.len(), 3);
-        assert_eq!(tokens[0].symbol, 1);
-        assert_eq!(tokens[0].count, 4);
-        assert_eq!(tokens[1].symbol, 2);
-        assert_eq!(tokens[1].count, 3);
-        assert_eq!(tokens[2].symbol, 3);
-        assert_eq!(tokens[2].count, 5);
+        let expected_tokens = vec![
+            RLEToken { symbol: 1, count: 4 },
+            RLEToken { symbol: 2, count: 3 },
+            RLEToken { symbol: 3, count: 5 },
+        ];
+
+        assert_eq!(tokens, expected_tokens);
+    }
+
+#[test]
+    fn test_revert_buffer_tokenization() {
+        let tokens = vec![
+            RLEToken { symbol: 1, count: 4 },
+            RLEToken { symbol: 2, count: 3 },
+            RLEToken { symbol: 3, count: 5 },
+        ];
+
+        let array = revert_buffer_tokenization(tokens);
+        let expected_array = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3];
+
+        assert_eq!(array, expected_array);
     }
 }
