@@ -3,12 +3,15 @@ use crate::prelude::*;
 pub fn setup_world_system(mut client: ResMut<RenetClient>) {
     let render_distance = 16;
 
+    info!("Sending chunk requests for chunks");
+
     let mut chunks = terrain_resources::ChunkManager::instantiate_chunks(
         Vec3::new(0.0, 0.0, 0.0),
         render_distance,
     );
 
     for chunk in &mut chunks {
+        debug!("Sending chunk request for chunk {:?}", chunk.position);
         client.send_message(
             DefaultChannel::ReliableUnordered,
             bincode::serialize(&NetworkingMessage::ChunkRequest {
@@ -31,6 +34,7 @@ pub fn handle_chunk_mesh_update_events(
     texture_manager: ResMut<terrain_util::TextureManager>,
 ) {
     for event in chunk_mesh_update_events.read() {
+        info!("Received chunk mesh update event for chunk {:?}", event.position);
         let chunk_option = chunk_manager.get_chunk(event.position);
         match chunk_option {
             Some(chunk) => {

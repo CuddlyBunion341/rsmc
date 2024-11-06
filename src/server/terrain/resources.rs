@@ -100,7 +100,7 @@ impl ChunkManager {
                 );
             }
             None => {
-                println!("No chunk found");
+                // println!("No chunk found");
             }
         }
     }
@@ -121,7 +121,7 @@ impl ChunkManager {
                 ))
             }
             None => {
-                println!("No chunk found for block at {:?}", position);
+                // println!("No chunk found for block at {:?}", position);
                 None
             }
         }

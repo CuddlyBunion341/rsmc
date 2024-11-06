@@ -7,6 +7,7 @@ pub fn receive_message_system(
     mut player_sync_events: ResMut<Events<remote_player_events::RemotePlayerSyncEvent>>,
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chunk_mesh_events: ResMut<Events<terrain_events::ChunkMeshUpdateEvent>>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
         let message = bincode::deserialize(&message).unwrap();
@@ -48,11 +49,15 @@ pub fn receive_message_system(
             debug!("Received message: {:?}", message);
             match message {
                 lib::NetworkingMessage::ChunkResponse(chunk) => {
-                    debug!(
+                    info!(
                         "Client received chunk response message for: {:?}",
                         chunk.position
                     );
+                    let chunk_position = chunk.position;
                     chunk_manager.insert_chunk(chunk);
+                    chunk_mesh_events.send(terrain_events::ChunkMeshUpdateEvent {
+                        position: chunk_position,
+                    });
                 }
                 lib::NetworkingMessage::PlayerSync(event) => {
                     player_sync_events
