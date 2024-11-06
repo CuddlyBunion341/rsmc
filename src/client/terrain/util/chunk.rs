@@ -1,3 +1,6 @@
+use serde::{Serialize, Deserialize};
+use super::buffer_serializer::{serialize_buffer, deserialize_buffer};
+use serde::ser::SerializeStruct;
 use crate::prelude::*;
 
 pub const CHUNK_SIZE: usize = 32;
@@ -37,9 +40,9 @@ impl Chunk {
 
     #[rustfmt::skip]
     pub fn index(x: usize, y: usize, z: usize) -> usize {
-      if (x >= PADDED_CHUNK_SIZE) || (y >= PADDED_CHUNK_SIZE) || (z >= PADDED_CHUNK_SIZE) {
-        panic!("Index out of bounds: ({}, {}, {})", x, y, z);
-      }
+        if (x >= PADDED_CHUNK_SIZE) || (y >= PADDED_CHUNK_SIZE) || (z >= PADDED_CHUNK_SIZE) {
+            panic!("Index out of bounds: ({}, {}, {})", x, y, z);
+        }
         x + PADDED_CHUNK_USIZE * (y + PADDED_CHUNK_USIZE * z)
     }
 
@@ -51,5 +54,46 @@ impl Chunk {
 impl Default for Chunk {
     fn default() -> Self {
         Self::new(Vec3::ZERO)
+    }
+}
+
+impl Serialize for Chunk {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let data_as_i32: Vec<i32> = self.data.iter().map(|block_id| *block_id as i32).collect();
+        let serialized_data = serialize_buffer(data_as_i32);
+        let mut state = serializer.serialize_struct("Chunk", 2)?;
+        state.serialize_field("data", &serialized_data)?;
+        state.serialize_field("position", &self.position)?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for Chunk {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct ChunkData {
+            data: Vec<u8>,
+            position: Vec3,
+        }
+
+        let ChunkData { data, position } = ChunkData::deserialize(deserializer)?;
+        let deserialized_data = deserialize_buffer(data);
+        let data_as_block_id: [BlockId; CHUNK_LENGTH] = deserialized_data
+            .into_iter()
+            .map(|i| BlockId::from(i))
+            .collect::<Vec<BlockId>>()
+            .try_into()
+            .map_err(|_| serde::de::Error::custom("Failed to convert data to BlockId array"))?;
+        
+        Ok(Chunk {
+            data: data_as_block_id,
+            position,
+        })
     }
 }
