@@ -31,7 +31,7 @@ impl Generator {
         }
     }
 
-    fn generate_block(&self, position: Vec3) -> BlockId {
+    fn get_block_density(&self, position: Vec3) -> f64 {
         let base_height = -50.0;
 
         let mut density = self.sample_3d(
@@ -42,13 +42,21 @@ impl Generator {
             },
             4,
         );
-        density -= position.y as f64 * 0.02;
+        density -= position.y as f64 * 0.02
+    }
+
+    fn generate_block(&self, position: Vec3) -> BlockId {
+        let density = self.get_block_density(position);
         if density > 0.7 {
             BlockId::Stone
         } else if density > 0.40 {
             BlockId::Dirt
         } else if density > 0.0 {
-            BlockId::Grass
+            if self.get_block_density(position + Vec3::new(0.0, 1.0, 0.0)) > 0.0 {
+                BlockId::Dirt
+            } else {
+                BlockId::Grass
+            }
         } else {
             BlockId::Air
         }
