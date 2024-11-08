@@ -14,9 +14,9 @@ iyes_perf_ui = "0.2.3"
 noise = "0.9.0"
 bincode = "1.3.3"
 rand = "0.8.5"
-renet = "0.0.15"
+renet = {version = "0.0.16", features = ["serde", "bevy"]}
 bevy_renet = {version = "0.0.12", features = ["serde"]}
-renet_visualizer = {version =  "0.0.9", features = ["bevy"] }
+# renet_visualizer = {version =  "0.0.9", features = ["bevy"] }
 egui = "0.29.1"
 serde = "1.0.203"
 

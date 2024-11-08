@@ -1144,7 +1144,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "587b1dc5b9677d41fec66cd45a456c60bc8fc89dfd4b82f82b7bce2f2e78f7e2"
 dependencies = [
  "bevy 0.14.2",
- "renet 0.0.16",
+ "renet",
 ]
 
 [[package]]
@@ -2054,32 +2054,11 @@ checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
 name = "ecolor"
-version = "0.28.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e6b451ff1143f6de0f33fc7f1b68fecfd2c7de06e104de96c4514de3f5396f8"
-dependencies = [
- "emath 0.28.1",
-]
-
-[[package]]
-name = "ecolor"
 version = "0.29.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "775cfde491852059e386c4e1deb4aef381c617dc364184c6f6afee99b87c402b"
 dependencies = [
- "emath 0.29.1",
-]
-
-[[package]]
-name = "egui"
-version = "0.28.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20c97e70a2768de630f161bb5392cbd3874fcf72868f14df0e002e82e06cb798"
-dependencies = [
- "ahash",
- "emath 0.28.1",
- "epaint 0.28.1",
- "nohash-hasher",
+ "emath",
 ]
 
 [[package]]
@@ -2089,8 +2068,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "53eafabcce0cb2325a59a98736efe0bf060585b437763f8c476957fb274bb974"
 dependencies = [
  "ahash",
- "emath 0.29.1",
- "epaint 0.29.1",
+ "emath",
+ "epaint",
  "nohash-hasher",
 ]
 
@@ -2099,12 +2078,6 @@ name = "either"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3dca9240753cf90908d7e4aac30f630662b02aebaa1b58a3cadabdb23385b58b"
-
-[[package]]
-name = "emath"
-version = "0.28.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a6a21708405ea88f63d8309650b4d77431f4bc28fb9d8e6f77d3963b51249e6"
 
 [[package]]
 name = "emath"
@@ -2146,28 +2119,14 @@ dependencies = [
 
 [[package]]
 name = "epaint"
-version = "0.28.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f0dcc0a0771e7500e94cd1cb797bd13c9f23b9409bdc3c824e2cbc562b7fa01"
-dependencies = [
- "ab_glyph",
- "ahash",
- "ecolor 0.28.1",
- "emath 0.28.1",
- "nohash-hasher",
- "parking_lot",
-]
-
-[[package]]
-name = "epaint"
 version = "0.29.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a32af8da821bd4f43f2c137e295459ee2e1661d87ca8779dfa0eaf45d870e20f"
 dependencies = [
  "ab_glyph",
  "ahash",
- "ecolor 0.29.1",
- "emath 0.29.1",
+ "ecolor",
+ "emath",
  "epaint_default_fonts",
  "nohash-hasher",
  "parking_lot",
@@ -3312,12 +3271,6 @@ dependencies = [
 
 [[package]]
 name = "octets"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a74f2cda724d43a0a63140af89836d4e7db6138ef67c9f96d3a0f0150d05000"
-
-[[package]]
-name = "octets"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "109983a091271ee8916076731ba5fdc9ee22fea871bc7c6ceab9bfd423eb1d99"
@@ -3723,18 +3676,6 @@ checksum = "19b30a45b0cd0bcca8037f3d0dc3421eaf95327a17cad11964fb8179b4fc4832"
 
 [[package]]
 name = "renet"
-version = "0.0.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93286238bc6ca687203a4ce476360fe2690255e77305a204403c8628e49ab69a"
-dependencies = [
- "bytes",
- "log",
- "octets 0.2.0",
- "renetcode 0.0.11",
-]
-
-[[package]]
-name = "renet"
 version = "0.0.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3cc90bf4168562c39eecba53bff2bb03e0ed7a308f5a2cfe7e59c2a40d24d7ec"
@@ -3742,30 +3683,9 @@ dependencies = [
  "bevy_ecs 0.14.2",
  "bytes",
  "log",
- "octets 0.3.0",
- "renetcode 0.0.12",
+ "octets",
+ "renetcode",
  "serde",
-]
-
-[[package]]
-name = "renet_visualizer"
-version = "0.0.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3004d354e219c11e72e414d4ecc2864bed3b5645a62777b233feb0f5a1533023"
-dependencies = [
- "bevy_ecs 0.14.2",
- "egui 0.28.1",
- "renet 0.0.16",
-]
-
-[[package]]
-name = "renetcode"
-version = "0.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a164cf662b1d663cc8faaa199154b0134d8202beaed0b57bbf8ed7e428232a7"
-dependencies = [
- "chacha20poly1305",
- "log",
 ]
 
 [[package]]
@@ -3818,12 +3738,11 @@ dependencies = [
  "bevy_renet",
  "bincode",
  "cgmath",
- "egui 0.29.1",
+ "egui",
  "iyes_perf_ui",
  "noise",
  "rand",
- "renet 0.0.15",
- "renet_visualizer",
+ "renet",
  "serde",
 ]
 
