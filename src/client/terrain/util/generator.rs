@@ -42,7 +42,8 @@ impl Generator {
             },
             4,
         );
-        density -= position.y as f64 * 0.02
+        density -= position.y as f64 * 0.02;
+        density
     }
 
     fn generate_block(&self, position: Vec3) -> BlockId {
