@@ -1,3 +1,4 @@
+use renet::Bytes;
 use serde::{Serialize, Deserialize};
 use super::buffer_serializer::{serialize_buffer, deserialize_buffer};
 use serde::ser::SerializeStruct;
@@ -78,7 +79,7 @@ impl<'de> Deserialize<'de> for Chunk {
     {
         #[derive(Deserialize)]
         struct ChunkData {
-            data: Vec<u8>,
+            data: Vec<Bytes>,
             position: Vec3,
         }
 

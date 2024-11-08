@@ -20,6 +20,7 @@ pub enum NetworkingMessage {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[repr(u8)]
 pub enum BlockId {
     Air,
     Grass,
