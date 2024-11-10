@@ -16,8 +16,8 @@ pub enum NetworkingMessage {
     PlayerLeave(ClientId),
     PlayerUpdate(PlayerState),
     PlayerSync(HashMap<ClientId, PlayerState>),
-    ChunkRequest { position: Vec3 },
-    ChunkResponse(Chunk),
+    ChunkBatchRequest(Vec<Vec3>),
+    ChunkBatchResponse(Vec<Chunk>),
     BlockUpdate { position: Vec3, block: BlockId },
 }
 
@@ -70,7 +70,7 @@ pub const PADDED_CHUNK_SIZE: usize = CHUNK_SIZE + 2;
 pub const PADDED_CHUNK_USIZE: usize = PADDED_CHUNK_SIZE;
 pub const CHUNK_LENGTH: usize = PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Copy)]
 pub struct Chunk {
     #[serde(with = "BigArray")]
     pub data: [BlockId; CHUNK_LENGTH],

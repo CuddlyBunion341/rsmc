@@ -5,21 +5,15 @@ pub fn setup_world_system(mut client: ResMut<RenetClient>) {
 
     info!("Sending chunk requests for chunks");
 
-    let mut chunks = terrain_resources::ChunkManager::instantiate_chunks(
+    let chunks = terrain_resources::ChunkManager::instantiate_chunks(
         Vec3::new(0.0, 0.0, 0.0),
         render_distance,
     );
 
-    for chunk in &mut chunks {
-        debug!("Sending chunk request for chunk {:?}", chunk.position);
-        client.send_message(
-            DefaultChannel::ReliableUnordered,
-            bincode::serialize(&NetworkingMessage::ChunkRequest {
-                position: chunk.position,
-            })
-            .unwrap(),
-        )
-    }
+    let positions = chunks.into_iter().map(|chunk| chunk.position).collect();
+    debug!("Sending chunk batch request for {:?}", positions);
+    let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(positions));
+    client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
 }
 
 #[allow(clippy::too_many_arguments)]

@@ -32,36 +32,34 @@ pub fn receive_message_system(
                 );
                 player_states.players.insert(client_id, player);
             }
-            lib::NetworkingMessage::ChunkRequest { position } => {
+            lib::NetworkingMessage::ChunkBatchRequest(positions) => {
                 info!(
-                    "Received chunk request at {} from client {}",
-                    position, client_id
+                    "Received chunk batch request at {:?} from client {}",
+                    positions, client_id
                 );
 
-                let chunk = chunk_manager.get_chunk(position);
+                let chunks: Vec<Chunk> = positions.into_iter().map(|position| {
+                    let chunk = chunk_manager.get_chunk(position);
 
-                match chunk {
-                    Some(chunk) => {
-                        let message = bincode::serialize(&lib::NetworkingMessage::ChunkResponse(
-                            chunk.clone(),
-                        ))
-                        .unwrap();
-                        server.send_message(client_id, DefaultChannel::ReliableUnordered, message);
+                    match chunk {
+                        Some(chunk) => {
+                            return chunk.clone();
+                        }
+                        None => {
+                            let mut chunk = lib::Chunk::new(position);
+
+                            let generator = terrain_util::generator::Generator::new(0);
+
+                            generator.generate_chunk(&mut chunk);
+
+                            return chunk.clone();
+                        }
                     }
-                    None => {
-                        let mut chunk = lib::Chunk::new(position);
+                }).collect();
 
-                        let generator = terrain_util::generator::Generator::new(0);
+                let message = bincode::serialize(&lib::NetworkingMessage::ChunkBatchResponse(chunks));
+                server.send_message(client_id, DefaultChannel::ReliableUnordered, message.unwrap());
 
-                        generator.generate_chunk(&mut chunk);
-
-                        let message = bincode::serialize(&lib::NetworkingMessage::ChunkResponse(
-                            chunk.clone(),
-                        ))
-                        .unwrap();
-                        server.send_message(client_id, DefaultChannel::ReliableUnordered, message);
-                    }
-                }
             }
             _ => {
                 warn!("Received unknown message type. (ReliableUnordered)");

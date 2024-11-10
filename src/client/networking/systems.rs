@@ -22,7 +22,7 @@ pub fn receive_message_system(
             lib::NetworkingMessage::PlayerLeave(event) => {
                 player_despawn_events
                     .send(remote_player_events::RemotePlayerDespawnedEvent { client_id: event });
-            }
+                }
             lib::NetworkingMessage::BlockUpdate { position, block } => {
                 debug!("Client received block update message: {:?}", position);
                 block_update_events.send(terrain_events::BlockUpdateEvent {
@@ -48,21 +48,23 @@ pub fn receive_message_system(
         if let Ok(message) = message {
             debug!("Received message: {:?}", message);
             match message {
-                lib::NetworkingMessage::ChunkResponse(chunk) => {
-                    info!(
-                        "Client received chunk response message for: {:?}",
-                        chunk.position
-                    );
-                    let chunk_position = chunk.position;
-                    chunk_manager.insert_chunk(chunk);
-                    chunk_mesh_events.send(terrain_events::ChunkMeshUpdateEvent {
-                        position: chunk_position,
-                    });
+                lib::NetworkingMessage::ChunkBatchResponse(chunks) => {
+                    for chunk in chunks {
+                        info!(
+                            "Client received chunk response message for: {:?}",
+                            chunk.position
+                        );
+                        let chunk_position = chunk.position;
+                        chunk_manager.insert_chunk(chunk);
+                        chunk_mesh_events.send(terrain_events::ChunkMeshUpdateEvent {
+                            position: chunk_position,
+                        });
+                    }
                 }
                 lib::NetworkingMessage::PlayerSync(event) => {
                     player_sync_events
                         .send(remote_player_events::RemotePlayerSyncEvent { players: event });
-                }
+                    }
                 _ => {
                     warn!("Received unknown message type. (ReliableUnordered)");
                 }
