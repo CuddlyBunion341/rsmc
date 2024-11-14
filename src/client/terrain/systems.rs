@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub fn setup_world_system(mut client: ResMut<RenetClient>) {
-    let render_distance = 16;
+    let render_distance = 4;
 
     info!("Sending chunk requests for chunks");
 
@@ -10,10 +10,16 @@ pub fn setup_world_system(mut client: ResMut<RenetClient>) {
         render_distance,
     );
 
-    let positions = chunks.into_iter().map(|chunk| chunk.position).collect();
-    debug!("Sending chunk batch request for {:?}", positions);
-    let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(positions));
-    client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
+    let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
+
+    let batched_positions = positions.chunks(32);
+
+    batched_positions.for_each(|batch| {
+        let request_positions = batch.to_vec();
+        info!("Sending chunk batch request for {:?}", request_positions.len());
+        let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(request_positions));
+        client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
+    });
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -113,18 +119,18 @@ fn spawn_chunk(
     );
 
     commands.spawn((
-        MaterialMeshBundle {
-            mesh: meshes.add(mesh),
-            transform,
-            material,
-            ..default()
-        },
-        terrain_components::ChunkMesh {
-            key: [
-                chunk.position.x as i32,
-                chunk.position.y as i32,
-                chunk.position.z as i32,
-            ],
-        },
+            MaterialMeshBundle {
+                mesh: meshes.add(mesh),
+                transform,
+                material,
+                ..default()
+            },
+            terrain_components::ChunkMesh {
+                key: [
+                    chunk.position.x as i32,
+                    chunk.position.y as i32,
+                    chunk.position.z as i32,
+                ],
+            },
     ));
 }

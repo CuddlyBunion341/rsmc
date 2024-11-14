@@ -14,13 +14,13 @@ impl Plugin for NetworkingPlugin {
 
         let channel_config_unreliable = ChannelConfig {
             channel_id: 0,
-            max_memory_usage_bytes: 1000 * 1024 * 1024,
+            max_memory_usage_bytes: 1000 * 1024 * 1024 * 1024,
             send_type: SendType::Unreliable,
         };
 
         let channel_config_reliable_ordered = ChannelConfig {
             channel_id: 1,
-            max_memory_usage_bytes: 1000 * 1024 * 1024,
+            max_memory_usage_bytes: 1000 * 1024 * 1024 * 1024,
             send_type: SendType::ReliableOrdered {
                 resend_time: Duration::from_millis(300),
             },
@@ -28,7 +28,7 @@ impl Plugin for NetworkingPlugin {
 
         let channel_config_reliable_unordered = ChannelConfig {
             channel_id: 2,
-            max_memory_usage_bytes: 1000 * 1024 * 1024,
+            max_memory_usage_bytes: 1000 * 1024 * 1024 * 1024,
             send_type: SendType::ReliableUnordered {
                 resend_time: Duration::from_millis(300),
             },
