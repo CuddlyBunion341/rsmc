@@ -1,11 +1,10 @@
 use renet::Bytes;
-use std::convert::TryFrom;
 use rsmc::BlockId;
 
 #[derive(Debug, PartialEq)]
 pub struct RLEToken {
     symbol: BlockId,
-    count: i32,
+    count: u16,
 }
 
 pub fn serialize_buffer(array: Vec<BlockId>) -> Vec<Bytes> {
@@ -13,7 +12,7 @@ pub fn serialize_buffer(array: Vec<BlockId>) -> Vec<Bytes> {
 
     let mut bytes = Vec::<Bytes>::new();
     tokens.iter().for_each(|token| {
-        let symbol_bytes = (token.symbol as i32).to_le_bytes();
+        let symbol_bytes = (token.symbol.to_u8()).to_le_bytes();
         let count_bytes = token.count.to_le_bytes();
         let mut buffer = Vec::new();
         buffer.extend_from_slice(&symbol_bytes);
@@ -27,24 +26,24 @@ pub fn serialize_buffer(array: Vec<BlockId>) -> Vec<Bytes> {
 fn tokenize_buffer(array: Vec<BlockId>) -> Vec<RLEToken> {
     let mut vec = Vec::<RLEToken>::new();
 
-    let mut last_symbol = array[0];
+    let mut last_symbol = &array[0];
     let mut count = 1;
 
-    for element in array.iter().skip(1) {
-        if last_symbol == *element {
+    for element in array.iter() {
+        if last_symbol == element {
             count += 1;
         } else {
             vec.push(RLEToken {
                 count,
-                symbol: last_symbol,
+                symbol: last_symbol.clone(),
             });
-            last_symbol = *element;
+            last_symbol = element;
             count = 1;
         }
     }
     vec.push(RLEToken {
         count,
-        symbol: last_symbol,
+        symbol: last_symbol.clone(),
     });
 
     vec
@@ -55,9 +54,9 @@ pub fn deserialize_buffer(bytes: Vec<Bytes>) -> Vec<BlockId> {
 
     bytes.iter().for_each(|byte| {
         let symbol_bytes = &byte[0..4];
-        let count_bytes = &byte[4..8];
-        let symbol = BlockId::try_from(i32::from_le_bytes(symbol_bytes.try_into().unwrap())).unwrap();
-        let count = i32::from_le_bytes(count_bytes.try_into().unwrap());
+        let count_bytes = &byte[4..16];
+        let symbol = BlockId::from_u8(symbol_bytes[0]).unwrap();
+        let count = u16::from_le_bytes(count_bytes.try_into().unwrap());
 
         for _ in 0..count {
             vec.push(symbol);
