@@ -1,4 +1,3 @@
-use renet::Bytes;
 use serde::{Serialize, Deserialize};
 use super::buffer_serializer::{serialize_buffer, deserialize_buffer};
 use serde::ser::SerializeStruct;
@@ -97,11 +96,8 @@ impl<'de> Deserialize<'de> for Chunk {
 
         let ChunkData { data, position } = ChunkData::deserialize(deserializer)?;
         let chunk_data_bytes_u8: Vec<u8> = data.0;
-        let chunk_data_renet_bytes: Vec<Bytes> = chunk_data_bytes_u8
-            .into_iter()
-            .map(|byte| Bytes::from(vec![byte]))
-            .collect();
-        let deserialized_data = deserialize_buffer(chunk_data_renet_bytes);
+        let bytes_slice: &[u8] = &chunk_data_bytes_u8;
+        let deserialized_data = deserialize_buffer(bytes_slice);
         let data_as_block_id: [BlockId; CHUNK_LENGTH] = deserialized_data
             .into_iter()
             .map(|i| BlockId::from_u8(i).unwrap())

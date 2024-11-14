@@ -1,22 +1,18 @@
-use renet::Bytes;
-
 #[derive(Debug, PartialEq)]
 pub struct RLEToken {
     symbol: u8,
     count: u16,
 }
 
-pub fn serialize_buffer(array: Vec<u8>) -> Vec<Bytes> {
+pub fn serialize_buffer(array: Vec<u8>) -> Vec<u8> {
     let tokens = tokenize_buffer(array);
 
-    let mut bytes = Vec::<Bytes>::new();
+    let mut bytes = Vec::<u8>::new();
     tokens.iter().for_each(|token| {
         let symbol_bytes = token.symbol.to_le_bytes();
         let count_bytes = token.count.to_le_bytes();
-        let mut buffer = Vec::new();
-        buffer.extend_from_slice(&symbol_bytes);
-        buffer.extend_from_slice(&count_bytes);
-        bytes.push(Bytes::from(buffer));
+        bytes.extend_from_slice(&symbol_bytes);
+        bytes.extend_from_slice(&count_bytes);
     });
 
     bytes
@@ -48,18 +44,21 @@ fn tokenize_buffer(array: Vec<u8>) -> Vec<RLEToken> {
     vec
 }
 
-pub fn deserialize_buffer(bytes: Vec<Bytes>) -> Vec<u8> {
+pub fn deserialize_buffer(bytes: &[u8]) -> Vec<u8> {
     let mut vec = Vec::<u8>::new();
 
-    bytes.iter().for_each(|byte| {
-        let symbol = byte[0];
-        let count_bytes = &byte[1..3];
+    let mut i = 0;
+    while i < bytes.len() {
+        let symbol = bytes[i];
+        let count_bytes = &bytes[i + 1..i + 3];
         let count = u16::from_le_bytes(count_bytes.try_into().unwrap());
 
         for _ in 0..count {
             vec.push(symbol);
         }
-    });
+
+        i += 3;
+    }
 
     vec
 }
@@ -115,7 +114,7 @@ pub mod tests {
         let bytes = serialize_buffer(array);
 
         let default_bytes = other_array.len() * std::mem::size_of::<u8>();
-        let compressed_bytes = bytes.iter().fold(0, |acc, x| acc + x.len());
+        let compressed_bytes = bytes.len();
 
         assert!(compressed_bytes < default_bytes);
     }
@@ -124,7 +123,7 @@ pub mod tests {
     fn test_serialization_deserialization() {
         let array = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3];
         let bytes = serialize_buffer(array.clone());
-        let deserialized_array = deserialize_buffer(bytes);
+        let deserialized_array = deserialize_buffer(&bytes);
         assert_eq!(array, deserialized_array);
     }
 }
