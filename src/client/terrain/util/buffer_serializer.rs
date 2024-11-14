@@ -4,6 +4,11 @@ pub struct RLEToken {
     count: u16,
 }
 
+const TOKEN_BYTE_COUNT: usize = 3;
+const SYMBOL_OFFSET: usize = 0;
+const COUNT_OFFSET: usize = 1;
+const COUNT_LENGTH: usize = 2;
+
 pub fn serialize_buffer(array: Vec<u8>) -> Vec<u8> {
     let tokens = tokenize_buffer(array);
 
@@ -49,15 +54,15 @@ pub fn deserialize_buffer(bytes: &[u8]) -> Vec<u8> {
 
     let mut i = 0;
     while i < bytes.len() {
-        let symbol = bytes[i];
-        let count_bytes = &bytes[i + 1..i + 3];
+        let symbol = bytes[i + SYMBOL_OFFSET];
+        let count_bytes = &bytes[i + COUNT_OFFSET..i + COUNT_OFFSET + COUNT_LENGTH];
         let count = u16::from_le_bytes(count_bytes.try_into().unwrap());
 
         for _ in 0..count {
             vec.push(symbol);
         }
 
-        i += 3;
+        i += TOKEN_BYTE_COUNT;
     }
 
     vec
