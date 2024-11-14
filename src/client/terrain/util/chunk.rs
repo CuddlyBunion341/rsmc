@@ -41,9 +41,9 @@ impl Chunk {
 
     #[rustfmt::skip]
     pub fn index(x: usize, y: usize, z: usize) -> usize {
-      if (x >= PADDED_CHUNK_SIZE) || (y >= PADDED_CHUNK_SIZE) || (z >= PADDED_CHUNK_SIZE) {
-        panic!("Index out of bounds: ({}, {}, {})", x, y, z);
-      }
+        if (x >= PADDED_CHUNK_SIZE) || (y >= PADDED_CHUNK_SIZE) || (z >= PADDED_CHUNK_SIZE) {
+            panic!("Index out of bounds: ({}, {}, {})", x, y, z);
+        }
         x + PADDED_CHUNK_USIZE * (y + PADDED_CHUNK_USIZE * z)
     }
 
@@ -63,12 +63,24 @@ impl Serialize for Chunk {
     where
         S: serde::Serializer,
     {
-        let data_as_i32: Vec<i32> = self.data.iter().map(|block_id| *block_id as i32).collect();
-        let serialized_data = serialize_buffer(data_as_i32);
+        let data_as_u8: Vec<u8> = self.data.iter().map(|block_id| block_id.to_u8()).collect();
+        let serialized_data = serialize_buffer(data_as_u8);
         let mut state = serializer.serialize_struct("Chunk", 2)?;
         state.serialize_field("data", &serialized_data)?;
         state.serialize_field("position", &self.position)?;
         state.end()
+    }
+}
+
+struct BytesVec(Vec<u8>);
+
+impl<'de> Deserialize<'de> for BytesVec {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let vec = Vec::<u8>::deserialize(deserializer)?;
+        Ok(BytesVec(vec))
     }
 }
 
@@ -79,15 +91,20 @@ impl<'de> Deserialize<'de> for Chunk {
     {
         #[derive(Deserialize)]
         struct ChunkData {
-            data: Vec<Bytes>,
+            data: BytesVec,
             position: Vec3,
         }
 
         let ChunkData { data, position } = ChunkData::deserialize(deserializer)?;
-        let deserialized_data = deserialize_buffer(data);
+        let chunk_data_bytes_u8: Vec<u8> = data.0;
+        let chunk_data_renet_bytes: Vec<Bytes> = chunk_data_bytes_u8
+            .into_iter()
+            .map(|byte| Bytes::from(vec![byte]))
+            .collect();
+        let deserialized_data = deserialize_buffer(chunk_data_renet_bytes);
         let data_as_block_id: [BlockId; CHUNK_LENGTH] = deserialized_data
             .into_iter()
-            .map(|i| BlockId::from(i))
+            .map(|i| BlockId::from_u8(i).unwrap())
             .collect::<Vec<BlockId>>()
             .try_into()
             .map_err(|_| serde::de::Error::custom("Failed to convert data to BlockId array"))?;
