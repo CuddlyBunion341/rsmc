@@ -22,7 +22,7 @@ pub fn receive_message_system(
             lib::NetworkingMessage::PlayerLeave(event) => {
                 player_despawn_events
                     .send(remote_player_events::RemotePlayerDespawnedEvent { client_id: event });
-                }
+            }
             lib::NetworkingMessage::BlockUpdate { position, block } => {
                 debug!("Client received block update message: {:?}", position);
                 block_update_events.send(terrain_events::BlockUpdateEvent {
@@ -64,7 +64,7 @@ pub fn receive_message_system(
                 lib::NetworkingMessage::PlayerSync(event) => {
                     player_sync_events
                         .send(remote_player_events::RemotePlayerSyncEvent { players: event });
-                    }
+                }
                 _ => {
                     warn!("Received unknown message type. (ReliableUnordered)");
                 }

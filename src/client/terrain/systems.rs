@@ -16,7 +16,10 @@ pub fn setup_world_system(mut client: ResMut<RenetClient>) {
 
     batched_positions.for_each(|batch| {
         let request_positions = batch.to_vec();
-        info!("Sending chunk batch request for {:?}", request_positions.len());
+        info!(
+            "Sending chunk batch request for {:?}",
+            request_positions.len()
+        );
         let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(request_positions));
         client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
     });
@@ -34,7 +37,10 @@ pub fn handle_chunk_mesh_update_events(
     texture_manager: ResMut<terrain_util::TextureManager>,
 ) {
     for event in chunk_mesh_update_events.read() {
-        info!("Received chunk mesh update event for chunk {:?}", event.position);
+        info!(
+            "Received chunk mesh update event for chunk {:?}",
+            event.position
+        );
         let chunk_option = chunk_manager.get_chunk(event.position);
         match chunk_option {
             Some(chunk) => {
@@ -119,18 +125,18 @@ fn spawn_chunk(
     );
 
     commands.spawn((
-            MaterialMeshBundle {
-                mesh: meshes.add(mesh),
-                transform,
-                material,
-                ..default()
-            },
-            terrain_components::ChunkMesh {
-                key: [
-                    chunk.position.x as i32,
-                    chunk.position.y as i32,
-                    chunk.position.z as i32,
-                ],
-            },
+        MaterialMeshBundle {
+            mesh: meshes.add(mesh),
+            transform,
+            material,
+            ..default()
+        },
+        terrain_components::ChunkMesh {
+            key: [
+                chunk.position.x as i32,
+                chunk.position.y as i32,
+                chunk.position.z as i32,
+            ],
+        },
     ));
 }

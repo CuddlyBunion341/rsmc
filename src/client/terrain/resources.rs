@@ -156,7 +156,7 @@ mod tests {
         let position = Vec3::new(0.0, 0.0, 0.0);
         let chunk = Chunk::new(position);
 
-        chunk_manager.set_chunk(position, chunk.clone());
+        chunk_manager.set_chunk(position, chunk);
         let retrieved_chunk = chunk_manager.get_chunk(position).unwrap();
         assert_eq!(retrieved_chunk.position, chunk.position);
     }
