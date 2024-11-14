@@ -81,9 +81,11 @@ pub mod tests {
 
     #[test]
     fn test_tokenize_buffer() {
+        #[rustfmt::skip]
         let array = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3];
         let tokens = tokenize_buffer(array);
 
+        #[rustfmt::skip]
         let expected_tokens = vec![
             RLEToken { symbol: 1, count: 4 },
             RLEToken { symbol: 2, count: 3 },
@@ -95,6 +97,7 @@ pub mod tests {
 
     #[test]
     fn test_revert_buffer_tokenization() {
+        #[rustfmt::skip]
         let tokens = vec![
             RLEToken { symbol: 1, count: 4 },
             RLEToken { symbol: 2, count: 3 },
@@ -102,6 +105,7 @@ pub mod tests {
         ];
 
         let array = revert_buffer_tokenization(tokens);
+        #[rustfmt::skip]
         let expected_array = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3];
 
         assert_eq!(array, expected_array);
@@ -109,6 +113,7 @@ pub mod tests {
 
     #[test]
     fn test_compressed_buffer_is_smaller() {
+        #[rustfmt::skip]
         let array = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3];
         let other_array = array.clone();
         let bytes = serialize_buffer(array);
@@ -121,6 +126,7 @@ pub mod tests {
 
     #[test]
     fn test_serialization_deserialization() {
+        #[rustfmt::skip]
         let array = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3];
         let bytes = serialize_buffer(array.clone());
         let deserialized_array = deserialize_buffer(&bytes);
