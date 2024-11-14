@@ -1,7 +1,7 @@
-use serde::{Serialize, Deserialize};
-use super::buffer_serializer::{serialize_buffer, deserialize_buffer};
-use serde::ser::SerializeStruct;
+use super::buffer_serializer::{deserialize_buffer, serialize_buffer};
 use crate::prelude::*;
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Serialize};
 
 pub const CHUNK_SIZE: usize = 32;
 pub const PADDED_CHUNK_SIZE: usize = CHUNK_SIZE + 2;
@@ -104,7 +104,7 @@ impl<'de> Deserialize<'de> for Chunk {
             .collect::<Vec<BlockId>>()
             .try_into()
             .map_err(|_| serde::de::Error::custom("Failed to convert data to BlockId array"))?;
-        
+
         Ok(Chunk {
             data: data_as_block_id,
             position,

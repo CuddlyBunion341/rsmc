@@ -63,21 +63,21 @@ pub fn deserialize_buffer(bytes: &[u8]) -> Vec<u8> {
     vec
 }
 
-fn revert_buffer_tokenization(tokens: Vec<RLEToken>) -> Vec<u8> {
-    let mut vec = Vec::<u8>::new();
-
-    tokens.iter().for_each(|token| {
-        for _ in 0..token.count {
-            vec.push(token.symbol);
-        }
-    });
-
-    vec
-}
-
 #[cfg(test)]
 pub mod tests {
     use super::*;
+
+    fn revert_buffer_tokenization(tokens: Vec<RLEToken>) -> Vec<u8> {
+        let mut vec = Vec::<u8>::new();
+
+        tokens.iter().for_each(|token| {
+            for _ in 0..token.count {
+                vec.push(token.symbol);
+            }
+        });
+
+        vec
+    }
 
     #[test]
     fn test_tokenize_buffer() {
