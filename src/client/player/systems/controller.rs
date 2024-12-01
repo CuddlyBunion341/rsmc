@@ -14,6 +14,7 @@ pub fn setup_player_camera(mut commands: Commands) {
         RenderPlayer {
             logical_entity: Entity::from_raw(0),
         },
+        player_components::PlayerCamera,
     ));
 }
 

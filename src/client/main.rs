@@ -3,6 +3,7 @@ use crate::prelude::*;
 pub mod prelude;
 
 mod collider;
+mod gui;
 mod networking;
 mod player;
 mod remote_player;
@@ -32,6 +33,7 @@ fn main() {
             EntityCountDiagnosticsPlugin,
             SystemInformationDiagnosticsPlugin,
             PerfUiPlugin,
+            gui::GuiPlugin,
             networking::NetworkingPlugin,
             terrain::TerrainPlugin,
             collider::ColliderPlugin,

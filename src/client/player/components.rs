@@ -5,3 +5,9 @@ pub struct HighlightCube;
 
 #[derive(Component, Default)]
 pub struct Player;
+
+#[derive(Component)]
+pub struct PlayerCamera;
+
+#[derive(Component)]
+pub struct Raycastable;

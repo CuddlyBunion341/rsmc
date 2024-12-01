@@ -146,6 +146,7 @@ fn spawn_chunk(
             material,
             ..default()
         },
+        player_components::Raycastable,
         terrain_components::ChunkMesh {
             key: [
                 chunk.position.x as i32,
