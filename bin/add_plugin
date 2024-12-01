@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Check if a plugin name is provided
+if [ -z "$1" ]; then
+    echo "Error: No plugin name provided."
+    echo "Usage: $0 <PLUGIN_NAME>"
+    exit 1
+fi
+
+PLUGIN_NAME=$1
+PLUGIN_DIR="./$PLUGIN_NAME"
+
+# Create the directory structure
+mkdir -p $PLUGIN_DIR || { echo "Error: Failed to create directory $PLUGIN_DIR"; exit 1; }
+touch $PLUGIN_DIR/{components.rs,resources.rs,events.rs,mod.rs,systems.rs} || { echo "Error: Failed to create files in $PLUGIN_DIR"; exit 1; }
+
+# Template content for mod.rs
+MOD_TEMPLATE=$(cat <<EOF
+use crate::prelude::*;
+
+pub mod components;
+pub mod events;
+pub mod resources;
+pub mod systems;
+
+pub struct ${PLUGIN_NAME}Plugin;
+
+impl Plugin for ${PLUGIN_NAME}Plugin {
+    fn build(&self, app: &mut App) {
+        info!("Building ${PLUGIN_NAME}Plugin");
+    }
+}
+EOF
+)
+
+# Write the template content to mod.rs
+echo "$MOD_TEMPLATE" > $PLUGIN_DIR/mod.rs || { echo "Error: Failed to write to $PLUGIN_DIR/mod.rs"; exit 1; }
+
+# Template content for other files
+OTHER_TEMPLATE="use crate::prelude::*;"
+
+# Write the template content to other files
+for file in components.rs resources.rs events.rs systems.rs; do
+    echo "$OTHER_TEMPLATE" > $PLUGIN_DIR/$file || { echo "Error: Failed to write to $PLUGIN_DIR/$file"; exit 1; }
+done
+
+# Update prelude.rs files
+for prelude_file in src/client/prelude.rs src/server/prelude.rs; do
+    sed -i '' "/^pub use crate::/a\\
+pub use crate::${PLUGIN_NAME}::components as ${PLUGIN_NAME}_components;\\
+pub use crate::${PLUGIN_NAME}::events as ${PLUGIN_NAME}_events;\\
+pub use crate::${PLUGIN_NAME}::resources as ${PLUGIN_NAME}_resources;\\
+pub use crate::${PLUGIN_NAME}::systems as ${PLUGIN_NAME}_systems;
+" $prelude_file || { echo "Error: Failed to update $prelude_file"; exit 1; }
+done
+
+echo "Plugin $PLUGIN_NAME created successfully."
