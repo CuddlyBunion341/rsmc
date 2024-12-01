@@ -28,16 +28,11 @@ impl Plugin for PlayerPlugin {
         app.add_event::<player_events::PlayerColliderUpdateEvent>();
         app.insert_resource(player_resources::BlockSelection::new());
         app.insert_resource(player_resources::LastPlayerPosition::new());
-        app.add_systems(
-            Startup,
-            (
-                player_systems::setup_controller_system,
-                player_systems::setup_highlight_cube_system,
-            ),
-        );
+        app.add_systems(Startup, (player_systems::setup_highlight_cube_system,));
         app.add_systems(
             Update,
             (
+                player_systems::setup_controller_on_area_ready_system,
                 player_systems::handle_controller_movement_system,
                 player_systems::manage_cursor_system,
                 player_systems::handle_mouse_events_system,

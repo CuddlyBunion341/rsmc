@@ -1,14 +1,29 @@
 use crate::prelude::*;
 
-pub fn setup_world_system(mut client: ResMut<RenetClient>) {
-    let render_distance = 4;
+pub fn prepare_spawn_area_system(mut client: ResMut<RenetClient>) {
+    let render_distance = 2;
 
-    info!("Sending chunk requests for chunks");
+    info!("Sending chunk requests for spawn area");
 
     let chunks = terrain_resources::ChunkManager::instantiate_chunks(
         Vec3::new(0.0, 0.0, 0.0),
         render_distance,
     );
+
+    let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
+    let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(positions));
+    client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
+}
+
+pub fn generate_world_system(
+    mut client: ResMut<RenetClient>,
+    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+) {
+    let render_distance = 6;
+
+    info!("Sending chunk requests for chunks");
+
+    let chunks = chunk_manager.instantiate_new_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
 
     let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
 

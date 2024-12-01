@@ -2,7 +2,15 @@ use crate::prelude::*;
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 20.0, 0.0);
 
-pub fn setup_controller_system(mut commands: Commands, mut window: Query<&mut Window>) {
+pub fn setup_controller_on_area_ready_system(
+    mut commands: Commands,
+    mut window: Query<&mut Window>,
+    mut spawn_area_ready_events: EventReader<terrain_events::SpawnAreaReadyEvent>,
+) {
+    if spawn_area_ready_events.read().count() == 0 {
+        return;
+    }
+
     let mut window = window.single_mut();
     window.title = String::from("Minimal FPS Controller Example");
 

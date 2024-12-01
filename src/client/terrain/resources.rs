@@ -38,6 +38,23 @@ impl ChunkManager {
         chunks
     }
 
+    pub fn instantiate_new_chunks(
+        &mut self,
+        position: Vec3,
+        render_distance: i32,
+    ) -> Vec<lib::Chunk> {
+        let chunks = Self::instantiate_chunks(position, render_distance);
+
+        chunks
+            .into_iter()
+            .filter(|chunk| {
+                let chunk_position = chunk.position;
+                let chunk = self.get_chunk(chunk_position);
+                chunk.is_some()
+            })
+            .collect()
+    }
+
     pub fn insert_chunk(&mut self, chunk: lib::Chunk) {
         self.chunks
             .insert(Self::position_to_key(chunk.position), chunk);

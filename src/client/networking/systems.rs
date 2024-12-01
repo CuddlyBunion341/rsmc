@@ -8,6 +8,7 @@ pub fn receive_message_system(
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
     mut chunk_mesh_events: ResMut<Events<terrain_events::ChunkMeshUpdateEvent>>,
+    mut spawn_ready_events: ResMut<Events<terrain_events::SpawnAreaReadyEvent>>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
         let message = bincode::deserialize(&message).unwrap();
@@ -59,6 +60,14 @@ pub fn receive_message_system(
                         chunk_mesh_events.send(terrain_events::ChunkMeshUpdateEvent {
                             position: chunk_position,
                         });
+
+                        if chunk_position.eq(&Vec3 {
+                            x: 0.0,
+                            y: 0.0,
+                            z: 0.0,
+                        }) {
+                            spawn_ready_events.send(terrain_events::SpawnAreaReadyEvent {});
+                        }
                     }
                 }
                 lib::NetworkingMessage::PlayerSync(event) => {
