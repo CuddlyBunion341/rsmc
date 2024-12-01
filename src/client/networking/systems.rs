@@ -1,11 +1,15 @@
 use crate::prelude::*;
 
+#[allow(clippy::too_many_arguments)]
 pub fn receive_message_system(
     mut client: ResMut<RenetClient>,
     mut player_spawn_events: ResMut<Events<remote_player_events::RemotePlayerSpawnedEvent>>,
     mut player_despawn_events: ResMut<Events<remote_player_events::RemotePlayerDespawnedEvent>>,
     mut player_sync_events: ResMut<Events<remote_player_events::RemotePlayerSyncEvent>>,
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
+    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chunk_mesh_events: ResMut<Events<terrain_events::ChunkMeshUpdateEvent>>,
+    mut spawn_area_loaded: ResMut<terrain_resources::SpawnAreaLoaded>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
         let message = bincode::deserialize(&message).unwrap();
@@ -46,6 +50,29 @@ pub fn receive_message_system(
         if let Ok(message) = message {
             debug!("Received message: {:?}", message);
             match message {
+                lib::NetworkingMessage::ChunkBatchResponse(chunks) => {
+                    info!("Client received chunk batch response message.");
+                    for chunk in chunks {
+                        info!(
+                            "Client received chunk response message for: {:?}",
+                            chunk.position
+                        );
+                        let chunk_position = chunk.position;
+                        chunk_manager.insert_chunk(chunk);
+                        chunk_mesh_events.send(terrain_events::ChunkMeshUpdateEvent {
+                            position: chunk_position,
+                        });
+
+                        if chunk_position.eq(&Vec3 {
+                            x: 0.0,
+                            y: 0.0,
+                            z: 0.0,
+                        }) {
+                            info!("Spawn area loaded.");
+                            spawn_area_loaded.0 = true;
+                        }
+                    }
+                }
                 lib::NetworkingMessage::PlayerSync(event) => {
                     player_sync_events
                         .send(remote_player_events::RemotePlayerSyncEvent { players: event });

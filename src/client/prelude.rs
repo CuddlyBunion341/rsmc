@@ -1,8 +1,8 @@
 // my crates
-pub use crate::terrain::util::chunk::CHUNK_SIZE;
 pub use rsmc as lib;
 pub use rsmc::BlockId;
 pub use rsmc::NetworkingMessage;
+pub use rsmc::CHUNK_SIZE;
 
 pub use crate::collider::components as collider_components;
 pub use crate::collider::events as collider_events;
@@ -64,8 +64,8 @@ pub use iyes_perf_ui::prelude::*;
 pub use iyes_perf_ui::PerfUiCompleteBundle;
 pub use serde::*;
 
+pub use self::lib::Chunk;
 pub use self::terrain_util::Block;
-pub use self::terrain_util::Chunk;
 pub use bevy::render::mesh::{Indices, PrimitiveTopology};
 pub use bevy::render::render_asset::RenderAssetUsages;
 pub use noise::NoiseFn;

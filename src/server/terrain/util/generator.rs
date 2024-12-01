@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use lib::CHUNK_SIZE;
 
 pub struct Generator {
     pub seed: u32,

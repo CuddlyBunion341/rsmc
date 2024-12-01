@@ -1,35 +1,43 @@
 use crate::prelude::*;
 
-pub fn setup_world_system(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
-    texture_manager: ResMut<terrain_util::TextureManager>,
-) {
-    let generator = terrain_util::generator::Generator::new(0);
+pub fn prepare_spawn_area_system(mut client: ResMut<RenetClient>) {
+    let render_distance = 2;
 
-    let render_distance = 16;
+    info!("Sending chunk requests for spawn area");
 
-    let mut chunks = terrain_resources::ChunkManager::instantiate_chunks(
+    let chunks = terrain_resources::ChunkManager::instantiate_chunks(
         Vec3::new(0.0, 0.0, 0.0),
         render_distance,
     );
 
-    for chunk in &mut chunks {
-        generator.generate_chunk(chunk);
-        add_chunk_objects(
-            &mut commands,
-            &asset_server,
-            &mut meshes,
-            &mut materials,
-            chunk,
-            &texture_manager,
-        );
-    }
+    let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
+    let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(positions));
+    client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
+}
 
-    chunk_manager.insert_chunks(chunks);
+pub fn generate_world_system(
+    mut client: ResMut<RenetClient>,
+    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+) {
+    let render_distance = 6;
+
+    info!("Sending chunk requests for chunks");
+
+    let chunks = chunk_manager.instantiate_new_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
+
+    let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
+
+    let batched_positions = positions.chunks(32);
+
+    batched_positions.for_each(|batch| {
+        let request_positions = batch.to_vec();
+        info!(
+            "Sending chunk batch request for {:?}",
+            request_positions.len()
+        );
+        let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(request_positions));
+        client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
+    });
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -44,11 +52,15 @@ pub fn handle_chunk_mesh_update_events(
     texture_manager: ResMut<terrain_util::TextureManager>,
 ) {
     for event in chunk_mesh_update_events.read() {
+        info!(
+            "Received chunk mesh update event for chunk {:?}",
+            event.position
+        );
         let chunk_option = chunk_manager.get_chunk(event.position);
         match chunk_option {
             Some(chunk) => {
                 for (entity, chunk_mesh) in mesh_query.iter_mut() {
-                    if terrain_util::Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
+                    if lib::Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
                         commands.entity(entity).despawn();
                     }
                 }
@@ -73,7 +85,7 @@ fn add_chunk_objects(
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
-    chunk: &terrain_util::Chunk,
+    chunk: &lib::Chunk,
     texture_manager: &terrain_util::TextureManager,
 ) {
     if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
@@ -90,7 +102,7 @@ fn add_chunk_objects(
 }
 
 fn create_chunk_mesh(
-    chunk: &terrain_util::Chunk,
+    chunk: &lib::Chunk,
     texture_manager: &terrain_util::TextureManager,
 ) -> Option<Mesh> {
     terrain_util::create_chunk_mesh(chunk, texture_manager)
@@ -119,7 +131,7 @@ fn spawn_chunk(
     meshes: &mut Mut<Assets<Mesh>>,
     material: Handle<StandardMaterial>,
     mesh: Mesh,
-    chunk: &terrain_util::Chunk,
+    chunk: &lib::Chunk,
 ) {
     let transform = Transform::from_xyz(
         chunk.position.x * CHUNK_SIZE as f32,
