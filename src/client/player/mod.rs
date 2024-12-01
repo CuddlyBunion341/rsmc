@@ -32,7 +32,7 @@ impl Plugin for PlayerPlugin {
         app.add_systems(Startup, 
             (
                 player_systems::setup_highlight_cube_system,
-                player_systems::setup_game_window
+                player_systems::setup_player_camera
             )
         );
         app.add_systems(
