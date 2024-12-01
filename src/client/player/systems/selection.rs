@@ -19,13 +19,17 @@ pub fn setup_highlight_cube_system(
         .insert(player_components::HighlightCube);
 }
 
+#[allow(clippy::type_complexity)]
 pub fn raycast_system(
     mut raycast: Raycast,
     mut gizmos: Gizmos,
     raycast_origin: Query<&Transform, With<player_components::PlayerCamera>>,
     mut selection_query: Query<
         (&mut Transform, &player_components::HighlightCube),
-        (Without<player_components::PlayerCamera>, Without<player_components::Raycastable>),
+        (
+            Without<player_components::PlayerCamera>,
+            Without<player_components::Raycastable>,
+        ),
     >,
     raycastable_query: Query<&Transform, With<player_components::Raycastable>>,
     mut block_selection: ResMut<player_resources::BlockSelection>,
