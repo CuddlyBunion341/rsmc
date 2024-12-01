@@ -12,10 +12,16 @@ pub struct PlayerSpawned(pub bool);
 impl PlayerSpawned {
     pub fn is_spawned(resource: Res<PlayerSpawned>) -> bool {
         resource.0
-    } 
+    }
 
     pub fn is_not_spawned(resource: Res<PlayerSpawned>) -> bool {
         !resource.0
+    }
+}
+
+impl Default for BlockSelection {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

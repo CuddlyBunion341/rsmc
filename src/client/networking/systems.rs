@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[allow(clippy::too_many_arguments)]
 pub fn receive_message_system(
     mut client: ResMut<RenetClient>,
     mut player_spawn_events: ResMut<Events<remote_player_events::RemotePlayerSpawnedEvent>>,
