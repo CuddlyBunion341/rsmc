@@ -49,7 +49,11 @@ impl Generator {
         } else if density > 0.40 {
             BlockId::Dirt
         } else if density > 0.0 {
-            BlockId::Grass
+            if self.generate_block(position + Vec3::new(0.0, 1.0, 0.0)) == BlockId::Air {
+                BlockId::Grass
+            } else {
+                BlockId::Dirt
+            }
         } else {
             BlockId::Air
         }
