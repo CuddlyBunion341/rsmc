@@ -8,7 +8,7 @@ pub fn receive_message_system(
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
     mut chunk_mesh_events: ResMut<Events<terrain_events::ChunkMeshUpdateEvent>>,
-    mut spawn_ready_events: ResMut<Events<terrain_events::SpawnAreaReadyEvent>>,
+    mut spawn_area_loaded: ResMut<terrain_resources::SpawnAreaLoaded>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
         let message = bincode::deserialize(&message).unwrap();
@@ -50,6 +50,7 @@ pub fn receive_message_system(
             debug!("Received message: {:?}", message);
             match message {
                 lib::NetworkingMessage::ChunkBatchResponse(chunks) => {
+                    info!("Client received chunk batch response message.");
                     for chunk in chunks {
                         info!(
                             "Client received chunk response message for: {:?}",
@@ -66,7 +67,8 @@ pub fn receive_message_system(
                             y: 0.0,
                             z: 0.0,
                         }) {
-                            spawn_ready_events.send(terrain_events::SpawnAreaReadyEvent {});
+                            info!("Spawn area loaded.");
+                            spawn_area_loaded.0 = true;
                         }
                     }
                 }

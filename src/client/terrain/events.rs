@@ -1,9 +1,6 @@
 use crate::prelude::*;
 
 #[derive(Event)]
-pub struct SpawnAreaReadyEvent;
-
-#[derive(Event)]
 pub struct ChunkMeshUpdateEvent {
     pub position: Vec3,
 }

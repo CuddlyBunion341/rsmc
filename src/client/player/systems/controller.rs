@@ -2,17 +2,26 @@ use crate::prelude::*;
 
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 20.0, 0.0);
 
+pub fn setup_game_window(mut window: Query<&mut Window>, mut commands: Commands) {
+    let mut window = window.single_mut();
+    window.title = String::from("Loading...");
+
+    commands.spawn((
+        Camera3dBundle {
+            projection: Projection::Perspective(PerspectiveProjection {
+                fov: TAU / 5.0,
+                ..default()
+            }),
+            ..default()
+        },
+        RenderPlayer { logical_entity: Entity::from_raw(0) }, // Placeholder for logical_entity
+    ));
+}
+
 pub fn setup_controller_on_area_ready_system(
     mut commands: Commands,
-    mut window: Query<&mut Window>,
-    mut spawn_area_ready_events: EventReader<terrain_events::SpawnAreaReadyEvent>,
 ) {
-    if spawn_area_ready_events.read().count() == 0 {
-        return;
-    }
-
-    let mut window = window.single_mut();
-    window.title = String::from("Minimal FPS Controller Example");
+    info!("Setting up controller");
 
     let logical_entity = commands
         .spawn((
@@ -55,16 +64,8 @@ pub fn setup_controller_on_area_ready_system(
         .insert(player_components::Player)
         .id();
 
-    commands.spawn((
-        Camera3dBundle {
-            projection: Projection::Perspective(PerspectiveProjection {
-                fov: TAU / 5.0,
-                ..default()
-            }),
-            ..default()
-        },
-        RenderPlayer { logical_entity },
-    ));
+    // Update the logical_entity in the camera setup
+    commands.entity(Entity::from_raw(0)).insert(RenderPlayer { logical_entity });
 }
 
 pub fn handle_controller_movement_system(

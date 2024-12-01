@@ -1,6 +1,15 @@
 use crate::prelude::*;
 
 #[derive(Resource)]
+pub struct SpawnAreaLoaded(pub bool);
+
+impl SpawnAreaLoaded {
+    pub fn is_loaded(resource: Res<SpawnAreaLoaded>) -> bool {
+        resource.0
+    }
+}
+
+#[derive(Resource)]
 pub struct ChunkManager {
     pub chunks: HashMap<[i32; 3], lib::Chunk>,
 }
