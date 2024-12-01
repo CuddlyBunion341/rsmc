@@ -16,6 +16,10 @@ pub use crate::player::events as player_events;
 pub use crate::player::resources as player_resources;
 pub use crate::player::systems as player_systems;
 
+pub use crate::gui::components as gui_components;
+pub use crate::gui::events as gui_events;
+pub use crate::gui::systems as gui_systems;
+
 pub use crate::remote_player::components as remote_player_components;
 pub use crate::remote_player::events as remote_player_events;
 pub use crate::remote_player::systems as remote_player_systems;
