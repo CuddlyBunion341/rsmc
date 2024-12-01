@@ -22,15 +22,16 @@ pub fn setup_highlight_cube_system(
 pub fn raycast_system(
     mut raycast: Raycast,
     mut gizmos: Gizmos,
-    query: Query<&Transform, With<player_components::PlayerCamera>>,
-    mut highlight_query: Query<
+    raycast_origin: Query<&Transform, With<player_components::PlayerCamera>>,
+    mut selection_query: Query<
         (&mut Transform, &player_components::HighlightCube),
-        Without<player_components::PlayerCamera>,
+        (Without<player_components::PlayerCamera>, Without<player_components::Raycastable>),
     >,
+    raycastable_query: Query<&Transform, With<player_components::Raycastable>>,
     mut block_selection: ResMut<player_resources::BlockSelection>,
 ) {
-    let camera_transform = query.single();
-    let filter = |entity| !highlight_query.contains(entity);
+    let camera_transform = raycast_origin.single();
+    let filter = |entity| raycastable_query.get(entity).is_ok();
 
     let pos = camera_transform.translation;
     let dir = camera_transform.rotation.mul_vec3(Vec3::Z).normalize();
@@ -45,7 +46,7 @@ pub fn raycast_system(
         &mut gizmos,
     );
 
-    let (mut highlight_transform, _) = highlight_query.single_mut();
+    let (mut highlight_transform, _) = selection_query.single_mut();
     let hover_position = intersections
         .first()
         .map(|(_, intersection)| (intersection.position() - intersection.normal() * 0.5).floor());

@@ -1,7 +1,13 @@
 use crate::prelude::*;
 
 pub fn setup_gui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle {
+        camera: Camera {
+            order: 2,
+        ..default()
+        },
+        ..default()
+    });
     commands
         .spawn(NodeBundle {
             style: Style {
