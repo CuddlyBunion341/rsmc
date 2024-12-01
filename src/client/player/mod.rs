@@ -39,7 +39,9 @@ impl Plugin for PlayerPlugin {
             Update,
             (
                 player_systems::setup_controller_on_area_ready_system,
-            ).run_if(terrain_resources::SpawnAreaLoaded::is_loaded),
+            )
+            .run_if(terrain_resources::SpawnAreaLoaded::is_loaded)
+            .run_if(player_resources::PlayerSpawned::is_not_spawned),
         );
         app.add_systems(
             Update,

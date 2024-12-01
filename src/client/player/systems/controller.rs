@@ -1,12 +1,12 @@
 use crate::prelude::*;
 
-const SPAWN_POINT: Vec3 = Vec3::new(0.0, 20.0, 0.0);
+const SPAWN_POINT: Vec3 = Vec3::new(0.0, 32.0, 0.0);
 
 pub fn setup_game_window(mut window: Query<&mut Window>, mut commands: Commands) {
     let mut window = window.single_mut();
     window.title = String::from("Loading...");
 
-    commands.spawn((
+    let camera_entity = commands.spawn((
         Camera3dBundle {
             projection: Projection::Perspective(PerspectiveProjection {
                 fov: TAU / 5.0,
@@ -14,13 +14,19 @@ pub fn setup_game_window(mut window: Query<&mut Window>, mut commands: Commands)
             }),
             ..default()
         },
-        RenderPlayer { logical_entity: Entity::from_raw(0) }, // Placeholder for logical_entity
-    ));
+        RenderPlayer { logical_entity: Entity::from_raw(0) },
+    )).id();
+
+    commands.insert_resource(CameraEntity(camera_entity));
 }
 
 pub fn setup_controller_on_area_ready_system(
     mut commands: Commands,
+    mut player_spawned: ResMut<player_resources::PlayerSpawned>,
+    mut render_player: Query<&mut RenderPlayer>,
+    camera_entity: Res<CameraEntity>,
 ) {
+
     info!("Setting up controller");
 
     let logical_entity = commands
@@ -64,8 +70,10 @@ pub fn setup_controller_on_area_ready_system(
         .insert(player_components::Player)
         .id();
 
-    // Update the logical_entity in the camera setup
-    commands.entity(Entity::from_raw(0)).insert(RenderPlayer { logical_entity });
+    let mut player = render_player.single_mut();
+    player.logical_entity = logical_entity;
+
+    player_spawned.0 = true;
 }
 
 pub fn handle_controller_movement_system(
@@ -83,3 +91,6 @@ pub fn handle_controller_movement_system(
         last_position.0 = controller_position;
     }
 }
+
+#[derive(Resource)]
+pub struct CameraEntity(Entity);

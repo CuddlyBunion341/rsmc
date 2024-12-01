@@ -13,6 +13,10 @@ impl PlayerSpawned {
     pub fn is_spawned(resource: Res<PlayerSpawned>) -> bool {
         resource.0
     } 
+
+    pub fn is_not_spawned(resource: Res<PlayerSpawned>) -> bool {
+        !resource.0
+    }
 }
 
 impl BlockSelection {
