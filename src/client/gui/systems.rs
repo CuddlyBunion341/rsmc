@@ -20,6 +20,15 @@ pub fn setup_gui_system(mut commands: Commands, asset_server: Res<AssetServer>) 
             ..default()
         })
         .with_children(|parent| {
+            parent.spawn(TextBundle::from_section(
+                "RSMC - Pre Alpha",
+                TextStyle {
+                    font: asset_server.load("fonts/Terminus500.ttf"),
+                    font_size: 60.0,
+                    color: Color::rgb(0.9, 0.9, 0.9),
+                },
+            ));
+
             parent
                 .spawn(ButtonBundle {
                     style: Style {
