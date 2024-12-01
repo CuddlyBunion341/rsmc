@@ -1,13 +1,34 @@
 #!/bin/bash
 
+# Usage:
+# ./add_plugin <PLUGIN_NAME> <TARGET>
+# 
+# Arguments:
+#   PLUGIN_NAME - The name of the plugin to create.
+#   TARGET      - The target for the plugin, can be 'server', 'client', or 'both'.
+# 
+# Example:
+# ./add_plugin my_plugin server
+# ./add_plugin my_plugin both
+
 # Check if a plugin name is provided
 if [ -z "$1" ]; then
     echo "Error: No plugin name provided."
-    echo "Usage: $0 <PLUGIN_NAME>"
+    echo "Usage: $0 <PLUGIN_NAME> <TARGET>"
+    echo "TARGET can be 'server', 'client', or 'both'"
+    exit 1
+fi
+
+# Check if a target is provided
+if [ -z "$2" ]; then
+    echo "Error: No target provided."
+    echo "Usage: $0 <PLUGIN_NAME> <TARGET>"
+    echo "TARGET can be 'server', 'client', or 'both'"
     exit 1
 fi
 
 PLUGIN_NAME=$1
+TARGET=$2
 PLUGIN_DIR="./$PLUGIN_NAME"
 
 # Create the directory structure
@@ -37,21 +58,56 @@ EOF
 echo "$MOD_TEMPLATE" > $PLUGIN_DIR/mod.rs || { echo "Error: Failed to write to $PLUGIN_DIR/mod.rs"; exit 1; }
 
 # Template content for other files
-OTHER_TEMPLATE="use crate::prelude::*;"
+COMPONENT_TEMPLATE=$(cat <<EOF
+use crate::prelude::*;
+
+pub struct ExampleComponent {
+    pub value: i32,
+}
+EOF
+)
+
+EVENT_TEMPLATE=$(cat <<EOF
+use crate::prelude::*;
+
+pub struct ExampleEvent {
+    pub message: String,
+}
+EOF
+)
+
+SYSTEM_TEMPLATE=$(cat <<EOF
+use crate::prelude::*;
+
+pub fn example_system() {
+    info!("Running example system");
+}
+EOF
+)
 
 # Write the template content to other files
-for file in components.rs resources.rs events.rs systems.rs; do
-    echo "$OTHER_TEMPLATE" > $PLUGIN_DIR/$file || { echo "Error: Failed to write to $PLUGIN_DIR/$file"; exit 1; }
-done
+echo "$COMPONENT_TEMPLATE" > $PLUGIN_DIR/components.rs || { echo "Error: Failed to write to $PLUGIN_DIR/components.rs"; exit 1; }
+echo "$EVENT_TEMPLATE" > $PLUGIN_DIR/events.rs || { echo "Error: Failed to write to $PLUGIN_DIR/events.rs"; exit 1; }
+echo "$SYSTEM_TEMPLATE" > $PLUGIN_DIR/systems.rs || { echo "Error: Failed to write to $PLUGIN_DIR/systems.rs"; exit 1; }
+echo "use crate::prelude::*;" > $PLUGIN_DIR/resources.rs || { echo "Error: Failed to write to $PLUGIN_DIR/resources.rs"; exit 1; }
 
-# Update prelude.rs files
-for prelude_file in src/client/prelude.rs src/server/prelude.rs; do
+# Update prelude.rs files based on the target
+if [ "$TARGET" == "server" ] || [ "$TARGET" == "both" ]; then
     sed -i '' "/^pub use crate::/a\\
 pub use crate::${PLUGIN_NAME}::components as ${PLUGIN_NAME}_components;\\
 pub use crate::${PLUGIN_NAME}::events as ${PLUGIN_NAME}_events;\\
 pub use crate::${PLUGIN_NAME}::resources as ${PLUGIN_NAME}_resources;\\
 pub use crate::${PLUGIN_NAME}::systems as ${PLUGIN_NAME}_systems;
-" $prelude_file || { echo "Error: Failed to update $prelude_file"; exit 1; }
-done
+" src/server/prelude.rs || { echo "Error: Failed to update src/server/prelude.rs"; exit 1; }
+fi
+
+if [ "$TARGET" == "client" ] || [ "$TARGET" == "both" ]; then
+    sed -i '' "/^pub use crate::/a\\
+pub use crate::${PLUGIN_NAME}::components as ${PLUGIN_NAME}_components;\\
+pub use crate::${PLUGIN_NAME}::events as ${PLUGIN_NAME}_events;\\
+pub use crate::${PLUGIN_NAME}::resources as ${PLUGIN_NAME}_resources;\\
+pub use crate::${PLUGIN_NAME}::systems as ${PLUGIN_NAME}_systems;
+" src/client/prelude.rs || { echo "Error: Failed to update src/client/prelude.rs"; exit 1; }
+fi
 
 echo "Plugin $PLUGIN_NAME created successfully."
