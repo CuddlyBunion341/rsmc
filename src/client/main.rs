@@ -33,7 +33,7 @@ fn main() {
             EntityCountDiagnosticsPlugin,
             SystemInformationDiagnosticsPlugin,
             PerfUiPlugin,
-            gui::GUIPlugin,
+            gui::GuiPlugin,
             networking::NetworkingPlugin,
             terrain::TerrainPlugin,
             collider::ColliderPlugin,
