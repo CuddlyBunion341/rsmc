@@ -168,12 +168,12 @@ echo "$SYSTEM_TEMPLATE" > $PLUGIN_DIR/systems.rs || { echo "Error: Failed to wri
 echo "$RESOURCE_TEMPLATE" > $PLUGIN_DIR/resources.rs || { echo "Error: Failed to write to $PLUGIN_DIR/resources.rs"; exit 1; }
 
 # Update prelude.rs file based on the target
-PRELUDE_CONTENT= <<EOF 
+PRELUDE_CONTENT=$(cat <<EOF 
 pub use crate::${PLUGIN_NAME}::components as ${PLUGIN_NAME}_components;
 pub use crate::${PLUGIN_NAME}::events as ${PLUGIN_NAME}_events;
 pub use crate::${PLUGIN_NAME}::resources as ${PLUGIN_NAME}_resources;
 pub use crate::${PLUGIN_NAME}::systems as ${PLUGIN_NAME}_systems;
-EOF
+EOF)
 
 if [ "$TARGET" == "server" ]; then
     echo "$PRELUDE_CONTENT" >> src/server/prelude.rs || { echo "Error: Failed to update src/server/prelude.rs"; exit 1; }
