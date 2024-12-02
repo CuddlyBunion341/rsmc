@@ -1,17 +1,3 @@
-// my crates
-pub use rsmc as lib;
-pub use rsmc::BlockId;
-
-pub use crate::networking::systems as networking_systems;
-
-pub use crate::player::resources as player_resources;
-pub use crate::player::systems as player_systems;
-
-pub use crate::terrain::events as terrain_events;
-pub use crate::terrain::resources as terrain_resources;
-pub use crate::terrain::systems as terrain_systems;
-pub use crate::terrain::util as terrain_util;
-
 // std crates
 pub use std::collections::HashMap;
 pub use std::net::UdpSocket;
@@ -36,3 +22,18 @@ pub use self::lib::Chunk;
 pub use self::terrain_util::Block;
 pub use noise::NoiseFn;
 pub use noise::Perlin;
+
+// my crates
+pub use rsmc as lib;
+pub use rsmc::BlockId;
+
+pub use crate::networking::systems as networking_systems;
+
+pub use crate::player::resources as player_resources;
+pub use crate::player::systems as player_systems;
+
+pub use crate::terrain::events as terrain_events;
+pub use crate::terrain::resources as terrain_resources;
+pub use crate::terrain::systems as terrain_systems;
+pub use crate::terrain::util as terrain_util;
+
