@@ -40,7 +40,7 @@ PLUGIN_DIR="./$TARGET/$PLUGIN_NAME"
 
 # Create the directory structure
 mkdir -p $PLUGIN_DIR || { echo "Error: Failed to create directory $PLUGIN_DIR"; exit 1; }
-touch $PLUGIN_DIR/{components.rs,resources.rs,events.rs,mod.rs,systems.rs,queries.rs,commands.rs} || { echo "Error: Failed to create files in $PLUGIN_DIR"; exit 1; }
+touch $PLUGIN_DIR/{components.rs,resources.rs,events.rs,mod.rs,systems.rs} || { echo "Error: Failed to create files in $PLUGIN_DIR"; exit 1; }
 
 # Template content for mod.rs
 MOD_TEMPLATE=$(cat <<EOF
@@ -107,7 +107,7 @@ EOF
 # Template content for systems
 SYSTEM_TEMPLATE=$(cat <<EOF
 use crate::prelude::*;
-use super::{components::*, events::*, resources::*, queries::*, commands::*};
+use super::{components::*, events::*, resources::*};
 
 pub fn example_system(
     mut commands: Commands,
@@ -169,7 +169,7 @@ echo "$SYSTEM_TEMPLATE" > $PLUGIN_DIR/systems.rs || { echo "Error: Failed to wri
 echo "$RESOURCE_TEMPLATE" > $PLUGIN_DIR/resources.rs || { echo "Error: Failed to write to $PLUGIN_DIR/resources.rs"; exit 1; }
 
 # Update prelude.rs file based on the target
-PRELUDE_CONTENT="pub use crate::${PLUGIN_NAME}::{components as ${PLUGIN_NAME}_components, events as ${PLUGIN_NAME}_events, resources as ${PLUGIN_NAME}_resources, systems as ${PLUGIN_NAME}_systems, queries as ${PLUGIN_NAME}_queries, commands as ${PLUGIN_NAME}_commands};"
+PRELUDE_CONTENT="pub use crate::${PLUGIN_NAME}::{components as ${PLUGIN_NAME}_components, events as ${PLUGIN_NAME}_events, resources as ${PLUGIN_NAME}_resources, systems as ${PLUGIN_NAME}_systems};"
 
 if [ "$TARGET" == "server" ]; then
     echo "$PRELUDE_CONTENT" >> src/server/prelude.rs || { echo "Error: Failed to update src/server/prelude.rs"; exit 1; }
