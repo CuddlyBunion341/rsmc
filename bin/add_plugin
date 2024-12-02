@@ -12,13 +12,12 @@
 # ./add_plugin my_plugin client
 
 # Function to convert to PascalCase
-to_pascal_case() {
-    echo "$1" | sed -r 's/(^|_)([a-z])/\U\2/g'
+snake_to_pascal_case() {
+  echo "$1" | awk -F'_' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1' OFS=''
 }
 
-# Function to convert to snake_case
-to_snake_case() {
-    echo "$1" | sed -r 's/([A-Z])/_\L\1/g' | sed -r 's/^_//'
+pascal_to_snake_case() {
+  echo "$1" | sed 's/[A-Z]/_&/g' | tr '[:upper:]' '[:lower:]' | sed 's/^_//'
 }
 
 # Check if a plugin name is provided
@@ -46,7 +45,7 @@ if [ "$TARGET" != "server" ] && [ "$TARGET" != "client" ]; then
     exit 1
 fi
 
-PLUGIN_DIR="./$TARGET/$(to_snake_case $PLUGIN_NAME)"
+PLUGIN_DIR="./$TARGET/$(pascal_to_snake_case $PLUGIN_NAME)"
 
 # Create the directory structure
 mkdir -p $PLUGIN_DIR || { echo "Error: Failed to create directory $PLUGIN_DIR"; exit 1; }
@@ -61,11 +60,11 @@ pub mod events;
 pub mod resources;
 pub mod systems;
 
-pub struct $(to_pascal_case $PLUGIN_NAME)Plugin;
+pub struct $(snake_to_pascal_case $PLUGIN_NAME)Plugin;
 
-impl Plugin for $(to_pascal_case $PLUGIN_NAME)Plugin {
+impl Plugin for $(snake_to_pascal_case $PLUGIN_NAME)Plugin {
     fn build(&self, app: &mut App) {
-        info!("Building $(to_pascal_case $PLUGIN_NAME)Plugin");
+        info!("Building $(snake_to_pascal_case $PLUGIN_NAME)Plugin");
 
         // Register components
         app.register_type::<components::ExampleComponent>();
@@ -180,10 +179,10 @@ echo "$RESOURCE_TEMPLATE" > $PLUGIN_DIR/resources.rs || { echo "Error: Failed to
 # Update prelude.rs file based on the target
 PRELUDE_CONTENT=$(cat <<EOF 
 
-pub use crate::$(to_snake_case $PLUGIN_NAME)::components as $(to_snake_case $PLUGIN_NAME)_components;
-pub use crate::$(to_snake_case $PLUGIN_NAME)::events as $(to_snake_case $PLUGIN_NAME)_events;
-pub use crate::$(to_snake_case $PLUGIN_NAME)::resources as $(to_snake_case $PLUGIN_NAME)_resources;
-pub use crate::$(to_snake_case $PLUGIN_NAME)::systems as $(to_snake_case $PLUGIN_NAME)_systems;
+pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::components as $(pascal_to_snake_case $PLUGIN_NAME)_components;
+pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::events as $(pascal_to_snake_case $PLUGIN_NAME)_events;
+pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::resources as $(pascal_to_snake_case $PLUGIN_NAME)_resources;
+pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::systems as $(pascal_to_snake_case $PLUGIN_NAME)_systems;
 EOF)
 
 if [ "$TARGET" == "server" ]; then
