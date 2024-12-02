@@ -1,35 +1,3 @@
-// my crates
-pub use rsmc as lib;
-pub use rsmc::BlockId;
-pub use rsmc::NetworkingMessage;
-pub use rsmc::CHUNK_SIZE;
-
-pub use crate::collider::components as collider_components;
-pub use crate::collider::events as collider_events;
-pub use crate::collider::systems as collider_systems;
-
-pub use crate::networking::systems as networking_systems;
-pub use crate::networking::NetworkingPlugin;
-
-pub use crate::player::components as player_components;
-pub use crate::player::events as player_events;
-pub use crate::player::resources as player_resources;
-pub use crate::player::systems as player_systems;
-
-pub use crate::gui::components as gui_components;
-pub use crate::gui::events as gui_events;
-pub use crate::gui::systems as gui_systems;
-
-pub use crate::remote_player::components as remote_player_components;
-pub use crate::remote_player::events as remote_player_events;
-pub use crate::remote_player::systems as remote_player_systems;
-
-pub use crate::terrain::components as terrain_components;
-pub use crate::terrain::events as terrain_events;
-pub use crate::terrain::resources as terrain_resources;
-pub use crate::terrain::systems as terrain_systems;
-pub use crate::terrain::util as terrain_util;
-
 // std crates
 pub use std::collections::HashMap;
 pub use std::f32::consts::*;
@@ -75,3 +43,35 @@ pub use bevy::render::render_asset::RenderAssetUsages;
 pub use noise::NoiseFn;
 pub use noise::Perlin;
 pub use terrain_util::CubeFace;
+
+// my crates
+pub use rsmc as lib;
+pub use rsmc::BlockId;
+pub use rsmc::NetworkingMessage;
+pub use rsmc::CHUNK_SIZE;
+
+pub use crate::collider::components as collider_components;
+pub use crate::collider::events as collider_events;
+pub use crate::collider::systems as collider_systems;
+
+pub use crate::networking::systems as networking_systems;
+pub use crate::networking::NetworkingPlugin;
+
+pub use crate::player::components as player_components;
+pub use crate::player::events as player_events;
+pub use crate::player::resources as player_resources;
+pub use crate::player::systems as player_systems;
+
+pub use crate::remote_player::components as remote_player_components;
+pub use crate::remote_player::events as remote_player_events;
+pub use crate::remote_player::systems as remote_player_systems;
+
+pub use crate::terrain::components as terrain_components;
+pub use crate::terrain::events as terrain_events;
+pub use crate::terrain::resources as terrain_resources;
+pub use crate::terrain::systems as terrain_systems;
+pub use crate::terrain::util as terrain_util;
+
+pub use crate::gui::components as gui_components;
+pub use crate::gui::events as gui_events;
+pub use crate::gui::systems as gui_systems;

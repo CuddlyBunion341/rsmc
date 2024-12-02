@@ -1,0 +1,214 @@
+#!/bin/bash
+
+# Usage:
+# ./add_plugin <PLUGIN_NAME> <TARGET>
+#
+# Arguments:
+#   PLUGIN_NAME - The name of the plugin to create.
+#   TARGET      - The target for the plugin, can be 'server' or 'client'.
+#
+# Example:
+# ./add_plugin my_plugin server
+# ./add_plugin my_plugin client
+
+# Function to convert to PascalCase
+snake_to_pascal_case() {
+  echo "$1" | awk -F'_' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1' OFS=''
+}
+
+pascal_to_snake_case() {
+  echo "$1" | sed 's/[A-Z]/_&/g' | tr '[:upper:]' '[:lower:]' | sed 's/^_//'
+}
+
+# Function to check if a string is in snake_case
+is_snake_case() {
+  [[ "$1" =~ ^[a-z]+(_[a-z]+)*$ ]]
+}
+
+# Check if a plugin name is provided
+if [ -z "$1" ]; then
+  echo "Error: No plugin name provided."
+  echo "Usage: $0 <PLUGIN_NAME> <TARGET>"
+  echo "TARGET can be 'server' or 'client'"
+  exit 1
+fi
+
+# Check if a target is provided
+if [ -z "$2" ]; then
+  echo "Error: No target provided."
+  echo "Usage: $0 <PLUGIN_NAME> <TARGET>"
+  echo "TARGET can be 'server' or 'client'"
+  exit 1
+fi
+
+PLUGIN_NAME=$1
+TARGET=$2
+
+# Validate the plugin name
+if [[ "$PLUGIN_NAME" == *"plugin"* ]]; then
+  echo "Error: Plugin name should not contain 'Plugin'."
+  exit 1
+fi
+
+if ! is_snake_case "$PLUGIN_NAME"; then
+  echo "Error: Plugin name must be in snake_case."
+  exit 1
+fi
+
+# Validate the target
+if [ "$TARGET" != "server" ] && [ "$TARGET" != "client" ]; then
+  echo "Error: Invalid target. TARGET can be 'server' or 'client'"
+  exit 1
+fi
+
+PLUGIN_DIR="./$TARGET/$(pascal_to_snake_case $PLUGIN_NAME)"
+
+# Create the directory structure
+mkdir -p $PLUGIN_DIR || { echo "Error: Failed to create directory $PLUGIN_DIR"; exit 1; }
+touch $PLUGIN_DIR/{components.rs,resources.rs,events.rs,mod.rs,systems.rs} || { echo "Error: Failed to create files in $PLUGIN_DIR"; exit 1; }
+
+# Template content for mod.rs
+MOD_TEMPLATE=$(cat <<EOF
+use crate::prelude::*;
+
+pub mod components;
+pub mod events;
+pub mod resources;
+pub mod systems;
+
+pub struct $(snake_to_pascal_case $PLUGIN_NAME)Plugin;
+
+impl Plugin for $(snake_to_pascal_case $PLUGIN_NAME)Plugin {
+    fn build(&self, app: &mut App) {
+        info!("Building $(snake_to_pascal_case $PLUGIN_NAME)Plugin");
+
+        // Register components
+        app.register_type::<components::ExampleComponent>();
+
+        // Register events
+        app.add_event::<events::ExampleEvent>();
+
+        // Add systems
+        app.add_systems(Update, systems::example_system);
+
+        // Add resources
+        app.insert_resource(resources::ExampleResource::default());
+      }
+    }
+EOF
+)
+
+# Write the template content to mod.rs
+echo "$MOD_TEMPLATE" > $PLUGIN_DIR/mod.rs || { echo "Error: Failed to write to $PLUGIN_DIR/mod.rs"; exit 1; }
+
+# Template content for components
+COMPONENT_TEMPLATE=$(cat <<EOF
+use crate::prelude::*;
+
+#[derive(Component, Default, Debug, Clone)]
+pub struct ExampleComponent {
+    pub value: i32,
+    pub name: String,
+    pub active: bool,
+  }
+EOF
+)
+
+# Template content for events
+EVENT_TEMPLATE=$(cat <<EOF
+use crate::prelude::*;
+
+#[derive(Event, Debug, Clone)]
+pub struct ExampleEvent {
+    pub message: String,
+    pub timestamp: f64,
+  }
+
+pub struct EventWriter<T: Event>(pub EventWriter<T>);
+pub struct EventReader<T: Event>(pub EventReader<T>);
+EOF
+)
+
+# Template content for systems
+SYSTEM_TEMPLATE=$(cat <<EOF
+use crate::prelude::*;
+
+pub fn example_system(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut example_resource: ResMut<ExampleResource>,
+    mut example_writer: EventWriter<ExampleEvent>,
+    mut example_reader: EventReader<ExampleEvent>,
+    query: Query<(Entity, &ExampleComponent)>,
+) {
+    // System implementation
+    for (entity, component) in query.iter() {
+        // Process entities
+        if component.active {
+            example_writer.send(ExampleEvent {
+                message: format!("Entity {} is active", entity.index()),
+                timestamp: time.elapsed_seconds(),
+              });
+            }
+          }
+        }
+
+pub fn cleanup_system(
+    mut commands: Commands,
+    query: Query<Entity, With<ExampleComponent>>,
+) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn();
+      }
+    }
+
+pub fn spawn_example_system(commands: &mut Commands) -> Entity {
+    commands
+        .spawn(ExampleComponent {
+            value: 0,
+            name: "Example".to_string(),
+            active: true,
+          })
+        .id()
+      }
+EOF
+)
+
+# Template content for resources
+RESOURCE_TEMPLATE=$(cat <<EOF
+use crate::prelude::*;
+
+#[derive(Resource, Default, Debug)]
+pub struct ExampleResource {
+    pub counter: usize,
+    pub last_update: f64,
+  }
+EOF
+)
+
+# Write the template content to files
+echo "$COMPONENT_TEMPLATE" > $PLUGIN_DIR/components.rs || { echo "Error: Failed to write to $PLUGIN_DIR/components.rs"; exit 1; }
+echo "$EVENT_TEMPLATE" > $PLUGIN_DIR/events.rs || { echo "Error: Failed to write to $PLUGIN_DIR/events.rs"; exit 1; }
+echo "$SYSTEM_TEMPLATE" > $PLUGIN_DIR/systems.rs || { echo "Error: Failed to write to $PLUGIN_DIR/systems.rs"; exit 1; }
+echo "$RESOURCE_TEMPLATE" > $PLUGIN_DIR/resources.rs || { echo "Error: Failed to write to $PLUGIN_DIR/resources.rs"; exit 1; }
+
+# Update prelude.rs file based on the target
+PRELUDE_CONTENT=$(cat <<EOF 
+
+pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::components as $(pascal_to_snake_case $PLUGIN_NAME)_components;
+pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::events as $(pascal_to_snake_case $PLUGIN_NAME)_events;
+pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::resources as $(pascal_to_snake_case $PLUGIN_NAME)_resources;
+pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::systems as $(pascal_to_snake_case $PLUGIN_NAME)_systems;
+EOF)
+
+if [ "$TARGET" == "server" ]; then
+    echo "$PRELUDE_CONTENT" >> src/server/prelude.rs || { echo "Error: Failed to update src/server/prelude.rs"; exit 1; }
+fi
+
+if [ "$TARGET" == "client" ]; then
+    echo "$PRELUDE_CONTENT" >> src/client/prelude.rs || { echo "Error: Failed to update src/client/prelude.rs"; exit 1; }
+fi
+
+echo "Plugin $PLUGIN_NAME created successfully."
+echo "Don't forget to add the plugin to the corresponding file:"
+echo "$EDITOR src/$TARGET/main.rs"
