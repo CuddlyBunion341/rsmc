@@ -169,6 +169,7 @@ echo "$RESOURCE_TEMPLATE" > $PLUGIN_DIR/resources.rs || { echo "Error: Failed to
 
 # Update prelude.rs file based on the target
 PRELUDE_CONTENT=$(cat <<EOF 
+
 pub use crate::${PLUGIN_NAME}::components as ${PLUGIN_NAME}_components;
 pub use crate::${PLUGIN_NAME}::events as ${PLUGIN_NAME}_events;
 pub use crate::${PLUGIN_NAME}::resources as ${PLUGIN_NAME}_resources;
