@@ -185,3 +185,5 @@ if [ "$TARGET" == "client" ]; then
 fi
 
 echo "Plugin $PLUGIN_NAME created successfully."
+echo "Don't forget to add the plugin to the corresponding file:"
+echo "$EDITOR src/$TARGET/main.rs"
