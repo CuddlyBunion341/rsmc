@@ -71,3 +71,7 @@ pub use crate::terrain::events as terrain_events;
 pub use crate::terrain::resources as terrain_resources;
 pub use crate::terrain::systems as terrain_systems;
 pub use crate::terrain::util as terrain_util;
+
+pub use crate::gui::components as gui_components;
+pub use crate::gui::events as gui_events;
+pub use crate::gui::systems as gui_systems;
