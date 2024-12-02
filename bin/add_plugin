@@ -27,18 +27,18 @@ is_snake_case() {
 
 # Check if a plugin name is provided
 if [ -z "$1" ]; then
-    echo "Error: No plugin name provided."
-    echo "Usage: $0 <PLUGIN_NAME> <TARGET>"
-    echo "TARGET can be 'server' or 'client'"
-    exit 1
+  echo "Error: No plugin name provided."
+  echo "Usage: $0 <PLUGIN_NAME> <TARGET>"
+  echo "TARGET can be 'server' or 'client'"
+  exit 1
 fi
 
 # Check if a target is provided
 if [ -z "$2" ]; then
-    echo "Error: No target provided."
-    echo "Usage: $0 <PLUGIN_NAME> <TARGET>"
-    echo "TARGET can be 'server' or 'client'"
-    exit 1
+  echo "Error: No target provided."
+  echo "Usage: $0 <PLUGIN_NAME> <TARGET>"
+  echo "TARGET can be 'server' or 'client'"
+  exit 1
 fi
 
 PLUGIN_NAME=$1
@@ -46,19 +46,19 @@ TARGET=$2
 
 # Validate the plugin name
 if [[ "$PLUGIN_NAME" == *"plugin"* ]]; then
-    echo "Error: Plugin name should not contain 'Plugin'."
-    exit 1
+  echo "Error: Plugin name should not contain 'Plugin'."
+  exit 1
 fi
 
 if ! is_snake_case "$PLUGIN_NAME"; then
-    echo "Error: Plugin name must be in snake_case."
-    exit 1
+  echo "Error: Plugin name must be in snake_case."
+  exit 1
 fi
 
 # Validate the target
 if [ "$TARGET" != "server" ] && [ "$TARGET" != "client" ]; then
-    echo "Error: Invalid target. TARGET can be 'server' or 'client'"
-    exit 1
+  echo "Error: Invalid target. TARGET can be 'server' or 'client'"
+  exit 1
 fi
 
 PLUGIN_DIR="./$TARGET/$(pascal_to_snake_case $PLUGIN_NAME)"
@@ -93,8 +93,8 @@ impl Plugin for $(snake_to_pascal_case $PLUGIN_NAME)Plugin {
 
         // Add resources
         app.insert_resource(resources::ExampleResource::default());
+      }
     }
-}
 EOF
 )
 
@@ -110,7 +110,7 @@ pub struct ExampleComponent {
     pub value: i32,
     pub name: String,
     pub active: bool,
-}
+  }
 EOF
 )
 
@@ -122,7 +122,7 @@ use crate::prelude::*;
 pub struct ExampleEvent {
     pub message: String,
     pub timestamp: f64,
-}
+  }
 
 pub struct EventWriter<T: Event>(pub EventWriter<T>);
 pub struct EventReader<T: Event>(pub EventReader<T>);
@@ -148,10 +148,10 @@ pub fn example_system(
             example_writer.send(ExampleEvent {
                 message: format!("Entity {} is active", entity.index()),
                 timestamp: time.elapsed_seconds(),
-            });
+              });
+            }
+          }
         }
-    }
-}
 
 pub fn cleanup_system(
     mut commands: Commands,
@@ -159,8 +159,8 @@ pub fn cleanup_system(
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn();
+      }
     }
-}
 
 pub fn spawn_example_system(commands: &mut Commands) -> Entity {
     commands
@@ -168,9 +168,9 @@ pub fn spawn_example_system(commands: &mut Commands) -> Entity {
             value: 0,
             name: "Example".to_string(),
             active: true,
-        })
+          })
         .id()
-}
+      }
 EOF
 )
 
@@ -182,7 +182,7 @@ use crate::prelude::*;
 pub struct ExampleResource {
     pub counter: usize,
     pub last_update: f64,
-}
+  }
 EOF
 )
 
