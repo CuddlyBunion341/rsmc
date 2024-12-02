@@ -20,6 +20,11 @@ pascal_to_snake_case() {
   echo "$1" | sed 's/[A-Z]/_&/g' | tr '[:upper:]' '[:lower:]' | sed 's/^_//'
 }
 
+# Function to check if a string is in snake_case
+is_snake_case() {
+  [[ "$1" =~ ^[a-z]+(_[a-z]+)*$ ]]
+}
+
 # Check if a plugin name is provided
 if [ -z "$1" ]; then
     echo "Error: No plugin name provided."
@@ -38,6 +43,17 @@ fi
 
 PLUGIN_NAME=$1
 TARGET=$2
+
+# Validate the plugin name
+if [[ "$PLUGIN_NAME" == *"plugin"* ]]; then
+    echo "Error: Plugin name should not contain 'Plugin'."
+    exit 1
+fi
+
+if ! is_snake_case "$PLUGIN_NAME"; then
+    echo "Error: Plugin name must be in snake_case."
+    exit 1
+fi
 
 # Validate the target
 if [ "$TARGET" != "server" ] && [ "$TARGET" != "client" ]; then
