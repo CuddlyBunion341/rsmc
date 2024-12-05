@@ -1,3 +1,5 @@
+use chat_events::SendMessageEvent;
+
 use crate::prelude::*;
 
 const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
@@ -40,13 +42,15 @@ pub fn setup_chat_container(mut commands: Commands) {
         });
 }
 
-pub fn send_message_system(mut client: ResMut<RenetClient>) {
-    let message = String::from("Hey there!");
+pub fn send_messages_system(mut client: ResMut<RenetClient>, mut event_reader: EventReader<SendMessageEvent>) {
+    for event in event_reader.read() {
+        let message = event.0.clone();
 
-    client.send_message(
-        DefaultChannel::ReliableOrdered,
-        bincode::serialize(&NetworkingMessage::ChatMessageSend(message)).unwrap(),
-    )
+        client.send_message(
+            DefaultChannel::ReliableOrdered,
+            bincode::serialize(&NetworkingMessage::ChatMessageSend(message)).unwrap(),
+        )
+    }
 }
 
 pub fn handle_input_system(
@@ -58,6 +62,7 @@ pub fn handle_input_system(
         &mut BackgroundColor,
         &mut chat_components::ChatMessageContainer,
     )>,
+    mut event_writer: EventWriter<chat_events::SendMessageEvent>
 ) {
     let mut window = window_query.single_mut();
     if btn.just_pressed(MouseButton::Left) {
@@ -67,6 +72,9 @@ pub fn handle_input_system(
             chat_component.enable_input = true;
             background_color.0 = COLOR_UNFOCUSED;
         }
+    }
+    if key.just_pressed(KeyCode::KeyX) {
+        event_writer.send(chat_events::SendMessageEvent(String::from("Test Message")));
     }
     if key.just_pressed(KeyCode::KeyT) {
         window.cursor.grab_mode = CursorGrabMode::None;
