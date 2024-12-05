@@ -15,17 +15,7 @@ pub fn setup_chat_container(
         background_color: BackgroundColor(Color::rgb_from_array([0.0,0.0,0.0])),
         ..default()
     })
-
-    // commands.spawn((
-    //         Node { ..default() }, 
-    //         Style {
-    //             width: Val::Percent(50.0), 
-    //             height: Val::Percent(80.0),  
-    //             flex_direction: FlexDirection::ColumnReverse,
-    //             ..default()
-    //         }, Outline::new(Val::Px(10.0), Val::Px(10.0), Color::rgb_from_array([0.0,0.0,0.0]))
-    // ))
-        .insert(chat_components::ChatMessageContainer{ enable_input: false }) 
+    .insert(chat_components::ChatMessageContainer{ enable_input: false }) 
         .with_children(|parent| {
             parent.spawn(TextBundle {
                 text: Text {
@@ -65,36 +55,41 @@ pub fn send_message_system(
 
 pub fn handle_input_system(
     mut commands: Commands,
+    btn: Res<ButtonInput<MouseButton>>,
     key: Res<ButtonInput<KeyCode>>,
     mut window_query: Query<&mut Window>,
     mut controller_query: Query<&mut FpsController>,
-    mut chat_query: Query<(Entity, &mut Style, &mut chat_components::ChatMessageContainer)>
+    mut chat_query: Query<(Entity, &mut BackgroundColor, &mut chat_components::ChatMessageContainer)>
 ) {
     let mut window = window_query.single_mut();
+    if btn.just_pressed(MouseButton::Left) {
+        window.cursor.grab_mode = CursorGrabMode::Locked;
+        window.cursor.visible = false;
+        for (entity, mut background_color, mut chat_component) in &mut chat_query {
+            chat_component.enable_input = true;
+            background_color.0 = Color::rgb_from_array([0.0,0.0,0.0]);
+        }
+    }
     if key.just_pressed(KeyCode::KeyT) {
         window.cursor.grab_mode = CursorGrabMode::None;
         window.cursor.visible = true;
-        for (entity, mut chat_style, mut chat_component) in &mut chat_query {
+        for (entity, mut background_color, mut chat_component) in &mut chat_query {
             chat_component.enable_input = true;
-            commands.entity(entity).insert(
-                Outline {
-                    color: Color::rgb_from_array([255.0, 255.0, 0.0]),
-                    ..default()
-                }
-            );
+            background_color.0 = Color::rgb_from_array([255.0,0.0,0.0]);
         }
         for mut controller in &mut controller_query {
             controller.enable_input = false;
         }
     }
     if key.just_pressed(KeyCode::Escape) {
-        for (entity, mut chat_style, mut chat_component) in &mut chat_query {
+        for (entity, mut background_color, mut chat_component) in &mut chat_query {
             chat_component.enable_input = false;
+            background_color.0 = Color::rgb_from_array([0.0, 0.0, 0.0]);
+            window.cursor.grab_mode = CursorGrabMode::Locked;
+            window.cursor.visible = false;
             for mut controller in &mut controller_query {
                 controller.enable_input = true;
             }
-
-            commands.entity(entity).remove::<Outline>();
         }
     }
 }
