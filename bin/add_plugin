@@ -61,7 +61,7 @@ if [ "$TARGET" != "server" ] && [ "$TARGET" != "client" ]; then
   exit 1
 fi
 
-PLUGIN_DIR="./$TARGET/$(pascal_to_snake_case $PLUGIN_NAME)"
+PLUGIN_DIR="./src/$TARGET/$(pascal_to_snake_case $PLUGIN_NAME)"
 
 # Create the directory structure
 mkdir -p $PLUGIN_DIR || { echo "Error: Failed to create directory $PLUGIN_DIR"; exit 1; }
