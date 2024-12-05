@@ -1,7 +1,7 @@
+pub mod chat;
 pub mod networking;
 pub mod player;
 pub mod prelude;
-pub mod chat;
 pub mod terrain;
 
 use crate::prelude::*;

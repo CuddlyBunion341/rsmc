@@ -109,9 +109,13 @@ pub fn receive_message_system(
                         timestamp: 0, // TODO: implement
                     });
 
-                    let response_message = lib::NetworkingMessage::ChatMessageSync(chat_messages.messages.clone());
+                    let response_message =
+                        lib::NetworkingMessage::ChatMessageSync(chat_messages.messages.clone());
 
-                    server.broadcast_message(DefaultChannel::ReliableOrdered, bincode::serialize(&response_message).unwrap());
+                    server.broadcast_message(
+                        DefaultChannel::ReliableOrdered,
+                        bincode::serialize(&response_message).unwrap(),
+                    );
                 }
                 _ => {
                     warn!("Received unknown message type. (ReliabelOrdered)");

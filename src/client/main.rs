@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 pub mod prelude;
 
+mod chat;
 mod collider;
 mod gui;
 mod networking;
@@ -9,7 +10,6 @@ mod player;
 mod remote_player;
 mod scene;
 mod terrain;
-mod chat;
 
 use scene::setup_scene;
 

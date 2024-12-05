@@ -9,7 +9,7 @@ pub struct ExampleComponent {
 
 #[derive(Component)]
 pub struct ChatMessageContainer {
-    pub enable_input: bool
+    pub enable_input: bool,
 }
 
 #[derive(Component)]

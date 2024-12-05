@@ -3,33 +3,32 @@ use crate::prelude::*;
 const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
 const COLOR_FOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.5);
 
-pub fn setup_chat_container(
-    mut commands: Commands,
-) {
-    commands.spawn(NodeBundle {
-        style: Style {
-            width: Val::Percent(50.0), 
-            height: Val::Percent(80.0),  
-            flex_direction: FlexDirection::ColumnReverse,
+pub fn setup_chat_container(mut commands: Commands) {
+    commands
+        .spawn(NodeBundle {
+            style: Style {
+                width: Val::Percent(50.0),
+                height: Val::Percent(80.0),
+                flex_direction: FlexDirection::ColumnReverse,
+                ..default()
+            },
+            background_color: BackgroundColor(COLOR_UNFOCUSED),
             ..default()
-        },
-        background_color: BackgroundColor(COLOR_UNFOCUSED),
-        ..default()
-    })
-    .insert(chat_components::ChatMessageContainer{ enable_input: false }) 
+        })
+        .insert(chat_components::ChatMessageContainer {
+            enable_input: false,
+        })
         .with_children(|parent| {
             parent.spawn(TextBundle {
                 text: Text {
-                    sections: vec![
-                        TextSection {
-                            value: "Welcome to the chat!".to_string(),
-                            style: TextStyle {
-                                font_size: 20.0,
-                                color: Color::WHITE,
-                                ..Default::default()
-                            },
+                    sections: vec![TextSection {
+                        value: "Welcome to the chat!".to_string(),
+                        style: TextStyle {
+                            font_size: 20.0,
+                            color: Color::WHITE,
+                            ..Default::default()
                         },
-                    ],
+                    }],
                     ..Default::default()
                 },
                 style: Style {
@@ -41,14 +40,12 @@ pub fn setup_chat_container(
         });
 }
 
-pub fn send_message_system(
-    mut client: ResMut<RenetClient>,
-) {
+pub fn send_message_system(mut client: ResMut<RenetClient>) {
     let message = String::from("Hey there!");
 
     client.send_message(
         DefaultChannel::ReliableOrdered,
-        bincode::serialize(&NetworkingMessage::ChatMessageSend(message)).unwrap()
+        bincode::serialize(&NetworkingMessage::ChatMessageSend(message)).unwrap(),
     )
 }
 
@@ -57,7 +54,10 @@ pub fn handle_input_system(
     key: Res<ButtonInput<KeyCode>>,
     mut window_query: Query<&mut Window>,
     mut controller_query: Query<&mut FpsController>,
-    mut chat_query: Query<(&mut BackgroundColor, &mut chat_components::ChatMessageContainer)>
+    mut chat_query: Query<(
+        &mut BackgroundColor,
+        &mut chat_components::ChatMessageContainer,
+    )>,
 ) {
     let mut window = window_query.single_mut();
     if btn.just_pressed(MouseButton::Left) {
@@ -104,33 +104,27 @@ pub fn handle_events_system(
         let messages = event.0.clone();
         let message = messages.last();
 
-        match message {
-            Some(message) => {
-                commands.entity(entity).with_children(|parent| {
-                    parent.spawn(TextBundle {
-                        text: Text {
-                            sections: vec![
-                                TextSection {
-                                    value: message.format_string(),
-                                    style: TextStyle {
-                                        font_size: 20.0,
-                                        color: Color::WHITE,
-                                        ..Default::default()
-                                    },
-                                },
-                            ],
-                            ..Default::default()
-                        },
-                        style: Style {
-                            margin: UiRect::all(Val::Px(5.0)),
-                            ..Default::default()
-                        },
+        if let Some(message) = message {
+            commands.entity(entity).with_children(|parent| {
+                parent.spawn(TextBundle {
+                    text: Text {
+                        sections: vec![TextSection {
+                            value: message.format_string(),
+                            style: TextStyle {
+                                font_size: 20.0,
+                                color: Color::WHITE,
+                                ..Default::default()
+                            },
+                        }],
                         ..Default::default()
-                    });
+                    },
+                    style: Style {
+                        margin: UiRect::all(Val::Px(5.0)),
+                        ..Default::default()
+                    },
+                    ..Default::default()
                 });
-
-            },
-            None => { }
+            });
         }
     }
 }
