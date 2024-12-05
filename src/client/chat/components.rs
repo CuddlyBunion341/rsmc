@@ -8,7 +8,9 @@ pub struct ExampleComponent {
 }
 
 #[derive(Component)]
-pub struct ChatMessageContainer();
+pub struct ChatMessageContainer {
+    pub enable_input: bool
+}
 
 #[derive(Component)]
 pub struct ChatMessageElement;
