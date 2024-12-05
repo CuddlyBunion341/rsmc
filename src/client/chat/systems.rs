@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
+const COLOR_FOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.5);
+
 pub fn setup_chat_container(
     mut commands: Commands,
 ) {
@@ -10,7 +13,7 @@ pub fn setup_chat_container(
             flex_direction: FlexDirection::ColumnReverse,
             ..default()
         },
-        background_color: BackgroundColor(Color::rgba(0.0,0.0,0.0, 0.0)),
+        background_color: BackgroundColor(COLOR_UNFOCUSED),
         ..default()
     })
     .insert(chat_components::ChatMessageContainer{ enable_input: false }) 
@@ -62,7 +65,7 @@ pub fn handle_input_system(
         window.cursor.visible = false;
         for (mut background_color, mut chat_component) in &mut chat_query {
             chat_component.enable_input = true;
-            background_color.0 = Color::rgba(0.0, 0.0, 0.0, 0.0)
+            background_color.0 = COLOR_UNFOCUSED;
         }
     }
     if key.just_pressed(KeyCode::KeyT) {
@@ -70,7 +73,7 @@ pub fn handle_input_system(
         window.cursor.visible = true;
         for (mut background_color, mut chat_component) in &mut chat_query {
             chat_component.enable_input = true;
-            background_color.0 = Color::rgba(255.0,0.0,0.0, 0.2);
+            background_color.0 = COLOR_FOCUSED;
         }
         for mut controller in &mut controller_query {
             controller.enable_input = false;
@@ -79,7 +82,7 @@ pub fn handle_input_system(
     if key.just_pressed(KeyCode::Escape) {
         for (mut background_color, mut chat_component) in &mut chat_query {
             chat_component.enable_input = false;
-            background_color.0 = Color::rgba(0.0, 0.0, 0.0, 0.0);
+            background_color.0 = COLOR_UNFOCUSED;
             window.cursor.grab_mode = CursorGrabMode::Locked;
             window.cursor.visible = false;
             for mut controller in &mut controller_query {
