@@ -1,5 +1,3 @@
-use bevy_rapier3d::na::RealField;
-
 use crate::prelude::*;
 
 pub fn receive_message_system(
