@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Resource, Debug)]
 pub struct ChatHistory {
-    pub messages: Vec<ChatMessage>
+    pub messages: Vec<lib::ChatMessage>
 }
 
 impl ChatHistory {
@@ -17,12 +17,4 @@ impl Default for ChatHistory {
     fn default() -> Self {
         Self::new()
     }
-}
-
-#[derive(Resource, Default, Debug)]
-pub struct ChatMessage {
-    pub message_id: i32,
-    pub client_id: usize,
-    pub timestamp: u32,
-    pub message: String,
 }

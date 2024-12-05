@@ -4,6 +4,7 @@ pub fn receive_message_system(
     mut server: ResMut<RenetServer>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
+    mut chat_messages: ResMut<chat_resources::ChatHistory>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
 ) {
     for client_id in server.clients_id() {
@@ -94,6 +95,19 @@ pub fn receive_message_system(
                         })
                         .unwrap(),
                     );
+                }
+                lib::NetworkingMessage::ChatMessageSend(message) => {
+                    info!("Received chat message from {}", client_id);
+
+                    let message_count = chat_messages.messages.len();
+                    let message_id = message_count;
+
+                    chat_messages.messages.push(lib::ChatMessage {
+                        client_id,
+                        message_id,
+                        message,
+                        timestamp: 0, // TODO: implement
+                    });
                 }
                 _ => {
                     warn!("Received unknown message type. (ReliabelOrdered)");

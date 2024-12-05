@@ -11,6 +11,14 @@ pub struct PlayerState {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct ChatMessage {
+    pub client_id: ClientId,
+    pub message_id: usize,
+    pub timestamp: u32,
+    pub message: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub enum NetworkingMessage {
     PlayerJoin(ClientId),
     PlayerLeave(ClientId),
@@ -18,6 +26,8 @@ pub enum NetworkingMessage {
     PlayerSync(HashMap<ClientId, PlayerState>),
     ChunkBatchRequest(Vec<Vec3>),
     ChunkBatchResponse(Vec<Chunk>),
+    ChatMessageSend(String),
+    ChatMessageSync(Vec<ChatMessage>),
     BlockUpdate { position: Vec3, block: BlockId },
 }
 
