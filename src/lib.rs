@@ -10,7 +10,7 @@ pub struct PlayerState {
     pub rotation: Quat,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ChatMessage {
     pub client_id: ClientId,
     pub message_id: usize,

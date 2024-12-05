@@ -1,3 +1,5 @@
+use bevy_rapier3d::na::RealField;
+
 use crate::prelude::*;
 
 pub fn receive_message_system(
@@ -108,6 +110,10 @@ pub fn receive_message_system(
                         message,
                         timestamp: 0, // TODO: implement
                     });
+
+                    let response_message = lib::NetworkingMessage::ChatMessageSync(chat_messages.messages.clone());
+
+                    server.broadcast_message(DefaultChannel::ReliableOrdered, bincode::serialize(&response_message).unwrap());
                 }
                 _ => {
                     warn!("Received unknown message type. (ReliabelOrdered)");
