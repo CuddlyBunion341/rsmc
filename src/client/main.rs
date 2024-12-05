@@ -9,6 +9,7 @@ mod player;
 mod remote_player;
 mod scene;
 mod terrain;
+mod chat;
 
 use scene::setup_scene;
 
@@ -39,6 +40,7 @@ fn main() {
             collider::ColliderPlugin,
             player::PlayerPlugin,
             remote_player::RemotePlayerPlugin,
+            chat::ChatPlugin,
         ))
         .add_systems(Startup, setup_scene)
         .run();
