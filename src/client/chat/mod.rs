@@ -12,6 +12,8 @@ impl Plugin for ChatPlugin {
         info!("Building ChatPlugin");
 
         app.add_systems(Startup, systems::setup_chat_container);
-        app.insert_resource(resources::ExampleResource::default());
-      }
+        app.add_systems(Update, systems::handle_events_system);
+        app.insert_resource(resources::ChatHistory::default());
+        app.add_event::<events::ChatSyncEvent>();
     }
+}

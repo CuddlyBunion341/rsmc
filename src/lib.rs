@@ -18,6 +18,12 @@ pub struct ChatMessage {
     pub message: String,
 }
 
+impl ChatMessage {
+    pub fn format_string(&self) -> String {
+        format!("[{}] {}: {}", self.timestamp, self.client_id, self.message)
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub enum NetworkingMessage {
     PlayerJoin(ClientId),
