@@ -1,3 +1,5 @@
+use renet::RenetServer;
+
 use crate::prelude::*;
 
 pub fn setup_chat_container(
@@ -35,6 +37,17 @@ pub fn setup_chat_container(
                 ..Default::default()
             });
         });
+}
+
+pub fn send_message_system(
+    mut client: ResMut<RenetClient>,
+) {
+    let message = String::from("Hey there!");
+
+    client.send_message(
+        DefaultChannel::ReliableOrdered,
+        bincode::serialize(&NetworkingMessage::ChatMessageSend(message)).unwrap()
+    )
 }
 
 pub fn handle_events_system(
