@@ -1,3 +1,7 @@
+use std::time::UNIX_EPOCH;
+
+use bevy_rapier3d::parry::mass_properties::details::trimesh_signed_volume_and_center_of_mass;
+
 use crate::prelude::*;
 
 pub fn receive_message_system(
@@ -106,7 +110,7 @@ pub fn receive_message_system(
                         client_id,
                         message_id,
                         message,
-                        timestamp: 0, // TODO: implement
+                        timestamp: get_current_time_in_ms()
                     });
 
                     let response_message =
@@ -121,6 +125,28 @@ pub fn receive_message_system(
                     warn!("Received unknown message type. (ReliabelOrdered)");
                 }
             }
+        }
+    }
+}
+
+fn get_current_time_in_ms() -> u32 {
+    let start = SystemTime::now();
+    let since_the_epoch = start.duration_since(UNIX_EPOCH);
+    match since_the_epoch {
+        Ok(time) => {
+            match time.as_millis().try_into() {
+                Ok(casted_time) => {
+                    casted_time
+                }
+                Err(_error) => {
+                    error!("Could not cast time milis to u32");
+                    0
+                }
+            }
+        }
+        Err(_error) => {
+            error!("Could not fetch system time");
+            0
         }
     }
 }
