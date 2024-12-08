@@ -141,8 +141,10 @@ pub fn handle_chat_input_system(
 
         match &ev.logical_key {
             Key::Enter => {
-                event_writer.send(chat_events::SendMessageEvent(chat_input_value));
-                chat_input_value = String::from("");
+                if !chat_input_value.trim().eq("")  {
+                    event_writer.send(chat_events::SendMessageEvent(chat_input_value.trim().to_string()));
+                    chat_input_value = String::from("");
+                }
             }
             Key::Backspace => {
                 chat_input_value.pop();
