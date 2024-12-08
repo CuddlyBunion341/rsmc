@@ -9,6 +9,7 @@ pub fn receive_message_system(
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
     mut chunk_mesh_events: ResMut<Events<terrain_events::ChunkMeshUpdateEvent>>,
+    mut chat_events: ResMut<Events<chat_events::ChatSyncEvent>>,
     mut spawn_area_loaded: ResMut<terrain_resources::SpawnAreaLoaded>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
@@ -32,6 +33,10 @@ pub fn receive_message_system(
                     block,
                     from_network: true,
                 });
+            }
+            lib::NetworkingMessage::ChatMessageSync(messages) => {
+                debug!("Client received chat messages");
+                chat_events.send(chat_events::ChatSyncEvent(messages));
             }
             _ => {
                 warn!("Received unknown message type. (ReliableOrdered)");
