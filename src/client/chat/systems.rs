@@ -1,4 +1,4 @@
-use bevy::render::texture::TEXTURE_ASSET_INDEX;
+use bevy::{input::ButtonState, render::texture::TEXTURE_ASSET_INDEX};
 use chat_events::SendMessageEvent;
 
 use crate::prelude::*;
@@ -134,6 +134,11 @@ pub fn handle_chat_input_system(
     };
 
     for ev in evr_kbd.read() {
+
+        if ev.state != chat_systems::ButtonState::Pressed {
+            return
+        }
+
         match &ev.logical_key {
             Key::Enter => {
                 event_writer.send(chat_events::SendMessageEvent(chat_input_value));
@@ -141,6 +146,9 @@ pub fn handle_chat_input_system(
             }
             Key::Backspace => {
                 chat_input_value.pop();
+            }
+            Key::Space => {
+                chat_input_value += " ";
             }
             Key::Character(input) => {
                 if input.chars().any(|c| c.is_control()) {
