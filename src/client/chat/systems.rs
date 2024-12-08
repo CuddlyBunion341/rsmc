@@ -42,7 +42,7 @@ pub fn setup_chat_container(mut commands: Commands) {
             parent.spawn(TextBundle {
                 style: Style { ..default() },
                 ..default()
-            }).insert(chat_components::ChatMessageInputElement { enable_input: false });
+            }).insert(chat_components::ChatMessageInputElement { focused: false });
         });
 }
 
@@ -60,44 +60,50 @@ pub fn send_messages_system(mut client: ResMut<RenetClient>, mut event_reader: E
 pub fn handle_chat_focus_input_event(
     btn: Res<ButtonInput<MouseButton>>,
     key: Res<ButtonInput<KeyCode>>,
-    mut window_query: Query<&mut Window>,
-    mut controller_query: Query<&mut FpsController>,
-    mut chat_query: Query<(
-        &mut BackgroundColor,
-        &mut chat_components::ChatMessageContainer,
-    )>,
     mut chat_input_query: Query<&mut chat_components::ChatMessageInputElement>,
     mut chat_focus_events: EventWriter<ChatFocusEvent>,
     mut chat_unfocus_events: EventWriter<ChatUnfocusEvent>,
 ) {
-    let mut window = window_query.single_mut();
-
-    let mut chat_input_component = chat_input_query.single_mut();
-    let (mut chat_container_background, mut chat_container_component) = chat_query.single_mut();
+    let chat_input_component = chat_input_query.single_mut();
 
     if btn.just_pressed(MouseButton::Left) {
-        chat_container_component.focused = false;
-        chat_input_component.enable_input = false;
-        chat_container_background.0 = COLOR_UNFOCUSED;
+        chat_unfocus_events.send(ChatUnfocusEvent());
     }
     if key.just_pressed(KeyCode::KeyT) {
-        chat_container_component.focused = true;
-        chat_input_component.enable_input = true;
-        chat_container_background.0 = COLOR_FOCUSED;
-
-        for mut controller in &mut controller_query {
-            controller.enable_input = false;
-        }
+        chat_focus_events.send(ChatFocusEvent());
     }
     if key.just_pressed(KeyCode::Escape) {
-        chat_container_component.focused = false;
-        chat_input_component.enable_input = false;
-        chat_container_background.0 = COLOR_UNFOCUSED;
+        if chat_input_component.focused {
+            chat_unfocus_events.send(ChatUnfocusEvent());
+        }
+    }
+}
+
+pub fn handle_window_focus_events(
+    mut window_query: Query<&mut Window>,
+    mut focus_events: EventReader<ChatFocusEvent>,
+) {
+    let mut window = window_query.single_mut();
+    for _ in focus_events.read() {
         window.cursor.grab_mode = CursorGrabMode::Locked;
         window.cursor.visible = false;
+    }
+}
 
+pub fn handle_chat_focus_player_events(
+    mut focus_events: EventReader<ChatFocusEvent>,
+    mut unfocus_events: EventReader<ChatUnfocusEvent>,
+    mut controller_query: Query<&mut FpsController>,
+) {
+    for _ in focus_events.read() {
         for mut controller in &mut controller_query {
             controller.enable_input = true;
+        }
+    }
+
+    for _ in unfocus_events.read() {
+        for mut controller in &mut controller_query {
+            controller.enable_input = false;
         }
     }
 }
@@ -133,12 +139,12 @@ pub fn handle_chat_input_focus_events(
     let (mut background_color, mut chat_container) = chat_input_query.single_mut();
     for _ in focus_events.read() {
         background_color.0 = COLOR_FOCUSED.clone();
-        chat_container.enable_input = true;
+        chat_container.focused = true;
     }
 
     for _ in unfocus_events.read() {
         background_color.0 = COLOR_UNFOCUSED.clone();
-        chat_container.enable_input = false;
+        chat_container.focused = false;
     }
 }
 
@@ -153,7 +159,7 @@ pub fn handle_chat_input_system(
 ) {
     let (mut text, input_component) = chat_input_query.single_mut();
 
-    if !input_component.enable_input {
+    if !input_component.focused {
         return;
     }
 

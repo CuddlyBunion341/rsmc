@@ -8,7 +8,7 @@ pub struct ChatMessageContainer {
 
 #[derive(Component)]
 pub struct ChatMessageInputElement {
-    pub enable_input: bool,
+    pub focused: bool,
 }
 
 #[derive(Component)]
