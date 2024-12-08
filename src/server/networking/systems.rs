@@ -129,7 +129,7 @@ pub fn receive_message_system(
     }
 }
 
-fn get_current_time_in_ms() -> u32 {
+fn get_current_time_in_ms() -> i64 {
     let start = SystemTime::now();
     let since_the_epoch = start.duration_since(UNIX_EPOCH);
     match since_the_epoch {

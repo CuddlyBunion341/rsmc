@@ -1,4 +1,4 @@
-use bevy::{input::ButtonState, render::texture::TEXTURE_ASSET_INDEX};
+use bevy::input::ButtonState;
 use chat_events::SendMessageEvent;
 
 use crate::prelude::*;
@@ -12,7 +12,7 @@ pub fn setup_chat_container(mut commands: Commands) {
             style: Style {
                 width: Val::Percent(50.0),
                 height: Val::Percent(80.0),
-                flex_direction: FlexDirection::ColumnReverse,
+                flex_direction: FlexDirection::Column,
                 ..default()
             },
             background_color: BackgroundColor(COLOR_UNFOCUSED),
@@ -66,15 +66,11 @@ pub fn handle_chat_focus_system(
         &mut BackgroundColor,
         &mut chat_components::ChatMessageContainer,
     )>,
-    mut chat_input_query: Query<(
-        &mut Text,
-        &mut chat_components::ChatMessageInputElement
-    )>,
-    mut event_writer: EventWriter<chat_events::SendMessageEvent>
+    mut chat_input_query: Query<&mut chat_components::ChatMessageInputElement>,
 ) {
     let mut window = window_query.single_mut();
 
-    let (mut chat_input_text, mut chat_input_component) = chat_input_query.single_mut();
+    let mut chat_input_component = chat_input_query.single_mut();
     let (mut chat_container_background, mut chat_container_component) = chat_query.single_mut();
 
     if btn.just_pressed(MouseButton::Left) {

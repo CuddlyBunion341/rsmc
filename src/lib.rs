@@ -1,6 +1,7 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use bevy::math::{Quat, Vec3};
+use chrono::DateTime;
 use renet::ClientId;
 use serde::{Deserialize, Serialize};
 
@@ -14,13 +15,15 @@ pub struct PlayerState {
 pub struct ChatMessage {
     pub client_id: ClientId,
     pub message_id: usize,
-    pub timestamp: u32,
+    pub timestamp: i64,
     pub message: String,
 }
 
 impl ChatMessage {
     pub fn format_string(&self) -> String {
-        format!("[{}] {}: {}", self.timestamp, self.client_id, self.message)
+        let dt = DateTime::from_timestamp_millis(self.timestamp).expect("invalid timestamp");
+        let timestamp_string = dt.to_string();
+        format!("[{}] {}: {}", timestamp_string, self.client_id, self.message)
     }
 }
 
