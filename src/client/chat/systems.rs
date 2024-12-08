@@ -74,16 +74,11 @@ pub fn handle_chat_focus_system(
     let (mut chat_container_background, mut chat_container_component) = chat_query.single_mut();
 
     if btn.just_pressed(MouseButton::Left) {
-        window.cursor.grab_mode = CursorGrabMode::Locked;
-        window.cursor.visible = false;
-        chat_container_component.focused = true;
-        chat_input_component.enable_input = true;
+        chat_container_component.focused = false;
+        chat_input_component.enable_input = false;
         chat_container_background.0 = COLOR_UNFOCUSED;
     }
     if key.just_pressed(KeyCode::KeyT) {
-        window.cursor.grab_mode = CursorGrabMode::None;
-        window.cursor.visible = true;
-
         chat_container_component.focused = true;
         chat_input_component.enable_input = true;
         chat_container_background.0 = COLOR_FOCUSED;
