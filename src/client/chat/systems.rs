@@ -1,5 +1,5 @@
 use bevy::input::ButtonState;
-use chat_events::{ChatFocusEvent, ChatUnfocusEvent, SendMessageEvent};
+use chat_events::{FocusChangeEvent, FocusState, SendMessageEvent};
 
 use crate::prelude::*;
 
@@ -61,90 +61,103 @@ pub fn handle_chat_focus_input_event(
     btn: Res<ButtonInput<MouseButton>>,
     key: Res<ButtonInput<KeyCode>>,
     mut chat_input_query: Query<&mut chat_components::ChatMessageInputElement>,
-    mut chat_focus_events: EventWriter<ChatFocusEvent>,
-    mut chat_unfocus_events: EventWriter<ChatUnfocusEvent>,
+    mut focus_change_events: EventWriter<FocusChangeEvent>,
 ) {
     let chat_input_component = chat_input_query.single_mut();
 
     if btn.just_pressed(MouseButton::Left) {
-        chat_unfocus_events.send(ChatUnfocusEvent());
+        focus_change_events.send(FocusChangeEvent {state: FocusState::Unfocus});
     }
     if key.just_pressed(KeyCode::KeyT) {
-        chat_focus_events.send(ChatFocusEvent());
+        focus_change_events.send(FocusChangeEvent {state: FocusState::Focus});
     }
     if key.just_pressed(KeyCode::Escape) {
         if chat_input_component.focused {
-            chat_unfocus_events.send(ChatUnfocusEvent());
+            focus_change_events.send(FocusChangeEvent {state: FocusState::Unfocus});
         }
     }
 }
 
 pub fn handle_window_focus_events(
     mut window_query: Query<&mut Window>,
-    mut focus_events: EventReader<ChatFocusEvent>,
+    mut focus_events: EventReader<FocusChangeEvent>
 ) {
     let mut window = window_query.single_mut();
-    for _ in focus_events.read() {
-        window.cursor.grab_mode = CursorGrabMode::Locked;
-        window.cursor.visible = false;
+    for event in focus_events.read() {
+        match event.state {
+            FocusState::Focus => {
+
+                window.cursor.grab_mode = CursorGrabMode::Locked;
+                window.cursor.visible = false;
+            }
+            FocusState::Unfocus => {}
+        }
     }
 }
 
 pub fn handle_chat_focus_player_events(
-    mut focus_events: EventReader<ChatFocusEvent>,
-    mut unfocus_events: EventReader<ChatUnfocusEvent>,
+    mut focus_change_events: EventReader<FocusChangeEvent>,
     mut controller_query: Query<&mut FpsController>,
 ) {
-    for _ in focus_events.read() {
-        for mut controller in &mut controller_query {
-            controller.enable_input = true;
-        }
-    }
+    for event in focus_change_events.read() {
+        match event.state {
+            FocusState::Focus => {
+                for mut controller in &mut controller_query {
+                    controller.enable_input = true;
+                }
 
-    for _ in unfocus_events.read() {
-        for mut controller in &mut controller_query {
-            controller.enable_input = false;
+            }
+            FocusState::Unfocus => {
+                for mut controller in &mut controller_query {
+                    controller.enable_input = false;
+                }
+            }
         }
     }
 }
 
 pub fn handle_chat_container_focus_events(
-    mut focus_events: EventReader<ChatFocusEvent>,
-    mut unfocus_events: EventReader<ChatUnfocusEvent>,
+    mut focus_change_events: EventReader<FocusChangeEvent>,
     mut chat_container_query: Query<(
         &mut BackgroundColor,
         &mut chat_components::ChatMessageContainer,
     )>,
 ) {
     let (mut background_color, mut chat_container) = chat_container_query.single_mut();
-    for _ in focus_events.read() {
-        background_color.0 = COLOR_FOCUSED.clone();
-        chat_container.focused = true;
-    }
-
-    for _ in unfocus_events.read() {
-        background_color.0 = COLOR_UNFOCUSED.clone();
-        chat_container.focused = false;
+    for event in focus_change_events.read() {
+        match event.state {
+            FocusState::Focus => {
+                background_color.0 = COLOR_FOCUSED.clone();
+                chat_container.focused = true;
+            }
+            FocusState::Unfocus => {
+                background_color.0 = COLOR_UNFOCUSED.clone();
+                chat_container.focused = false;
+            }
+        } 
     }
 }
 
 pub fn handle_chat_input_focus_events(
-    mut focus_events: EventReader<ChatFocusEvent>,
-    mut unfocus_events: EventReader<ChatUnfocusEvent>,
+    mut focus_change_events: EventReader<FocusChangeEvent>,
     mut chat_input_query: Query<(
         &mut BackgroundColor,
         &mut chat_components::ChatMessageInputElement
     )>,
 ) {
     let (mut background_color, mut chat_container) = chat_input_query.single_mut();
-    for _ in focus_events.read() {
-        background_color.0 = COLOR_FOCUSED.clone();
-        chat_container.focused = true;
-    }
+    for event in focus_change_events.read() {
+        match event.state {
+            FocusState::Focus => {
+                background_color.0 = COLOR_FOCUSED.clone();
+                chat_container.focused = true;
+            }
+            FocusState::Unfocus => {
+                background_color.0 = COLOR_UNFOCUSED.clone();
+                chat_container.focused = false;
 
-    for _ in unfocus_events.read() {
-        background_color.0 = COLOR_UNFOCUSED.clone();
-        chat_container.focused = false;
+            }
+        }
     }
 }
 
