@@ -18,31 +18,31 @@ pub fn setup_chat_container(mut commands: Commands) {
             ..default()
         })
     .insert(chat_components::ChatMessageContainer { focused: false })
-    .with_children(|parent| {
-        parent.spawn(TextBundle {
-            text: Text {
-                sections: vec![TextSection {
-                    value: "Welcome to the chat!".to_string(),
-                    style: TextStyle {
-                        font_size: 20.0,
-                        color: Color::WHITE,
-                        ..Default::default()
-                    },
-                }],
+        .with_children(|parent| {
+            parent.spawn(TextBundle {
+                text: Text {
+                    sections: vec![TextSection {
+                        value: "Welcome to the chat!".to_string(),
+                        style: TextStyle {
+                            font_size: 20.0,
+                            color: Color::WHITE,
+                            ..Default::default()
+                        },
+                    }],
+                    ..Default::default()
+                },
+                style: Style {
+                    margin: UiRect::all(Val::Px(5.0)),
+                    ..Default::default()
+                },
                 ..Default::default()
-            },
-            style: Style {
-                margin: UiRect::all(Val::Px(5.0)),
-                ..Default::default()
-            },
-            ..Default::default()
-        });
+            });
 
-        parent.spawn(TextBundle {
-            style: Style { ..default() },
-            ..default()
-        }).insert(chat_components::ChatMessageInputElement { enable_input: false });
-    });
+            parent.spawn(TextBundle {
+                style: Style { ..default() },
+                ..default()
+            }).insert(chat_components::ChatMessageInputElement { enable_input: false });
+        });
 }
 
 pub fn send_messages_system(mut client: ResMut<RenetClient>, mut event_reader: EventReader<SendMessageEvent>) {
@@ -59,6 +59,7 @@ pub fn send_messages_system(mut client: ResMut<RenetClient>, mut event_reader: E
 pub fn handle_input_system(
     btn: Res<ButtonInput<MouseButton>>,
     key: Res<ButtonInput<KeyCode>>,
+    mut evr_kbd: EventReader<KeyboardInput>,
     mut window_query: Query<&mut Window>,
     mut controller_query: Query<&mut FpsController>,
     mut chat_query: Query<(
@@ -73,7 +74,7 @@ pub fn handle_input_system(
 ) {
     let mut window = window_query.single_mut();
 
-    let (mut chat_input_text, _) = chat_input_query.single_mut();
+    let (mut chat_input_text, mut chat_input_component) = chat_input_query.single_mut();
     let (mut chat_container_background, mut chat_container_component) = chat_query.single_mut();
 
     if btn.just_pressed(MouseButton::Left) {
@@ -106,6 +107,57 @@ pub fn handle_input_system(
             controller.enable_input = true;
         }
     }
+
+    // handle input
+    if !chat_input_component.enable_input {
+        return;
+    }
+
+    let pressed = key.get_just_pressed();
+
+    for ev in evr_kbd.read() {
+        if ev.state == ButtonState::Released {
+            continue;
+        }
+        match &ev.logical_key {
+            // Handle pressing Enter to finish the input
+            Key::Enter => {
+                event_writer.send(chat_events::SendMessageEvent(chat_input_text));
+            }
+            // Handle pressing Backspace to delete last char
+            Key::Backspace => {
+                string.pop();
+            }
+            // Handle key presses that produce text characters
+            Key::Character(input) => {
+                // Ignore any input that contains control (special) characters
+                if input.chars().any(|c| c.is_control()) {
+                    continue;
+                }
+                string.push_str(&input);
+            }
+            _ => {}
+        }
+    }
+    pressed.for_each(|key_code| {
+        let key: String = key_code;
+
+        KeyCode
+
+            let section = chat_input_text.sections.first();
+
+        match section {
+            Some(section) => {
+                section.value += &key;
+            }
+            None => {
+                chat_input_text.sections.push(TextSection {
+                    value: key,
+                    ..default()
+                })
+            }
+        }
+    });
 }
 
 pub fn handle_events_system(
