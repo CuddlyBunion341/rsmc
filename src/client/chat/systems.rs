@@ -1,5 +1,5 @@
 use bevy::input::ButtonState;
-use chat_events::SendMessageEvent;
+use chat_events::{ChatFocusEvent, ChatUnfocusEvent, SendMessageEvent};
 
 use crate::prelude::*;
 
@@ -57,7 +57,7 @@ pub fn send_messages_system(mut client: ResMut<RenetClient>, mut event_reader: E
     }
 }
 
-pub fn handle_chat_focus_system(
+pub fn handle_chat_focus_input_event(
     btn: Res<ButtonInput<MouseButton>>,
     key: Res<ButtonInput<KeyCode>>,
     mut window_query: Query<&mut Window>,
@@ -67,6 +67,8 @@ pub fn handle_chat_focus_system(
         &mut chat_components::ChatMessageContainer,
     )>,
     mut chat_input_query: Query<&mut chat_components::ChatMessageInputElement>,
+    mut chat_focus_events: EventWriter<ChatFocusEvent>,
+    mut chat_unfocus_events: EventWriter<ChatUnfocusEvent>,
 ) {
     let mut window = window_query.single_mut();
 
@@ -97,6 +99,46 @@ pub fn handle_chat_focus_system(
         for mut controller in &mut controller_query {
             controller.enable_input = true;
         }
+    }
+}
+
+pub fn handle_chat_container_focus_events(
+    mut focus_events: EventReader<ChatFocusEvent>,
+    mut unfocus_events: EventReader<ChatUnfocusEvent>,
+    mut chat_container_query: Query<(
+        &mut BackgroundColor,
+        &mut chat_components::ChatMessageContainer,
+    )>,
+) {
+    let (mut background_color, mut chat_container) = chat_container_query.single_mut();
+    for _ in focus_events.read() {
+        background_color.0 = COLOR_FOCUSED.clone();
+        chat_container.focused = true;
+    }
+
+    for _ in unfocus_events.read() {
+        background_color.0 = COLOR_UNFOCUSED.clone();
+        chat_container.focused = false;
+    }
+}
+
+pub fn handle_chat_input_focus_events(
+    mut focus_events: EventReader<ChatFocusEvent>,
+    mut unfocus_events: EventReader<ChatUnfocusEvent>,
+    mut chat_input_query: Query<(
+        &mut BackgroundColor,
+        &mut chat_components::ChatMessageInputElement
+    )>,
+) {
+    let (mut background_color, mut chat_container) = chat_input_query.single_mut();
+    for _ in focus_events.read() {
+        background_color.0 = COLOR_FOCUSED.clone();
+        chat_container.enable_input = true;
+    }
+
+    for _ in unfocus_events.read() {
+        background_color.0 = COLOR_UNFOCUSED.clone();
+        chat_container.enable_input = false;
     }
 }
 
