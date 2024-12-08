@@ -1,3 +1,4 @@
+use bevy::render::texture::TEXTURE_ASSET_INDEX;
 use chat_events::SendMessageEvent;
 
 use crate::prelude::*;
@@ -56,10 +57,9 @@ pub fn send_messages_system(mut client: ResMut<RenetClient>, mut event_reader: E
     }
 }
 
-pub fn handle_input_system(
+pub fn handle_chat_focus_system(
     btn: Res<ButtonInput<MouseButton>>,
     key: Res<ButtonInput<KeyCode>>,
-    mut evr_kbd: EventReader<KeyboardInput>,
     mut window_query: Query<&mut Window>,
     mut controller_query: Query<&mut FpsController>,
     mut chat_query: Query<(
@@ -81,16 +81,15 @@ pub fn handle_input_system(
         window.cursor.grab_mode = CursorGrabMode::Locked;
         window.cursor.visible = false;
         chat_container_component.focused = true;
+        chat_input_component.enable_input = true;
         chat_container_background.0 = COLOR_UNFOCUSED;
-    }
-    if key.just_pressed(KeyCode::KeyX) {
-        event_writer.send(chat_events::SendMessageEvent(String::from("Test Message")));
     }
     if key.just_pressed(KeyCode::KeyT) {
         window.cursor.grab_mode = CursorGrabMode::None;
         window.cursor.visible = true;
 
         chat_container_component.focused = true;
+        chat_input_component.enable_input = true;
         chat_container_background.0 = COLOR_FOCUSED;
 
         for mut controller in &mut controller_query {
@@ -99,6 +98,7 @@ pub fn handle_input_system(
     }
     if key.just_pressed(KeyCode::Escape) {
         chat_container_component.focused = false;
+        chat_input_component.enable_input = false;
         chat_container_background.0 = COLOR_UNFOCUSED;
         window.cursor.grab_mode = CursorGrabMode::Locked;
         window.cursor.visible = false;
@@ -107,57 +107,60 @@ pub fn handle_input_system(
             controller.enable_input = true;
         }
     }
+}
 
-    // handle input
-    if !chat_input_component.enable_input {
+pub fn handle_chat_input_system(
+    mut evr_kbd: EventReader<KeyboardInput>,
+    mut chat_input_query: Query<(
+        &mut Text,
+        &mut chat_components::ChatMessageInputElement
+    )>,
+    mut event_writer: EventWriter<chat_events::SendMessageEvent>
+
+) {
+    let (mut text, input_component) = chat_input_query.single_mut();
+
+    if !input_component.enable_input {
         return;
     }
 
-    let pressed = key.get_just_pressed();
+    let mut chat_input_value = match text.sections.first() {
+        Some(text_section) => {
+            text_section.value.clone()
+        }
+        None => {
+            String::from("")
+        }
+    };
 
     for ev in evr_kbd.read() {
-        if ev.state == ButtonState::Released {
-            continue;
-        }
         match &ev.logical_key {
-            // Handle pressing Enter to finish the input
             Key::Enter => {
-                event_writer.send(chat_events::SendMessageEvent(chat_input_text));
+                event_writer.send(chat_events::SendMessageEvent(chat_input_value));
+                chat_input_value = String::from("");
             }
-            // Handle pressing Backspace to delete last char
             Key::Backspace => {
-                string.pop();
+                chat_input_value.pop();
             }
-            // Handle key presses that produce text characters
             Key::Character(input) => {
-                // Ignore any input that contains control (special) characters
                 if input.chars().any(|c| c.is_control()) {
                     continue;
                 }
-                string.push_str(&input);
+                input.chars().for_each(|char| {
+                    chat_input_value.push(char);
+                });
             }
-            _ => {}
+            _ => { }
         }
     }
-    pressed.for_each(|key_code| {
-        let key: String = key_code;
 
-        KeyCode
+    text.sections.clear();
 
-            let section = chat_input_text.sections.first();
+    text.sections.push(TextSection {
+        value: chat_input_value,
+        ..Default::default()
+    })
 
-        match section {
-            Some(section) => {
-                section.value += &key;
-            }
-            None => {
-                chat_input_text.sections.push(TextSection {
-                    value: key,
-                    ..default()
-                })
-            }
-        }
-    });
 }
 
 pub fn handle_events_system(
