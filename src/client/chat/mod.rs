@@ -12,16 +12,18 @@ impl Plugin for ChatPlugin {
         info!("Building ChatPlugin");
 
         app.add_systems(Startup, systems::setup_chat_container);
-        app.add_systems(Update, (
-            systems::handle_chat_input_system,
-            systems::send_messages_system,
-            systems::handle_chat_focus_input_event,
-            systems::handle_window_focus_events,
-            systems::handle_chat_focus_player_events,
-            systems::handle_chat_container_focus_events,
-            systems::handle_chat_input_focus_events,
-            systems::handle_events_system,
-        )
+        app.add_systems(
+            Update,
+            (
+                systems::handle_chat_input_system,
+                systems::send_messages_system,
+                systems::handle_chat_focus_input_event,
+                systems::handle_window_focus_events,
+                systems::handle_chat_focus_player_events,
+                systems::handle_chat_container_focus_events,
+                systems::handle_chat_input_focus_events,
+                systems::handle_events_system,
+            ),
         );
         app.insert_resource(resources::ChatHistory::default());
         app.add_event::<events::ChatSyncEvent>();

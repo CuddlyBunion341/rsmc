@@ -23,7 +23,10 @@ impl ChatMessage {
     pub fn format_string(&self) -> String {
         let dt = DateTime::from_timestamp_millis(self.timestamp).expect("invalid timestamp");
         let timestamp_string = dt.to_string();
-        format!("[{}] {}: {}", timestamp_string, self.client_id, self.message)
+        format!(
+            "[{}] {}: {}",
+            timestamp_string, self.client_id, self.message
+        )
     }
 }
 

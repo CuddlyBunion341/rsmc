@@ -110,7 +110,7 @@ pub fn receive_message_system(
                         client_id,
                         message_id,
                         message,
-                        timestamp: get_current_time_in_ms()
+                        timestamp: get_current_time_in_ms(),
                     });
 
                     let response_message =
@@ -133,17 +133,13 @@ fn get_current_time_in_ms() -> i64 {
     let start = SystemTime::now();
     let since_the_epoch = start.duration_since(UNIX_EPOCH);
     match since_the_epoch {
-        Ok(time) => {
-            match time.as_millis().try_into() {
-                Ok(casted_time) => {
-                    casted_time
-                }
-                Err(_error) => {
-                    error!("Could not cast time milis to u32");
-                    0
-                }
+        Ok(time) => match time.as_millis().try_into() {
+            Ok(casted_time) => casted_time,
+            Err(_error) => {
+                error!("Could not cast time milis to u32");
+                0
             }
-        }
+        },
         Err(_error) => {
             error!("Could not fetch system time");
             0

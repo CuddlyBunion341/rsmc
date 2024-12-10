@@ -8,7 +8,9 @@ pub fn handle_keyboard_events_system(
 ) {
     for controller in &controller_query {
         for event in keyboard_events.read() {
-            if !controller.enable_input { continue; }
+            if !controller.enable_input {
+                continue;
+            }
 
             if event.state.is_pressed() && event.key_code == bevy::input::keyboard::KeyCode::KeyC {
                 let controller_transform = camera_query.single();

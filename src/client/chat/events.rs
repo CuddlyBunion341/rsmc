@@ -12,6 +12,6 @@ pub enum FocusState {
 }
 
 #[derive(Event)]
-pub struct FocusChangeEvent{
-    pub state: FocusState
+pub struct FocusChangeEvent {
+    pub state: FocusState,
 }
