@@ -160,11 +160,11 @@ pub fn handle_chat_container_focus_events(
     for event in focus_change_events.read() {
         match event.state {
             FocusState::Focus => {
-                background_color.0 = COLOR_FOCUSED.clone();
+                background_color.0 = COLOR_FOCUSED;
                 chat_container.focused = true;
             }
             FocusState::Unfocus => {
-                background_color.0 = COLOR_UNFOCUSED.clone();
+                background_color.0 = COLOR_UNFOCUSED;
                 chat_container.focused = false;
             }
         }
@@ -182,11 +182,11 @@ pub fn handle_chat_input_focus_events(
     for event in focus_change_events.read() {
         match event.state {
             FocusState::Focus => {
-                background_color.0 = COLOR_FOCUSED.clone();
+                background_color.0 = COLOR_FOCUSED;
                 chat_container.focused = true;
             }
             FocusState::Unfocus => {
-                background_color.0 = COLOR_UNFOCUSED.clone();
+                background_color.0 = COLOR_UNFOCUSED;
                 chat_container.focused = false;
             }
         }

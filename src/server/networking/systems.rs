@@ -1,7 +1,5 @@
 use std::time::UNIX_EPOCH;
 
-use bevy_rapier3d::parry::mass_properties::details::trimesh_signed_volume_and_center_of_mass;
-
 use crate::prelude::*;
 
 pub fn receive_message_system(
