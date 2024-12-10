@@ -6,9 +6,6 @@ pub struct ChatSyncEvent(pub Vec<lib::ChatMessage>);
 #[derive(Event)]
 pub struct SendMessageEvent(pub String);
 
-#[derive(Event)]
-pub struct ChatFocusEvent();
-
 pub enum FocusState {
     Focus,
     Unfocus,
@@ -18,6 +15,3 @@ pub enum FocusState {
 pub struct FocusChangeEvent{
     pub state: FocusState
 }
-
-#[derive(Event)]
-pub struct ChatUnfocusEvent();

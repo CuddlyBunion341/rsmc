@@ -10,37 +10,57 @@ pub fn setup_chat_container(mut commands: Commands) {
     commands
         .spawn(NodeBundle {
             style: Style {
+                margin: UiRect::all(Val::Px(5.0)),
                 width: Val::Percent(50.0),
                 height: Val::Percent(80.0),
-                flex_direction: FlexDirection::Column,
+                flex_direction: FlexDirection::ColumnReverse,
                 ..default()
             },
             background_color: BackgroundColor(COLOR_UNFOCUSED),
             ..default()
         })
-    .insert(chat_components::ChatMessageContainer { focused: false })
         .with_children(|parent| {
             parent.spawn(TextBundle {
                 text: Text {
                     sections: vec![TextSection {
-                        value: "Welcome to the chat!".to_string(),
+                        value: String::new(),
                         style: TextStyle {
                             font_size: 20.0,
-                            color: Color::WHITE,
-                            ..Default::default()
+                            color: Color::rgba(1.0,1.0,1.0, 0.1),
+                            ..default()
                         },
                     }],
-                    ..Default::default()
+                    ..default()
                 },
                 style: Style {
-                    margin: UiRect::all(Val::Px(5.0)),
-                    ..Default::default()
+                    flex_direction: FlexDirection::Column,
+                    ..default()
                 },
-                ..Default::default()
-            });
+                ..default()
+            })
+            .insert(chat_components::ChatMessageContainer { focused: false });
 
             parent.spawn(TextBundle {
-                style: Style { ..default() },
+                text: Text {
+                    sections: vec![TextSection {
+                        value: String::new(),
+                        style: TextStyle {
+                            font_size: 20.0,
+                            color: Color::rgba(1.0,1.0,1.0, 0.1),
+                            ..default()
+                        },
+                    }],
+                    ..default()
+                },
+                style: Style { 
+                    padding: UiRect {
+                        top: Val::Px(10.0),
+                        left: Val::Px(10.0),
+                        bottom: Val::Px(10.0),
+                        right: Val::Px(10.0),
+                    },
+                    height: Val::Px(20.0),
+                    ..default() },
                 ..default()
             }).insert(chat_components::ChatMessageInputElement { focused: false });
         });
@@ -69,7 +89,9 @@ pub fn handle_chat_focus_input_event(
         focus_change_events.send(FocusChangeEvent {state: FocusState::Unfocus});
     }
     if key.just_pressed(KeyCode::KeyT) {
-        focus_change_events.send(FocusChangeEvent {state: FocusState::Focus});
+        if !chat_input_component.focused {
+            focus_change_events.send(FocusChangeEvent {state: FocusState::Focus});
+        }
     }
     if key.just_pressed(KeyCode::Escape) {
         if chat_input_component.focused {
@@ -85,12 +107,11 @@ pub fn handle_window_focus_events(
     let mut window = window_query.single_mut();
     for event in focus_events.read() {
         match event.state {
-            FocusState::Focus => {
-
+            FocusState::Unfocus => {
                 window.cursor.grab_mode = CursorGrabMode::Locked;
                 window.cursor.visible = false;
             }
-            FocusState::Unfocus => {}
+            FocusState::Focus => {}
         }
     }
 }
@@ -103,13 +124,13 @@ pub fn handle_chat_focus_player_events(
         match event.state {
             FocusState::Focus => {
                 for mut controller in &mut controller_query {
-                    controller.enable_input = true;
+                    controller.enable_input = false;
                 }
 
             }
             FocusState::Unfocus => {
                 for mut controller in &mut controller_query {
-                    controller.enable_input = false;
+                    controller.enable_input = true;
                 }
             }
         }
@@ -167,9 +188,14 @@ pub fn handle_chat_input_system(
         &mut Text,
         &mut chat_components::ChatMessageInputElement
     )>,
+    mut event_reader: EventReader<chat_events::FocusChangeEvent>,
     mut event_writer: EventWriter<chat_events::SendMessageEvent>
 
 ) {
+    if event_reader.read().len() != 0 {
+        return;
+    }
+
     let (mut text, input_component) = chat_input_query.single_mut();
 
     if !input_component.focused {
@@ -220,7 +246,7 @@ pub fn handle_chat_input_system(
 
     text.sections.push(TextSection {
         value: chat_input_value,
-        ..Default::default()
+        ..default()
     })
 
 }
@@ -246,16 +272,16 @@ pub fn handle_events_system(
                             style: TextStyle {
                                 font_size: 20.0,
                                 color: Color::WHITE,
-                                ..Default::default()
+                                ..default()
                             },
                         }],
-                        ..Default::default()
+                        ..default()
                     },
                     style: Style {
                         margin: UiRect::all(Val::Px(5.0)),
-                        ..Default::default()
+                        ..default()
                     },
-                    ..Default::default()
+                    ..default()
                 });
             });
         }

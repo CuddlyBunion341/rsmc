@@ -13,33 +13,39 @@ pub fn receive_message_system(
     mut spawn_area_loaded: ResMut<terrain_resources::SpawnAreaLoaded>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
-        let message = bincode::deserialize(&message).unwrap();
+        match bincode::deserialize(&message) {
+            Ok(message) => {
+                match message {
+                    lib::NetworkingMessage::PlayerJoin(event) => {
+                        player_spawn_events.send(remote_player_events::RemotePlayerSpawnedEvent {
+                            client_id: event,
+                            position: Vec3::ZERO,
+                        });
+                    }
+                    lib::NetworkingMessage::PlayerLeave(event) => {
+                        player_despawn_events
+                            .send(remote_player_events::RemotePlayerDespawnedEvent { client_id: event });
+                        }
+                    lib::NetworkingMessage::BlockUpdate { position, block } => {
+                        debug!("Client received block update message: {:?}", position);
+                        block_update_events.send(terrain_events::BlockUpdateEvent {
+                            position,
+                            block,
+                            from_network: true,
+                        });
+                    }
+                    lib::NetworkingMessage::ChatMessageSync(messages) => {
+                        debug!("Client received chat messages");
+                        chat_events.send(chat_events::ChatSyncEvent(messages));
+                    }
+                    _ => {
+                        warn!("Received unknown message type. (ReliableOrdered)");
+                    }
+                }
 
-        match message {
-            lib::NetworkingMessage::PlayerJoin(event) => {
-                player_spawn_events.send(remote_player_events::RemotePlayerSpawnedEvent {
-                    client_id: event,
-                    position: Vec3::ZERO,
-                });
             }
-            lib::NetworkingMessage::PlayerLeave(event) => {
-                player_despawn_events
-                    .send(remote_player_events::RemotePlayerDespawnedEvent { client_id: event });
-            }
-            lib::NetworkingMessage::BlockUpdate { position, block } => {
-                debug!("Client received block update message: {:?}", position);
-                block_update_events.send(terrain_events::BlockUpdateEvent {
-                    position,
-                    block,
-                    from_network: true,
-                });
-            }
-            lib::NetworkingMessage::ChatMessageSync(messages) => {
-                debug!("Client received chat messages");
-                chat_events.send(chat_events::ChatSyncEvent(messages));
-            }
-            _ => {
-                warn!("Received unknown message type. (ReliableOrdered)");
+            Err(message) => {
+                error!("Could not deserialize message {:?}", message);
             }
         }
     }
@@ -81,7 +87,7 @@ pub fn receive_message_system(
                 lib::NetworkingMessage::PlayerSync(event) => {
                     player_sync_events
                         .send(remote_player_events::RemotePlayerSyncEvent { players: event });
-                }
+                    }
                 _ => {
                     warn!("Received unknown message type. (ReliableUnordered)");
                 }
