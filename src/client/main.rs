@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 pub mod prelude;
 
+mod chat;
 mod collider;
 mod gui;
 mod networking;
@@ -39,6 +40,7 @@ fn main() {
             collider::ColliderPlugin,
             player::PlayerPlugin,
             remote_player::RemotePlayerPlugin,
+            chat::ChatPlugin,
         ))
         .add_systems(Startup, setup_scene)
         .run();

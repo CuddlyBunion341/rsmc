@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::math::{Quat, Vec3};
+use chrono::DateTime;
 use renet::ClientId;
 use serde::{Deserialize, Serialize};
 
@@ -8,6 +9,25 @@ use serde::{Deserialize, Serialize};
 pub struct PlayerState {
     pub position: Vec3,
     pub rotation: Quat,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ChatMessage {
+    pub client_id: ClientId,
+    pub message_id: usize,
+    pub timestamp: i64,
+    pub message: String,
+}
+
+impl ChatMessage {
+    pub fn format_string(&self) -> String {
+        let dt = DateTime::from_timestamp_millis(self.timestamp).expect("invalid timestamp");
+        let timestamp_string = dt.to_string();
+        format!(
+            "[{}] {}: {}",
+            timestamp_string, self.client_id, self.message
+        )
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -18,6 +38,8 @@ pub enum NetworkingMessage {
     PlayerSync(HashMap<ClientId, PlayerState>),
     ChunkBatchRequest(Vec<Vec3>),
     ChunkBatchResponse(Vec<Chunk>),
+    ChatMessageSend(String),
+    ChatMessageSync(Vec<ChatMessage>),
     BlockUpdate { position: Vec3, block: BlockId },
 }
 

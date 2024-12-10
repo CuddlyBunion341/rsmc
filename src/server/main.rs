@@ -1,3 +1,4 @@
+pub mod chat;
 pub mod networking;
 pub mod player;
 pub mod prelude;
@@ -11,5 +12,6 @@ fn main() {
     app.add_plugins(player::PlayerPlugin);
     app.add_plugins(networking::NetworkingPlugin);
     app.add_plugins(terrain::TerrainPlugin);
+    app.add_plugins(chat::ChatPlugin);
     app.run();
 }
