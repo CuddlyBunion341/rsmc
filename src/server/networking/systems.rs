@@ -5,7 +5,7 @@ pub fn receive_message_system(
     mut player_states: ResMut<player_resources::PlayerStates>,
     mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
-    mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>
+    mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
 ) {
     for client_id in server.clients_id() {
         let message_bytes = server.receive_message(client_id, DefaultChannel::ReliableUnordered);
@@ -98,7 +98,8 @@ pub fn receive_message_system(
                 }
                 lib::NetworkingMessage::ChatMessageSend(message) => {
                     info!("Received chat message from {}", client_id);
-                    chat_message_events.send(chat_events::PlayerChatMessageSendEvent { client_id, message });
+                    chat_message_events
+                        .send(chat_events::PlayerChatMessageSendEvent { client_id, message });
                 }
                 _ => {
                     warn!("Received unknown message type. (ReliabelOrdered)");
@@ -113,7 +114,7 @@ pub fn handle_events_system(
     mut server_events: EventReader<ServerEvent>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     past_block_updates: Res<terrain_resources::PastBlockUpdates>,
-    mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>
+    mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
 ) {
     for event in server_events.read() {
         match event {
@@ -128,7 +129,7 @@ pub fn handle_events_system(
                 );
                 chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
                     client_id: lib::SERVER_MESSAGE_ID,
-                    message: format!("Player {} joined the game", client_id)
+                    message: format!("Player {} joined the game", client_id),
                 });
 
                 let message =
@@ -154,7 +155,7 @@ pub fn handle_events_system(
 
                 chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
                     client_id: lib::SERVER_MESSAGE_ID,
-                    message: format!("Player {} left the game", client_id)
+                    message: format!("Player {} left the game", client_id),
                 });
 
                 let message =

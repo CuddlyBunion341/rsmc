@@ -7,7 +7,6 @@ pub fn handle_network_chat_message_send(
     mut player_send_messages: EventReader<chat_events::PlayerChatMessageSendEvent>,
     mut chat_messages: ResMut<chat_resources::ChatHistory>,
 ) {
-
     for event in player_send_messages.read() {
         let message = event.message.clone();
         let client_id = event.client_id;

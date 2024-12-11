@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+pub mod events;
 pub mod resources;
 pub mod systems;
-pub mod events;
 
 pub struct ChatPlugin;
 

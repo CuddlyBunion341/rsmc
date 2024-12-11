@@ -97,19 +97,15 @@ pub fn handle_chat_focus_input_event(
             state: FocusState::Unfocus,
         });
     }
-    if key.just_pressed(KeyCode::KeyT) {
-        if !chat_input_component.focused {
-            focus_change_events.send(FocusChangeEvent {
-                state: FocusState::Focus,
-            });
-        }
+    if key.just_pressed(KeyCode::KeyT) && !chat_input_component.focused {
+        focus_change_events.send(FocusChangeEvent {
+            state: FocusState::Focus,
+        });
     }
-    if key.just_pressed(KeyCode::Escape) {
-        if chat_input_component.focused {
-            focus_change_events.send(FocusChangeEvent {
-                state: FocusState::Unfocus,
-            });
-        }
+    if key.just_pressed(KeyCode::Escape) && chat_input_component.focused {
+        focus_change_events.send(FocusChangeEvent {
+            state: FocusState::Unfocus,
+        });
     }
 }
 
@@ -221,7 +217,7 @@ pub fn handle_chat_input_system(
 
         match &ev.logical_key {
             Key::Enter => {
-                if !chat_input_value.trim().eq("") {
+                if !chat_input_value.trim().is_empty() {
                     event_writer.send(chat_events::SendMessageEvent(
                         chat_input_value.trim().to_string(),
                     ));
