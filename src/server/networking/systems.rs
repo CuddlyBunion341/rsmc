@@ -115,6 +115,7 @@ pub fn handle_events_system(
     mut player_states: ResMut<player_resources::PlayerStates>,
     past_block_updates: Res<terrain_resources::PastBlockUpdates>,
     mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
+    mut chat_sync_events: EventWriter<chat_events::SyncPlayerChatMessagesEvent>,
 ) {
     for event in server_events.read() {
         match event {
@@ -127,6 +128,11 @@ pub fn handle_events_system(
                         rotation: Quat::IDENTITY,
                     },
                 );
+
+                chat_sync_events.send(chat_events::SyncPlayerChatMessagesEvent {
+                    client_id: *client_id,
+                });
+
                 chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
                     client_id: lib::SERVER_MESSAGE_ID,
                     message: format!("Player {} joined the game", client_id),

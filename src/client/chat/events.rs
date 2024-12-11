@@ -4,6 +4,9 @@ use crate::prelude::*;
 pub struct ChatSyncEvent(pub Vec<lib::ChatMessage>);
 
 #[derive(Event)]
+pub struct SingleChatSendEvent(pub lib::ChatMessage);
+
+#[derive(Event)]
 pub struct SendMessageEvent(pub String);
 
 pub enum FocusState {

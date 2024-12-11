@@ -251,38 +251,53 @@ pub fn handle_chat_input_system(
 }
 
 pub fn handle_events_system(
-    mut commands: Commands,
     mut chat_sync_events: EventReader<chat_events::ChatSyncEvent>,
-    query: Query<(Entity, &chat_components::ChatMessageContainer)>,
+    mut events: EventWriter<chat_events::SingleChatSendEvent>,
 ) {
-    let (entity, _) = query.single();
-    let events = chat_sync_events.read();
-
-    for event in events {
+    for event in chat_sync_events.read() {
         let messages = event.0.clone();
         let message = messages.last();
 
-        if let Some(message) = message {
-            commands.entity(entity).with_children(|parent| {
-                parent.spawn(TextBundle {
-                    text: Text {
-                        sections: vec![TextSection {
-                            value: message.format_string(),
-                            style: TextStyle {
-                                font_size: 20.0,
-                                color: Color::WHITE,
-                                ..default()
-                            },
-                        }],
-                        ..default()
-                    },
-                    style: Style {
-                        margin: UiRect::all(Val::Px(5.0)),
-                        ..default()
-                    },
-                    ..default()
-                });
-            });
+        match message {
+            None => {
+                info!("No message found");
+            }
+            Some(message) => {
+                events.send(chat_events::SingleChatSendEvent(message.clone()));
+            }
         }
+    }
+}
+
+pub fn add_message_to_chat_container_system(
+    mut commands: Commands,
+    query: Query<(Entity, &chat_components::ChatMessageContainer)>,
+    mut events: EventReader<chat_events::SingleChatSendEvent>,
+) {
+    let (entity, _) = query.single();
+
+    let events = events.read();
+
+    for event in events {
+        commands.entity(entity).with_children(|parent| {
+            parent.spawn(TextBundle {
+                text: Text {
+                    sections: vec![TextSection {
+                        value: event.0.format_string(),
+                        style: TextStyle {
+                            font_size: 20.0,
+                            color: Color::WHITE,
+                            ..default()
+                        },
+                    }],
+                    ..default()
+                },
+                style: Style {
+                    margin: UiRect::all(Val::Px(5.0)),
+                    ..default()
+                },
+                ..default()
+            });
+        });
     }
 }

@@ -2,7 +2,7 @@ use std::time::UNIX_EPOCH;
 
 use crate::prelude::*;
 
-pub fn handle_network_chat_message_send(
+pub fn sync_single_player_chat_messages_system(
     mut server: ResMut<RenetServer>,
     mut player_send_messages: EventReader<chat_events::PlayerChatMessageSendEvent>,
     mut chat_messages: ResMut<chat_resources::ChatHistory>,
@@ -13,20 +13,35 @@ pub fn handle_network_chat_message_send(
         let message_count = chat_messages.messages.len();
         let message_id = message_count;
 
-        chat_messages.messages.push(lib::ChatMessage {
+        let chat_message = lib::ChatMessage {
             client_id,
             message_id,
             message,
             timestamp: get_current_time_in_ms(),
-        });
+        };
 
-        let response_message =
-            lib::NetworkingMessage::ChatMessageSync(chat_messages.messages.clone());
+        chat_messages.messages.push(chat_message.clone());
+
+        let response_message = lib::NetworkingMessage::SingleChatMessageSync(chat_message);
 
         server.broadcast_message(
             DefaultChannel::ReliableOrdered,
             bincode::serialize(&response_message).unwrap(),
         );
+    }
+}
+
+pub fn sync_player_chat_messages_event(
+    mut server: ResMut<RenetServer>,
+    mut events: EventReader<chat_events::SyncPlayerChatMessagesEvent>,
+    chat_messages: ResMut<chat_resources::ChatHistory>,
+) {
+    for event in events.read() {
+        let client_id = event.client_id;
+        let history = chat_messages.messages.clone();
+
+        let response_message = bincode::serialize(&history).unwrap();
+        server.send_message(client_id, DefaultChannel::ReliableOrdered, response_message);
     }
 }
 

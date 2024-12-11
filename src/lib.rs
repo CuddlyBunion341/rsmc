@@ -44,6 +44,7 @@ pub enum NetworkingMessage {
     ChunkBatchRequest(Vec<Vec3>),
     ChunkBatchResponse(Vec<Chunk>),
     ChatMessageSend(String),
+    SingleChatMessageSync(ChatMessage),
     ChatMessageSync(Vec<ChatMessage>),
     BlockUpdate { position: Vec3, block: BlockId },
 }

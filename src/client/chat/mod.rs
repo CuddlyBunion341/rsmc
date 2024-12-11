@@ -23,11 +23,13 @@ impl Plugin for ChatPlugin {
                 systems::handle_chat_container_focus_events,
                 systems::handle_chat_input_focus_events,
                 systems::handle_events_system,
+                systems::add_message_to_chat_container_system,
             ),
         );
         app.insert_resource(resources::ChatHistory::default());
         app.add_event::<events::ChatSyncEvent>();
         app.add_event::<events::FocusChangeEvent>();
         app.add_event::<events::SendMessageEvent>();
+        app.add_event::<events::SingleChatSendEvent>();
     }
 }
