@@ -1,13 +1,11 @@
-use std::time::UNIX_EPOCH;
-
 use crate::prelude::*;
 
 pub fn receive_message_system(
     mut server: ResMut<RenetServer>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
-    mut chat_messages: ResMut<chat_resources::ChatHistory>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>
 ) {
     for client_id in server.clients_id() {
         let message_bytes = server.receive_message(client_id, DefaultChannel::ReliableUnordered);
@@ -100,47 +98,12 @@ pub fn receive_message_system(
                 }
                 lib::NetworkingMessage::ChatMessageSend(message) => {
                     info!("Received chat message from {}", client_id);
-
-                    let message_count = chat_messages.messages.len();
-                    let message_id = message_count;
-
-                    chat_messages.messages.push(lib::ChatMessage {
-                        client_id,
-                        message_id,
-                        message,
-                        timestamp: get_current_time_in_ms(),
-                    });
-
-                    let response_message =
-                        lib::NetworkingMessage::ChatMessageSync(chat_messages.messages.clone());
-
-                    server.broadcast_message(
-                        DefaultChannel::ReliableOrdered,
-                        bincode::serialize(&response_message).unwrap(),
-                    );
+                    chat_message_events.send(chat_events::PlayerChatMessageSendEvent { client_id, message });
                 }
                 _ => {
                     warn!("Received unknown message type. (ReliabelOrdered)");
                 }
             }
-        }
-    }
-}
-
-fn get_current_time_in_ms() -> i64 {
-    let start = SystemTime::now();
-    let since_the_epoch = start.duration_since(UNIX_EPOCH);
-    match since_the_epoch {
-        Ok(time) => match time.as_millis().try_into() {
-            Ok(casted_time) => casted_time,
-            Err(_error) => {
-                error!("Could not cast time milis to u32");
-                0
-            }
-        },
-        Err(_error) => {
-            error!("Could not fetch system time");
-            0
         }
     }
 }
