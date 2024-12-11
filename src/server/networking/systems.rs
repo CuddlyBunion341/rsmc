@@ -113,6 +113,7 @@ pub fn handle_events_system(
     mut server_events: EventReader<ServerEvent>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     past_block_updates: Res<terrain_resources::PastBlockUpdates>,
+    mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>
 ) {
     for event in server_events.read() {
         match event {
@@ -125,6 +126,11 @@ pub fn handle_events_system(
                         rotation: Quat::IDENTITY,
                     },
                 );
+                chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
+                    client_id: lib::SERVER_MESSAGE_ID,
+                    message: format!("Player {} joined the game", client_id)
+                });
+
                 let message =
                     bincode::serialize(&lib::NetworkingMessage::PlayerJoin(*client_id)).unwrap();
                 server.broadcast_message_except(
@@ -145,6 +151,12 @@ pub fn handle_events_system(
             ServerEvent::ClientDisconnected { client_id, reason } => {
                 println!("Client {client_id} disconnected: {reason}");
                 player_states.players.remove(client_id);
+
+                chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
+                    client_id: lib::SERVER_MESSAGE_ID,
+                    message: format!("Player {} left the game", client_id)
+                });
+
                 let message =
                     bincode::serialize(&lib::NetworkingMessage::PlayerLeave(*client_id)).unwrap();
                 server.broadcast_message(DefaultChannel::ReliableOrdered, message);
