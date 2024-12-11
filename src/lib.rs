@@ -31,10 +31,7 @@ impl ChatMessage {
             _ => self.client_id.to_string(),
         };
 
-        format!(
-            "[{}] {}: {}",
-            timestamp_string, client_name, self.message
-        )
+        format!("[{}] {}: {}", timestamp_string, client_name, self.message)
     }
 }
 
