@@ -23,6 +23,10 @@ impl Plugin for ChatPlugin {
                 systems::handle_chat_container_focus_events,
                 systems::handle_chat_input_focus_events,
                 systems::handle_events_system,
+                systems::setup_chat_container,
+                systems::handle_focus_events
+                systems::handle_chat_input_system
+                systems::add_message_to_chat_container_system
                 systems::add_message_to_chat_container_system,
             ),
         );
