@@ -1,3 +1,5 @@
+use std::ptr::read;
+
 use crate::prelude::*;
 
 pub fn broadcast_player_attributes_system(
@@ -13,6 +15,9 @@ pub fn broadcast_player_attributes_system(
         rotation: camera_transform.rotation,
     };
 
+    return;
+
+    info!("Sharing player update");
     client.send_message(
         DefaultChannel::ReliableUnordered,
         bincode::serialize(&lib::NetworkingMessage::PlayerUpdate(player_state)).unwrap(),

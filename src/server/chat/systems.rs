@@ -10,6 +10,8 @@ pub fn sync_single_player_chat_messages_system(
     for event in player_send_messages.read() {
         let message = event.message.clone();
         let client_id = event.client_id;
+
+        info!("Received message from client {}", client_id);
         let message_count = chat_messages.messages.len();
         let message_id = message_count;
 
@@ -38,8 +40,9 @@ pub fn sync_player_chat_messages_event(
 ) {
     for event in events.read() {
         let client_id = event.client_id;
-        let history = chat_messages.messages.clone();
+        info!("Synchronizing messages with client {}", client_id);
 
+        let history = chat_messages.messages.clone();
         let response_message = bincode::serialize(&history).unwrap();
         server.send_message(client_id, DefaultChannel::ReliableOrdered, response_message);
     }
