@@ -9,32 +9,46 @@ pub fn receive_message_system(
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
     mut chunk_mesh_events: ResMut<Events<terrain_events::ChunkMeshUpdateEvent>>,
+    mut chat_events: ResMut<Events<chat_events::ChatSyncEvent>>,
+    mut single_chat_events: ResMut<Events<chat_events::SingleChatSendEvent>>,
     mut spawn_area_loaded: ResMut<terrain_resources::SpawnAreaLoaded>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
-        let message = bincode::deserialize(&message).unwrap();
-
-        match message {
-            lib::NetworkingMessage::PlayerJoin(event) => {
-                player_spawn_events.send(remote_player_events::RemotePlayerSpawnedEvent {
-                    client_id: event,
-                    position: Vec3::ZERO,
-                });
-            }
-            lib::NetworkingMessage::PlayerLeave(event) => {
-                player_despawn_events
-                    .send(remote_player_events::RemotePlayerDespawnedEvent { client_id: event });
-            }
-            lib::NetworkingMessage::BlockUpdate { position, block } => {
-                debug!("Client received block update message: {:?}", position);
-                block_update_events.send(terrain_events::BlockUpdateEvent {
-                    position,
-                    block,
-                    from_network: true,
-                });
-            }
-            _ => {
-                warn!("Received unknown message type. (ReliableOrdered)");
+        match bincode::deserialize(&message) {
+            Ok(message) => match message {
+                lib::NetworkingMessage::PlayerJoin(event) => {
+                    player_spawn_events.send(remote_player_events::RemotePlayerSpawnedEvent {
+                        client_id: event,
+                        position: Vec3::ZERO,
+                    });
+                }
+                lib::NetworkingMessage::PlayerLeave(event) => {
+                    player_despawn_events.send(remote_player_events::RemotePlayerDespawnedEvent {
+                        client_id: event,
+                    });
+                }
+                lib::NetworkingMessage::BlockUpdate { position, block } => {
+                    debug!("Client received block update message: {:?}", position);
+                    block_update_events.send(terrain_events::BlockUpdateEvent {
+                        position,
+                        block,
+                        from_network: true,
+                    });
+                }
+                lib::NetworkingMessage::ChatMessageSync(messages) => {
+                    info!("Client received {} chat messages", messages.len());
+                    chat_events.send(chat_events::ChatSyncEvent(messages));
+                }
+                lib::NetworkingMessage::SingleChatMessageSync(message) => {
+                    info!("Client received chat message {}", message.message);
+                    single_chat_events.send(chat_events::SingleChatSendEvent(message));
+                }
+                _ => {
+                    warn!("Received unknown message type. (ReliableOrdered)");
+                }
+            },
+            Err(message) => {
+                error!("Could not deserialize message {:?}", message);
             }
         }
     }

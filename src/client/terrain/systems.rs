@@ -12,6 +12,7 @@ pub fn prepare_spawn_area_system(mut client: ResMut<RenetClient>) {
 
     let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
     let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(positions));
+    info!("requesting world");
     client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
 }
 
@@ -36,6 +37,7 @@ pub fn generate_world_system(
             request_positions.len()
         );
         let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(request_positions));
+        info!("requesting chunks");
         client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
     });
 }

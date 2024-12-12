@@ -5,72 +5,9 @@ pub fn receive_message_system(
     mut player_states: ResMut<player_resources::PlayerStates>,
     mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
 ) {
     for client_id in server.clients_id() {
-        let message_bytes = server.receive_message(client_id, DefaultChannel::ReliableUnordered);
-
-        if message_bytes.is_none() {
-            warn!("Failed to receive message. (ReliableUnordered)");
-            continue;
-        }
-
-        let some_message = bincode::deserialize(&message_bytes.unwrap());
-
-        if some_message.is_err() {
-            warn!("Failed to deserialize message.");
-            continue;
-        }
-
-        let message = some_message.unwrap();
-        info!("Received message: {:?}", message);
-
-        match message {
-            lib::NetworkingMessage::PlayerUpdate(player) => {
-                info!(
-                    "Received player update from client {} {}",
-                    client_id, player.position
-                );
-                player_states.players.insert(client_id, player);
-            }
-            lib::NetworkingMessage::ChunkBatchRequest(positions) => {
-                info!(
-                    "Received chunk batch request at {:?} from client {}",
-                    positions, client_id
-                );
-
-                let chunks: Vec<Chunk> = positions
-                    .into_iter()
-                    .map(|position| {
-                        let chunk = chunk_manager.get_chunk(position);
-
-                        match chunk {
-                            Some(chunk) => *chunk,
-                            None => {
-                                let mut chunk = lib::Chunk::new(position);
-
-                                let generator = terrain_util::generator::Generator::new(0);
-
-                                generator.generate_chunk(&mut chunk);
-
-                                chunk
-                            }
-                        }
-                    })
-                    .collect();
-
-                let message =
-                    bincode::serialize(&lib::NetworkingMessage::ChunkBatchResponse(chunks));
-                server.send_message(
-                    client_id,
-                    DefaultChannel::ReliableUnordered,
-                    message.unwrap(),
-                );
-            }
-            _ => {
-                warn!("Received unknown message type. (ReliableUnordered)");
-            }
-        }
-
         while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
         {
             let message = bincode::deserialize(&message).unwrap();
@@ -95,8 +32,67 @@ pub fn receive_message_system(
                         .unwrap(),
                     );
                 }
+                lib::NetworkingMessage::ChatMessageSend(message) => {
+                    info!("Received chat message from {}", client_id);
+                    chat_message_events
+                        .send(chat_events::PlayerChatMessageSendEvent { client_id, message });
+                }
                 _ => {
                     warn!("Received unknown message type. (ReliabelOrdered)");
+                }
+            }
+        }
+
+        while let Some(message) =
+            server.receive_message(client_id, DefaultChannel::ReliableUnordered)
+        {
+            let message = bincode::deserialize(&message).unwrap();
+            debug!("Received message: {:?}", message);
+
+            match message {
+                lib::NetworkingMessage::PlayerUpdate(player) => {
+                    debug!(
+                        "Received player update from client {} {}",
+                        client_id, player.position
+                    );
+                    player_states.players.insert(client_id, player);
+                }
+                lib::NetworkingMessage::ChunkBatchRequest(positions) => {
+                    info!(
+                        "Received chunk batch request at {:?} from client {}",
+                        positions, client_id
+                    );
+
+                    let chunks: Vec<Chunk> = positions
+                        .into_iter()
+                        .map(|position| {
+                            let chunk = chunk_manager.get_chunk(position);
+
+                            match chunk {
+                                Some(chunk) => *chunk,
+                                None => {
+                                    let mut chunk = lib::Chunk::new(position);
+
+                                    let generator = terrain_util::generator::Generator::new(0);
+
+                                    generator.generate_chunk(&mut chunk);
+
+                                    chunk
+                                }
+                            }
+                        })
+                        .collect();
+
+                    let message =
+                        bincode::serialize(&lib::NetworkingMessage::ChunkBatchResponse(chunks));
+                    server.send_message(
+                        client_id,
+                        DefaultChannel::ReliableUnordered,
+                        message.unwrap(),
+                    );
+                }
+                _ => {
+                    warn!("Received unknown message type. (ReliableUnordered)");
                 }
             }
         }
@@ -108,6 +104,8 @@ pub fn handle_events_system(
     mut server_events: EventReader<ServerEvent>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     past_block_updates: Res<terrain_resources::PastBlockUpdates>,
+    mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
+    mut chat_sync_events: EventWriter<chat_events::SyncPlayerChatMessagesEvent>,
 ) {
     for event in server_events.read() {
         match event {
@@ -120,6 +118,16 @@ pub fn handle_events_system(
                         rotation: Quat::IDENTITY,
                     },
                 );
+
+                chat_sync_events.send(chat_events::SyncPlayerChatMessagesEvent {
+                    client_id: *client_id,
+                });
+
+                chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
+                    client_id: lib::SERVER_MESSAGE_ID,
+                    message: format!("Player {} joined the game", *client_id),
+                });
+
                 let message =
                     bincode::serialize(&lib::NetworkingMessage::PlayerJoin(*client_id)).unwrap();
                 server.broadcast_message_except(
@@ -140,6 +148,12 @@ pub fn handle_events_system(
             ServerEvent::ClientDisconnected { client_id, reason } => {
                 println!("Client {client_id} disconnected: {reason}");
                 player_states.players.remove(client_id);
+
+                chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
+                    client_id: lib::SERVER_MESSAGE_ID,
+                    message: format!("Player {} left the game", client_id),
+                });
+
                 let message =
                     bincode::serialize(&lib::NetworkingMessage::PlayerLeave(*client_id)).unwrap();
                 server.broadcast_message(DefaultChannel::ReliableOrdered, message);

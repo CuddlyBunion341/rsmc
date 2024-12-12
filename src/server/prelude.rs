@@ -36,3 +36,7 @@ pub use crate::terrain::events as terrain_events;
 pub use crate::terrain::resources as terrain_resources;
 pub use crate::terrain::systems as terrain_systems;
 pub use crate::terrain::util as terrain_util;
+
+pub use crate::chat::events as chat_events;
+pub use crate::chat::resources as chat_resources;
+pub use crate::chat::systems as chat_systems;
