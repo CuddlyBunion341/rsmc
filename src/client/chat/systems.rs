@@ -1,10 +1,11 @@
 use crate::prelude::*;
 use bevy::input::{keyboard::KeyboardInput, ButtonState};
 use chat_events::{FocusChangeEvent, FocusState, SendMessageEvent};
+use chat_resources::ChatState;
 
 const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
 const COLOR_FOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.5);
-const TEXT_COLOR: Color = Color::rgba(1.0, 1.0, 1.0, 0.1);
+const TEXT_COLOR: Color = Color::rgba(1.0, 1.0, 1.0, 0.5);
 
 const FONT_SIZE: f32 = 20.0;
 const PADDING: UiRect = UiRect {
@@ -144,6 +145,7 @@ pub fn handle_chat_focus_input_event(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut chat_input_query: Query<&mut chat_components::ChatMessageInputElement>,
     mut focus_change_events: EventWriter<FocusChangeEvent>,
+    mut chat_state: ResMut<chat_resources::ChatState>
 ) {
     if let Ok(chat_input_component) = chat_input_query.get_single_mut() {
         if mouse_button_input.just_pressed(MouseButton::Left) {
@@ -157,6 +159,7 @@ pub fn handle_chat_focus_input_event(
             focus_change_events.send(FocusChangeEvent {
                 state: FocusState::Focus,
             });
+            chat_state.just_focused = true;
         }
         if keyboard_input.just_pressed(KeyCode::Escape) && chat_input_component.focused {
             info!("Unfocusing chat via Escape");
@@ -209,6 +212,7 @@ pub fn handle_chat_input_system(
     mut evr_kbd: EventReader<KeyboardInput>,
     mut chat_input_query: Query<(&mut Text, &mut chat_components::ChatMessageInputElement)>,
     mut send_event_writer: EventWriter<SendMessageEvent>,
+    mut chat_state: ResMut<chat_resources::ChatState>
 ) {
     if let Ok((mut text, input_component)) = chat_input_query.get_single_mut() {
         if !input_component.focused {
@@ -224,6 +228,12 @@ pub fn handle_chat_input_system(
             if ev.state != ButtonState::Pressed {
                 continue;
             }
+
+            if chat_state.just_focused {
+                chat_state.just_focused = false;
+                continue;
+            }
+
             match &ev.logical_key {
                 Key::Enter if !chat_input_value.trim().is_empty() => {
                     send_event_writer.send(SendMessageEvent(chat_input_value.trim().to_string()));
