@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use bevy::input::{keyboard::KeyboardInput, ButtonState};
-use chat_events::{ChatFocusStateChangeEvent, FocusState, SendMessageEvent};
+use chat_events::{ChatFocusStateChangeEvent, FocusState, ChatMessageSendEvent};
 
 const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
 const COLOR_FOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.5);
@@ -125,7 +125,7 @@ pub fn handle_focus_events(
 
 pub fn send_messages_system(
     mut client: ResMut<RenetClient>,
-    mut event_reader: EventReader<SendMessageEvent>,
+    mut event_reader: EventReader<ChatMessageSendEvent>,
 ) {
     for event in event_reader.read() {
         let message = event.0.clone();
@@ -210,7 +210,7 @@ pub fn handle_chat_focus_player_controller_events(
 pub fn process_chat_input_system(
     mut evr_kbd: EventReader<KeyboardInput>,
     mut chat_input_query: Query<(&mut Text, &mut chat_components::ChatMessageInputElement)>,
-    mut send_event_writer: EventWriter<SendMessageEvent>,
+    mut send_event_writer: EventWriter<ChatMessageSendEvent>,
     mut chat_state: ResMut<chat_resources::ChatState>,
 ) {
     if let Ok((mut text, input_component)) = chat_input_query.get_single_mut() {
@@ -235,7 +235,7 @@ pub fn process_chat_input_system(
 
             match &ev.logical_key {
                 Key::Enter if !chat_input_value.trim().is_empty() => {
-                    send_event_writer.send(SendMessageEvent(chat_input_value.trim().to_string()));
+                    send_event_writer.send(ChatMessageSendEvent(chat_input_value.trim().to_string()));
                     chat_input_value.clear();
                 }
                 Key::Backspace => {

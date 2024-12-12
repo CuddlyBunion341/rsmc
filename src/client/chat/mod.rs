@@ -29,7 +29,7 @@ impl Plugin for ChatPlugin {
         app.insert_resource(resources::ChatState::default());
         app.add_event::<events::ChatSyncEvent>();
         app.add_event::<events::ChatFocusStateChangeEvent>();
-        app.add_event::<events::SendMessageEvent>();
+        app.add_event::<events::ChatMessageSendEvent>();
         app.add_event::<events::SingleChatSendEvent>();
     }
 }
