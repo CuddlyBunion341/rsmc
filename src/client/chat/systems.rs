@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use bevy::input::{keyboard::KeyboardInput, ButtonState};
 use chat_events::{FocusChangeEvent, FocusState, SendMessageEvent};
-use chat_resources::ChatState;
 
 const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
 const COLOR_FOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.5);
@@ -51,22 +50,22 @@ pub fn setup_chat_container(mut commands: Commands) {
                 .spawn(create_text_bundle(
                     String::new(),
                     Style {
-                        flex_direction: FlexDirection::Column,
-                        ..default()
-                    },
-                ))
-                .insert(chat_components::ChatMessageContainer { focused: false });
-
-            parent
-                .spawn(create_text_bundle(
-                    String::new(),
-                    Style {
                         padding: PADDING,
                         height: Val::Px(20.0),
                         ..default()
                     },
                 ))
                 .insert(chat_components::ChatMessageInputElement { focused: false });
+
+            parent
+                .spawn(create_text_bundle(
+                    String::new(),
+                    Style {
+                        flex_direction: FlexDirection::Column,
+                        ..default()
+                    },
+                ))
+                .insert(chat_components::ChatMessageContainer { focused: false });
         });
 }
 
@@ -145,7 +144,7 @@ pub fn handle_chat_focus_input_event(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut chat_input_query: Query<&mut chat_components::ChatMessageInputElement>,
     mut focus_change_events: EventWriter<FocusChangeEvent>,
-    mut chat_state: ResMut<chat_resources::ChatState>
+    mut chat_state: ResMut<chat_resources::ChatState>,
 ) {
     if let Ok(chat_input_component) = chat_input_query.get_single_mut() {
         if mouse_button_input.just_pressed(MouseButton::Left) {
@@ -212,7 +211,7 @@ pub fn handle_chat_input_system(
     mut evr_kbd: EventReader<KeyboardInput>,
     mut chat_input_query: Query<(&mut Text, &mut chat_components::ChatMessageInputElement)>,
     mut send_event_writer: EventWriter<SendMessageEvent>,
-    mut chat_state: ResMut<chat_resources::ChatState>
+    mut chat_state: ResMut<chat_resources::ChatState>,
 ) {
     if let Ok((mut text, input_component)) = chat_input_query.get_single_mut() {
         if !input_component.focused {

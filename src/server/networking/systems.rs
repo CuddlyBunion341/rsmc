@@ -8,15 +8,50 @@ pub fn receive_message_system(
     mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
 ) {
     for client_id in server.clients_id() {
+        while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
+        {
+            let message = bincode::deserialize(&message).unwrap();
+
+            match message {
+                lib::NetworkingMessage::BlockUpdate { position, block } => {
+                    info!(
+                        "Received block update from client {} {} {:?}",
+                        client_id, position, block
+                    );
+                    past_block_updates
+                        .updates
+                        .push(terrain_events::BlockUpdateEvent { position, block });
+
+                    server.broadcast_message_except(
+                        client_id,
+                        DefaultChannel::ReliableOrdered,
+                        bincode::serialize(&lib::NetworkingMessage::BlockUpdate {
+                            position,
+                            block,
+                        })
+                        .unwrap(),
+                    );
+                }
+                lib::NetworkingMessage::ChatMessageSend(message) => {
+                    info!("Received chat message from {}", client_id);
+                    chat_message_events
+                        .send(chat_events::PlayerChatMessageSendEvent { client_id, message });
+                }
+                _ => {
+                    warn!("Received unknown message type. (ReliabelOrdered)");
+                }
+            }
+        }
+
         while let Some(message) =
             server.receive_message(client_id, DefaultChannel::ReliableUnordered)
         {
             let message = bincode::deserialize(&message).unwrap();
-            info!("Received message: {:?}", message);
+            debug!("Received message: {:?}", message);
 
             match message {
                 lib::NetworkingMessage::PlayerUpdate(player) => {
-                    info!(
+                    debug!(
                         "Received player update from client {} {}",
                         client_id, player.position
                     );
@@ -58,41 +93,6 @@ pub fn receive_message_system(
                 }
                 _ => {
                     warn!("Received unknown message type. (ReliableUnordered)");
-                }
-            }
-        }
-
-        while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
-        {
-            let message = bincode::deserialize(&message).unwrap();
-
-            match message {
-                lib::NetworkingMessage::BlockUpdate { position, block } => {
-                    info!(
-                        "Received block update from client {} {} {:?}",
-                        client_id, position, block
-                    );
-                    past_block_updates
-                        .updates
-                        .push(terrain_events::BlockUpdateEvent { position, block });
-
-                    server.broadcast_message_except(
-                        client_id,
-                        DefaultChannel::ReliableOrdered,
-                        bincode::serialize(&lib::NetworkingMessage::BlockUpdate {
-                            position,
-                            block,
-                        })
-                        .unwrap(),
-                    );
-                }
-                lib::NetworkingMessage::ChatMessageSend(message) => {
-                    info!("Received chat message from {}", client_id);
-                    chat_message_events
-                        .send(chat_events::PlayerChatMessageSendEvent { client_id, message });
-                }
-                _ => {
-                    warn!("Received unknown message type. (ReliabelOrdered)");
                 }
             }
         }

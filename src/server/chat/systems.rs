@@ -43,7 +43,8 @@ pub fn sync_player_chat_messages_event(
         info!("Synchronizing messages with client {}", client_id);
 
         let history = chat_messages.messages.clone();
-        let response_message = bincode::serialize(&history).unwrap();
+        let response_message =
+            bincode::serialize(&lib::NetworkingMessage::ChatMessageSync(history)).unwrap();
         server.send_message(client_id, DefaultChannel::ReliableOrdered, response_message);
     }
 }

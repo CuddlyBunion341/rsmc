@@ -13,7 +13,6 @@ pub fn broadcast_player_attributes_system(
         rotation: camera_transform.rotation,
     };
 
-    info!("Sharing player update");
     client.send_message(
         DefaultChannel::ReliableUnordered,
         bincode::serialize(&lib::NetworkingMessage::PlayerUpdate(player_state)).unwrap(),
