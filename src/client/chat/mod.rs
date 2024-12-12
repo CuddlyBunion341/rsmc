@@ -15,7 +15,7 @@ impl Plugin for ChatPlugin {
         app.add_systems(
             Update,
             (
-                systems::handle_chat_input_system,
+                systems::process_chat_input_system,
                 systems::handle_chat_focus_player_controller_events,
                 systems::handle_window_focus_events,
                 systems::handle_chat_focus_input_event,

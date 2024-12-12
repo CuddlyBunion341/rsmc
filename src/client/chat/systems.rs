@@ -207,7 +207,7 @@ pub fn handle_chat_focus_player_controller_events(
     }
 }
 
-pub fn handle_chat_input_system(
+pub fn process_chat_input_system(
     mut evr_kbd: EventReader<KeyboardInput>,
     mut chat_input_query: Query<(&mut Text, &mut chat_components::ChatMessageInputElement)>,
     mut send_event_writer: EventWriter<SendMessageEvent>,
