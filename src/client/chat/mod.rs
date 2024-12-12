@@ -21,6 +21,8 @@ impl Plugin for ChatPlugin {
                 systems::handle_chat_focus_input_event,
                 systems::send_messages_system,
                 systems::handle_focus_events,
+                systems::handle_chat_message_sync_event,
+                systems::add_message_to_chat_container_system,
             ),
         );
         app.insert_resource(resources::ChatHistory::default());

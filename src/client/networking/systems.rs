@@ -1,3 +1,5 @@
+use rsmc::ChatMessage;
+
 use crate::prelude::*;
 
 #[allow(clippy::too_many_arguments)]
@@ -36,11 +38,11 @@ pub fn receive_message_system(
                     });
                 }
                 lib::NetworkingMessage::ChatMessageSync(messages) => {
-                    debug!("Client received chat messages");
+                    info!("Client received {} chat messages", messages.len());
                     chat_events.send(chat_events::ChatSyncEvent(messages));
                 }
                 lib::NetworkingMessage::SingleChatMessageSync(message) => {
-                    debug!("Client received chat message");
+                    info!("Client received chat message {}", message.message);
                     single_chat_events.send(chat_events::SingleChatSendEvent(message));
                 }
                 _ => {

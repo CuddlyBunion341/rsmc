@@ -11,7 +11,7 @@ pub fn sync_single_player_chat_messages_system(
         let message = event.message.clone();
         let client_id = event.client_id;
 
-        info!("Received message from client {}", client_id);
+        info!("Broadcasting message from sender {}", client_id);
         let message_count = chat_messages.messages.len();
         let message_id = message_count;
 

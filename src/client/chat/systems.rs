@@ -2,8 +2,6 @@ use crate::prelude::*;
 use bevy::input::{keyboard::KeyboardInput, mouse::MouseButtonInput, ButtonState};
 use chat_events::{FocusChangeEvent, FocusState, SendMessageEvent};
 
-// Assuming `chat_components` is your own module with the necessary components defined
-
 const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
 const COLOR_FOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.5);
 const TEXT_COLOR: Color = Color::rgba(1.0, 1.0, 1.0, 0.1);
@@ -16,7 +14,6 @@ const PADDING: UiRect = UiRect {
     right: Val::Px(10.0),
 };
 
-// Utility function for creating default TextBundle
 fn create_text_bundle(value: String, style: Style) -> TextBundle {
     TextBundle {
         text: Text {
@@ -75,20 +72,27 @@ pub fn setup_chat_container(mut commands: Commands) {
 pub fn handle_focus_events(
     mut focus_change_events: EventReader<FocusChangeEvent>,
     mut chat_container_query: Query<
-    (&mut BackgroundColor, &mut chat_components::ChatMessageContainer),
+    (
+        &mut BackgroundColor,
+        &mut chat_components::ChatMessageContainer,
+    ),
     Without<chat_components::ChatMessageInputElement>,
     >,
     mut chat_input_query: Query<
-    (&mut BackgroundColor, &mut chat_components::ChatMessageInputElement),
+    (
+        &mut BackgroundColor,
+        &mut chat_components::ChatMessageInputElement,
+    ),
     Without<chat_components::ChatMessageContainer>,
     >,
     mut controller_query: Query<&mut FpsController>,
     mut window_query: Query<&mut Window>,
 ) {
     if let Ok(mut window) = window_query.get_single_mut() {
-        if let (Ok((mut container_bg, mut chat_container)), Ok((mut input_bg, mut chat_input))) =
-            (chat_container_query.get_single_mut(), chat_input_query.get_single_mut())
-        {
+        if let (Ok((mut container_bg, mut chat_container)), Ok((mut input_bg, mut chat_input))) = (
+            chat_container_query.get_single_mut(),
+            chat_input_query.get_single_mut(),
+        ) {
             for event in focus_change_events.read() {
                 match event.state {
                     FocusState::Focus => {
@@ -232,7 +236,7 @@ pub fn handle_chat_input_system(
                 Key::Character(input) => {
                     if input.chars().all(|c| !c.is_control()) {
                         chat_input_value.push_str(input);
-                    } 
+                    }
                 }
                 _ => {}
             }
@@ -250,13 +254,24 @@ pub fn handle_chat_input_system(
     }
 }
 
+pub fn handle_chat_message_sync_event(
+    mut sync_events: EventReader<chat_events::ChatSyncEvent>,
+    mut send_events: EventWriter<chat_events::SingleChatSendEvent>,
+) {
+    for event in sync_events.read() {
+        event.0.clone().into_iter().for_each(|message| {
+            send_events.send(chat_events::SingleChatSendEvent(message));
+        })
+    }
+}
+
 pub fn add_message_to_chat_container_system(
     mut commands: Commands,
     query: Query<(Entity, &chat_components::ChatMessageContainer)>,
     mut events: EventReader<chat_events::SingleChatSendEvent>,
 ) {
-    if let Ok((entity, _)) = query.get_single() {
-        for event in events.read() {
+    for event in events.read() {
+        if let Ok((entity, _)) = query.get_single() {
             commands.entity(entity).with_children(|parent| {
                 parent.spawn(create_text_bundle(
                         event.0.format_string(),
