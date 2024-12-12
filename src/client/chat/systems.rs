@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use bevy::input::{keyboard::KeyboardInput, ButtonState};
-use chat_events::{ChatFocusStateChangeEvent, FocusState, ChatMessageSendEvent};
+use chat_events::{ChatFocusStateChangeEvent, ChatMessageSendEvent, FocusState};
 
 const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
 const COLOR_FOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.5);
@@ -235,7 +235,8 @@ pub fn process_chat_input_system(
 
             match &ev.logical_key {
                 Key::Enter if !chat_input_value.trim().is_empty() => {
-                    send_event_writer.send(ChatMessageSendEvent(chat_input_value.trim().to_string()));
+                    send_event_writer
+                        .send(ChatMessageSendEvent(chat_input_value.trim().to_string()));
                     chat_input_value.clear();
                 }
                 Key::Backspace => {
