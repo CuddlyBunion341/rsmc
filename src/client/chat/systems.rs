@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use bevy::input::{keyboard::KeyboardInput, ButtonState};
-use chat_events::{FocusChangeEvent, FocusState, SendMessageEvent};
+use chat_events::{ChatFocusStateChangeEvent, FocusState, SendMessageEvent};
 
 const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
 const COLOR_FOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.5);
@@ -70,7 +70,7 @@ pub fn setup_chat_container(mut commands: Commands) {
 }
 
 pub fn handle_focus_events(
-    mut focus_change_events: EventReader<FocusChangeEvent>,
+    mut focus_change_events: EventReader<ChatFocusStateChangeEvent>,
     mut chat_container_query: Query<
         (
             &mut BackgroundColor,
@@ -143,26 +143,26 @@ pub fn focus_chat_input_system(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut chat_input_query: Query<&mut chat_components::ChatMessageInputElement>,
-    mut focus_change_events: EventWriter<FocusChangeEvent>,
+    mut focus_change_events: EventWriter<ChatFocusStateChangeEvent>,
     mut chat_state: ResMut<chat_resources::ChatState>,
 ) {
     if let Ok(chat_input_component) = chat_input_query.get_single_mut() {
         if mouse_button_input.just_pressed(MouseButton::Left) {
             info!("Unfocusing chat via Left click");
-            focus_change_events.send(FocusChangeEvent {
+            focus_change_events.send(ChatFocusStateChangeEvent {
                 state: FocusState::Unfocus,
             });
         }
         if keyboard_input.just_pressed(KeyCode::KeyT) && !chat_input_component.focused {
             info!("Focusing chat via KeyT");
-            focus_change_events.send(FocusChangeEvent {
+            focus_change_events.send(ChatFocusStateChangeEvent {
                 state: FocusState::Focus,
             });
             chat_state.just_focused = true;
         }
         if keyboard_input.just_pressed(KeyCode::Escape) && chat_input_component.focused {
             info!("Unfocusing chat via Escape");
-            focus_change_events.send(FocusChangeEvent {
+            focus_change_events.send(ChatFocusStateChangeEvent {
                 state: FocusState::Unfocus,
             });
         }
@@ -171,7 +171,7 @@ pub fn focus_chat_input_system(
 
 pub fn handle_window_focus_events(
     mut window_query: Query<&mut Window>,
-    mut focus_events: EventReader<FocusChangeEvent>,
+    mut focus_events: EventReader<ChatFocusStateChangeEvent>,
 ) {
     if let Ok(mut window) = window_query.get_single_mut() {
         for event in focus_events.read() {
@@ -187,7 +187,7 @@ pub fn handle_window_focus_events(
 }
 
 pub fn handle_chat_focus_player_controller_events(
-    mut focus_change_events: EventReader<FocusChangeEvent>,
+    mut focus_change_events: EventReader<ChatFocusStateChangeEvent>,
     mut controller_query: Query<&mut FpsController>,
 ) {
     for event in focus_change_events.read() {
