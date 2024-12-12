@@ -139,7 +139,7 @@ pub fn send_messages_system(
     }
 }
 
-pub fn handle_chat_focus_input_event(
+pub fn focus_chat_input_system(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut chat_input_query: Query<&mut chat_components::ChatMessageInputElement>,

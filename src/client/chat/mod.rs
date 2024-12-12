@@ -18,7 +18,7 @@ impl Plugin for ChatPlugin {
                 systems::process_chat_input_system,
                 systems::handle_chat_focus_player_controller_events,
                 systems::handle_window_focus_events,
-                systems::handle_chat_focus_input_event,
+                systems::focus_chat_input_system,
                 systems::send_messages_system,
                 systems::handle_focus_events,
                 systems::handle_chat_message_sync_event,
