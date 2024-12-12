@@ -126,7 +126,7 @@ pub fn send_messages_system(
     for event in event_reader.read() {
         let message = event.0.clone();
 
-        info!("Sharing send message with server");
+        info!("Sending message \"{}\" to server", message);
 
         client.send_message(
             DefaultChannel::ReliableOrdered,
@@ -141,7 +141,7 @@ pub fn handle_chat_focus_input_event(
     mut chat_input_query: Query<&mut chat_components::ChatMessageInputElement>,
     mut focus_change_events: EventWriter<FocusChangeEvent>,
 ) {
-    if let Ok(mut chat_input_component) = chat_input_query.get_single_mut() {
+    if let Ok(chat_input_component) = chat_input_query.get_single_mut() {
         if mouse_button_input.just_pressed(MouseButton::Left) {
             info!("Unfocusing chat via Left click");
             focus_change_events.send(FocusChangeEvent {
