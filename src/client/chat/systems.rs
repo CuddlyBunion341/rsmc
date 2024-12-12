@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use bevy::input::{keyboard::KeyboardInput, mouse::MouseButtonInput, ButtonState};
+use bevy::input::{keyboard::KeyboardInput, ButtonState};
 use chat_events::{FocusChangeEvent, FocusState, SendMessageEvent};
 
 const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
@@ -45,45 +45,45 @@ pub fn setup_chat_container(mut commands: Commands) {
             background_color: BackgroundColor(COLOR_UNFOCUSED),
             ..default()
         })
-    .with_children(|parent| {
-        parent
-            .spawn(create_text_bundle(
+        .with_children(|parent| {
+            parent
+                .spawn(create_text_bundle(
                     String::new(),
                     Style {
                         flex_direction: FlexDirection::Column,
                         ..default()
                     },
-            ))
-            .insert(chat_components::ChatMessageContainer { focused: false });
+                ))
+                .insert(chat_components::ChatMessageContainer { focused: false });
 
-        parent
-            .spawn(create_text_bundle(
+            parent
+                .spawn(create_text_bundle(
                     String::new(),
                     Style {
                         padding: PADDING,
                         height: Val::Px(20.0),
                         ..default()
                     },
-            ))
-            .insert(chat_components::ChatMessageInputElement { focused: false });
+                ))
+                .insert(chat_components::ChatMessageInputElement { focused: false });
         });
 }
 
 pub fn handle_focus_events(
     mut focus_change_events: EventReader<FocusChangeEvent>,
     mut chat_container_query: Query<
-    (
-        &mut BackgroundColor,
-        &mut chat_components::ChatMessageContainer,
-    ),
-    Without<chat_components::ChatMessageInputElement>,
+        (
+            &mut BackgroundColor,
+            &mut chat_components::ChatMessageContainer,
+        ),
+        Without<chat_components::ChatMessageInputElement>,
     >,
     mut chat_input_query: Query<
-    (
-        &mut BackgroundColor,
-        &mut chat_components::ChatMessageInputElement,
-    ),
-    Without<chat_components::ChatMessageContainer>,
+        (
+            &mut BackgroundColor,
+            &mut chat_components::ChatMessageInputElement,
+        ),
+        Without<chat_components::ChatMessageContainer>,
     >,
     mut controller_query: Query<&mut FpsController>,
     mut window_query: Query<&mut Window>,
@@ -274,11 +274,11 @@ pub fn add_message_to_chat_container_system(
         if let Ok((entity, _)) = query.get_single() {
             commands.entity(entity).with_children(|parent| {
                 parent.spawn(create_text_bundle(
-                        event.0.format_string(),
-                        Style {
-                            margin: UiRect::all(Val::Px(5.0)),
-                            ..default()
-                        },
+                    event.0.format_string(),
+                    Style {
+                        margin: UiRect::all(Val::Px(5.0)),
+                        ..default()
+                    },
                 ));
             });
         }

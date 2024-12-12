@@ -1,5 +1,3 @@
-use rsmc::ChatMessage;
-
 use crate::prelude::*;
 
 #[allow(clippy::too_many_arguments)]

@@ -8,7 +8,9 @@ pub fn receive_message_system(
     mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
 ) {
     for client_id in server.clients_id() {
-        while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableUnordered) {
+        while let Some(message) =
+            server.receive_message(client_id, DefaultChannel::ReliableUnordered)
+        {
             let message = bincode::deserialize(&message).unwrap();
             info!("Received message: {:?}", message);
 
@@ -44,7 +46,7 @@ pub fn receive_message_system(
                                 }
                             }
                         })
-                    .collect();
+                        .collect();
 
                     let message =
                         bincode::serialize(&lib::NetworkingMessage::ChunkBatchResponse(chunks));
@@ -60,7 +62,8 @@ pub fn receive_message_system(
             }
         }
 
-        while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered) {
+        while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
+        {
             let message = bincode::deserialize(&message).unwrap();
 
             match message {
@@ -87,7 +90,7 @@ pub fn receive_message_system(
                     info!("Received chat message from {}", client_id);
                     chat_message_events
                         .send(chat_events::PlayerChatMessageSendEvent { client_id, message });
-                    }
+                }
                 _ => {
                     warn!("Received unknown message type. (ReliabelOrdered)");
                 }

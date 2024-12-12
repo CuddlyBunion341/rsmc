@@ -1,5 +1,3 @@
-use std::ptr::read;
-
 use crate::prelude::*;
 
 pub fn broadcast_player_attributes_system(
@@ -14,8 +12,6 @@ pub fn broadcast_player_attributes_system(
         position: transform.translation,
         rotation: camera_transform.rotation,
     };
-
-    return;
 
     info!("Sharing player update");
     client.send_message(
