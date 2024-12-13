@@ -83,6 +83,7 @@ Make sure that you:
 - Create links to related markdown files and entities in the documenation where relevant.
   Use the following git base url for that: $REPOSITORY_BASE_URL
 - Don\'t wrap your response in a markdown code block
+- Don\'t include the code of the context files, only link to them
 
 Content:
 $file_content
