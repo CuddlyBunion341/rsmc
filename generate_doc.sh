@@ -3,53 +3,91 @@
 SRC_DIR="src"
 DOC_CLIENT_DIR="docs/client"
 DOC_SERVER_DIR="docs/server"
-PLUGIN_DIR="plugin"
 
+# Create documentation directories
 mkdir -p "$DOC_CLIENT_DIR"
 mkdir -p "$DOC_SERVER_DIR"
 
+CLIENT_README="$DOC_CLIENT_DIR/README.md"
+SERVER_README="$DOC_SERVER_DIR/README.md"
+
+# Initialize README files
+initialize_readme() {
+  local output_file="$1"
+  local title="$2"
+  {
+    echo "# $title Plugins"
+    echo
+    echo "A collection of plugins for the $title."
+    echo
+  } > "$output_file"
+}
+
+# Add a plugin link to README
+add_plugin_to_readme() {
+  local readme_file="$1"
+  local plugin_name="$2"
+  {
+    echo "* [$plugin_name](./${plugin_name}.md)"
+  } >> "$readme_file"
+}
+
+# Function to generate documentation for a plugin
 generate_plugin_docs() {
-  local dir_path=$1
-  local dir_name=$(basename "$dir_path")
-  local doc_type=$2
+  local plugin_dir="$1"
+  local plugin_type="$2"
+  local plugin_name=$(basename "$plugin_dir")
+  local doc_dir output_file prelude_file networking_file readme_file
 
-  SUBDIR_FILES=$(find "$dir_path" -type f -name '*.rs')
-
-  if [[ $dir_path == *"client"* ]]; then
-    PRELUDE_FILE="$SRC_DIR/client/prelude.rs"
-    NETWORKING_FILE="$SRC_DIR/client/networking/systems.rs"
-    OUTPUT_FILE="$DOC_CLIENT_DIR/${dir_name}.md"
+  if [[ "$plugin_type" == "client" ]]; then
+    doc_dir="$DOC_CLIENT_DIR"
+    prelude_file="$SRC_DIR/client/prelude.rs"
+    networking_file="$SRC_DIR/client/networking/systems.rs"
+    readme_file="$CLIENT_README"
   else
-    PRELUDE_FILE="$SRC_DIR/server/prelude.rs"
-    NETWORKING_FILE="$SRC_DIR/server/networking/systems.rs"
-    OUTPUT_FILE="$DOC_SERVER_DIR/${dir_name}.md"
+    doc_dir="$DOC_SERVER_DIR"
+    prelude_file="$SRC_DIR/server/prelude.rs"
+    networking_file="$SRC_DIR/server/networking/systems.rs"
+    readme_file="$SERVER_README"
   fi
+
+  output_file="$doc_dir/${plugin_name}.md"
+  plugin_files=$(find "$plugin_dir" -type f -name '*.rs')
+
+  if [[ -z "$plugin_files" ]]; then
+    echo "No Rust files found in $plugin_dir. Skipping..."
+    return
+  fi
+
+  # Add the plugin to the corresponding README
+  add_plugin_to_readme "$readme_file" "$plugin_name"
 
   {
     cat <<EOF
-file: $OUTPUT_FILE
+# Plugin: $plugin_name
 
-# Plugin Name: $dir_name
-Short plugin description for $dir_name.
+Short description of the $plugin_name plugin.
 
 ## Dependencies
-- \`Dependency\`: Describe the necessity.
+- \`Dependency Name\`: Brief explanation of why this dependency is necessary.
 
+## Mermaid Diagram
 \`\`\`mermaid
 
-% A mermaid diagram showcasing the various elements of the plugin:
-% - Use subgraphs to structure Components / Systems / Resources / Events
-% - Show relations between the components systems etc.
-% - Show data attributes of the resources / components with the corresponding visibility
-% - Make sure to include all data fields from the events, resources, components in the diagram
+graph TD
+    %% A mermaid diagram showcasing the various elements of the plugin:
+    %% - Use subgraphs to structure Components / Systems / Resources / Events
+    %% - Show relations between the components systems etc.
+    %% - Show data attributes of the resources / components with the corresponding visibility
+    %% - Make sure to include all data fields from the events, resources, components in the diagram
 
 \`\`\`
 
 ## Components
-- \`Component Name\`: Purpose
+- \`Component Name\`: Description of purpose.
 
 ## Resources
-- \`Resource Name\`: Purpose
+- \`Resource Name\`: Description of purpose.
 
 ## Systems
 - **Category of System**:
@@ -63,41 +101,50 @@ Short plugin description for $dir_name.
 ## Collected Source Files
 EOF
 
-for file in $SUBDIR_FILES; do
-  echo "- $(basename "$file")"
-done
+    for file in $plugin_files; do
+      echo "- $(basename "$file")"
+    done
 
-cat <<EOF
+    cat <<EOF
 
 ## Source Code Content
-EOF
 
-    # Concatenate each file content into the output
-    for file in $SUBDIR_FILES; do
-      echo "---- File: $file ----"
+\`\`\`rs
+EOF
+    for file in $plugin_files; do
+      echo "// ---- File: $file ----"
       cat "$file"
       echo
     done
 
-    # Include additional files like prelude and networking
-    echo "---- File: $PRELUDE_FILE ----"
-    cat "$PRELUDE_FILE"
+    echo "// ---- File: $prelude_file ----"
+    cat "$prelude_file"
     echo
-    echo "---- File: $NETWORKING_FILE ----"
-    cat "$NETWORKING_FILE"
+
+    echo "// ---- File: $networking_file ----"
+    cat "$networking_file"
     echo
-  } > "$OUTPUT_FILE"
-  echo "Documentation generated and saved to $OUTPUT_FILE"
+
+    echo "\`\`\`"
+  } > "$output_file"
+
+  echo "Generated documentation for $plugin_name: $output_file"
 }
 
-for dir in "$SRC_DIR/client"/*; do
-  if [[ -d $dir && $(find "$dir" -type f -name '*.rs') ]]; then
-    generate_plugin_docs "$dir" "client"
+# Initialize README files
+initialize_readme "$CLIENT_README" "Client"
+initialize_readme "$SERVER_README" "Server"
+
+# Process client plugins
+for plugin_dir in "$SRC_DIR/client"/*; do
+  if [[ -d "$plugin_dir" ]]; then
+    generate_plugin_docs "$plugin_dir" "client"
   fi
 done
 
-for dir in "$SRC_DIR/server"/*; do
-  if [[ -d $dir && $(find "$dir" -type f -name '*.rs') ]]; then
-    generate_plugin_docs "$dir" "server"
+# Process server plugins
+for plugin_dir in "$SRC_DIR/server"/*; do
+  if [[ -d "$plugin_dir" ]]; then
+    generate_plugin_docs "$plugin_dir" "server"
   fi
 done
