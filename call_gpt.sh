@@ -96,3 +96,9 @@ PROMPT
   fi
 done
 
+# Get rid of files used for prompting
+find docs/ -type f -name "*_processed.md" | while read -r file; do
+  new_name="${file/_processed.md/.md}"
+  mv "$file" "$new_name"
+  echo "Renamed $file to $new_name"
+done
