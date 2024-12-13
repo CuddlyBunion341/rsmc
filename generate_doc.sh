@@ -8,30 +8,6 @@ PLUGIN_DIR="plugin"
 mkdir -p "$DOC_CLIENT_DIR"
 mkdir -p "$DOC_SERVER_DIR"
 
-get_repository_url() {
-    REMOTE_URL=$(git config --get remote.origin.url)
-
-    if [ -z "$REMOTE_URL" ]; then
-        echo "No remote origin found. Ensure that this is a valid Git repository."
-        return 1
-    fi
-
-    # Convert the SSH URL to HTTP if necessary
-    if [[ "$REMOTE_URL" == git@* ]]; then
-        # Convert git@github.com:user/repo.git to https://github.com/user/repo
-        REMOTE_URL="https://${REMOTE_URL#git@}"
-        REMOTE_URL="${REMOTE_URL/:/\/}"
-        REMOTE_URL="${REMOTE_URL%.git}"
-    elif [[ "$REMOTE_URL" == *.git ]]; then
-        # Remove .git suffix if URL is already in HTTP(S) format
-        REMOTE_URL="${REMOTE_URL%.git}"
-    fi
-
-    echo "${REMOTE_URL}/blob/main/"
-}
-
-BASE_URL=$(get_repository_url)
-
 generate_plugin_docs() {
   local dir_path=$1
   local dir_name=$(basename "$dir_path")
@@ -52,7 +28,6 @@ generate_plugin_docs() {
   {
     cat <<EOF
 file: $OUTPUT_FILE
-git_base_url: $BASE_URL
 
 # Plugin Name: $dir_name
 Short plugin description for $dir_name.
