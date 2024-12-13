@@ -1,34 +1,30 @@
 #!/bin/bash
 
-# Define directories and files
 SRC_DIR="src"
-DOC_DIR="docs/plugins"
+DOC_CLIENT_DIR="docs/client"
+DOC_SERVER_DIR="docs/server"
 PLUGIN_DIR="plugin"
 
-# Make sure the output directory exists
-mkdir -p "$DOC_DIR"
+mkdir -p "$DOC_CLIENT_DIR"
+mkdir -p "$DOC_SERVER_DIR"
 
-# Function to process each subdirectory and generate the output file
 generate_plugin_docs() {
   local dir_path=$1
   local dir_name=$(basename "$dir_path")
+  local doc_type=$2
 
-  # Collect relevant files from the subdirectory
   SUBDIR_FILES=$(find "$dir_path" -type f -name '*.rs')
 
-  # Collect prelude and networking system files based on the root of the directory
   if [[ $dir_path == *"client"* ]]; then
     PRELUDE_FILE="$SRC_DIR/client/prelude.rs"
     NETWORKING_FILE="$SRC_DIR/client/networking/systems.rs"
+    OUTPUT_FILE="$DOC_CLIENT_DIR/${dir_name}.md"
   else
     PRELUDE_FILE="$SRC_DIR/server/prelude.rs"
     NETWORKING_FILE="$SRC_DIR/server/networking/systems.rs"
+    OUTPUT_FILE="$DOC_SERVER_DIR/${dir_name}.md"
   fi
 
-  # Output filename
-  OUTPUT_FILE="$DOC_DIR/${dir_name}.md"
-
-  # Generate the output content
   {
     echo "file: $OUTPUT_FILE"
     echo
@@ -36,12 +32,11 @@ generate_plugin_docs() {
     echo "Short plugin description for $dir_name."
     echo
     echo "## Context"
-    echo "- The following code has been sourced from the project's $dir_name plugin directory."
-    echo "- Includes files from \`prelude.rs\` and networking systems specific to client or server."
+    echo "- Includes files from the project's ${dir_name} ${doc_type} plugin directory."
+    echo "- Incorporates \`prelude.rs\` and networking systems specific to ${doc_type}."
     echo
     echo "## Collected Source Files"
     
-    # List each file name
     for file in $SUBDIR_FILES; do
       echo "- $(basename "$file")"
     done
@@ -89,11 +84,14 @@ generate_plugin_docs() {
   echo "Documentation generated and saved to $OUTPUT_FILE"
 }
 
-# Find all subdirectories in client and server that contain .rs files
-for dir in "$SRC_DIR"/client/* "$SRC_DIR"/server/*; do
-  if [[ -d $dir ]]; then
-    if [[ $(find "$dir" -type f -name '*.rs') ]]; then
-      generate_plugin_docs "$dir"
-    fi
+for dir in "$SRC_DIR/client"/*; do
+  if [[ -d $dir && $(find "$dir" -type f -name '*.rs') ]]; then
+    generate_plugin_docs "$dir" "client"
+  fi
+done
+
+for dir in "$SRC_DIR/server"/*; do
+  if [[ -d $dir && $(find "$dir" -type f -name '*.rs') ]]; then
+    generate_plugin_docs "$dir" "server"
   fi
 done
