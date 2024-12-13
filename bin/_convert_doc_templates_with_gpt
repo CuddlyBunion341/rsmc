@@ -1,8 +1,11 @@
 #!/bin/bash
 
-API_KEY=$API_KEY
-MODEL="gpt-4o-mini"
+if [ -z "$API_KEY" ]; then
+  echo "No API Key present. Please provide one"
+  exit 1
+fi
 
+MODEL="gpt-4o-mini"
 DOCS_DIR="docs"
 
 # Used for generating links inside of the documentation
