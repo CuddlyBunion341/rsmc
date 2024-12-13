@@ -26,44 +26,50 @@ generate_plugin_docs() {
   fi
 
   {
-    echo "file: $OUTPUT_FILE"
-    echo
-    echo "# Plugin Name: $dir_name"
-    echo "Short plugin description for $dir_name."
-    echo
-    echo "## Context"
-    echo "- Includes files from the project's ${dir_name} ${doc_type} plugin directory."
-    echo "- Incorporates \`prelude.rs\` and networking systems specific to ${doc_type}."
-    echo
-    echo "## Collected Source Files"
-    
-    for file in $SUBDIR_FILES; do
-      echo "- $(basename "$file")"
-    done
+    cat <<EOF
+file: $OUTPUT_FILE
 
-    echo
-    echo "## Dependencies"
-    echo "- \`Dependency\`: Describe the necessity."
-    echo
-    echo "\`\`\`mermaid"
-    echo "graph TD"
-    echo "  A[Component] --> B[System]"
-    echo "  C[Resource] --> D[Event]"
-    echo "\`\`\`"
-    echo
-    echo "## Components"
-    echo "- \`Component Name\`: Purpose"
-    echo
-    echo "## Resources"
-    echo "- \`Resource Name\`: Purpose"
-    echo
-    echo "## Systems"
-    echo "- **Category of System**:"
-    echo "  - \`Name of system\`: Description"
-    echo "- **Networking** (if applicable)"
-    echo
+# Plugin Name: $dir_name
+Short plugin description for $dir_name.
 
-    echo "## Source Code Content"
+## Dependencies
+- \`Dependency\`: Describe the necessity.
+
+\`\`\`mermaid
+
+// A mermaid diagram showcasing the various elements of the plugin.
+// - Use subgraphs to structure Components / Systems / Resources / Events
+// - Show relations between the components systems etc.
+// - Show data attributes of the resources / components with the corresponding visibility
+
+\`\`\`
+
+## Components
+- \`Component Name\`: Purpose
+
+## Resources
+- \`Resource Name\`: Purpose
+
+## Systems
+- **Category of System**:
+  - \`Name of system\`: Description
+- **Networking** (if applicable)
+
+## Context
+- Includes files from the project's ${dir_name} ${doc_type} plugin directory.
+- Incorporates \`prelude.rs\` and networking systems specific to ${doc_type}.
+
+## Collected Source Files
+EOF
+
+for file in $SUBDIR_FILES; do
+  echo "- $(basename "$file")"
+done
+
+cat <<EOF
+
+## Source Code Content
+EOF
 
     # Concatenate each file content into the output
     for file in $SUBDIR_FILES; do
@@ -80,7 +86,6 @@ generate_plugin_docs() {
     cat "$NETWORKING_FILE"
     echo
   } > "$OUTPUT_FILE"
-
   echo "Documentation generated and saved to $OUTPUT_FILE"
 }
 
