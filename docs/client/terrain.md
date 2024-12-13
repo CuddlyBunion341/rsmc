@@ -1,116 +1,68 @@
 # Plugin: terrain
 
-The Terrain plugin provides functionalities for managing and rendering a voxel-based terrain system in the game environment. It handles chunk generation, block management, and event-driven updates for the terrain.
+The Terrain plugin provides functionalities for managing and rendering a voxel-based terrain system, including chunk management, mesh generation, and networking support for multiplayer environments.
 
 ## Dependencies
-- `bevy`: Required for game engine functionalities such as rendering and event handling.
+- `bevy`: Required for the engine framework that the plugin operates within.
+- `renet`: Used for networking capabilities, enabling communication between clients in the multiplayer setup.
 
 ## Mermaid Diagram
 ```mermaid
 graph TD
     subgraph Components
-        ChunkMesh[ChunkMesh]
+        ChunkMesh((ChunkMesh))
     end
 
     subgraph Systems
-        PrepareSpawnArea[Prepare Spawn Area System]
-        GenerateWorld[Generate World System]
-        HandleChunkMeshUpdate[Handle Chunk Mesh Update Events]
+        PrepareSpawnAreaSystem((Prepare Spawn Area))
+        GenerateWorldSystem((Generate World))
+        HandleChunkMeshUpdateEvents((Handle Chunk Mesh Updates))
     end
 
     subgraph Resources
-        ChunkManager[Chunk Manager]
-        TextureManager[Texture Manager]
-        SpawnAreaLoaded[Spawn Area Loaded]
+        ChunkManager((Chunk Manager))
+        TextureManager((Texture Manager))
+        SpawnAreaLoaded((Spawn Area Loaded))
     end
 
     subgraph Events
-        BlockUpdateEvent[Block Update Event]
-        ChunkMeshUpdateEvent[Chunk Mesh Update Event]
+        BlockUpdateEvent((Block Update Event))
+        ChunkMeshUpdateEvent((Chunk Mesh Update Event))
     end
 
-    ChunkMesh -->|used by| HandleChunkMeshUpdate
-    HandleChunkMeshUpdate --> BlockUpdateEvent
-    HandleChunkMeshUpdate --> ChunkMeshUpdateEvent
-    PrepareSpawnArea --> SpawnAreaLoaded
-    GenerateWorld --> ChunkManager
+    ChunkManager -->|contains| ChunkMesh
+    TextureManager -->|provides textures for| ChunkMesh
+    ChunkMesh -->|displayed by| GenerateWorldSystem
+    PrepareSpawnAreaSystem -->|initializes| SpawnAreaLoaded
+    HandleChunkMeshUpdateEvents -->|responds to| ChunkMeshUpdateEvent
+    HandleChunkMeshUpdateEvents -->|updates| ChunkManager 
 ```
 
 ## Components
-- `ChunkMesh`: Represents a mesh associated with a chunk of terrain, containing data necessary for rendering.
+- `ChunkMesh`: Represents the mesh data associated with a terrain chunk, facilitating rendering in the scene.
 
 ## Resources
-- `ChunkManager`: Manages all chunks in the terrain, providing functionality for chunk creation, retrieval, and block manipulation.
-- `TextureManager`: Handles texture UV mappings for various blocks used in the terrain.
-- `SpawnAreaLoaded`: Indicates whether the spawn area has been successfully loaded.
+- `ChunkManager`: Manages the storage and retrieval of chunks in the terrain, ensuring efficient access and updates.
+- `TextureManager`: Handles texture mapping for different block types in the terrain.
+- `SpawnAreaLoaded`: Indicates whether the initial spawn area has been loaded.
 
 ## Systems
-- **Initialization**:
-  - `Prepare Spawn Area System`: Sends requests to generate the initial spawn area chunks.
-  - `Generate World System`: Requests additional chunks based on player position and render distance.
-- **Updates**:
-  - `Handle Chunk Mesh Update Events`: Listens for events signaling that a chunk's mesh needs to be updated or re-rendered.
+- **Terrain Management**:
+  - `PrepareSpawnAreaSystem`: Prepares the initial area for spawning entities by requesting necessary chunks.
+  - `GenerateWorldSystem`: Generates the world by requesting additional chunks based on player position.
+  - `HandleChunkMeshUpdateEvents`: Processes events related to mesh updates for chunks, updating visuals as needed.
 
 ## Context
-- Includes files from the project's plugin directory.
-- Incorporates [`prelude.rs`](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/prelude.rs) and networking systems specific to terrain management.
+- Includes files from the project's plugin directory. 
+- Incorporates [`prelude.rs`](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/prelude.rs) and networking systems specific to this plugin.
 
 ## Collected Source Files
-- events.rs
-- chunk.rs
-- mesher.rs
-- buffer_serializer.rs
-- mod.rs (util)
-- blocks.rs (util)
-- systems.rs
-- mod.rs (plugin)
-- components.rs
-- resources.rs
-
-## Source Code Content
-
-```rs
-// ---- File: src/client/terrain/events.rs ----
-use crate::prelude::*;
-
-#[derive(Event)]
-pub struct ChunkMeshUpdateEvent {
-    pub position: Vec3,
-}
-
-#[derive(Event)]
-pub struct BlockUpdateEvent {
-    pub position: Vec3,
-    pub block: BlockId,
-    pub from_network: bool,
-}
-
-// ---- File: src/client/terrain/util/chunk.rs ----
-// [Chunk implementation code]
-
-// ---- File: src/client/terrain/util/mesher.rs ----
-// [Mesher implementation code]
-
-// ---- File: src/client/terrain/util/buffer_serializer.rs ----
-// [Buffer serializer implementation code]
-
-// ---- File: src/client/terrain/util/mod.rs ----
-// [Util module code]
-
-// ---- File: src/client/terrain/util/blocks.rs ----
-// [Blocks implementation code]
-
-// ---- File: src/client/terrain/systems.rs ----
-// [Systems implementation code]
-
-// ---- File: src/client/terrain/mod.rs ----
-// [Terrain plugin implementation code]
-
-// ---- File: src/client/terrain/components.rs ----
-// [Components implementation code]
-
-// ---- File: src/client/terrain/resources.rs ----
-// [Resources implementation code]
-```
-
-This documentation serves as a reference for developers working with the Terrain plugin, detailing its structure, components, systems, and relevant source files. For further details on specific elements, please refer to the linked source files.
+- [events.rs](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/terrain/events.rs)
+- [chunk.rs](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/terrain/util/chunk.rs)
+- [mesher.rs](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/terrain/util/mesher.rs)
+- [buffer_serializer.rs](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/terrain/util/buffer_serializer.rs)
+- [mod.rs](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/terrain/mod.rs)
+- [blocks.rs](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/terrain/util/blocks.rs)
+- [systems.rs](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/terrain/systems.rs)
+- [components.rs](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/terrain/components.rs)
+- [resources.rs](https://github.com/CuddlyBunion341/hello-bevy/blob/main/src/client/terrain/resources.rs)
