@@ -4,14 +4,12 @@ SRC_DIR="src"
 DOC_CLIENT_DIR="docs/client"
 DOC_SERVER_DIR="docs/server"
 
-# Create documentation directories
 mkdir -p "$DOC_CLIENT_DIR"
 mkdir -p "$DOC_SERVER_DIR"
 
 CLIENT_README="$DOC_CLIENT_DIR/README.md"
 SERVER_README="$DOC_SERVER_DIR/README.md"
 
-# Initialize README files
 initialize_readme() {
   local output_file="$1"
   local title="$2"
@@ -23,7 +21,6 @@ initialize_readme() {
   } > "$output_file"
 }
 
-# Add a plugin link to README
 add_plugin_to_readme() {
   local readme_file="$1"
   local plugin_name="$2"
@@ -32,7 +29,6 @@ add_plugin_to_readme() {
   } >> "$readme_file"
 }
 
-# Function to generate documentation for a plugin
 generate_plugin_docs() {
   local plugin_dir="$1"
   local plugin_type="$2"
@@ -59,7 +55,6 @@ generate_plugin_docs() {
     return
   fi
 
-  # Add the plugin to the corresponding README
   add_plugin_to_readme "$readme_file" "$plugin_name"
 
   {
@@ -131,18 +126,15 @@ EOF
   echo "Generated documentation for $plugin_name: $output_file"
 }
 
-# Initialize README files
 initialize_readme "$CLIENT_README" "Client"
 initialize_readme "$SERVER_README" "Server"
 
-# Process client plugins
 for plugin_dir in "$SRC_DIR/client"/*; do
   if [[ -d "$plugin_dir" ]]; then
     generate_plugin_docs "$plugin_dir" "client"
   fi
 done
 
-# Process server plugins
 for plugin_dir in "$SRC_DIR/server"/*; do
   if [[ -d "$plugin_dir" ]]; then
     generate_plugin_docs "$plugin_dir" "server"
