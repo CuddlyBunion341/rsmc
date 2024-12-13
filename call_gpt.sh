@@ -79,6 +79,7 @@ Make sure that you:
 - Don\'t leave out any details
 - Create links to related markdown files and entities in the documenation where relevant.
   Use the following git base url for that: $REPOSITORY_BASE_URL
+- Don\'t wrap your response in a markdown code block
 
 Content:
 $file_content

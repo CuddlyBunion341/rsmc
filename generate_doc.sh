@@ -37,10 +37,11 @@ Short plugin description for $dir_name.
 
 \`\`\`mermaid
 
-// A mermaid diagram showcasing the various elements of the plugin.
-// - Use subgraphs to structure Components / Systems / Resources / Events
-// - Show relations between the components systems etc.
-// - Show data attributes of the resources / components with the corresponding visibility
+% A mermaid diagram showcasing the various elements of the plugin:
+% - Use subgraphs to structure Components / Systems / Resources / Events
+% - Show relations between the components systems etc.
+% - Show data attributes of the resources / components with the corresponding visibility
+% - Make sure to include all data fields from the events, resources, components in the diagram
 
 \`\`\`
 
