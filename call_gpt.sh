@@ -12,17 +12,22 @@ call_gpt_api() {
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $API_KEY" \
     -d '{
-      "model": "'"$MODEL"'",
-      "prompt": "'"$prompt"'",
+      "model": "'$MODEL'",
+      "messages": [
+        {
+          "role": "user",
+          "content": "'$PROMPT'"
+        }
+      ],
       "temperature": 0.7,
-      "max_tokens": 4096,  # Adjust this according to model limits
+      "max_tokens": 4096,
       "top_p": 1,
       "frequency_penalty": 0.2,
       "presence_penalty": 0.2
     }'
   )
 
-  echo "$response" | jq -r '.choices[0].text'
+  echo "$response" | jq -r '.choices[0].message.content'
 }
 
 for file in "$DOCS_DIR"/*/*.md; do
