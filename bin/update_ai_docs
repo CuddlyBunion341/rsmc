@@ -1,0 +1,4 @@
+#!/bin/bash
+
+./bin/_convert_doc_templates_with_gpt
+./bin/_create_doc_contexts
