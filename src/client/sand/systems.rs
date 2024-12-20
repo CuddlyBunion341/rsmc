@@ -1,18 +1,23 @@
 use crate::prelude::*;
 
-pub fn example_system(
-    mut _commands: Commands,
-    time: Res<Time>,
-    mut _example_resource: ResMut<sand_resources::ExampleResource>,
-    mut example_writer: EventWriter<sand_events::ExampleEvent>,
-    query: Query<(Entity, &sand_components::ExampleComponent)>,
+pub fn spawn_falling_blocks_system(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    for (entity, component) in query.iter() {
-        if component.active {
-            example_writer.send(sand_events::ExampleEvent {
-                message: format!("Entity {} is active", entity.index()),
-                timestamp: time.elapsed_seconds(),
-            });
-        }
-    }
+    let mesh = Cuboid::new(1.0, 1.0, 1.0);
+
+    commands
+        .spawn(PbrBundle {
+            mesh: meshes.add(mesh),
+            material: materials.add(Color::rgba(1.0, 1.0, 1.0, 1.0)),
+            transform: Transform::from_xyz(0.0, 20.0, 0.0),
+            ..default()
+        })
+    .insert(sand_components::FallingBlock());
 }
+//
+// pub fn update_falling_blocks_system(
+//     mut query: Query<&Transform, sand_components::FallingBlock>
+// ) {
+// }
