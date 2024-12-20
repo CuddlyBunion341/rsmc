@@ -8,9 +8,9 @@ mod gui;
 mod networking;
 mod player;
 mod remote_player;
+mod sand;
 mod scene;
 mod terrain;
-mod sand;
 
 use scene::setup_scene;
 
