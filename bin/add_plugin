@@ -82,10 +82,6 @@ pub mod events;
 pub mod resources;
 pub mod systems;
 
-use components;
-use events;
-use systems;
-
 pub struct $(snake_to_pascal_case $PLUGIN_NAME)Plugin;
 
 impl Plugin for $(snake_to_pascal_case $PLUGIN_NAME)Plugin {
@@ -123,7 +119,7 @@ use crate::prelude::*;
 #[derive(Event, Debug, Clone)]
 pub struct ExampleEvent {
   pub message: String,
-  pub timestamp: f64,
+  pub timestamp: f32,
 }
 EOF
 )
@@ -131,10 +127,6 @@ EOF
 # Template content for systems
 SYSTEM_TEMPLATE=$(cat <<EOF
 use crate::prelude::*;
-
-use events;
-use components;
-use resources;
 
 pub fn example_system(
   mut commands: Commands,
