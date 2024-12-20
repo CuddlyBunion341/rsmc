@@ -129,9 +129,9 @@ SYSTEM_TEMPLATE=$(cat <<EOF
 use crate::prelude::*;
 
 pub fn example_system(
-  mut commands: Commands,
+  mut _commands: Commands,
   time: Res<Time>,
-  mut example_resource: ResMut<$(pascal_to_snake_case $PLUGIN_NAME)_resources::ExampleResource>,
+  mut _example_resource: ResMut<$(pascal_to_snake_case $PLUGIN_NAME)_resources::ExampleResource>,
   mut example_writer: EventWriter<$(pascal_to_snake_case $PLUGIN_NAME)_events::ExampleEvent>,
   query: Query<(Entity, &$(pascal_to_snake_case $PLUGIN_NAME)_components::ExampleComponent)>,
 ) {
