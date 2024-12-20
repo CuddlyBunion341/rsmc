@@ -82,6 +82,10 @@ pub mod events;
 pub mod resources;
 pub mod systems;
 
+use components;
+use events;
+use systems;
+
 pub struct $(snake_to_pascal_case $PLUGIN_NAME)Plugin;
 
 impl Plugin for $(snake_to_pascal_case $PLUGIN_NAME)Plugin {
@@ -127,6 +131,10 @@ EOF
 # Template content for systems
 SYSTEM_TEMPLATE=$(cat <<EOF
 use crate::prelude::*;
+
+use events;
+use components;
+use resources;
 
 pub fn example_system(
   mut commands: Commands,
