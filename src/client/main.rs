@@ -10,6 +10,7 @@ mod player;
 mod remote_player;
 mod scene;
 mod terrain;
+mod sand;
 
 use scene::setup_scene;
 
@@ -41,6 +42,7 @@ fn main() {
             player::PlayerPlugin,
             remote_player::RemotePlayerPlugin,
             chat::ChatPlugin,
+            sand::SandPlugin,
         ))
         .add_systems(Startup, setup_scene)
         .run();
