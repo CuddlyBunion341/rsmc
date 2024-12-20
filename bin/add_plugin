@@ -131,14 +131,14 @@ use crate::prelude::*;
 pub fn example_system(
   mut commands: Commands,
   time: Res<Time>,
-  mut example_resource: ResMut<ExampleResource>,
-  mut example_writer: EventWriter<ExampleEvent>,
-  mut example_reader: EventReader<ExampleEvent>,
-  query: Query<(Entity, &ExampleComponent)>,
+  mut example_resource: ResMut<$(pascal_to_snake_case $PLUGIN_NAME)_resources::ExampleResource>,
+  mut example_writer: EventWriter<$(pascal_to_snake_case $PLUGIN_NAME)_events::ExampleEvent>,
+  mut example_reader: EventReader<$(pascal_to_snake_case $PLUGIN_NAME)_events::ExampleEvent>,
+  query: Query<(Entity, &$(pascal_to_snake_case $PLUGIN_NAME)_components::ExampleComponent)>,
 ) {
   for (entity, component) in query.iter() {
     if component.active {
-      example_writer.send(ExampleEvent {
+      example_writer.send($(pascal_to_snake_case $PLUGIN_NAME)_events::ExampleEvent {
         message: format!("Entity {} is active", entity.index()),
         timestamp: time.elapsed_seconds(),
       });
@@ -173,7 +173,8 @@ pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::components as $(pascal_to_s
 pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::events as $(pascal_to_snake_case $PLUGIN_NAME)_events;
 pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::resources as $(pascal_to_snake_case $PLUGIN_NAME)_resources;
 pub use crate::$(pascal_to_snake_case $PLUGIN_NAME)::systems as $(pascal_to_snake_case $PLUGIN_NAME)_systems;
-EOF)
+EOF
+)
 
 if [ "$TARGET" == "server" ]; then
     echo "$PRELUDE_CONTENT" >> src/server/prelude.rs || { echo "Error: Failed to update src/server/prelude.rs"; exit 1; }
