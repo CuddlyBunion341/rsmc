@@ -133,7 +133,6 @@ pub fn example_system(
   time: Res<Time>,
   mut example_resource: ResMut<$(pascal_to_snake_case $PLUGIN_NAME)_resources::ExampleResource>,
   mut example_writer: EventWriter<$(pascal_to_snake_case $PLUGIN_NAME)_events::ExampleEvent>,
-  mut example_reader: EventReader<$(pascal_to_snake_case $PLUGIN_NAME)_events::ExampleEvent>,
   query: Query<(Entity, &$(pascal_to_snake_case $PLUGIN_NAME)_components::ExampleComponent)>,
 ) {
   for (entity, component) in query.iter() {
