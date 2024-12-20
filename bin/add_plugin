@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 # Usage:
 # ./add_plugin <PLUGIN_NAME> <TARGET>
 #
@@ -11,7 +10,9 @@
 # ./add_plugin my_plugin server
 # ./add_plugin my_plugin client
 
-# Function to convert to PascalCase
+
+set -e
+
 snake_to_pascal_case() {
   echo "$1" | awk -F'_' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1' OFS=''
 }
@@ -63,6 +64,11 @@ fi
 
 PLUGIN_DIR="./src/$TARGET/$(pascal_to_snake_case $PLUGIN_NAME)"
 
+if [ -d "$PLUGIN_DIR" ]; then 
+  echo "Error: Plugin directory already exists"
+  exit 1
+fi
+
 # Create the directory structure
 mkdir -p $PLUGIN_DIR || { echo "Error: Failed to create directory $PLUGIN_DIR"; exit 1; }
 touch $PLUGIN_DIR/{components.rs,resources.rs,events.rs,mod.rs,systems.rs} || { echo "Error: Failed to create files in $PLUGIN_DIR"; exit 1; }
@@ -79,22 +85,14 @@ pub mod systems;
 pub struct $(snake_to_pascal_case $PLUGIN_NAME)Plugin;
 
 impl Plugin for $(snake_to_pascal_case $PLUGIN_NAME)Plugin {
-    fn build(&self, app: &mut App) {
-        info!("Building $(snake_to_pascal_case $PLUGIN_NAME)Plugin");
+  fn build(&self, app: &mut App) {
+    info!("Building $(snake_to_pascal_case $PLUGIN_NAME)Plugin");
 
-        // Register components
-        app.register_type::<components::ExampleComponent>();
-
-        // Register events
-        app.add_event::<events::ExampleEvent>();
-
-        // Add systems
-        app.add_systems(Update, systems::example_system);
-
-        // Add resources
-        app.insert_resource(resources::ExampleResource::default());
-      }
-    }
+    app.add_event::<events::ExampleEvent>();
+    app.add_systems(Update, systems::example_system);
+    app.insert_resource(resources::ExampleResource::default());
+  }
+}
 EOF
 )
 
@@ -107,10 +105,10 @@ use crate::prelude::*;
 
 #[derive(Component, Default, Debug, Clone)]
 pub struct ExampleComponent {
-    pub value: i32,
-    pub name: String,
-    pub active: bool,
-  }
+  pub value: i32,
+  pub name: String,
+  pub active: bool,
+}
 EOF
 )
 
@@ -120,12 +118,9 @@ use crate::prelude::*;
 
 #[derive(Event, Debug, Clone)]
 pub struct ExampleEvent {
-    pub message: String,
-    pub timestamp: f64,
-  }
-
-pub struct EventWriter<T: Event>(pub EventWriter<T>);
-pub struct EventReader<T: Event>(pub EventReader<T>);
+  pub message: String,
+  pub timestamp: f64,
+}
 EOF
 )
 
@@ -134,43 +129,22 @@ SYSTEM_TEMPLATE=$(cat <<EOF
 use crate::prelude::*;
 
 pub fn example_system(
-    mut commands: Commands,
-    time: Res<Time>,
-    mut example_resource: ResMut<ExampleResource>,
-    mut example_writer: EventWriter<ExampleEvent>,
-    mut example_reader: EventReader<ExampleEvent>,
-    query: Query<(Entity, &ExampleComponent)>,
+  mut commands: Commands,
+  time: Res<Time>,
+  mut example_resource: ResMut<ExampleResource>,
+  mut example_writer: EventWriter<ExampleEvent>,
+  mut example_reader: EventReader<ExampleEvent>,
+  query: Query<(Entity, &ExampleComponent)>,
 ) {
-    // System implementation
-    for (entity, component) in query.iter() {
-        // Process entities
-        if component.active {
-            example_writer.send(ExampleEvent {
-                message: format!("Entity {} is active", entity.index()),
-                timestamp: time.elapsed_seconds(),
-              });
-            }
-          }
-        }
-
-pub fn cleanup_system(
-    mut commands: Commands,
-    query: Query<Entity, With<ExampleComponent>>,
-) {
-    for entity in query.iter() {
-        commands.entity(entity).despawn();
-      }
+  for (entity, component) in query.iter() {
+    if component.active {
+      example_writer.send(ExampleEvent {
+        message: format!("Entity {} is active", entity.index()),
+        timestamp: time.elapsed_seconds(),
+      });
     }
-
-pub fn spawn_example_system(commands: &mut Commands) -> Entity {
-    commands
-        .spawn(ExampleComponent {
-            value: 0,
-            name: "Example".to_string(),
-            active: true,
-          })
-        .id()
-      }
+  }
+}
 EOF
 )
 
@@ -180,9 +154,9 @@ use crate::prelude::*;
 
 #[derive(Resource, Default, Debug)]
 pub struct ExampleResource {
-    pub counter: usize,
-    pub last_update: f64,
-  }
+  pub counter: usize,
+  pub last_update: f64,
+}
 EOF
 )
 
