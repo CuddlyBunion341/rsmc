@@ -8,6 +8,7 @@ mod gui;
 mod networking;
 mod player;
 mod remote_player;
+mod sand;
 mod scene;
 mod terrain;
 
@@ -41,6 +42,7 @@ fn main() {
             player::PlayerPlugin,
             remote_player::RemotePlayerPlugin,
             chat::ChatPlugin,
+            sand::SandPlugin,
         ))
         .add_systems(Startup, setup_scene)
         .run();

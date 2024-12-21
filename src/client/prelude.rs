@@ -80,3 +80,8 @@ pub use crate::chat::components as chat_components;
 pub use crate::chat::events as chat_events;
 pub use crate::chat::resources as chat_resources;
 pub use crate::chat::systems as chat_systems;
+
+pub use crate::sand::components as sand_components;
+pub use crate::sand::events as sand_events;
+pub use crate::sand::resources as sand_resources;
+pub use crate::sand::systems as sand_systems;
