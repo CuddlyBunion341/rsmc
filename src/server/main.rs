@@ -1,7 +1,5 @@
 use bevy::prelude::*;
 
-use crate::prelude::*;
-
 pub mod chat;
 pub mod dashboard;
 pub mod networking;

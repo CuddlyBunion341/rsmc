@@ -1,5 +1,3 @@
-use bevy_tui::prelude::*;
-
 use crate::prelude::*;
 use ratatui::layout::{Alignment, Constraint, Layout};
 use ratatui::prelude::Direction;
@@ -10,22 +8,13 @@ use ratatui::Frame;
 
 use bevy::app::AppExit;
 
-// This lint doesn't like values passed in but not consumed which is fair. Bevy requires the
-// `Res<_>` type to be passed by value so we unfortunately have to disable this lint wherever a
-// `Res<_>` is used but not consumed.
-#[allow(clippy::needless_pass_by_value)]
 pub fn quit_system(key_code: Res<ButtonInput<KeyCode>>, mut event_writer: EventWriter<AppExit>) {
     if key_code.just_pressed(KeyCode::KeyQ) {
         event_writer.send(AppExit);
     }
 }
 
-fn render_ui(
-    f: &mut Frame,
-    keyboard: &ButtonInput<KeyCode>,
-    mouse: &ButtonInput<MouseButton>,
-    mouse_state: &MouseState,
-) {
+fn render_ui(f: &mut Frame, keyboard: &ButtonInput<KeyCode>) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints(
@@ -40,6 +29,19 @@ fn render_ui(
         )
         .split(f.size());
 
+    let logo_content = r"   
+▗▄▄▖  ▗▄▄▖▗▖  ▗▖ ▗▄▄▖    ▗▄▄▖ ▗▄▄▖ ▗▄▄▄▖ ▗▄▖ ▗▖   ▗▄▄▖ ▗▖ ▗▖ ▗▄▖ 
+▐▌ ▐▌▐▌   ▐▛▚▞▜▌▐▌       ▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌ ▐▌▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌ ▐▌
+▐▛▀▚▖ ▝▀▚▖▐▌  ▐▌▐▌       ▐▛▀▘ ▐▛▀▚▖▐▛▀▀▘▐▛▀▜▌▐▌   ▐▛▀▘ ▐▛▀▜▌▐▛▀▜▌
+▐▌ ▐▌▗▄▄▞▘▐▌  ▐▌▝▚▄▄▖    ▐▌   ▐▌ ▐▌▐▙▄▄▖▐▌ ▐▌▐▙▄▄▖▐▌   ▐▌ ▐▌▐▌ ▐▌
+                                                                           ";
+
+    let logo_paragraph = Paragraph::new(logo_content)
+        .alignment(Alignment::Center)
+        .wrap(Wrap { trim: true });
+
+    f.render_widget(logo_paragraph, chunks[0]);
+
     let hello_content = Span::styled("Hello Bevy! Press 'q' to quit.", Style::default());
     let hello_paragraph = Paragraph::new(hello_content)
         .alignment(Alignment::Center)
@@ -53,35 +55,14 @@ fn render_ui(
         .wrap(Wrap { trim: true });
 
     f.render_widget(keyboard_paragraph, chunks[1]);
-
-    let mouse_content = Span::styled(format!("Mouse Buttons: {mouse:?}"), Style::default());
-    let mouse_paragraph = Paragraph::new(mouse_content)
-        .alignment(Alignment::Center)
-        .wrap(Wrap { trim: true });
-
-    f.render_widget(mouse_paragraph, chunks[2]);
-
-    let mouse_state_content =
-        Span::styled(format!("Mouse State: {mouse_state:?}"), Style::default());
-    let mouse_state_paragraph = Paragraph::new(mouse_state_content)
-        .alignment(Alignment::Center)
-        .wrap(Wrap { trim: true });
-
-    f.render_widget(mouse_state_paragraph, chunks[3]);
 }
 
-// This lint doesn't like values passed in but not consumed which is fair. Bevy requires the
-// `Res<_>` type to be passed by value so we unfortunately have to disable this lint wherever a
-// `Res<_>` is used but not consumed.
-#[allow(clippy::needless_pass_by_value)]
 pub fn run_basic_ui(
     mut terminal: ResMut<bevy_tui::BevyTerminal>,
     keyboard: Res<ButtonInput<KeyCode>>,
-    mouse: Res<ButtonInput<MouseButton>>,
-    mouse_state: Res<MouseState>,
 ) {
     terminal
         .0
-        .draw(|f| render_ui(f, &keyboard, &mouse, &mouse_state))
+        .draw(|f| render_ui(f, &keyboard))
         .expect("failed to draw to terminal");
 }
