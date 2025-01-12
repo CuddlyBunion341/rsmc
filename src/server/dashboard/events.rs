@@ -1,7 +1,4 @@
 use crate::prelude::*;
 
 #[derive(Event, Debug, Clone)]
-pub struct ExampleEvent {
-    pub message: String,
-    pub timestamp: f64,
-}
+pub struct LogEvent(pub String);

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use dashboard_events::LogEvent;
 use ratatui::layout::{Alignment, Constraint, Flex, Layout};
 use ratatui::prelude::Direction;
 use ratatui::style::{Modifier, Style};
@@ -28,8 +29,10 @@ fn render_ui(f: &mut ratatui::Frame) {
     let left = header_chunks[0];
     let right = header_chunks[1];
 
-    let logo = Paragraph::new(ratatui::text::Line::from("RSMC Pre Alpha")).block(border_block.clone());
-    let exit_text = Paragraph::new(ratatui::text::Line::from("Press 'q' to quit.")).block(border_block.clone());
+    let logo =
+        Paragraph::new(ratatui::text::Line::from("RSMC Pre Alpha")).block(border_block.clone());
+    let exit_text =
+        Paragraph::new(ratatui::text::Line::from("Press 'q' to quit.")).block(border_block.clone());
 
     f.render_widget(logo, left);
     f.render_widget(exit_text, right);
