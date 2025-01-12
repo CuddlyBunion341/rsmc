@@ -1,16 +1,6 @@
 use bevy::prelude::*;
 
-use bevy_tui::prelude::*;
-
-use ratatui::layout::{Alignment, Constraint, Layout};
-use ratatui::prelude::Direction;
-use ratatui::style::Style;
-use ratatui::text::Span;
-use ratatui::widgets::{Paragraph, Wrap};
-use ratatui::Frame;
 use crate::prelude::*;
-
-use bevy::app::AppExit;
 
 pub mod chat;
 pub mod dashboard;
@@ -24,7 +14,6 @@ use bevy_tui::{
     prelude::{initialize_terminal, teardown_terminal},
     MinimalTuiPlugins,
 };
-
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     initialize_terminal()?;

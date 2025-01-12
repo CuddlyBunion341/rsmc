@@ -1,12 +1,12 @@
 use bevy_tui::prelude::*;
 
+use crate::prelude::*;
 use ratatui::layout::{Alignment, Constraint, Layout};
 use ratatui::prelude::Direction;
 use ratatui::style::Style;
 use ratatui::text::Span;
 use ratatui::widgets::{Paragraph, Wrap};
 use ratatui::Frame;
-use crate::prelude::*;
 
 use bevy::app::AppExit;
 

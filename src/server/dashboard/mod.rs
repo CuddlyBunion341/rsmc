@@ -13,8 +13,8 @@ impl Plugin for DashboardPlugin {
 
         app.add_event::<events::ExampleEvent>();
 
-        app.add_systems(Update, (systems::run_basic_ui));
-        app.add_systems(Update, (systems::quit_system));
+        app.add_systems(Update, systems::run_basic_ui);
+        app.add_systems(Update, systems::quit_system);
 
         app.insert_resource(resources::ExampleResource::default());
     }
