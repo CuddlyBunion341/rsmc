@@ -94,7 +94,7 @@ impl<'de> Deserialize<'de> for Chunk {
             position: Vec3,
         }
 
-        let ChunkData { data, position } = ChunkData::deserialize(deserializer)?;
+        let ChunkData { data, position } = ChunkData::deserialize(deserializer)?
         let chunk_data_bytes_u8: Vec<u8> = data.0;
         let bytes_slice: &[u8] = &chunk_data_bytes_u8;
         let deserialized_data = deserialize_buffer(bytes_slice);

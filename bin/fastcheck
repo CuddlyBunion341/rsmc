@@ -1,4 +1,3 @@
 #!/bin/bash
 
-cargo clippy --fix --allow-dirty
-cargo fmt --all
+cargo clippy --fix --allow-dirty cargo fmt --all
