@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     App::new()
         .add_plugins(MinimalTuiPlugins)
-        .add_plugins(LogPlugin::default())
+        // .add_plugins(LogPlugin::default())
         .add_plugins(player::PlayerPlugin)
         .add_plugins(networking::NetworkingPlugin)
         .add_plugins(terrain::TerrainPlugin)
