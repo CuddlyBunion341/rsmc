@@ -3494,6 +3494,7 @@ dependencies = [
  "iyes_perf_ui",
  "noise",
  "rand",
+ "ratatui",
  "renet",
  "serde",
  "serde-big-array",

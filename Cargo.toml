@@ -20,6 +20,7 @@ serde = { version = "1.0.203", features = ["derive"] }
 serde-big-array = "0.5.1"
 chrono = "0.4.38"
 bevy_tui = "0.13.0"
+ratatui = "0.26.0"
 
 [profile.dev.package."*"]
 opt-level = 3
