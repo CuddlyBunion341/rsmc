@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use ratatui::layout::{Alignment, Constraint, Layout};
+use ratatui::layout::{Alignment, Constraint, Flex, Layout};
 use ratatui::prelude::Direction;
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{self, Line, Span};
@@ -14,53 +14,31 @@ pub fn quit_system(key_code: Res<ButtonInput<KeyCode>>, mut event_writer: EventW
     }
 }
 
-fn render_ui(f: &mut Frame, keyboard: &ButtonInput<KeyCode>) {
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints(
-            [
-            Constraint::Length(2),
-                Constraint::Length(1),
-                Constraint::Length(1),
-                Constraint::Length(1),
-                Constraint::Min(0),
-            ]
-            .as_ref(),
-        )
-        .split(f.size());
+fn render_ui(f: &mut ratatui::Frame) {
+    let chunks = Layout::vertical([Constraint::Length(2), Constraint::Min(0)]).split(f.size());
 
-    let logo_block = ratatui::widgets::Block::bordered().borders(Borders::BOTTOM);
+    let header_chunk = chunks[0];
 
-    let header_rows = vec![Line::from("RSMC pre alpha")];
-    let logo_content = text::Text::from(header_rows);
+    let header_chunks = Layout::horizontal([Constraint::Min(0), Constraint::Min(0)])
+        .flex(Flex::SpaceBetween)
+        .split(header_chunk);
 
-    let logo_paragraph = Paragraph::new(logo_content).block(logo_block)
-        // .alignment(Alignment::Center)
-        .wrap(Wrap { trim: true });
+    let left = header_chunks[0];
+    let right = header_chunks[1];
 
-    f.render_widget(logo_paragraph, chunks[0]);
+    let logo = Paragraph::new(ratatui::text::Line::from("RSMC Pre Alpha"));
+    let exit_text = Span::styled(
+        "Press 'q' to quit.",
+        Style::default().add_modifier(Modifier::BOLD),
+    );
 
-    let hello_content = Span::styled("Hello Bevy! Press 'q' to quit.", Style::default());
-    let hello_paragraph = Paragraph::new(hello_content)
-        .alignment(Alignment::Center)
-        .wrap(Wrap { trim: true });
-
-    f.render_widget(hello_paragraph, chunks[1]);
-
-    let keyboard_content = Span::styled(format!("Keyboard: {keyboard:?}"), Style::default());
-    let keyboard_paragraph = Paragraph::new(keyboard_content)
-        .alignment(Alignment::Center)
-        .wrap(Wrap { trim: true });
-
-    f.render_widget(keyboard_paragraph, chunks[1]);
+    f.render_widget(logo, left);
+    f.render_widget(exit_text, right);
 }
 
-pub fn run_basic_ui(
-    mut terminal: ResMut<bevy_tui::BevyTerminal>,
-    keyboard: Res<ButtonInput<KeyCode>>,
-) {
+pub fn run_basic_ui(mut terminal: ResMut<bevy_tui::BevyTerminal>) {
     terminal
         .0
-        .draw(|f| render_ui(f, &keyboard))
+        .draw(|f| render_ui(f))
         .expect("failed to draw to terminal");
 }
