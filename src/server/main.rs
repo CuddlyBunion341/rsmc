@@ -9,7 +9,6 @@ use ratatui::text::Span;
 use ratatui::widgets::{Paragraph, Wrap};
 use ratatui::Frame;
 
-
 pub mod chat;
 pub mod dashboard;
 pub mod networking;
@@ -26,7 +25,6 @@ use bevy_tui::{
 use crate::prelude::*;
 
 use bevy::{app::AppExit, prelude::*};
-use bevy_tui::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     initialize_terminal()?;
@@ -34,6 +32,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     App::new()
         .add_plugins(MinimalTuiPlugins)
         .add_systems(Update, (run_basic_ui, quit_system))
+        .add_plugins(LogPlugin::default())
+        .add_plugins(player::PlayerPlugin)
+        .add_plugins(networking::NetworkingPlugin)
+        .add_plugins(terrain::TerrainPlugin)
+        .add_plugins(chat::ChatPlugin)
+        .add_plugins(dashboard::DashboardPlugin)
         .run();
 
     teardown_terminal()?;
@@ -116,20 +120,3 @@ fn run_basic_ui(
         .draw(|f| render_ui(f, &keyboard, &mouse, &mouse_state))
         .expect("failed to draw to terminal");
 }
-
-// fn main() ->  {
-//     let _ = initialize_terminal();
-//
-//     let mut app = App::new();
-//     app.add_plugins(MinimalPlugins);
-//     app.add_plugins(MinimalTuiPlugins);
-//     app.add_plugins(LogPlugin::default());
-//     app.add_plugins(player::PlayerPlugin);
-//     app.add_plugins(networking::NetworkingPlugin);
-//     app.add_plugins(terrain::TerrainPlugin);
-//     app.add_plugins(chat::ChatPlugin);
-//     app.add_plugins(dashboard::DashboardPlugin);
-//     app.run();
-//
-//     let _ = teardown_terminal();
-// }
