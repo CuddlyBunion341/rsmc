@@ -3,7 +3,7 @@ use ratatui::layout::{Alignment, Constraint, Layout};
 use ratatui::prelude::Direction;
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{self, Line, Span};
-use ratatui::widgets::{Paragraph, Wrap};
+use ratatui::widgets::{Borders, Paragraph, Wrap};
 use ratatui::Frame;
 
 use bevy::app::AppExit;
@@ -19,7 +19,7 @@ fn render_ui(f: &mut Frame, keyboard: &ButtonInput<KeyCode>) {
         .direction(Direction::Vertical)
         .constraints(
             [
-                Constraint::Length(10),
+            Constraint::Length(2),
                 Constraint::Length(1),
                 Constraint::Length(1),
                 Constraint::Length(1),
@@ -29,35 +29,12 @@ fn render_ui(f: &mut Frame, keyboard: &ButtonInput<KeyCode>) {
         )
         .split(f.size());
 
-    // let logo_block = ratatui::widgets::Block::bordered().title(Span::styled(
-    //     "Logo",
-    //     Style::default()
-    //         // .fg(Color::Magenta)
-    //         .add_modifier(Modifier::BOLD),
-    // ));
-    //
-    // let foo = vec![
-    //     Line::from("Hello"),
-    //     Line::from("World"),
-    //     Line::from("!"),
-    // ];
-    //
-    // let paragraph = Paragraph::new(foo).block(logo_block);
-    // f.render_widget(paragraph, chunks[0]);
+    let logo_block = ratatui::widgets::Block::bordered().borders(Borders::BOTTOM);
 
+    let header_rows = vec![Line::from("RSMC pre alpha")];
+    let logo_content = text::Text::from(header_rows);
 
-
-    let logo_rows: Vec<String> = r"   
-▗▄▄▖  ▗▄▄▖▗▖  ▗▖ ▗▄▄▖    ▗▄▄▖ ▗▄▄▖ ▗▄▄▄▖ ▗▄▖ ▗▖   ▗▄▄▖ ▗▖ ▗▖ ▗▄▖ 
-▐▌ ▐▌▐▌   ▐▛▚▞▜▌▐▌       ▐▌ ▐▌▐▌ ▐▌▐▌   ▐▌ ▐▌▐▌   ▐▌ ▐▌▐▌ ▐▌▐▌ ▐▌
-▐▛▀▚▖ ▝▀▚▖▐▌  ▐▌▐▌       ▐▛▀▘ ▐▛▀▚▖▐▛▀▀▘▐▛▀▜▌▐▌   ▐▛▀▘ ▐▛▀▜▌▐▛▀▜▌
-▐▌ ▐▌▗▄▄▞▘▐▌  ▐▌▝▚▄▄▖    ▐▌   ▐▌ ▐▌▐▙▄▄▖▐▌ ▐▌▐▙▄▄▖▐▌   ▐▌ ▐▌▐▌ ▐▌
-                                                                           ".split("\n").map(|s| s.to_string()).collect();
-
-    let logo_lines: Vec<text::Line> = logo_rows.iter().map(|s| text::Line::from(s.as_str())).collect();
-    let logo_content = text::Text::from(logo_lines);
-
-    let logo_paragraph = Paragraph::new(logo_content)
+    let logo_paragraph = Paragraph::new(logo_content).block(logo_block)
         // .alignment(Alignment::Center)
         .wrap(Wrap { trim: true });
 
