@@ -4,4 +4,4 @@ use crate::prelude::*;
 pub struct ExampleResource {
     pub counter: usize,
     pub last_update: f64,
-  }
+}

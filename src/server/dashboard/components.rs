@@ -5,4 +5,4 @@ pub struct ExampleComponent {
     pub value: i32,
     pub name: String,
     pub active: bool,
-  }
+}

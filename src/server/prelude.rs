@@ -8,8 +8,8 @@ pub use bevy::app::{App, Plugin, Startup, Update};
 pub use bevy::ecs::event::*;
 pub use bevy::ecs::system::*;
 
-pub use bevy::prelude::*;
 pub use bevy::math::*;
+pub use bevy::prelude::*;
 pub use bevy::MinimalPlugins;
 pub use bevy_log::{debug, error, info, warn};
 

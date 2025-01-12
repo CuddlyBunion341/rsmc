@@ -4,4 +4,4 @@ use crate::prelude::*;
 pub struct ExampleEvent {
     pub message: String,
     pub timestamp: f64,
-  }
+}
