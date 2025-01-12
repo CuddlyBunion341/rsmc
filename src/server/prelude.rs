@@ -7,6 +7,8 @@ pub use std::time::SystemTime;
 pub use bevy::app::{App, Plugin, Startup, Update};
 pub use bevy::ecs::event::*;
 pub use bevy::ecs::system::*;
+
+pub use bevy::prelude::*;
 pub use bevy::math::*;
 pub use bevy::MinimalPlugins;
 pub use bevy_log::{debug, error, info, warn};
@@ -40,3 +42,8 @@ pub use crate::terrain::util as terrain_util;
 pub use crate::chat::events as chat_events;
 pub use crate::chat::resources as chat_resources;
 pub use crate::chat::systems as chat_systems;
+
+pub use crate::dashboard::components as dashboard_components;
+pub use crate::dashboard::events as dashboard_events;
+pub use crate::dashboard::resources as dashboard_resources;
+pub use crate::dashboard::systems as dashboard_systems;
