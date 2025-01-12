@@ -1,4 +1,4 @@
-use bevy_log::{tracing_subscriber::{self, layer::{Context, SubscriberExt}, Layer}, Level, LogPlugin};
+use bevy_log::{tracing_subscriber::{self, field::{RecordFields, Visit}, layer::{Context, SubscriberExt}, Layer}, Level, LogPlugin};
 
 use crate::prelude::*;
 
@@ -9,10 +9,24 @@ pub mod systems;
 
 pub struct DashboardPlugin;
 
+struct MyVisitor {}
+
+impl<'a> Visit for MyVisitor {
+    fn record_debug(&mut self, field: &bevy::utils::tracing::field::Field, value: &dyn std::fmt::Debug) {
+        println!("Visiting debug: {:?}", value);
+    }
+}
+
 struct MyCustomLayer;
 impl<S: bevy::utils::tracing::Subscriber> Layer<S> for MyCustomLayer {
     fn on_event(&self, event: &bevy::utils::tracing::Event<'_>, _ctx: Context<'_, S>) {
-        println!("Event: {:?}", event)
+        // event.fields().into_iter().for_each(|field| {
+        //     field.name();
+        //     field.
+        //     println!("Field: {:?}", field.name());
+        // });
+        event.record();
+        println!("Event: {:?}", event);
     }
 }
 
