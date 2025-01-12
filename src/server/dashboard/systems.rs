@@ -19,6 +19,8 @@ fn render_ui(f: &mut ratatui::Frame) {
 
     let header_chunk = chunks[0];
 
+    let border_block = ratatui::widgets::Block::bordered().borders(Borders::BOTTOM);
+
     let header_chunks = Layout::horizontal([Constraint::Min(0), Constraint::Min(0)])
         .flex(Flex::SpaceBetween)
         .split(header_chunk);
@@ -26,11 +28,8 @@ fn render_ui(f: &mut ratatui::Frame) {
     let left = header_chunks[0];
     let right = header_chunks[1];
 
-    let logo = Paragraph::new(ratatui::text::Line::from("RSMC Pre Alpha"));
-    let exit_text = Span::styled(
-        "Press 'q' to quit.",
-        Style::default().add_modifier(Modifier::BOLD),
-    );
+    let logo = Paragraph::new(ratatui::text::Line::from("RSMC Pre Alpha")).block(border_block.clone());
+    let exit_text = Paragraph::new(ratatui::text::Line::from("Press 'q' to quit.")).block(border_block.clone());
 
     f.render_widget(logo, left);
     f.render_widget(exit_text, right);
