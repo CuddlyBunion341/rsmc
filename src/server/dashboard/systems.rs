@@ -24,24 +24,26 @@ pub fn run_basic_ui(mut terminal: ResMut<bevy_tui::BevyTerminal>, chunk_manager:
 }
 
 fn render_ui(frame: &mut ratatui::Frame, chunk_manager: Res<terrain_resources::ChunkManager>, player_states: Res<player_resources::PlayerStates>) {
-    let chunks = Layout::vertical([Constraint::Length(2), Constraint::Length(5), Constraint::Min(0)]).split(frame.size());
+    let slots = Layout::vertical([
+        Constraint::Length(2),
+        Constraint::Length(5),
+        Constraint::Min(0)
+    ]).split(frame.size());
 
-    render_header(frame, chunks[0]);
-    render_world_stats(frame, chunks[1], chunk_manager);
-    render_players(frame, chunks[2], player_states);
+    render_header(frame, slots[0]);
+    render_world_stats(frame, slots[1], chunk_manager);
+    render_players(frame, slots[2], player_states);
 }
 
-fn render_header(frame: &mut Frame, header_chunk: ratatui::prelude::Rect) {
-    let header_chunk = header_chunk;
-
+fn render_header(frame: &mut Frame, slot: ratatui::prelude::Rect) {
     let border_block = ratatui::widgets::Block::bordered().borders(Borders::BOTTOM);
 
-    let header_chunks = Layout::horizontal([Constraint::Min(0), Constraint::Min(0)])
+    let header_slots = Layout::horizontal([Constraint::Min(0), Constraint::Min(0)])
         .flex(Flex::SpaceBetween)
-        .split(header_chunk);
+        .split(slot);
 
-    let left = header_chunks[0];
-    let right = header_chunks[1];
+    let left = header_slots[0];
+    let right = header_slots[1];
 
     let logo =
         Paragraph::new(ratatui::text::Line::from("RSMC Pre Alpha")).block(border_block.clone());
@@ -63,7 +65,7 @@ fn render_world_stats(frame: &mut ratatui::Frame, slot: ratatui::prelude::Rect, 
     frame.render_widget(paragraph, slot);
 }
 
-fn render_players(frame: &mut Frame, chunk: ratatui::prelude::Rect, player_states: Res<player_resources::PlayerStates>) {
+fn render_players(frame: &mut Frame, slot: ratatui::prelude::Rect, player_states: Res<player_resources::PlayerStates>) {
     let player_chunks = Layout::vertical([Constraint::Length(10), Constraint::Min(0)]);
 
     let paragraphs = get_formatted_player_text(player_states);
@@ -74,7 +76,7 @@ fn render_players(frame: &mut Frame, chunk: ratatui::prelude::Rect, player_state
             .title("Players")
 
         );
-        frame.render_widget(paragraph, player_chunks.split(chunk)[0]);
+        frame.render_widget(paragraph, player_chunks.split(slot)[0]);
     });
 }
 
