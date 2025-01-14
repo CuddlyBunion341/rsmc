@@ -43,6 +43,5 @@ pub use crate::chat::events as chat_events;
 pub use crate::chat::resources as chat_resources;
 pub use crate::chat::systems as chat_systems;
 
-pub use crate::dashboard::components as dashboard_components;
 pub use crate::dashboard::events as dashboard_events;
 pub use crate::dashboard::systems as dashboard_systems;
