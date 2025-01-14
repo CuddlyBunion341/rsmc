@@ -16,10 +16,15 @@ pub fn quit_system(key_code: Res<ButtonInput<KeyCode>>, mut event_writer: EventW
     }
 }
 
-fn render_ui(f: &mut ratatui::Frame, player_states: Res<player_resources::PlayerStates>) {
-    let chunks = Layout::vertical([Constraint::Length(2), Constraint::Min(0)]).split(f.size());
+fn render_ui(frame: &mut ratatui::Frame, player_states: Res<player_resources::PlayerStates>) {
+    let chunks = Layout::vertical([Constraint::Length(2), Constraint::Min(0)]).split(frame.size());
 
-    let header_chunk = chunks[0];
+    render_header(frame, chunks[0]);
+    render_players(frame, chunks[1], player_states);
+}
+
+fn render_header(frame: &mut Frame, header_chunk: ratatui::prelude::Rect) {
+    let header_chunk = header_chunk;
 
     let border_block = ratatui::widgets::Block::bordered().borders(Borders::BOTTOM);
 
@@ -35,20 +40,23 @@ fn render_ui(f: &mut ratatui::Frame, player_states: Res<player_resources::Player
     let exit_text =
         Paragraph::new(ratatui::text::Line::from("Press 'q' to quit.")).block(border_block.clone());
 
-    f.render_widget(logo, left);
-    f.render_widget(exit_text, right);
+    frame.render_widget(logo, left);
+    frame.render_widget(exit_text, right);
 
+}
+
+fn render_players(frame: &mut Frame, chunk: ratatui::prelude::Rect, player_states: Res<player_resources::PlayerStates>) {
     let player_chunks = Layout::vertical([Constraint::Length(10), Constraint::Min(0)]);
 
     let paragraphs = get_formatted_player_text(player_states);
-    paragraphs.into_iter().for_each(|p| {
-        let p = p.clone().block(
+    paragraphs.into_iter().for_each(|paragraph| {
+        let paragraph = paragraph.clone().block(
             ratatui::widgets::Block::default()
             .borders(Borders::ALL)
             .title("Players")
 
         );
-        f.render_widget(p, player_chunks.split(chunks[1])[0]);
+        frame.render_widget(paragraph, player_chunks.split(chunk)[0]);
     });
 }
 
