@@ -13,7 +13,7 @@ use bevy_tui::{
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // initialize_terminal()?;
+    initialize_terminal()?;
 
     App::new()
         .add_plugins(MinimalTuiPlugins)
@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_plugins(dashboard::DashboardPlugin)
         .run();
 
-    // teardown_terminal()?;
+    teardown_terminal()?;
 
     Ok(())
 }

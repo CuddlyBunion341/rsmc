@@ -72,6 +72,25 @@ fn render_ui(f: &mut ratatui::Frame, player_states: Res<player_resources::Player
     }
 }
 
+fn get_player_text(player_states: Res<player_resources::PlayerStates>) -> String {
+    if player_states.players.len() == 0 {
+        String::from("Waiting for players...")
+    } else {
+        let player_states: Vec<String> =  player_states.players.iter().map({|player| {
+            let (client_id, state) = player;
+
+            let position = state.position;
+            let rotation = state.rotation;
+            
+            let val: String = format!("{}: {}/{}", client_id, position, rotation);
+
+            val
+        }}).collect();
+
+        player_states.join("\n")
+    }
+}
+
 pub fn run_basic_ui(mut terminal: ResMut<bevy_tui::BevyTerminal>, player_states: Res<player_resources::PlayerStates>) {
     terminal
         .0
