@@ -16,6 +16,13 @@ pub fn quit_system(key_code: Res<ButtonInput<KeyCode>>, mut event_writer: EventW
     }
 }
 
+pub fn run_basic_ui(mut terminal: ResMut<bevy_tui::BevyTerminal>, player_states: Res<player_resources::PlayerStates>) {
+    terminal
+        .0
+        .draw(|f| render_ui(f, player_states))
+        .expect("failed to draw to terminal");
+}
+
 fn render_ui(frame: &mut ratatui::Frame, player_states: Res<player_resources::PlayerStates>) {
     let chunks = Layout::vertical([Constraint::Length(2), Constraint::Min(0)]).split(frame.size());
 
@@ -84,11 +91,4 @@ fn get_player_text(player_states: Res<player_resources::PlayerStates>) -> Vec<St
             val
         }}).collect()
     }
-}
-
-pub fn run_basic_ui(mut terminal: ResMut<bevy_tui::BevyTerminal>, player_states: Res<player_resources::PlayerStates>) {
-    terminal
-        .0
-        .draw(|f| render_ui(f, player_states))
-        .expect("failed to draw to terminal");
 }
