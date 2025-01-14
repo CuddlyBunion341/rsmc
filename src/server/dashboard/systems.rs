@@ -16,18 +16,19 @@ pub fn quit_system(key_code: Res<ButtonInput<KeyCode>>, mut event_writer: EventW
     }
 }
 
-pub fn run_basic_ui(mut terminal: ResMut<bevy_tui::BevyTerminal>, player_states: Res<player_resources::PlayerStates>) {
+pub fn run_basic_ui(mut terminal: ResMut<bevy_tui::BevyTerminal>, chunk_manager: Res<terrain_resources::ChunkManager>, player_states: Res<player_resources::PlayerStates>) {
     terminal
         .0
-        .draw(|f| render_ui(f, player_states))
+        .draw(|f| render_ui(f, chunk_manager, player_states))
         .expect("failed to draw to terminal");
 }
 
-fn render_ui(frame: &mut ratatui::Frame, player_states: Res<player_resources::PlayerStates>) {
-    let chunks = Layout::vertical([Constraint::Length(2), Constraint::Min(0)]).split(frame.size());
+fn render_ui(frame: &mut ratatui::Frame, chunk_manager: Res<terrain_resources::ChunkManager>, player_states: Res<player_resources::PlayerStates>) {
+    let chunks = Layout::vertical([Constraint::Length(2), Constraint::Length(5), Constraint::Min(0)]).split(frame.size());
 
     render_header(frame, chunks[0]);
-    render_players(frame, chunks[1], player_states);
+    render_world_stats(frame, chunks[1], chunk_manager);
+    render_players(frame, chunks[2], player_states);
 }
 
 fn render_header(frame: &mut Frame, header_chunk: ratatui::prelude::Rect) {
@@ -50,6 +51,16 @@ fn render_header(frame: &mut Frame, header_chunk: ratatui::prelude::Rect) {
     frame.render_widget(logo, left);
     frame.render_widget(exit_text, right);
 
+}
+
+fn render_world_stats(frame: &mut ratatui::Frame, slot: ratatui::prelude::Rect, chunk_manager: Res<terrain_resources::ChunkManager>) {
+    let block = ratatui::widgets::Block::default().borders(Borders::ALL).title("World");
+
+    let chunk_count = chunk_manager.chunks.keys().len();
+
+    let paragraph = Paragraph::new(Line::from(format!("Chunk count: {}", chunk_count))).block(block);
+
+    frame.render_widget(paragraph, slot);
 }
 
 fn render_players(frame: &mut Frame, chunk: ratatui::prelude::Rect, player_states: Res<player_resources::PlayerStates>) {
