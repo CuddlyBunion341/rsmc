@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use bevy::core_pipeline::tonemapping::get_lut_bind_group_layout_entries;
 use dashboard_events::LogEvent;
 use ratatui::layout::{Alignment, Constraint, Flex, Layout};
 use ratatui::prelude::Direction;
@@ -37,57 +38,43 @@ fn render_ui(f: &mut ratatui::Frame, player_states: Res<player_resources::Player
     f.render_widget(logo, left);
     f.render_widget(exit_text, right);
 
-    let player_block = ratatui::widgets::Block::default()
-        .borders(Borders::ALL)
-        .title("Players");
-
     let player_chunks = Layout::vertical([Constraint::Length(10), Constraint::Min(0)]);
 
-    for (player_id, player_state) in player_states.players.iter() {
-        let player_chunk = player_chunks.split(chunks[1]);
-        let player_chunks = Layout::horizontal([Constraint::Length(10), Constraint::Min(0)]);
-        let left = player_chunks.split(player_chunk[0])[0];
-        let right = player_chunks.split(player_chunk[1])[1];
+    let paragraphs = get_formatted_player_text(player_states);
+    paragraphs.into_iter().for_each(|p| {
+        let p = p.clone().block(
+            ratatui::widgets::Block::default()
+            .borders(Borders::ALL)
+            .title("Players")
 
-        let player_name = Span::styled(
-            format!("{}", player_id),
-            Style::default().fg(ratatui::style::Color::Yellow),
         );
-        let player_status = Span::styled(
-            format!("{}", player_state.position),
-            Style::default().fg(ratatui::style::Color::Green),
-        );
-
-        let player_text = Paragraph::new(Line::from(player_name))
-            .style(Style::default().fg(ratatui::style::Color::Yellow))
-            .block(border_block.clone())
-            .alignment(Alignment::Left);
-        let player_status_text = Paragraph::new(Line::from(player_status))
-            .style(Style::default().fg(ratatui::style::Color::Green))
-            .block(border_block.clone())
-            .alignment(Alignment::Left);
-
-        f.render_widget(player_text, left);
-        f.render_widget(player_status_text, right);
-    }
+        f.render_widget(p, player_chunks.split(chunks[1])[0]);
+    });
 }
 
-fn get_player_text(player_states: Res<player_resources::PlayerStates>) -> String {
+fn get_formatted_player_text(player_states: Res<player_resources::PlayerStates>) -> Vec<Paragraph> {
+    let text = get_player_text(player_states);
+
+    text.into_iter().map(|line_content| {
+        let line = Line::from(line_content);
+        Paragraph::new(line)
+    }).collect()
+}
+
+fn get_player_text(player_states: Res<player_resources::PlayerStates>) -> Vec<String> {
     if player_states.players.len() == 0 {
-        String::from("Waiting for players...")
+        vec![String::from("Waiting for players...")]
     } else {
-        let player_states: Vec<String> =  player_states.players.iter().map({|player| {
+        player_states.players.iter().map({|player| {
             let (client_id, state) = player;
 
             let position = state.position;
             let rotation = state.rotation;
-            
+
             let val: String = format!("{}: {}/{}", client_id, position, rotation);
 
             val
-        }}).collect();
-
-        player_states.join("\n")
+        }}).collect()
     }
 }
 
