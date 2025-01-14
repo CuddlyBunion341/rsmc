@@ -1,9 +1,12 @@
+use rayon::iter::IntoParallelRefMutIterator;
+use rayon::iter::ParallelIterator;
+
 use crate::prelude::*;
 
 pub fn setup_world_system(mut chunk_manager: ResMut<terrain_resources::ChunkManager>) {
     let generator = terrain_util::generator::Generator::new(0);
 
-    let render_distance = 4;
+    let render_distance = 16;
 
     info!("Generating chunks");
 
@@ -12,10 +15,10 @@ pub fn setup_world_system(mut chunk_manager: ResMut<terrain_resources::ChunkMana
         render_distance,
     );
 
-    for chunk in &mut chunks {
+    chunks.par_iter_mut().for_each(|chunk| {
         info!("Generating chunk at {:?}", chunk.position);
         generator.generate_chunk(chunk);
-    }
+    });
 
     chunk_manager.insert_chunks(chunks);
 }
