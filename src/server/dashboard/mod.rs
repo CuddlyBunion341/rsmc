@@ -1,5 +1,3 @@
-use bevy_log::{tracing_subscriber::{self, field::{RecordFields, Visit}, layer::{Context, SubscriberExt}, Layer}, Level, LogPlugin};
-
 use crate::prelude::*;
 
 pub mod components;
