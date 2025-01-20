@@ -12,9 +12,7 @@ pub use bevy::MinimalPlugins;
 pub use bevy_log::{debug, error, info, warn};
 
 // networking crates
-pub use bevy_renet::transport::*;
 pub use bevy_renet::RenetServerPlugin;
-pub use renet::transport::*;
 pub use renet::DefaultChannel;
 pub use renet::*;
 

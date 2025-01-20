@@ -5,7 +5,7 @@ use chrono::DateTime;
 use renet::ClientId;
 use serde::{Deserialize, Serialize};
 
-pub const SERVER_MESSAGE_ID: ClientId = ClientId::from_raw(0);
+pub const SERVER_MESSAGE_ID: ClientId = 0;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PlayerState {
