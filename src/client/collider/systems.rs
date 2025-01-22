@@ -77,8 +77,8 @@ mod tests {
 
         app.update();
 
-        let mut colliders_query = app.world.query::<&collider_components::BlockCollider>();
-        let colliders_count = colliders_query.iter(&app.world).count();
+        let mut colliders_query = app.world_mut().query::<&collider_components::BlockCollider>();
+        let colliders_count = colliders_query.iter(&app.world_mut()).count();
 
         assert_eq!(colliders_count, 3 * 3 * 3);
     }
@@ -91,9 +91,9 @@ mod tests {
         app.add_systems(Update, handle_collider_update_events_system);
         app.insert_resource(terrain_resources::ChunkManager::new());
 
-        app.world.spawn((
+        app.world_mut().spawn((
             Transform {
-                translation: Vec3 {
+                    translation: Vec3 {
                     x: 0.0,
                     y: 0.0,
                     z: 0.0,
@@ -111,7 +111,7 @@ mod tests {
 
         let block = BlockId::Dirt;
         let mut resource = app
-            .world
+            .world_mut()
             .get_resource_mut::<terrain_resources::ChunkManager>()
             .unwrap();
         let chunks = terrain_resources::ChunkManager::instantiate_chunks(
@@ -132,16 +132,17 @@ mod tests {
             block,
         );
 
-        app.world.send_event(ColliderUpdateEvent {
+        app.world_mut().send_event(ColliderUpdateEvent {
             grid_center_position: [5.0, 5.0, 5.0],
         });
 
         app.update();
 
         let mut collider_query = app
-            .world
+            .world_mut()
             .query::<(&Transform, &collider_components::BlockCollider)>();
-        let (collider_transform, _) = collider_query.single(&app.world);
+        let world_mut = app.world_mut();
+        let (collider_transform, _) = collider_query.single(&world_mut);
         assert_eq!(
             Vec3 {
                 x: 6.5,
