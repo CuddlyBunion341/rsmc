@@ -114,8 +114,8 @@ pub fn handle_focus_events(
                         for mut controller in &mut controller_query.iter_mut() {
                             controller.enable_input = true;
                         }
-                        window.cursor.grab_mode = CursorGrabMode::Locked;
-                        window.cursor.visible = false;
+                        window.cursor_options.grab_mode = CursorGrabMode::Locked;
+                        window.cursor_options.visible = false;
                     }
                 }
             }
@@ -177,8 +177,8 @@ pub fn handle_window_focus_events(
         for event in focus_events.read() {
             match event.state {
                 FocusState::Unfocus => {
-                    window.cursor.grab_mode = CursorGrabMode::Locked;
-                    window.cursor.visible = false;
+                    window.cursor_options.grab_mode = CursorGrabMode::Locked;
+                    window.cursor_options.visible = false;
                 }
                 FocusState::Focus => {}
             }
