@@ -131,30 +131,25 @@ fn obtain_texture_handle(asset_server: &Res<AssetServer>) -> Handle<Image> {
 fn spawn_chunk(
     commands: &mut Commands,
     meshes: &mut Mut<Assets<Mesh>>,
-    material: Handle<MeshMaterial3d<Handle<StandardMaterial>>>,
+    material: Handle<StandardMaterial>,
     mesh: Mesh,
     chunk: &lib::Chunk,
 ) {
-    let transform = Transform::from_xyz(
-        chunk.position.x * CHUNK_SIZE as f32,
-        chunk.position.y * CHUNK_SIZE as f32,
-        chunk.position.z * CHUNK_SIZE as f32,
-    );
-
     commands.spawn((
-        MaterialMeshBundle {
-            mesh: bevy::prelude::Mesh3d(meshes.add(mesh)),
-            transform,
-            material: bevy::prelude::MeshMaterial3d(material),
-            ..default()
-        },
-        player_components::Raycastable,
-        terrain_components::ChunkMesh {
-            key: [
-                chunk.position.x as i32,
-                chunk.position.y as i32,
-                chunk.position.z as i32,
-            ],
-        },
+            Mesh3d(meshes.add(mesh)),
+            Transform::from_xyz(
+                chunk.position.x * CHUNK_SIZE as f32,
+                chunk.position.y * CHUNK_SIZE as f32,
+                chunk.position.z * CHUNK_SIZE as f32,
+            ),
+            MeshMaterial3d(material),
+            player_components::Raycastable,
+            terrain_components::ChunkMesh {
+                key: [
+                    chunk.position.x as i32,
+                    chunk.position.y as i32,
+                    chunk.position.z as i32,
+                ],
+            },
     ));
 }

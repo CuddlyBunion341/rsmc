@@ -14,59 +14,51 @@ const PADDING: UiRect = UiRect {
     right: Val::Px(10.0),
 };
 
-fn create_text_bundle(value: String, style: Style) -> TextBundle {
-    TextBundle {
-        text: Text {
-            sections: vec![TextSection {
-                value,
-                style: TextStyle {
-                    font_size: FONT_SIZE,
-                    color: TEXT_COLOR,
-                    ..default()
-                },
-            }],
+fn create_text_bundle(value: String, style: Style) -> Bundle {
+    (
+        Text::new(value),
+        TextColor(TEXT_COLOR),
+        TextFont {
+            font_size: FONT_SIZE,
             ..default()
         },
-        style,
-        ..default()
-    }
+        style
+    )
 }
 
 pub fn setup_chat_container(mut commands: Commands) {
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                margin: UiRect::all(Val::Px(5.0)),
-                width: Val::Percent(50.0),
-                height: Val::Percent(80.0),
-                flex_direction: FlexDirection::ColumnReverse,
-                ..default()
-            },
+        .spawn(Node {
+            margin: UiRect::all(Val::Px(5.0)),
+            width: Val::Percent(50.0),
+            height: Val::Percent(80.0),
+            flex_direction: FlexDirection::ColumnReverse,
             background_color: BackgroundColor(COLOR_UNFOCUSED),
             ..default()
+            })
+.with_children(|parent| {
+    parent
+        .spawn(
+            Node(
+                padding: PADDING,
+                height: Val::Px(20.0),
+                ..default()
+            ))
+        )).with_children(|parent| {
+            parent.spawn(Text::new("<Empty>"))
         })
-        .with_children(|parent| {
-            parent
-                .spawn(create_text_bundle(
-                    String::new(),
-                    Style {
-                        padding: PADDING,
-                        height: Val::Px(20.0),
-                        ..default()
-                    },
-                ))
-                .insert(chat_components::ChatMessageInputElement { focused: false });
+    .insert(chat_components::ChatMessageInputElement { focused: false });
 
-            parent
-                .spawn(create_text_bundle(
-                    String::new(),
-                    Style {
-                        flex_direction: FlexDirection::Column,
-                        ..default()
-                    },
-                ))
-                .insert(chat_components::ChatMessageContainer { focused: false });
-        });
+    parent
+        .spawn(create_text_bundle(
+                String::new(),
+                Style {
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                },
+        ))
+        .insert(chat_components::ChatMessageContainer { focused: false });
+    });
 }
 
 pub fn handle_focus_events(
@@ -218,10 +210,7 @@ pub fn process_chat_input_system(
             return;
         }
 
-        let mut chat_input_value = text
-            .sections
-            .first()
-            .map_or(String::new(), |s| s.value.clone());
+        let mut chat_input_value = text.0.clone();
 
         for ev in evr_kbd.read() {
             if ev.state != ButtonState::Pressed {
@@ -252,15 +241,9 @@ pub fn process_chat_input_system(
             }
         }
 
-        text.sections.clear();
-        text.sections.push(TextSection {
-            value: chat_input_value.clone(),
-            style: TextStyle {
-                font_size: FONT_SIZE,
-                color: TEXT_COLOR,
-                ..default()
-            },
-        });
+        text.clear();
+
+        text.0 += &chat_input_value;
     }
 }
 

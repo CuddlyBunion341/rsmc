@@ -11,8 +11,8 @@ pub fn setup_highlight_cube_system(
 
     commands
         .spawn(PbrBundle {
-            mesh: Mesh3d<meshes.add(mesh)>,
-            material: MeshMaterial3d<materials.add(Color::rgba(1.0, 1.0, 1.0, 0.5))>,
+            mesh: Mesh3d(meshes.add(mesh)),
+            material: MeshMaterial3d(materials.add(Color::rgba(1.0, 1.0, 1.0, 0.5))),
             transform: Transform::from_xyz(0.0, 0.0, -7.0),
             ..default()
         })
@@ -42,7 +42,7 @@ pub fn raycast_system(
     let dir = dir * RAY_DIST.z;
 
     let intersections = raycast.debug_cast_ray(
-        Ray3d::new(pos, dir),
+        Ray3d::new(pos, Dir3::new(dir).expect("Ray can be cast")),
         &RaycastSettings {
             filter: &filter,
             ..default()
