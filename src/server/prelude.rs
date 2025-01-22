@@ -9,10 +9,13 @@ pub use bevy::ecs::event::*;
 pub use bevy::ecs::system::*;
 pub use bevy::math::*;
 pub use bevy::MinimalPlugins;
-pub use bevy_log::{debug, error, info, warn};
+// pub use bevy_log::{debug, error, info, warn};
 
 // networking crates
 pub use bevy_renet::RenetServerPlugin;
+pub use bevy_renet::netcode::NetcodeServerTransport;
+pub use bevy_renet::netcode::ServerAuthentication;
+pub use bevy_renet::netcode::ServerConfig;
 pub use renet::DefaultChannel;
 pub use renet::*;
 

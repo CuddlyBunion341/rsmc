@@ -131,7 +131,7 @@ fn obtain_texture_handle(asset_server: &Res<AssetServer>) -> Handle<Image> {
 fn spawn_chunk(
     commands: &mut Commands,
     meshes: &mut Mut<Assets<Mesh>>,
-    material: Handle<StandardMaterial>,
+    material: Handle<MeshMaterial3d<Handle<StandardMaterial>>>,
     mesh: Mesh,
     chunk: &lib::Chunk,
 ) {
@@ -143,9 +143,9 @@ fn spawn_chunk(
 
     commands.spawn((
         MaterialMeshBundle {
-            mesh: meshes.add(mesh),
+            mesh: bevy::prelude::Mesh3d(meshes.add(mesh)),
             transform,
-            material,
+            material: bevy::prelude::MeshMaterial3d(material),
             ..default()
         },
         player_components::Raycastable,

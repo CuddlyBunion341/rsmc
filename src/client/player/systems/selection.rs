@@ -5,7 +5,7 @@ const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 pub fn setup_highlight_cube_system(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<MeshMaterial3d>>,
 ) {
     let mesh = Cuboid::new(1.01, 1.01, 1.01);
 

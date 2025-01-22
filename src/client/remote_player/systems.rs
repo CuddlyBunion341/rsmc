@@ -17,7 +17,7 @@ pub fn spawn_remote_player_system(
         commands.spawn((
             PbrBundle {
                 mesh: meshes.add(Cuboid::new(0.5, 0.5, 0.5)),
-                material,
+                material: bevy::prelude::Handle::new(material),
                 ..default()
             },
             remote_player_components::RemotePlayer { client_id },
