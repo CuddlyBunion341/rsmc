@@ -47,7 +47,7 @@ pub fn handle_chunk_mesh_update_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<MeshMaterial3d>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,

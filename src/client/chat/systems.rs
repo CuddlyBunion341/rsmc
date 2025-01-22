@@ -14,18 +14,6 @@ const PADDING: UiRect = UiRect {
     right: Val::Px(10.0),
 };
 
-fn create_text_bundle(value: String, style: Style) -> Bundle {
-    (
-        Text::new(value),
-        TextColor(TEXT_COLOR),
-        TextFont {
-            font_size: FONT_SIZE,
-            ..default()
-        },
-        style
-    )
-}
-
 pub fn setup_chat_container(mut commands: Commands) {
     commands
         .spawn(Node {
@@ -33,32 +21,33 @@ pub fn setup_chat_container(mut commands: Commands) {
             width: Val::Percent(50.0),
             height: Val::Percent(80.0),
             flex_direction: FlexDirection::ColumnReverse,
-            background_color: BackgroundColor(COLOR_UNFOCUSED),
+            // background_color: BackgroundColor(COLOR_UNFOCUSED),
             ..default()
-            })
-.with_children(|parent| {
-    parent
-        .spawn(
-            Node(
-                padding: PADDING,
-                height: Val::Px(20.0),
-                ..default()
-            ))
-        )).with_children(|parent| {
-            parent.spawn(Text::new("<Empty>"))
-        })
-    .insert(chat_components::ChatMessageInputElement { focused: false });
+        });
 
-    parent
-        .spawn(create_text_bundle(
-                String::new(),
-                Style {
-                    flex_direction: FlexDirection::Column,
-                    ..default()
-                },
-        ))
-        .insert(chat_components::ChatMessageContainer { focused: false });
-    });
+    // .with_children(|parent| {
+    //     parent
+    //         .spawn(
+    //             Node(
+    //                 padding: PADDING,
+    //                 height: Val::Px(20.0),
+    //                 ..default()
+    //             )).with_children(|parent| {
+    //             parent.spawn(Text::new("<Empty>"))
+    //         })
+    //     ))
+    //         .insert(chat_components::ChatMessageInputElement { focused: false });
+    //
+    // parent
+    //     .spawn(create_text_bundle(
+    //             String::new(),
+    //             Style {
+    //                 flex_direction: FlexDirection::Column,
+    //                 ..default()
+    //             },
+    //     ))
+    //     .insert(chat_components::ChatMessageContainer { focused: false });
+    // });
 }
 
 pub fn handle_focus_events(
@@ -266,13 +255,22 @@ pub fn add_message_to_chat_container_system(
     for event in events.read() {
         if let Ok((entity, _)) = query.get_single() {
             commands.entity(entity).with_children(|parent| {
-                parent.spawn(create_text_bundle(
-                    event.0.format_string(),
-                    Style {
-                        margin: UiRect::all(Val::Px(5.0)),
-                        ..default()
-                    },
-                ));
+
+                parent.spawn(Node {
+                    margin: UiRect::all(Val::Px(5.0)),
+                    ..default()
+                }).with_children(|parent| {
+                    parent.spawn(
+                        (
+                            Text::new(event.0.message.clone()),
+                            TextColor(TEXT_COLOR),
+                            TextFont {
+                                font_size: FONT_SIZE,
+                                ..default()
+                            },
+                        )
+                    );
+                });
             });
         }
     }

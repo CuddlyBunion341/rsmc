@@ -1,5 +1,6 @@
 pub mod systems;
 
+use bevy_renet::{netcode::{ClientAuthentication, NetcodeClientPlugin, NetcodeClientTransport}, RenetClientPlugin};
 use renet::{ChannelConfig, SendType};
 
 use crate::prelude::*;
