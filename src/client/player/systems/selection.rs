@@ -5,14 +5,14 @@ const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -20.0);
 pub fn setup_highlight_cube_system(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<MeshMaterial3d>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let mesh = Cuboid::new(1.01, 1.01, 1.01);
 
     commands
         .spawn(PbrBundle {
-            mesh: meshes.add(mesh),
-            material: materials.add(Color::rgba(1.0, 1.0, 1.0, 0.5)),
+            mesh: Mesh3d<meshes.add(mesh)>,
+            material: MeshMaterial3d<materials.add(Color::rgba(1.0, 1.0, 1.0, 0.5))>,
             transform: Transform::from_xyz(0.0, 0.0, -7.0),
             ..default()
         })

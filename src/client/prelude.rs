@@ -7,7 +7,7 @@ pub use std::{net::*, time::*};
 pub use bevy::asset::Assets;
 pub use bevy::diagnostic::*;
 pub use bevy::ecs::{event::*, query::*, system::*};
-pub use bevy::gizmos::gizmos::*;
+pub use bevy_gizmos::gizmos::gizmos::*;
 pub use bevy::input::{keyboard::*, mouse::*, ButtonInput};
 pub use bevy::math::{primitives::Cuboid, EulerRot, Quat, Ray3d, Vec3};
 pub use bevy::pbr::*;
