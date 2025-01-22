@@ -29,7 +29,7 @@ fn main() {
 
     App::new()
         .add_plugins((
-            // default_plugins,
+            default_plugins,
             FrameTimeDiagnosticsPlugin,
             EntityCountDiagnosticsPlugin,
             SystemInformationDiagnosticsPlugin,
