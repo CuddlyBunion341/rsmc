@@ -15,15 +15,14 @@ const PADDING: UiRect = UiRect {
 };
 
 pub fn setup_chat_container(mut commands: Commands) {
-    commands
-        .spawn(Node {
-            margin: UiRect::all(Val::Px(5.0)),
-            width: Val::Percent(50.0),
-            height: Val::Percent(80.0),
-            flex_direction: FlexDirection::ColumnReverse,
-            // background_color: BackgroundColor(COLOR_UNFOCUSED),
-            ..default()
-        });
+    commands.spawn(Node {
+        margin: UiRect::all(Val::Px(5.0)),
+        width: Val::Percent(50.0),
+        height: Val::Percent(80.0),
+        flex_direction: FlexDirection::ColumnReverse,
+        // background_color: BackgroundColor(COLOR_UNFOCUSED),
+        ..default()
+    });
 
     // .with_children(|parent| {
     //     parent
@@ -255,22 +254,21 @@ pub fn add_message_to_chat_container_system(
     for event in events.read() {
         if let Ok((entity, _)) = query.get_single() {
             commands.entity(entity).with_children(|parent| {
-
-                parent.spawn(Node {
-                    margin: UiRect::all(Val::Px(5.0)),
-                    ..default()
-                }).with_children(|parent| {
-                    parent.spawn(
-                        (
+                parent
+                    .spawn(Node {
+                        margin: UiRect::all(Val::Px(5.0)),
+                        ..default()
+                    })
+                    .with_children(|parent| {
+                        parent.spawn((
                             Text::new(event.0.message.clone()),
                             TextColor(TEXT_COLOR),
                             TextFont {
                                 font_size: FONT_SIZE,
                                 ..default()
                             },
-                        )
-                    );
-                });
+                        ));
+                    });
             });
         }
     }

@@ -77,8 +77,10 @@ mod tests {
 
         app.update();
 
-        let mut colliders_query = app.world_mut().query::<&collider_components::BlockCollider>();
-        let colliders_count = colliders_query.iter(&app.world_mut()).count();
+        let mut colliders_query = app
+            .world_mut()
+            .query::<&collider_components::BlockCollider>();
+        let colliders_count = colliders_query.iter(app.world_mut()).count();
 
         assert_eq!(colliders_count, 3 * 3 * 3);
     }
@@ -93,7 +95,7 @@ mod tests {
 
         app.world_mut().spawn((
             Transform {
-                    translation: Vec3 {
+                translation: Vec3 {
                     x: 0.0,
                     y: 0.0,
                     z: 0.0,
@@ -142,7 +144,7 @@ mod tests {
             .world_mut()
             .query::<(&Transform, &collider_components::BlockCollider)>();
         let world_mut = app.world_mut();
-        let (collider_transform, _) = collider_query.single(&world_mut);
+        let (collider_transform, _) = collider_query.single(world_mut);
         assert_eq!(
             Vec3 {
                 x: 6.5,

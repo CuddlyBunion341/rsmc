@@ -136,20 +136,20 @@ fn spawn_chunk(
     chunk: &lib::Chunk,
 ) {
     commands.spawn((
-            Mesh3d(meshes.add(mesh)),
-            Transform::from_xyz(
-                chunk.position.x * CHUNK_SIZE as f32,
-                chunk.position.y * CHUNK_SIZE as f32,
-                chunk.position.z * CHUNK_SIZE as f32,
-            ),
-            MeshMaterial3d(material),
-            player_components::Raycastable,
-            terrain_components::ChunkMesh {
-                key: [
-                    chunk.position.x as i32,
-                    chunk.position.y as i32,
-                    chunk.position.z as i32,
-                ],
-            },
+        Mesh3d(meshes.add(mesh)),
+        Transform::from_xyz(
+            chunk.position.x * CHUNK_SIZE as f32,
+            chunk.position.y * CHUNK_SIZE as f32,
+            chunk.position.z * CHUNK_SIZE as f32,
+        ),
+        MeshMaterial3d(material),
+        player_components::Raycastable,
+        terrain_components::ChunkMesh {
+            key: [
+                chunk.position.x as i32,
+                chunk.position.y as i32,
+                chunk.position.z as i32,
+            ],
+        },
     ));
 }

@@ -86,7 +86,7 @@ mod tests {
         let highlight_cube_exists = app
             .world_mut()
             .query::<&player_components::HighlightCube>()
-            .iter(&app.world())
+            .iter(app.world())
             .count()
             > 0;
 

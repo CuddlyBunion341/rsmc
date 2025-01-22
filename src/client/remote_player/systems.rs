@@ -15,8 +15,8 @@ pub fn spawn_remote_player_system(
         });
 
         commands.spawn((
-                bevy::prelude::Mesh3d(meshes.add(Cuboid::new(0.5, 0.5, 0.5))),
-                MeshMaterial3d(material),
+            bevy::prelude::Mesh3d(meshes.add(Cuboid::new(0.5, 0.5, 0.5))),
+            MeshMaterial3d(material),
             remote_player_components::RemotePlayer { client_id },
         ));
     }

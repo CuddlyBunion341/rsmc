@@ -22,17 +22,15 @@ pub fn setup_gui_system(mut commands: Commands, asset_server: Res<AssetServer>) 
             },
             ..default()
         })
-    .with_children(|parent| {
-        parent.spawn(
-            (
-                Text::new(                    "RSMC - Pre Alpha"),
+        .with_children(|parent| {
+            parent.spawn((
+                Text::new("RSMC - Pre Alpha"),
                 TextFont {
                     font: asset_server.load("fonts/Terminus500.ttf"),
                     font_size: 60.0,
                     ..Default::default()
                 },
-                TextColor(Color::srgb(0.9, 0.9, 0.9))
-            )
-        );
-    });
+                TextColor(Color::srgb(0.9, 0.9, 0.9)),
+            ));
+        });
 }
