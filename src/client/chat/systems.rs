@@ -126,6 +126,10 @@ pub fn focus_chat_input_system(
     mut focus_change_events: EventWriter<ChatFocusStateChangeEvent>,
     mut chat_state: ResMut<chat_resources::ChatState>,
 ) {
+    if chat_input_query.is_empty() {
+        return;
+    }
+
     if let Ok(chat_input_component) = chat_input_query.get_single_mut() {
         if mouse_button_input.just_pressed(MouseButton::Left) {
             info!("Unfocusing chat via Left click");
@@ -153,6 +157,8 @@ pub fn handle_window_focus_events(
     mut window_query: Query<&mut Window>,
     mut focus_events: EventReader<ChatFocusStateChangeEvent>,
 ) {
+    if window_query.is_empty() { return; }
+
     if let Ok(mut window) = window_query.get_single_mut() {
         for event in focus_events.read() {
             match event.state {
@@ -251,6 +257,8 @@ pub fn add_message_to_chat_container_system(
     query: Query<(Entity, &chat_components::ChatMessageContainer)>,
     mut events: EventReader<chat_events::SingleChatSendEvent>,
 ) {
+    if query.is_empty() { return; }
+
     for event in events.read() {
         if let Ok((entity, _)) = query.get_single() {
             commands.entity(entity).with_children(|parent| {
