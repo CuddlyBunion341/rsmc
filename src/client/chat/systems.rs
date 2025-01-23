@@ -7,12 +7,12 @@ const COLOR_FOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
 const TEXT_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 0.5);
 
 const FONT_SIZE: f32 = 20.0;
-const PADDING: UiRect = UiRect {
-    top: Val::Px(10.0),
-    left: Val::Px(10.0),
-    bottom: Val::Px(10.0),
-    right: Val::Px(10.0),
-};
+// const PADDING: UiRect = UiRect {
+//     top: Val::Px(10.0),
+//     left: Val::Px(10.0),
+//     bottom: Val::Px(10.0),
+//     right: Val::Px(10.0),
+// };
 
 pub fn setup_chat_container(mut commands: Commands) {
     commands.spawn(Node {

@@ -10,12 +10,11 @@ pub fn setup_highlight_cube_system(
     let mesh = Cuboid::new(1.01, 1.01, 1.01);
 
     commands
-        .spawn(PbrBundle {
-            mesh: Mesh3d(meshes.add(mesh)),
-            material: MeshMaterial3d(materials.add(Color::srgba(1.0, 1.0, 1.0, 0.5))),
-            transform: Transform::from_xyz(0.0, 0.0, -7.0),
-            ..default()
-        })
+        .spawn((
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(materials.add(Color::srgba(1.0, 1.0, 1.0, 0.5))),
+            Transform::from_xyz(0.0, 0.0, -7.0),
+        ))
         .insert(player_components::HighlightCube);
 }
 
