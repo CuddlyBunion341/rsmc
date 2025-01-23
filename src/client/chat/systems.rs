@@ -2,9 +2,9 @@ use crate::prelude::*;
 use bevy::input::{keyboard::KeyboardInput, ButtonState};
 use chat_events::{ChatFocusStateChangeEvent, ChatMessageSendEvent, FocusState};
 
-const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
-const COLOR_FOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.5);
-const TEXT_COLOR: Color = Color::rgba(1.0, 1.0, 1.0, 0.5);
+const COLOR_UNFOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
+const COLOR_FOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
+const TEXT_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 0.5);
 
 const FONT_SIZE: f32 = 20.0;
 const PADDING: UiRect = UiRect {

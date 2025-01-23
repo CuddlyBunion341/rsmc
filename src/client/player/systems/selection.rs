@@ -12,7 +12,7 @@ pub fn setup_highlight_cube_system(
     commands
         .spawn(PbrBundle {
             mesh: Mesh3d(meshes.add(mesh)),
-            material: MeshMaterial3d(materials.add(Color::rgba(1.0, 1.0, 1.0, 0.5))),
+            material: MeshMaterial3d(materials.add(Color::srgba(1.0, 1.0, 1.0, 0.5))),
             transform: Transform::from_xyz(0.0, 0.0, -7.0),
             ..default()
         })
