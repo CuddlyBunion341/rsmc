@@ -157,7 +157,9 @@ pub fn handle_window_focus_events(
     mut window_query: Query<&mut Window>,
     mut focus_events: EventReader<ChatFocusStateChangeEvent>,
 ) {
-    if window_query.is_empty() { return; }
+    if window_query.is_empty() {
+        return;
+    }
 
     if let Ok(mut window) = window_query.get_single_mut() {
         for event in focus_events.read() {
@@ -257,7 +259,9 @@ pub fn add_message_to_chat_container_system(
     query: Query<(Entity, &chat_components::ChatMessageContainer)>,
     mut events: EventReader<chat_events::SingleChatSendEvent>,
 ) {
-    if query.is_empty() { return; }
+    if query.is_empty() {
+        return;
+    }
 
     for event in events.read() {
         if let Ok((entity, _)) = query.get_single() {

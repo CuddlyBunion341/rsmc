@@ -7,12 +7,10 @@ static COLLIDER_CUBOID_WIDTH: f32 = 1.0;
 pub fn setup_coliders_system(mut commands: Commands) {
     let collider_range = 0..COLLIDER_GRID_SIZE;
 
-    commands.spawn(
-        (Collider::cuboid(32.0, 1.0, 32.0),
-        Transform::from_xyz(
-            0.0, 0.0, 0.0,
-        ))
-    );
+    commands.spawn((
+        Collider::cuboid(32.0, 1.0, 32.0),
+        Transform::from_xyz(0.0, 0.0, 0.0),
+    ));
 
     for x in collider_range.clone() {
         for y in collider_range.clone() {
@@ -20,9 +18,13 @@ pub fn setup_coliders_system(mut commands: Commands) {
                 info!("collider {} {} {}", x, y, z);
 
                 commands
-                    .spawn(Collider::cuboid(COLLIDER_CUBOID_WIDTH / 2.0, COLLIDER_CUBOID_WIDTH / 2.0, COLLIDER_CUBOID_WIDTH / 2.0))
+                    .spawn(Collider::cuboid(
+                        COLLIDER_CUBOID_WIDTH / 2.0,
+                        COLLIDER_CUBOID_WIDTH / 2.0,
+                        COLLIDER_CUBOID_WIDTH / 2.0,
+                    ))
                     .insert(TransformBundle::from(Transform::from_xyz(
-                                x as f32, y as f32, z as f32,
+                        x as f32, y as f32, z as f32,
                     )))
                     .insert(collider_components::BlockCollider {
                         relative_position: Vec3 {
@@ -47,13 +49,19 @@ pub fn handle_collider_update_events_system(
             event.grid_center_position[1],
             event.grid_center_position[2],
         )
-            .floor();
+        .floor();
         for (mut transform, collider) in query.iter_mut() {
             let relative_position = collider.relative_position;
             let collider_position = (event_position + relative_position).floor();
 
-            if relative_position.x == 0.0 && relative_position.y == 0.0 && relative_position.z == 0.0 {
-                info!("54 ({} {} {})", collider_position.x, collider_position.y, collider_position.z);
+            if relative_position.x == 0.0
+                && relative_position.y == 0.0
+                && relative_position.z == 0.0
+            {
+                info!(
+                    "54 ({} {} {})",
+                    collider_position.x, collider_position.y, collider_position.z
+                );
             }
 
             let block = chunk_manager.get_block(collider_position);
@@ -109,21 +117,21 @@ mod tests {
         app.insert_resource(terrain_resources::ChunkManager::new());
 
         app.world_mut().spawn((
-                Transform {
-                    translation: Vec3 {
-                        x: 0.0,
-                        y: 0.0,
-                        z: 0.0,
-                    },
-                    ..Default::default()
+            Transform {
+                translation: Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
                 },
-                collider_components::BlockCollider {
-                    relative_position: Vec3 {
-                        x: 1.0,
-                        y: 2.0,
-                        z: 3.0,
-                    },
+                ..Default::default()
+            },
+            collider_components::BlockCollider {
+                relative_position: Vec3 {
+                    x: 1.0,
+                    y: 2.0,
+                    z: 3.0,
                 },
+            },
         ));
 
         let block = BlockId::Dirt;
