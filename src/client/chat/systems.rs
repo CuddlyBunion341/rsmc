@@ -9,57 +9,64 @@ const TEXT_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 0.5);
 const FONT_SIZE: f32 = 20.0;
 
 pub fn setup_chat_container(mut commands: Commands) {
-    commands.spawn((
-        Node {
-            margin: UiRect::all(Val::Px(5.0)),
-            width: Val::Percent(50.0),
-            height: Val::Percent(80.0),
-            flex_direction: FlexDirection::ColumnReverse,
-            ..default()
-        },
-        BackgroundColor(COLOR_UNFOCUSED),
-    ));
+    commands
+        .spawn((
+                Node {
+                    margin: UiRect::all(Val::Px(5.0)),
+                    width: Val::Percent(50.0),
+                    height: Val::Percent(80.0),
+                    flex_direction: FlexDirection::ColumnReverse,
+                    ..default()
+                },
+                BackgroundColor(COLOR_UNFOCUSED),
+        ))
+        .with_children(|parent| {
+            parent
+                .spawn(Node {
+                    padding: UiRect {
+                        top: Val::Px(10.0),
+                        left: Val::Px(10.0),
+                        bottom: Val::Px(10.0),
+                        right: Val::Px(10.0),
+                    },
+                    height: Val::Px(20.0),
+                    ..default()
+                })
+            .with_children(|parent| {
+                parent.spawn(Text::new("<Empty>"));
+            })
+            .insert(chat_components::ChatMessageInputElement { focused: false });
 
-    // .with_children(|parent| {
-    //     parent
-    //         .spawn(
-    //             Node(
-    //                 padding: PADDING,
-    //                 height: Val::Px(20.0),
-    //                 ..default()
-    //             )).with_children(|parent| {
-    //             parent.spawn(Text::new("<Empty>"))
-    //         })
-    //     ))
-    //         .insert(chat_components::ChatMessageInputElement { focused: false });
-    //
-    // parent
-    //     .spawn(create_text_bundle(
-    //             String::new(),
-    //             Style {
-    //                 flex_direction: FlexDirection::Column,
-    //                 ..default()
-    //             },
-    //     ))
-    //     .insert(chat_components::ChatMessageContainer { focused: false });
-    // });
+
+            parent.spawn(( Node {
+                flex_direction: FlexDirection::ColumnReverse,
+                ..default()
+            }, 
+
+            chat_components::ChatMessageContainer { focused: false })
+
+
+            ).with_children(|parent| {
+                parent.spawn(Text::new(""));
+            });
+        });
 }
 
 pub fn handle_focus_events(
     mut focus_change_events: EventReader<ChatFocusStateChangeEvent>,
     mut chat_container_query: Query<
-        (
-            &mut BackgroundColor,
-            &mut chat_components::ChatMessageContainer,
-        ),
-        Without<chat_components::ChatMessageInputElement>,
+    (
+        &mut BackgroundColor,
+        &mut chat_components::ChatMessageContainer,
+    ),
+    Without<chat_components::ChatMessageInputElement>,
     >,
     mut chat_input_query: Query<
-        (
-            &mut BackgroundColor,
-            &mut chat_components::ChatMessageInputElement,
-        ),
-        Without<chat_components::ChatMessageContainer>,
+    (
+        &mut BackgroundColor,
+        &mut chat_components::ChatMessageInputElement,
+    ),
+    Without<chat_components::ChatMessageContainer>,
     >,
     mut controller_query: Query<&mut FpsController>,
     mut window_query: Query<&mut Window>,
@@ -267,16 +274,16 @@ pub fn add_message_to_chat_container_system(
                         margin: UiRect::all(Val::Px(5.0)),
                         ..default()
                     })
-                    .with_children(|parent| {
-                        parent.spawn((
+                .with_children(|parent| {
+                    parent.spawn((
                             Text::new(event.0.message.clone()),
                             TextColor(TEXT_COLOR),
                             TextFont {
                                 font_size: FONT_SIZE,
                                 ..default()
                             },
-                        ));
-                    });
+                    ));
+                });
             });
         }
     }
