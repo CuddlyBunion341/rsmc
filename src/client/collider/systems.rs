@@ -105,7 +105,7 @@ mod tests {
             .query::<&collider_components::BlockCollider>();
         let colliders_count = colliders_query.iter(app.world_mut()).count();
 
-        assert_eq!(colliders_count, 3 * 3 * 3);
+        assert_eq!(colliders_count, 4 * 4 * 4);
     }
 
     #[test]
