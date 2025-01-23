@@ -52,16 +52,6 @@ pub fn handle_collider_update_events_system(
             let relative_position = collider.relative_position;
             let collider_position = (event_position + relative_position).floor();
 
-            if relative_position.x == 0.0
-                && relative_position.y == 0.0
-                && relative_position.z == 0.0
-            {
-                info!(
-                    "54 ({} {} {})",
-                    collider_position.x, collider_position.y, collider_position.z
-                );
-            }
-
             let block = chunk_manager.get_block(collider_position);
 
             match block {
