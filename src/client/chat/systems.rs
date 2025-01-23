@@ -13,7 +13,15 @@ fn root_node() -> Node {
         margin: UiRect::all(Val::Px(5.0)),
         width: Val::Percent(50.0),
         height: Val::Percent(80.0),
+        flex_direction: FlexDirection::Column,
+        ..default()
+    }
+}
+
+fn chat_message_container_node() -> Node {
+    Node {
         flex_direction: FlexDirection::ColumnReverse,
+        height: Val::Percent(50.0),
         ..default()
     }
 }
@@ -31,12 +39,6 @@ fn chat_message_input_node() -> Node {
     }
 }
 
-fn chat_message_container_node() -> Node {
-    Node {
-        flex_direction: FlexDirection::ColumnReverse,
-        ..default()
-    }
-}
 
 pub fn setup_chat_container(mut commands: Commands) {
     commands
@@ -44,20 +46,20 @@ pub fn setup_chat_container(mut commands: Commands) {
         .with_children(|parent| {
             parent
                 .spawn((
-                    chat_message_input_node(),
-                    chat_components::ChatMessageInputElement { focused: false },
-                ))
-                .with_children(|parent| {
-                    parent.spawn(Text::new("<Empty>"));
-                });
-
-            parent
-                .spawn((
                     chat_message_container_node(),
                     chat_components::ChatMessageContainer { focused: false },
                 ))
                 .with_children(|parent| {
                     parent.spawn(Text::new(""));
+                });
+
+            parent
+                .spawn((
+                        chat_message_input_node(),
+                        chat_components::ChatMessageInputElement { focused: false },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(Text::new("<Empty>"));
                 });
         });
 }
@@ -219,6 +221,8 @@ pub fn process_chat_input_system(
                 chat_state.just_focused = false;
                 continue;
             }
+
+            info!("Chat state: {}", chat_input_value);
 
             match &event.logical_key {
                 Key::Enter if !chat_input_value.trim().is_empty() => {
