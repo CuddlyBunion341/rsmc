@@ -35,3 +35,6 @@ path = "src/client/main.rs"
 name = "server"
 path = "src/server/main.rs"
 
+[features]
+wireframe = []
+

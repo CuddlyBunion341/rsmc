@@ -110,6 +110,7 @@ fn create_chunk_mesh(
     terrain_util::create_chunk_mesh(chunk, texture_manager)
 }
 
+#[cfg(not(feature = "wireframe"))]
 fn create_chunk_material(
     texture_handle: Handle<Image>,
     materials: &mut Mut<Assets<StandardMaterial>>,
@@ -120,6 +121,18 @@ fn create_chunk_material(
         unlit: false,
         specular_transmission: 0.0,
         base_color_texture: Some(texture_handle),
+        ..default()
+    })
+}
+
+#[cfg(feature = "wireframe")]
+fn create_chunk_material(
+    texture_handle: Handle<Image>,
+    materials: &mut Mut<Assets<StandardMaterial>>,
+) -> Handle<StandardMaterial> {
+    materials.add(StandardMaterial {
+        base_color: Color::srgba(0.0, 0.0, 0.0, 0.0),
+        alpha_mode: AlphaMode::Mask(0.5),
         ..default()
     })
 }
