@@ -15,17 +15,15 @@ pub fn setup_coliders_system(mut commands: Commands) {
     for x in collider_range.clone() {
         for y in collider_range.clone() {
             for z in collider_range.clone() {
-                info!("collider {} {} {}", x, y, z);
-
                 commands
-                    .spawn(Collider::cuboid(
-                        COLLIDER_CUBOID_WIDTH / 2.0,
-                        COLLIDER_CUBOID_WIDTH / 2.0,
-                        COLLIDER_CUBOID_WIDTH / 2.0,
+                    .spawn((
+                        Collider::cuboid(
+                            COLLIDER_CUBOID_WIDTH / 2.0,
+                            COLLIDER_CUBOID_WIDTH / 2.0,
+                            COLLIDER_CUBOID_WIDTH / 2.0,
+                        ),
+                        Transform::from_xyz(x as f32, y as f32, z as f32),
                     ))
-                    .insert(TransformBundle::from(Transform::from_xyz(
-                        x as f32, y as f32, z as f32,
-                    )))
                     .insert(collider_components::BlockCollider {
                         relative_position: Vec3 {
                             x: x as f32 - (COLLIDER_GRID_SIZE as f32) / 2.0,
