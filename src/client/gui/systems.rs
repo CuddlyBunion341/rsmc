@@ -1,10 +1,13 @@
 use crate::prelude::*;
 
 pub fn setup_gui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera {
-        order: 2,
-        ..default()
-    });
+    commands.spawn((
+        Camera2d::default(),
+        Camera {
+            order: 2,
+            ..default()
+        },
+    ));
     commands
         .spawn(Node {
             width: Val::Percent(100.0),
