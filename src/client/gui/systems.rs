@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 pub fn setup_gui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
-        Camera2d::default(),
+        Camera2d,
         Camera {
             order: 2,
             ..default()
