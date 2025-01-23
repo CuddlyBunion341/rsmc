@@ -8,65 +8,75 @@ const TEXT_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 0.5);
 
 const FONT_SIZE: f32 = 20.0;
 
+fn root_node() -> Node {
+    Node {
+        margin: UiRect::all(Val::Px(5.0)),
+        width: Val::Percent(50.0),
+        height: Val::Percent(80.0),
+        flex_direction: FlexDirection::ColumnReverse,
+        ..default()
+    }
+}
+
+fn chat_message_input_node() -> Node {
+    Node {
+        padding: UiRect {
+            top: Val::Px(10.0),
+            left: Val::Px(10.0),
+            bottom: Val::Px(10.0),
+            right: Val::Px(10.0),
+        },
+        height: Val::Px(20.0),
+        ..default()
+    }
+}
+
+fn chat_message_container_node() -> Node {
+    Node {
+        flex_direction: FlexDirection::ColumnReverse,
+        ..default()
+    }
+}
+
 pub fn setup_chat_container(mut commands: Commands) {
     commands
-        .spawn((
-                Node {
-                    margin: UiRect::all(Val::Px(5.0)),
-                    width: Val::Percent(50.0),
-                    height: Val::Percent(80.0),
-                    flex_direction: FlexDirection::ColumnReverse,
-                    ..default()
-                },
-                BackgroundColor(COLOR_UNFOCUSED),
-        ))
+        .spawn((root_node(), BackgroundColor(COLOR_UNFOCUSED)))
         .with_children(|parent| {
             parent
-                .spawn(Node {
-                    padding: UiRect {
-                        top: Val::Px(10.0),
-                        left: Val::Px(10.0),
-                        bottom: Val::Px(10.0),
-                        right: Val::Px(10.0),
-                    },
-                    height: Val::Px(20.0),
-                    ..default()
-                })
-            .with_children(|parent| {
-                parent.spawn(Text::new("<Empty>"));
-            })
-            .insert(chat_components::ChatMessageInputElement { focused: false });
+                .spawn((
+                    chat_message_input_node(),
+                    chat_components::ChatMessageInputElement { focused: false },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(Text::new("<Empty>"));
+                });
 
-
-            parent.spawn(( Node {
-                flex_direction: FlexDirection::ColumnReverse,
-                ..default()
-            }, 
-
-            chat_components::ChatMessageContainer { focused: false })
-
-
-            ).with_children(|parent| {
-                parent.spawn(Text::new(""));
-            });
+            parent
+                .spawn((
+                    chat_message_container_node(),
+                    chat_components::ChatMessageContainer { focused: false },
+                ))
+                .with_children(|parent| {
+                    parent.spawn(Text::new(""));
+                });
         });
 }
 
 pub fn handle_focus_events(
     mut focus_change_events: EventReader<ChatFocusStateChangeEvent>,
     mut chat_container_query: Query<
-    (
-        &mut BackgroundColor,
-        &mut chat_components::ChatMessageContainer,
-    ),
-    Without<chat_components::ChatMessageInputElement>,
+        (
+            &mut BackgroundColor,
+            &mut chat_components::ChatMessageContainer,
+        ),
+        Without<chat_components::ChatMessageInputElement>,
     >,
     mut chat_input_query: Query<
-    (
-        &mut BackgroundColor,
-        &mut chat_components::ChatMessageInputElement,
-    ),
-    Without<chat_components::ChatMessageContainer>,
+        (
+            &mut BackgroundColor,
+            &mut chat_components::ChatMessageInputElement,
+        ),
+        Without<chat_components::ChatMessageContainer>,
     >,
     mut controller_query: Query<&mut FpsController>,
     mut window_query: Query<&mut Window>,
@@ -129,10 +139,6 @@ pub fn focus_chat_input_system(
     mut focus_change_events: EventWriter<ChatFocusStateChangeEvent>,
     mut chat_state: ResMut<chat_resources::ChatState>,
 ) {
-    if chat_input_query.is_empty() {
-        return;
-    }
-
     if let Ok(chat_input_component) = chat_input_query.get_single_mut() {
         if mouse_button_input.just_pressed(MouseButton::Left) {
             info!("Unfocusing chat via Left click");
@@ -160,10 +166,6 @@ pub fn handle_window_focus_events(
     mut window_query: Query<&mut Window>,
     mut focus_events: EventReader<ChatFocusStateChangeEvent>,
 ) {
-    if window_query.is_empty() {
-        return;
-    }
-
     if let Ok(mut window) = window_query.get_single_mut() {
         for event in focus_events.read() {
             match event.state {
@@ -183,17 +185,14 @@ pub fn handle_chat_focus_player_controller_events(
 ) {
     for event in focus_change_events.read() {
         info!("Received event to change player controller focus");
-        match event.state {
-            FocusState::Focus => {
-                for mut controller in &mut controller_query.iter_mut() {
-                    controller.enable_input = false;
-                }
-            }
-            FocusState::Unfocus => {
-                for mut controller in &mut controller_query.iter_mut() {
-                    controller.enable_input = true;
-                }
-            }
+
+        let enable_input = match event.state {
+            FocusState::Focus => false,
+            FocusState::Unfocus => true,
+        };
+
+        for mut controller in &mut controller_query.iter_mut() {
+            controller.enable_input = enable_input;
         }
     }
 }
@@ -211,8 +210,8 @@ pub fn process_chat_input_system(
 
         let mut chat_input_value = text.0.clone();
 
-        for ev in evr_kbd.read() {
-            if ev.state != ButtonState::Pressed {
+        for event in evr_kbd.read() {
+            if event.state != ButtonState::Pressed {
                 continue;
             }
 
@@ -221,7 +220,7 @@ pub fn process_chat_input_system(
                 continue;
             }
 
-            match &ev.logical_key {
+            match &event.logical_key {
                 Key::Enter if !chat_input_value.trim().is_empty() => {
                     send_event_writer
                         .send(ChatMessageSendEvent(chat_input_value.trim().to_string()));
@@ -262,10 +261,6 @@ pub fn add_message_to_chat_container_system(
     query: Query<(Entity, &chat_components::ChatMessageContainer)>,
     mut events: EventReader<chat_events::SingleChatSendEvent>,
 ) {
-    if query.is_empty() {
-        return;
-    }
-
     for event in events.read() {
         if let Ok((entity, _)) = query.get_single() {
             commands.entity(entity).with_children(|parent| {
@@ -274,16 +269,16 @@ pub fn add_message_to_chat_container_system(
                         margin: UiRect::all(Val::Px(5.0)),
                         ..default()
                     })
-                .with_children(|parent| {
-                    parent.spawn((
+                    .with_children(|parent| {
+                        parent.spawn((
                             Text::new(event.0.message.clone()),
                             TextColor(TEXT_COLOR),
                             TextFont {
                                 font_size: FONT_SIZE,
                                 ..default()
                             },
-                    ));
-                });
+                        ));
+                    });
             });
         }
     }
