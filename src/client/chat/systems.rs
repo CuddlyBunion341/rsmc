@@ -307,7 +307,10 @@ mod tests {
             chat_components::ChatMessageContainer { focused: false },
         ));
 
-        let mut event_writer = app.world_mut().get_resource_mut::<Events<SingleChatSendEvent>>().unwrap();
+        let mut event_writer = app
+            .world_mut()
+            .get_resource_mut::<Events<SingleChatSendEvent>>()
+            .unwrap();
 
         event_writer.send(SingleChatSendEvent(ChatMessage {
             message: "Hello World".to_string(),
@@ -324,7 +327,10 @@ mod tests {
 
         let message_count = messages.iter(app.world()).count();
         assert_eq!(message_count, 1);
-        assert_eq!(messages.iter(app.world()).next().unwrap().0.0, "Hello World");
+        assert_eq!(
+            messages.iter(app.world()).next().unwrap().0 .0,
+            "Hello World"
+        );
     }
 
     fn get_chat_messages(app: &mut App) -> Vec<String> {
@@ -332,7 +338,10 @@ mod tests {
             .world_mut()
             .query::<(&Text, &chat_components::ChatMessageElement)>();
 
-        messages.iter(app.world()).map(|(text, _)| text.0.clone()).collect()
+        messages
+            .iter(app.world())
+            .map(|(text, _)| text.0.clone())
+            .collect()
     }
 
     #[test]
@@ -343,28 +352,31 @@ mod tests {
             .add_systems(Update, handle_chat_clear_events_system)
             .insert_resource(Events::<ChatClearEvent>::default());
 
-        app.world_mut().spawn((
-            chat_components::ChatMessageContainer { focused: false },
-        )).with_children(|parent| {
-            parent.spawn((
-                Node::default(),
-                chat_components::ChatMessageElement,
-                Text::new("Message 1"),
-            ));
+        app.world_mut()
+            .spawn((chat_components::ChatMessageContainer { focused: false },))
+            .with_children(|parent| {
+                parent.spawn((
+                    Node::default(),
+                    chat_components::ChatMessageElement,
+                    Text::new("Message 1"),
+                ));
 
-            parent.spawn((
-                Node::default(),
-                chat_components::ChatMessageElement,
-                Text::new("Message 2"),
-            ));
-        });
+                parent.spawn((
+                    Node::default(),
+                    chat_components::ChatMessageElement,
+                    Text::new("Message 2"),
+                ));
+            });
 
         let messages = get_chat_messages(&mut app);
         assert_eq!(messages.len(), 2);
         assert_eq!(messages[0], "Message 1");
         assert_eq!(messages[1], "Message 2");
 
-        let mut event_writer = app.world_mut().get_resource_mut::<Events<chat_events::ChatClearEvent>>().unwrap();
+        let mut event_writer = app
+            .world_mut()
+            .get_resource_mut::<Events<chat_events::ChatClearEvent>>()
+            .unwrap();
         event_writer.send(chat_events::ChatClearEvent);
 
         app.update();
