@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add `bevy_flair` stylesheets
+
 ## 0.1.1
 
 - Upgrade to Bevy 0.15.2

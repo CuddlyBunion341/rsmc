@@ -1,0 +1,38 @@
+#root {
+  margin: 0px;
+  margin-top: 30px;
+  padding: 15px;
+  width: 60%;
+  height: 100%;
+  flex-direction: column;
+}
+
+#chat_message_container {
+  flex-direction: column;
+  overflow-x: visible;
+  overflow-y: scroll;
+  min-height: 400px;
+  max-height: 400px;
+}
+
+#chat_message_input {
+  margin: 0px;
+  padding: 10px;
+  height: 20px;
+  display: flex;
+}
+
+#chat_entry {
+  margin: 5px;
+  font-size: 20px;
+}
+
+/* TODO: find out why this is not working when only using a single class */
+
+.focused {
+  background-color: rgba(0.0, 0.0, 0.0, 0.5);
+}
+
+.unfocused {
+  background-color: rgba(0.0, 0.0, 0.0, 0.0);
+}

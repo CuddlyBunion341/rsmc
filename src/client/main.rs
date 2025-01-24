@@ -12,6 +12,7 @@ mod scene;
 mod terrain;
 
 use bevy::color::palettes::css::WHITE;
+use bevy_flair::FlairPlugin;
 use scene::setup_scene;
 use wireframe::WireframeConfig;
 
@@ -32,6 +33,7 @@ fn main() {
     App::new()
         .add_plugins((
             default_plugins,
+            FlairPlugin,
             #[cfg(feature = "wireframe")]
             WireframePlugin,
             FrameTimeDiagnosticsPlugin,
