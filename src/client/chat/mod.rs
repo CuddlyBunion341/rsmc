@@ -17,6 +17,7 @@ impl Plugin for ChatPlugin {
             (
                 systems::handle_chat_message_sync_event,
                 systems::add_message_to_chat_container_system,
+                systems::chat_state_transition_system
             ),
         );
         app.add_systems(
@@ -29,8 +30,8 @@ impl Plugin for ChatPlugin {
                 .run_if(in_state(GameState::Chatting)),
         );
 
-        app.add_systems(OnExit(GameState::Chatting), systems::focus_chat_system);
-        app.add_systems(OnEnter(GameState::Chatting), systems::unfocus_chat_system);
+        app.add_systems(OnEnter(GameState::Chatting), systems::focus_chat_system);
+        app.add_systems(OnExit(GameState::Chatting), systems::unfocus_chat_system);
 
         app.insert_resource(resources::ChatHistory::default());
         app.insert_resource(resources::ChatState::default());

@@ -54,23 +54,26 @@ pub fn chat_state_transition_system(
     mut next_state: ResMut<NextState<GameState>>,
     mut chat_state: ResMut<chat_resources::ChatState>,
 ) {
-    let mut next_state_value = current_state.get();
+    let current_state_value = current_state.get() ;
+    let mut next_state_value = current_state_value.clone();
 
     if mouse_button_input.just_pressed(MouseButton::Left) {
         info!("Unfocusing chat via Left click");
-        next_state_value = &GameState::Playing;
+        next_state_value = GameState::Playing;
     }
     if keyboard_input.just_pressed(KeyCode::KeyT) {
         info!("Focusing chat via KeyT");
-        chat_state.just_focused = true;
-        next_state_value = &GameState::Chatting;
+        if *current_state_value == GameState::Playing {
+            chat_state.just_focused = true;
+            next_state_value = GameState::Chatting;
+        }
     }
     if keyboard_input.just_pressed(KeyCode::Escape) {
         info!("Unfocusing chat via Escape");
-        next_state_value = &GameState::Playing;
+        next_state_value = GameState::Playing;
     }
 
-    next_state.set(next_state_value.clone());
+    next_state.set(next_state_value);
 }
 
 pub fn process_chat_input_system(
