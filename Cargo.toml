@@ -7,7 +7,7 @@ rust-version = "1.83.0"
 [dependencies]
 bevy = "0.15.1"
 bevy_fps_controller = "0.15.0"
-bevy_mod_raycast = { git = "https://github.com/NthTensor/bevy_mod_raycast.git", branch = "main" }
+bevy_mod_raycast = { git = "https://github.com/CuddlyBunion341/bevy_mod_raycast.git", branch = "main" }
 bevy_rapier3d = "0.28.0"
 cgmath = "0.18.0"
 iyes_perf_ui = { git = "https://github.com/IyesGames/iyes_perf_ui.git", branch = "main" }

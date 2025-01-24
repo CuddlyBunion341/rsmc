@@ -862,8 +862,9 @@ dependencies = [
 [[package]]
 name = "bevy_mod_raycast"
 version = "0.19.0"
-source = "git+https://github.com/NthTensor/bevy_mod_raycast.git?branch=main#8416f6ec9008a0736f65b5788a3f85c05288efd2"
+source = "git+https://github.com/CuddlyBunion341/bevy_mod_raycast.git?branch=main#aeb2754b815882ce1625ff7cd12b47583b932bf9"
 dependencies = [
+ "bevy",
  "bevy_app",
  "bevy_asset",
  "bevy_color",
