@@ -5,7 +5,6 @@ use chat_events::{ChatFocusStateChangeEvent, ChatMessageSendEvent, FocusState};
 const COLOR_UNFOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
 const COLOR_FOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
 const TEXT_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 0.5);
-
 const FONT_SIZE: f32 = 20.0;
 
 fn root_node() -> Node {
@@ -256,11 +255,13 @@ pub fn handle_chat_message_sync_event(
 
 pub fn add_message_to_chat_container_system(
     mut commands: Commands,
-    query: Query<(Entity, &chat_components::ChatMessageContainer)>,
+    mut query: Query<(Entity, &chat_components::ChatMessageContainer, &mut ScrollPosition)>,
     mut events: EventReader<chat_events::SingleChatSendEvent>,
 ) {
     for event in events.read() {
-        if let Ok((entity, _)) = query.get_single() {
+        if let Ok((entity, _, mut scroll_position)) = query.get_single_mut() {
+            scroll_position.offset_y = scroll_position.offset_y + 100.0;
+
             commands.entity(entity).with_children(|parent| {
                 parent.spawn((
                     Node {
