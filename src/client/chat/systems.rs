@@ -1,7 +1,7 @@
 use crate::prelude::*;
-use accesskit::{Node as Accessible, Role};
 use bevy::{
-    a11y::AccessibilityNode, input::{keyboard::KeyboardInput, ButtonState}, picking::focus::HoverMap
+    input::{keyboard::KeyboardInput, ButtonState},
+    picking::focus::HoverMap,
 };
 use chat_events::{ChatFocusStateChangeEvent, ChatMessageSendEvent, FocusState};
 
@@ -25,7 +25,10 @@ fn root_node() -> Node {
 fn chat_message_container_node() -> Node {
     Node {
         flex_direction: FlexDirection::Column,
-        overflow: Overflow::scroll_y(),
+        overflow: Overflow {
+            x: OverflowAxis::Scroll,
+            y: OverflowAxis::Scroll,
+        },
         flex_grow: 1.0,
         max_height: Val::Px(200.0),
         ..default()
@@ -43,13 +46,12 @@ fn chat_message_input_node() -> Node {
 pub fn setup_chat_container(mut commands: Commands) {
     commands
         .spawn((root_node(), BackgroundColor(COLOR_UNFOCUSED)))
-        // .insert(PickingBehavior::IGNORE)
+        .insert(PickingBehavior::IGNORE)
         .with_children(|parent| {
             parent.spawn((
                 chat_message_container_node(),
                 chat_components::ChatMessageContainer { focused: false },
             ));
-        // .insert(PickingBehavior::IGNORE);
 
             parent.spawn((
                 chat_message_input_node(),
@@ -167,7 +169,7 @@ pub fn handle_window_focus_events(
         for event in focus_events.read() {
             match event.state {
                 FocusState::Unfocus => {
-                    // window.cursor_options.grab_mode = CursorGrabMode::Locked;
+                    window.cursor_options.grab_mode = CursorGrabMode::Locked;
                     window.cursor_options.visible = false;
                 }
                 FocusState::Focus => {}
@@ -275,12 +277,11 @@ pub fn add_message_to_chat_container_system(
                             font_size: FONT_SIZE,
                             ..default()
                         },
-                        AccessibilityNode(Accessible::new(Role::ListItem)),
-                    ));
-                    // .insert(PickingBehavior {
-                    //     should_block_lower: false,
-                    //     ..default()
-                    // });
+                    ))
+                    .insert(PickingBehavior {
+                        should_block_lower: false,
+                        ..default()
+                    });
             });
         }
     }
@@ -311,7 +312,6 @@ pub fn update_scroll_position_system(
 
         for (_pointer, pointer_map) in hover_map.iter() {
             for (entity, _hit) in pointer_map.iter() {
-                info!("Entity: {:?}", entity);
                 if let Ok(mut scroll_position) = scrolled_node_query.get_mut(*entity) {
                     scroll_position.offset_x -= dx;
                     scroll_position.offset_y -= dy;

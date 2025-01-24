@@ -8,7 +8,7 @@ pub fn manage_cursor_system(
 ) {
     let mut window = window_query.single_mut();
     if btn.just_pressed(MouseButton::Left) {
-        // window.cursor_options.grab_mode = CursorGrabMode::Locked;
+        window.cursor_options.grab_mode = CursorGrabMode::Locked;
         window.cursor_options.visible = false;
         for mut controller in &mut controller_query {
             controller.enable_input = true;

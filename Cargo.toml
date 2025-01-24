@@ -20,7 +20,6 @@ serde = { version = "1.0.203", features = ["derive"] }
 serde-big-array = "0.5.1"
 chrono = "0.4.38"
 rayon = "1.10.0"
-accesskit = "0.17.1"
 
 [profile.dev.package."*"]
 opt-level = 3

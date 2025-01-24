@@ -22,7 +22,6 @@ pub fn setup_gui_system(mut commands: Commands, asset_server: Res<AssetServer>) 
             },
             ..default()
         })
-        .insert(PickingBehavior::IGNORE)
         .with_children(|parent| {
             parent.spawn((
                 Text::new("RSMC - Pre Alpha"),
