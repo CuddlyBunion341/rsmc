@@ -248,7 +248,7 @@ pub fn process_chat_input_system(
     }
 }
 
-fn extract_message(value: &String) -> String {
+fn extract_message(value: &str) -> String {
     let message = value.trim_start_matches(MESSAGE_PROMPT);
     message.to_string()
 }
