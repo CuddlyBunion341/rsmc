@@ -43,7 +43,8 @@ impl Plugin for PlayerPlugin {
                 player_systems::broadcast_player_attributes_system,
                 player_systems::handle_player_collider_events_system,
             )
-                .run_if(player_resources::PlayerSpawned::is_spawned),
+                .run_if(player_resources::PlayerSpawned::is_spawned)
+                .run_if(in_state(GameState::Playing)),
         );
     }
 }

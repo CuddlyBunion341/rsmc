@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 pub mod prelude;
 
+mod states;
 mod chat;
 mod collider;
 mod gui;
@@ -50,6 +51,7 @@ fn main() {
             remote_player::RemotePlayerPlugin,
             chat::ChatPlugin,
         ))
+        .insert_state(GameState::Playing)
         .insert_resource(WireframeConfig {
             #[cfg(not(feature = "wireframe"))]
             global: false,

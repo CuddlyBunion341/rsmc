@@ -46,6 +46,7 @@ pub use rsmc as lib;
 pub use rsmc::BlockId;
 pub use rsmc::NetworkingMessage;
 pub use rsmc::CHUNK_SIZE;
+pub use crate::states::GameState;
 
 pub use crate::collider::components as collider_components;
 pub use crate::collider::events as collider_events;

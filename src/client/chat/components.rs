@@ -1,14 +1,10 @@
 use crate::prelude::*;
 
 #[derive(Component)]
-pub struct ChatMessageContainer {
-    pub focused: bool,
-}
+pub struct ChatMessageContainer;
 
 #[derive(Component)]
-pub struct ChatMessageInputElement {
-    pub focused: bool,
-}
+pub struct ChatMessageInputElement;
 
 #[derive(Component)]
 pub struct ChatMessageElement;
