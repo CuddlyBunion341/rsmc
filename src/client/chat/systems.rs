@@ -267,6 +267,7 @@ pub fn add_message_to_chat_container_system(
                 parent.spawn((
                     Node::default(),
                     Name::new("chat_entry"),
+                    chat_components::ChatMessageElement,
                     Text::new(event.0.message.clone()),
                 ));
             });
@@ -283,5 +284,79 @@ pub fn handle_chat_clear_events_system(
         if let Ok(entity) = query.get_single() {
             commands.entity(entity).despawn_descendants();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::ecs::event::Events;
+    use bevy::ecs::schedule::Schedule;
+    use bevy::ecs::world::World;
+    use bevy_rapier3d::parry::either::IntoEither;
+    use chat_events::SingleChatSendEvent;
+    use rsmc::ChatMessage;
+
+    #[test]
+    fn test_focus_events() {
+        // let mut world = World::new();
+        // let mut schedule = Schedule::default();
+        //
+        // world.spawn((
+        //     chat_components::ChatMessageContainer { focused: false },
+        //     chat_components::ChatMessageInputElement { focused: false },
+        // ));
+        //
+        // let mut focus_events = Events::<ChatFocusStateChangeEvent>::default();
+        // focus_events.send(ChatFocusStateChangeEvent {
+        //     state: FocusState::Focus,
+        // });
+        //
+        // world.insert_resource(focus_events);
+        //
+        // schedule.add_system(handle_focus_events);
+        // schedule.run(&mut world);
+        //
+        // let container = world
+        //     .query::<(&chat_components::ChatMessageContainer, &chat_components::ChatMessageInputElement)>()
+        //     .iter(&world)
+        //     .next()
+        //     .unwrap();
+        //
+        // assert!(container.0.focused);
+        // assert!(container.1.focused);
+    }
+
+    #[test]
+    fn test_send_message_system() {
+        let mut app = App::new();
+
+        app.add_plugins(MinimalPlugins)
+            .add_systems(Update, add_message_to_chat_container_system)
+            .insert_resource(Events::<SingleChatSendEvent>::default());
+
+        app.world_mut().spawn((
+            ScrollPosition::default(),
+            chat_components::ChatMessageContainer { focused: false },
+        ));
+
+        let mut event_writer = app.world_mut().get_resource_mut::<Events<SingleChatSendEvent>>().unwrap();
+
+        event_writer.send(SingleChatSendEvent(ChatMessage {
+            message: "Hello World".to_string(),
+            client_id: 0,
+            message_id: 1,
+            timestamp: 0,
+        }));
+
+        app.update();
+
+        let mut messages = app
+            .world_mut()
+            .query::<(&Text, &chat_components::ChatMessageElement)>();
+
+        let message_count = messages.iter(app.world()).count();
+        assert_eq!(message_count, 1);
+        assert_eq!(messages.iter(app.world()).next().unwrap().0.0, "Hello World");
     }
 }
