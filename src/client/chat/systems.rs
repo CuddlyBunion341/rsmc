@@ -60,9 +60,13 @@ pub fn handle_focus_events(
                     FocusState::Focus => {
                         info!("Handling focus state");
                         container_classes.add_class("focused");
+                        container_classes.remove_class("unfocused");
                         chat_container.focused = true;
+
                         input_classes.add_class("focused");
+                        input_classes.remove_class("unfocused");
                         chat_input.focused = true;
+
                         for mut controller in &mut controller_query.iter_mut() {
                             controller.enable_input = false;
                         }
@@ -70,12 +74,17 @@ pub fn handle_focus_events(
                     FocusState::Unfocus => {
                         info!("Handling unfocus state");
                         container_classes.remove_class("focused");
+                        container_classes.add_class("unfocused");
                         chat_container.focused = false;
+
                         input_classes.remove_class("focused");
+                        input_classes.add_class("unfocused");
                         chat_input.focused = false;
+
                         for mut controller in &mut controller_query.iter_mut() {
                             controller.enable_input = true;
                         }
+
                         window.cursor_options.grab_mode = CursorGrabMode::Locked;
                         window.cursor_options.visible = false;
                     }

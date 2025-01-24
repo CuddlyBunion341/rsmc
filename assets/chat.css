@@ -1,5 +1,6 @@
 #root {
   margin: 0px;
+  margin-top: 30px;
   padding: 15px;
   width: 60%;
   height: 100%;
@@ -23,10 +24,15 @@
 
 #chat_entry {
   margin: 5px;
-  color: white;
   font-size: 20px;
 }
 
+/* TODO: find out why this is not working when only using a single class */
+
 .focused {
   background-color: rgba(0.0, 0.0, 0.0, 0.5);
+}
+
+.unfocused {
+  background-color: rgba(0.0, 0.0, 0.0, 0.0);
 }
