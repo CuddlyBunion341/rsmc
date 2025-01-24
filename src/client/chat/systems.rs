@@ -180,6 +180,7 @@ pub fn process_chat_input_system(
     mut chat_input_query: Query<(&mut Text, &mut chat_components::ChatMessageInputElement)>,
     mut send_event_writer: EventWriter<ChatMessageSendEvent>,
     mut chat_state: ResMut<chat_resources::ChatState>,
+    mut chat_clear_writer: EventWriter<chat_events::ChatClearEvent>,
 ) {
     if let Ok((mut text, input_component)) = chat_input_query.get_single_mut() {
         if !input_component.focused {
@@ -204,7 +205,11 @@ pub fn process_chat_input_system(
 
             match &event.logical_key {
                 Key::Enter if !message.trim().is_empty() => {
-                    send_event_writer.send(ChatMessageSendEvent(message.trim().to_string()));
+                    if message.trim() == "CLEAR" {
+                        chat_clear_writer.send(chat_events::ChatClearEvent);
+                    } else {
+                        send_event_writer.send(ChatMessageSendEvent(message.trim().to_string()));
+                    }
                     message.clear();
                 }
                 Key::Backspace => {
@@ -262,9 +267,121 @@ pub fn add_message_to_chat_container_system(
                 parent.spawn((
                     Node::default(),
                     Name::new("chat_entry"),
+                    chat_components::ChatMessageElement,
                     Text::new(event.0.message.clone()),
                 ));
             });
         }
+    }
+}
+
+pub fn handle_chat_clear_events_system(
+    mut chat_clear_events: EventReader<chat_events::ChatClearEvent>,
+    mut commands: Commands,
+    query: Query<Entity, With<chat_components::ChatMessageContainer>>,
+) {
+    for _ in chat_clear_events.read() {
+        if let Ok(entity) = query.get_single() {
+            commands.entity(entity).despawn_descendants();
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::ecs::event::Events;
+    use chat_events::{ChatClearEvent, SingleChatSendEvent};
+    use rsmc::ChatMessage;
+
+    #[test]
+    fn test_send_message_system() {
+        let mut app = App::new();
+
+        app.add_plugins(MinimalPlugins)
+            .add_systems(Update, add_message_to_chat_container_system)
+            .insert_resource(Events::<SingleChatSendEvent>::default());
+
+        app.world_mut().spawn((
+            ScrollPosition::default(),
+            chat_components::ChatMessageContainer { focused: false },
+        ));
+
+        let mut event_writer = app
+            .world_mut()
+            .get_resource_mut::<Events<SingleChatSendEvent>>()
+            .unwrap();
+
+        event_writer.send(SingleChatSendEvent(ChatMessage {
+            message: "Hello World".to_string(),
+            client_id: 0,
+            message_id: 1,
+            timestamp: 0,
+        }));
+
+        app.update();
+
+        let mut messages = app
+            .world_mut()
+            .query::<(&Text, &chat_components::ChatMessageElement)>();
+
+        let message_count = messages.iter(app.world()).count();
+        assert_eq!(message_count, 1);
+        assert_eq!(
+            messages.iter(app.world()).next().unwrap().0 .0,
+            "Hello World"
+        );
+    }
+
+    fn get_chat_messages(app: &mut App) -> Vec<String> {
+        let mut messages = app
+            .world_mut()
+            .query::<(&Text, &chat_components::ChatMessageElement)>();
+
+        messages
+            .iter(app.world())
+            .map(|(text, _)| text.0.clone())
+            .collect()
+    }
+
+    #[test]
+    fn test_chat_clear_system() {
+        let mut app = App::new();
+
+        app.add_plugins(MinimalPlugins)
+            .add_systems(Update, handle_chat_clear_events_system)
+            .insert_resource(Events::<ChatClearEvent>::default());
+
+        app.world_mut()
+            .spawn((chat_components::ChatMessageContainer { focused: false },))
+            .with_children(|parent| {
+                parent.spawn((
+                    Node::default(),
+                    chat_components::ChatMessageElement,
+                    Text::new("Message 1"),
+                ));
+
+                parent.spawn((
+                    Node::default(),
+                    chat_components::ChatMessageElement,
+                    Text::new("Message 2"),
+                ));
+            });
+
+        let messages = get_chat_messages(&mut app);
+        assert_eq!(messages.len(), 2);
+        assert_eq!(messages[0], "Message 1");
+        assert_eq!(messages[1], "Message 2");
+
+        let mut event_writer = app
+            .world_mut()
+            .get_resource_mut::<Events<chat_events::ChatClearEvent>>()
+            .unwrap();
+        event_writer.send(chat_events::ChatClearEvent);
+
+        app.update();
+
+        let messages = get_chat_messages(&mut app);
+        assert_eq!(messages.len(), 0);
     }
 }

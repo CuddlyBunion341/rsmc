@@ -9,6 +9,9 @@ pub struct SingleChatSendEvent(pub lib::ChatMessage);
 #[derive(Event)]
 pub struct ChatMessageSendEvent(pub String);
 
+#[derive(Event)]
+pub struct ChatClearEvent;
+
 pub enum FocusState {
     Focus,
     Unfocus,
