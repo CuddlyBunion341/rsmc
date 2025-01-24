@@ -2,70 +2,61 @@ use crate::prelude::*;
 use bevy::input::{keyboard::KeyboardInput, ButtonState};
 use chat_events::{ChatFocusStateChangeEvent, ChatMessageSendEvent, FocusState};
 
-const COLOR_UNFOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.0);
-const COLOR_FOCUSED: Color = Color::rgba(0.0, 0.0, 0.0, 0.5);
-const TEXT_COLOR: Color = Color::rgba(1.0, 1.0, 1.0, 0.5);
-
+const COLOR_UNFOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
+const COLOR_FOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
+const TEXT_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 0.5);
 const FONT_SIZE: f32 = 20.0;
-const PADDING: UiRect = UiRect {
-    top: Val::Px(10.0),
-    left: Val::Px(10.0),
-    bottom: Val::Px(10.0),
-    right: Val::Px(10.0),
-};
+const MESSAGE_PROMPT: &str = "> ";
 
-fn create_text_bundle(value: String, style: Style) -> TextBundle {
-    TextBundle {
-        text: Text {
-            sections: vec![TextSection {
-                value,
-                style: TextStyle {
-                    font_size: FONT_SIZE,
-                    color: TEXT_COLOR,
-                    ..default()
-                },
-            }],
-            ..default()
+fn root_node() -> Node {
+    Node {
+        margin: UiRect::px(0.0, 0.0, 30.0, 0.0),
+        padding: UiRect::all(Val::Px(15.0)),
+        width: Val::Percent(60.0),
+        height: Val::Percent(100.0),
+        flex_direction: FlexDirection::Column,
+        ..default()
+    }
+}
+
+fn chat_message_container_node() -> Node {
+    Node {
+        flex_direction: FlexDirection::Column,
+        overflow: Overflow {
+            x: OverflowAxis::Visible,
+            y: OverflowAxis::Scroll,
         },
-        style,
+        min_height: Val::Px(400.0),
+        max_height: Val::Px(400.0),
+        ..default()
+    }
+}
+
+fn chat_message_input_node() -> Node {
+    Node {
+        margin: UiRect::px(0.0, 0.0, 15.0, 0.0),
+        padding: UiRect::all(Val::Px(10.0)),
+        height: Val::Px(20.0),
+        display: Display::Flex,
         ..default()
     }
 }
 
 pub fn setup_chat_container(mut commands: Commands) {
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                margin: UiRect::all(Val::Px(5.0)),
-                width: Val::Percent(50.0),
-                height: Val::Percent(80.0),
-                flex_direction: FlexDirection::ColumnReverse,
-                ..default()
-            },
-            background_color: BackgroundColor(COLOR_UNFOCUSED),
-            ..default()
-        })
+        .spawn((root_node(), BackgroundColor(COLOR_UNFOCUSED)))
         .with_children(|parent| {
-            parent
-                .spawn(create_text_bundle(
-                    String::new(),
-                    Style {
-                        padding: PADDING,
-                        height: Val::Px(20.0),
-                        ..default()
-                    },
-                ))
-                .insert(chat_components::ChatMessageInputElement { focused: false });
+            parent.spawn((
+                chat_message_container_node(),
+                chat_components::ChatMessageContainer { focused: false },
+                Text::new(""),
+            ));
 
-            parent
-                .spawn(create_text_bundle(
-                    String::new(),
-                    Style {
-                        flex_direction: FlexDirection::Column,
-                        ..default()
-                    },
-                ))
-                .insert(chat_components::ChatMessageContainer { focused: false });
+            parent.spawn((
+                chat_message_input_node(),
+                chat_components::ChatMessageInputElement { focused: false },
+                Text::new(MESSAGE_PROMPT),
+            ));
         });
 }
 
@@ -114,8 +105,8 @@ pub fn handle_focus_events(
                         for mut controller in &mut controller_query.iter_mut() {
                             controller.enable_input = true;
                         }
-                        window.cursor.grab_mode = CursorGrabMode::Locked;
-                        window.cursor.visible = false;
+                        window.cursor_options.grab_mode = CursorGrabMode::Locked;
+                        window.cursor_options.visible = false;
                     }
                 }
             }
@@ -177,8 +168,8 @@ pub fn handle_window_focus_events(
         for event in focus_events.read() {
             match event.state {
                 FocusState::Unfocus => {
-                    window.cursor.grab_mode = CursorGrabMode::Locked;
-                    window.cursor.visible = false;
+                    window.cursor_options.grab_mode = CursorGrabMode::Locked;
+                    window.cursor_options.visible = false;
                 }
                 FocusState::Focus => {}
             }
@@ -192,17 +183,14 @@ pub fn handle_chat_focus_player_controller_events(
 ) {
     for event in focus_change_events.read() {
         info!("Received event to change player controller focus");
-        match event.state {
-            FocusState::Focus => {
-                for mut controller in &mut controller_query.iter_mut() {
-                    controller.enable_input = false;
-                }
-            }
-            FocusState::Unfocus => {
-                for mut controller in &mut controller_query.iter_mut() {
-                    controller.enable_input = true;
-                }
-            }
+
+        let enable_input = match event.state {
+            FocusState::Focus => false,
+            FocusState::Unfocus => true,
+        };
+
+        for mut controller in &mut controller_query.iter_mut() {
+            controller.enable_input = enable_input;
         }
     }
 }
@@ -218,13 +206,10 @@ pub fn process_chat_input_system(
             return;
         }
 
-        let mut chat_input_value = text
-            .sections
-            .first()
-            .map_or(String::new(), |s| s.value.clone());
+        let mut chat_input_value = text.0.clone();
 
-        for ev in evr_kbd.read() {
-            if ev.state != ButtonState::Pressed {
+        for event in evr_kbd.read() {
+            if event.state != ButtonState::Pressed {
                 continue;
             }
 
@@ -233,35 +218,39 @@ pub fn process_chat_input_system(
                 continue;
             }
 
-            match &ev.logical_key {
-                Key::Enter if !chat_input_value.trim().is_empty() => {
-                    send_event_writer
-                        .send(ChatMessageSendEvent(chat_input_value.trim().to_string()));
-                    chat_input_value.clear();
+            info!("Chat state: {}", chat_input_value);
+
+            let mut message = extract_message(&chat_input_value);
+
+            match &event.logical_key {
+                Key::Enter if !message.trim().is_empty() => {
+                    send_event_writer.send(ChatMessageSendEvent(message.trim().to_string()));
+                    message.clear();
                 }
                 Key::Backspace => {
-                    chat_input_value.pop();
+                    message.pop();
                 }
-                Key::Space => chat_input_value.push(' '),
+                Key::Space => message.push(' '),
                 Key::Character(input) => {
                     if input.chars().all(|c| !c.is_control()) {
-                        chat_input_value.push_str(input);
+                        message.push_str(input);
                     }
                 }
                 _ => {}
             }
+
+            chat_input_value = MESSAGE_PROMPT.to_string() + &message;
         }
 
-        text.sections.clear();
-        text.sections.push(TextSection {
-            value: chat_input_value.clone(),
-            style: TextStyle {
-                font_size: FONT_SIZE,
-                color: TEXT_COLOR,
-                ..default()
-            },
-        });
+        text.clear();
+
+        text.0 += &chat_input_value;
     }
+}
+
+fn extract_message(value: &str) -> String {
+    let message = value.trim_start_matches(MESSAGE_PROMPT);
+    message.to_string()
 }
 
 pub fn handle_chat_message_sync_event(
@@ -277,16 +266,28 @@ pub fn handle_chat_message_sync_event(
 
 pub fn add_message_to_chat_container_system(
     mut commands: Commands,
-    query: Query<(Entity, &chat_components::ChatMessageContainer)>,
+    mut query: Query<(
+        Entity,
+        &chat_components::ChatMessageContainer,
+        &mut ScrollPosition,
+    )>,
     mut events: EventReader<chat_events::SingleChatSendEvent>,
 ) {
     for event in events.read() {
-        if let Ok((entity, _)) = query.get_single() {
+        if let Ok((entity, _, mut scroll_position)) = query.get_single_mut() {
+            // Offset does not need to be exact, just needs to be large enough to see the new message
+            scroll_position.offset_y += 100.0;
+
             commands.entity(entity).with_children(|parent| {
-                parent.spawn(create_text_bundle(
-                    event.0.format_string(),
-                    Style {
+                parent.spawn((
+                    Node {
                         margin: UiRect::all(Val::Px(5.0)),
+                        ..default()
+                    },
+                    Text::new(event.0.message.clone()),
+                    TextColor(TEXT_COLOR),
+                    TextFont {
+                        font_size: FONT_SIZE,
                         ..default()
                     },
                 ));

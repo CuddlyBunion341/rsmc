@@ -4,13 +4,11 @@ const SPAWN_POINT: Vec3 = Vec3::new(0.0, 32.0, 0.0);
 
 pub fn setup_player_camera(mut commands: Commands) {
     commands.spawn((
-        Camera3dBundle {
-            projection: Projection::Perspective(PerspectiveProjection {
-                fov: TAU / 5.0,
-                ..default()
-            }),
+        Camera3d::default(),
+        Projection::Perspective(PerspectiveProjection {
+            fov: TAU / 5.0,
             ..default()
-        },
+        }),
         RenderPlayer {
             logical_entity: Entity::from_raw(0),
         },
@@ -44,7 +42,7 @@ pub fn setup_controller_on_area_ready_system(
             AdditionalMassProperties::Mass(1.0),
             GravityScale(0.0),
             Ccd { enabled: true }, // Prevent clipping when going fast
-            TransformBundle::from_transform(Transform::from_translation(SPAWN_POINT)),
+            Transform::from_translation(SPAWN_POINT),
             LogicalPlayer,
             FpsControllerInput {
                 pitch: -TAU / 12.0,
@@ -54,15 +52,13 @@ pub fn setup_controller_on_area_ready_system(
             FpsController {
                 upright_height: 1.25,
                 height: 1.0,
-                crouch_height: 0.8,
+                crouch_height: 0.6,
                 air_acceleration: 80.0,
+                radius: 0.75,
                 ..default()
             },
         ))
-        .insert(CameraConfig {
-            height_offset: 0.0,
-            radius_scale: 0.75,
-        })
+        .insert(CameraConfig { height_offset: 0.0 })
         .insert(player_components::Player)
         .id();
 
@@ -81,9 +77,9 @@ pub fn handle_controller_movement_system(
         let controller_position = transform.translation;
         if last_position.0.floor() != controller_position.floor() {
             collider_events.send(collider_events::ColliderUpdateEvent {
-                grid_center_position: controller_position.into(),
+                grid_center_position: controller_position.floor().into(),
             });
         }
-        last_position.0 = controller_position;
+        last_position.0 = controller_position.floor();
     }
 }

@@ -1,24 +1,34 @@
 use crate::prelude::*;
 
-static COLLIDER_GRID_SIZE: u32 = 3;
+static COLLIDER_GRID_SIZE: u32 = 4;
 static COLLIDER_RESTING_POSITION: Vec3 = Vec3::ZERO;
+static COLLIDER_CUBOID_WIDTH: f32 = 1.0;
 
 pub fn setup_coliders_system(mut commands: Commands) {
     let collider_range = 0..COLLIDER_GRID_SIZE;
+
+    commands.spawn((
+        Collider::cuboid(32.0, 1.0, 32.0),
+        Transform::from_xyz(0.0, 0.0, 0.0),
+    ));
 
     for x in collider_range.clone() {
         for y in collider_range.clone() {
             for z in collider_range.clone() {
                 commands
-                    .spawn(Collider::cuboid(0.5, 0.5, 0.5))
-                    .insert(TransformBundle::from(Transform::from_xyz(
-                        x as f32, y as f32, z as f32,
-                    )))
+                    .spawn((
+                        Collider::cuboid(
+                            COLLIDER_CUBOID_WIDTH / 2.0,
+                            COLLIDER_CUBOID_WIDTH / 2.0,
+                            COLLIDER_CUBOID_WIDTH / 2.0,
+                        ),
+                        Transform::from_xyz(x as f32, y as f32, z as f32),
+                    ))
                     .insert(collider_components::BlockCollider {
                         relative_position: Vec3 {
-                            x: x as f32,
-                            y: y as f32,
-                            z: z as f32,
+                            x: x as f32 - (COLLIDER_GRID_SIZE as f32) / 2.0,
+                            y: y as f32 - (COLLIDER_GRID_SIZE as f32) / 2.0,
+                            z: z as f32 - (COLLIDER_GRID_SIZE as f32) / 2.0,
                         },
                     });
             }
@@ -41,12 +51,13 @@ pub fn handle_collider_update_events_system(
         for (mut transform, collider) in query.iter_mut() {
             let relative_position = collider.relative_position;
             let collider_position = (event_position + relative_position).floor();
+
             let block = chunk_manager.get_block(collider_position);
 
             match block {
                 Some(block) => {
                     if block != BlockId::Air {
-                        transform.translation = collider_position + 0.5;
+                        transform.translation = collider_position + COLLIDER_CUBOID_WIDTH / 2.0;
                     } else {
                         transform.translation = COLLIDER_RESTING_POSITION;
                     }
@@ -77,10 +88,12 @@ mod tests {
 
         app.update();
 
-        let mut colliders_query = app.world.query::<&collider_components::BlockCollider>();
-        let colliders_count = colliders_query.iter(&app.world).count();
+        let mut colliders_query = app
+            .world_mut()
+            .query::<&collider_components::BlockCollider>();
+        let colliders_count = colliders_query.iter(app.world_mut()).count();
 
-        assert_eq!(colliders_count, 3 * 3 * 3);
+        assert_eq!(colliders_count, 4 * 4 * 4);
     }
 
     #[test]
@@ -91,7 +104,7 @@ mod tests {
         app.add_systems(Update, handle_collider_update_events_system);
         app.insert_resource(terrain_resources::ChunkManager::new());
 
-        app.world.spawn((
+        app.world_mut().spawn((
             Transform {
                 translation: Vec3 {
                     x: 0.0,
@@ -111,7 +124,7 @@ mod tests {
 
         let block = BlockId::Dirt;
         let mut resource = app
-            .world
+            .world_mut()
             .get_resource_mut::<terrain_resources::ChunkManager>()
             .unwrap();
         let chunks = terrain_resources::ChunkManager::instantiate_chunks(
@@ -132,16 +145,17 @@ mod tests {
             block,
         );
 
-        app.world.send_event(ColliderUpdateEvent {
+        app.world_mut().send_event(ColliderUpdateEvent {
             grid_center_position: [5.0, 5.0, 5.0],
         });
 
         app.update();
 
         let mut collider_query = app
-            .world
+            .world_mut()
             .query::<(&Transform, &collider_components::BlockCollider)>();
-        let (collider_transform, _) = collider_query.single(&app.world);
+        let world_mut = app.world_mut();
+        let (collider_transform, _) = collider_query.single(world_mut);
         assert_eq!(
             Vec3 {
                 x: 6.5,

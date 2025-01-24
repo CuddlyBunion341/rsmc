@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -20.0);
+const HIGHLIGHT_CUBE_ORIGIN: Vec3 = Vec3::new(0.0, 2.0, 0.0);
 
 pub fn setup_highlight_cube_system(
     mut commands: Commands,
@@ -10,12 +11,11 @@ pub fn setup_highlight_cube_system(
     let mesh = Cuboid::new(1.01, 1.01, 1.01);
 
     commands
-        .spawn(PbrBundle {
-            mesh: meshes.add(mesh),
-            material: materials.add(Color::rgba(1.0, 1.0, 1.0, 0.5)),
-            transform: Transform::from_xyz(0.0, 0.0, -7.0),
-            ..default()
-        })
+        .spawn((
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(materials.add(Color::srgba(1.0, 1.0, 1.0, 0.5))),
+            Transform::from_xyz(0.0, 0.0, -7.0),
+        ))
         .insert(player_components::HighlightCube);
 }
 
@@ -42,7 +42,7 @@ pub fn raycast_system(
     let dir = dir * RAY_DIST.z;
 
     let intersections = raycast.debug_cast_ray(
-        Ray3d::new(pos, dir),
+        Ray3d::new(pos, Dir3::new(dir).expect("Ray can be cast")),
         &RaycastSettings {
             filter: &filter,
             ..default()
@@ -61,7 +61,7 @@ pub fn raycast_system(
         .map(|(_, intersection)| intersection.normal());
 
     if hover_position.is_none() {
-        highlight_transform.translation = Vec3::new(-100.0, -100.0, -100.0);
+        highlight_transform.translation = HIGHLIGHT_CUBE_ORIGIN;
         return;
     }
 
@@ -84,9 +84,9 @@ mod tests {
         app.update();
 
         let highlight_cube_exists = app
-            .world
+            .world_mut()
             .query::<&player_components::HighlightCube>()
-            .iter(&app.world)
+            .iter(app.world())
             .count()
             > 0;
 

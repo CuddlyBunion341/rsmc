@@ -11,7 +11,9 @@ mod remote_player;
 mod scene;
 mod terrain;
 
+use bevy::color::palettes::css::WHITE;
 use scene::setup_scene;
+use wireframe::WireframeConfig;
 
 fn main() {
     let window_plugin = WindowPlugin {
@@ -30,6 +32,8 @@ fn main() {
     App::new()
         .add_plugins((
             default_plugins,
+            #[cfg(feature = "wireframe")]
+            WireframePlugin,
             FrameTimeDiagnosticsPlugin,
             EntityCountDiagnosticsPlugin,
             SystemInformationDiagnosticsPlugin,
@@ -42,6 +46,13 @@ fn main() {
             remote_player::RemotePlayerPlugin,
             chat::ChatPlugin,
         ))
+        .insert_resource(WireframeConfig {
+            #[cfg(not(feature = "wireframe"))]
+            global: false,
+            #[cfg(feature = "wireframe")]
+            global: true,
+            default_color: WHITE.into(),
+        })
         .add_systems(Startup, setup_scene)
         .run();
 }

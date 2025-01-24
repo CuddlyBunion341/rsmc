@@ -110,6 +110,7 @@ fn create_chunk_mesh(
     terrain_util::create_chunk_mesh(chunk, texture_manager)
 }
 
+#[cfg(not(feature = "wireframe"))]
 fn create_chunk_material(
     texture_handle: Handle<Image>,
     materials: &mut Mut<Assets<StandardMaterial>>,
@@ -120,6 +121,18 @@ fn create_chunk_material(
         unlit: false,
         specular_transmission: 0.0,
         base_color_texture: Some(texture_handle),
+        ..default()
+    })
+}
+
+#[cfg(feature = "wireframe")]
+fn create_chunk_material(
+    texture_handle: Handle<Image>,
+    materials: &mut Mut<Assets<StandardMaterial>>,
+) -> Handle<StandardMaterial> {
+    materials.add(StandardMaterial {
+        base_color: Color::srgba(0.0, 0.0, 0.0, 0.0),
+        alpha_mode: AlphaMode::Mask(0.5),
         ..default()
     })
 }
@@ -135,19 +148,14 @@ fn spawn_chunk(
     mesh: Mesh,
     chunk: &lib::Chunk,
 ) {
-    let transform = Transform::from_xyz(
-        chunk.position.x * CHUNK_SIZE as f32,
-        chunk.position.y * CHUNK_SIZE as f32,
-        chunk.position.z * CHUNK_SIZE as f32,
-    );
-
     commands.spawn((
-        MaterialMeshBundle {
-            mesh: meshes.add(mesh),
-            transform,
-            material,
-            ..default()
-        },
+        Mesh3d(meshes.add(mesh)),
+        Transform::from_xyz(
+            chunk.position.x * CHUNK_SIZE as f32,
+            chunk.position.y * CHUNK_SIZE as f32,
+            chunk.position.z * CHUNK_SIZE as f32,
+        ),
+        MeshMaterial3d(material),
         player_components::Raycastable,
         terrain_components::ChunkMesh {
             key: [

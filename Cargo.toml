@@ -1,21 +1,21 @@
 [package]
 name = "rsmc"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
+rust-version = "1.83.0"
 
 [dependencies]
-bevy = "0.13.2"
-bevy_fps_controller = "0.2.5"
-bevy_log = "0.13.2"
-bevy_mod_raycast = "0.17.0"
-bevy_rapier3d = "0.25.0"
+bevy = "0.15.1"
+bevy_fps_controller = "0.15.0"
+bevy_mod_raycast = { git = "https://github.com/CuddlyBunion341/bevy_mod_raycast.git", branch = "main" }
+bevy_rapier3d = "0.28.0"
 cgmath = "0.18.0"
-iyes_perf_ui = "0.2.3"
+iyes_perf_ui = { git = "https://github.com/IyesGames/iyes_perf_ui.git", branch = "main" }
 noise = "0.9.0"
-bevy_renet = {version = "0.0.11", features = ["serde"]}
+bevy_renet = { version = "1.0.0" }
 bincode = "1.3.3"
 rand = "0.8.5"
-renet = "0.0.15"
+renet = "1.0.0"
 serde = { version = "1.0.203", features = ["derive"] }
 serde-big-array = "0.5.1"
 chrono = "0.4.38"
@@ -34,3 +34,7 @@ path = "src/client/main.rs"
 [[bin]]
 name = "server"
 path = "src/server/main.rs"
+
+[features]
+wireframe = []
+

@@ -10,16 +10,13 @@ pub fn spawn_remote_player_system(
         let client_id = event.client_id;
 
         let material = materials.add(StandardMaterial {
-            base_color: Color::rgb(0.8, 0.7, 0.6),
+            base_color: Color::srgb(0.8, 0.7, 0.6),
             ..default()
         });
 
         commands.spawn((
-            PbrBundle {
-                mesh: meshes.add(Cuboid::new(0.5, 0.5, 0.5)),
-                material,
-                ..default()
-            },
+            bevy::prelude::Mesh3d(meshes.add(Cuboid::new(0.5, 0.5, 0.5))),
+            MeshMaterial3d(material),
             remote_player_components::RemotePlayer { client_id },
         ));
     }
@@ -75,7 +72,7 @@ pub fn draw_gizmos(
         player_gizmos.ray(
             transform.translation,
             transform.rotation * Vec3::new(0.0, 0.0, -1.0),
-            Color::rgb(0.8, 0.7, 0.6),
+            Color::srgb(0.8, 0.7, 0.6),
         );
     }
 }

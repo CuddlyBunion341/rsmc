@@ -14,17 +14,6 @@ impl Plugin for PlayerPlugin {
         app.add_plugins(FpsControllerPlugin);
         app.add_plugins(RapierPhysicsPlugin::<NoUserData>::default());
         app.add_plugins(RapierDebugRenderPlugin::default());
-        app.insert_resource(RapierConfiguration {
-            gravity: Vec3::new(0., 0.0, 0.),
-            physics_pipeline_active: true,
-            force_update_from_transform_changes: false,
-            scaled_shape_subdivision: 1,
-            query_pipeline_active: true,
-            timestep_mode: TimestepMode::Fixed {
-                dt: 1.0 / 120.0,
-                substeps: 1,
-            },
-        });
         app.add_event::<player_events::PlayerColliderUpdateEvent>();
         app.insert_resource(player_resources::BlockSelection::new());
         app.insert_resource(player_resources::PlayerSpawned(false));

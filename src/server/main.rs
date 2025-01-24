@@ -4,7 +4,7 @@ pub mod player;
 pub mod prelude;
 pub mod terrain;
 
-use bevy_log::LogPlugin;
+use bevy::log::LogPlugin;
 
 use crate::prelude::*;
 
