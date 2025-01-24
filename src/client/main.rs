@@ -13,6 +13,7 @@ mod terrain;
 
 use bevy::color::palettes::css::WHITE;
 use bevy_flair::FlairPlugin;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use scene::setup_scene;
 use wireframe::WireframeConfig;
 
@@ -36,6 +37,7 @@ fn main() {
             FlairPlugin,
             #[cfg(feature = "wireframe")]
             WireframePlugin,
+            WorldInspectorPlugin::default(),
             FrameTimeDiagnosticsPlugin,
             EntityCountDiagnosticsPlugin,
             SystemInformationDiagnosticsPlugin,
