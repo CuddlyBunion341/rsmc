@@ -28,8 +28,8 @@ fn chat_message_container_node() -> Node {
             x: OverflowAxis::Visible,
             y: OverflowAxis::Scroll,
         },
-        flex_grow: 1.0,
-        max_height: Val::Px(200.0),
+        min_height: Val::Px(400.0),
+        max_height: Val::Px(400.0),
         ..default()
     }
 }
