@@ -61,7 +61,7 @@ pub fn raycast_system(
         .map(|(_, intersection)| intersection.normal());
 
     if hover_position.is_none() {
-        highlight_transform.translation = HIGHLIGHT_CUBE_ORIGIN.clone();
+        highlight_transform.translation = HIGHLIGHT_CUBE_ORIGIN;
         return;
     }
 
