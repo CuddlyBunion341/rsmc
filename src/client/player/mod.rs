@@ -46,5 +46,15 @@ impl Plugin for PlayerPlugin {
                 .run_if(player_resources::PlayerSpawned::is_spawned)
                 .run_if(in_state(GameState::Playing)),
         );
+
+        app.add_systems(
+            OnEnter(GameState::Playing),
+            player_systems::activate_fps_controller_system,
+        );
+
+        app.add_systems(
+            OnExit(GameState::Playing),
+            player_systems::deactivate_fps_controller_system,
+        );
     }
 }

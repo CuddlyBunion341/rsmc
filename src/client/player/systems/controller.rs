@@ -83,3 +83,15 @@ pub fn handle_controller_movement_system(
         last_position.0 = controller_position.floor();
     }
 }
+
+pub fn activate_fps_controller_system(mut controller_query: Query<&mut FpsController>) {
+    for mut controller in &mut controller_query.iter_mut() {
+        controller.enable_input = true;
+    }
+}
+
+pub fn deactivate_fps_controller_system(mut controller_query: Query<&mut FpsController>) {
+    for mut controller in &mut controller_query.iter_mut() {
+        controller.enable_input = false;
+    }
+}

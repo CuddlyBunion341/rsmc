@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 pub mod prelude;
 
-mod states;
 mod chat;
 mod collider;
 mod gui;
@@ -10,6 +9,7 @@ mod networking;
 mod player;
 mod remote_player;
 mod scene;
+mod states;
 mod terrain;
 
 use bevy::color::palettes::css::WHITE;
