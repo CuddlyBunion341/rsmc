@@ -1,0 +1,32 @@
+#root {
+  margin: 0px;
+  padding: 15px;
+  width: 60%;
+  height: 100%;
+  flex-direction: column;
+}
+
+#chat_message_container {
+  flex-direction: column;
+  overflow-x: visible;
+  overflow-y: scroll;
+  min-height: 400px;
+  max-height: 400px;
+}
+
+#chat_message_input {
+  margin: 0px;
+  padding: 10px;
+  height: 20px;
+  display: flex;
+}
+
+#chat_entry {
+  margin: 5px;
+  color: white;
+  font-size: 20px;
+}
+
+.focused {
+  background-color: rgba(0.0, 0.0, 0.0, 0.5);
+}

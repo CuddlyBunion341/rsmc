@@ -1,59 +1,30 @@
 use crate::prelude::*;
 use bevy::input::{keyboard::KeyboardInput, ButtonState};
+use bevy_flair::style::components::{ClassList, NodeStyleSheet};
 use chat_events::{ChatFocusStateChangeEvent, ChatMessageSendEvent, FocusState};
 
-const COLOR_UNFOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
-const COLOR_FOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
-const TEXT_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 0.5);
-const FONT_SIZE: f32 = 20.0;
 const MESSAGE_PROMPT: &str = "> ";
 
-fn root_node() -> Node {
-    Node {
-        margin: UiRect::px(0.0, 0.0, 30.0, 0.0),
-        padding: UiRect::all(Val::Px(15.0)),
-        width: Val::Percent(60.0),
-        height: Val::Percent(100.0),
-        flex_direction: FlexDirection::Column,
-        ..default()
-    }
-}
-
-fn chat_message_container_node() -> Node {
-    Node {
-        flex_direction: FlexDirection::Column,
-        overflow: Overflow {
-            x: OverflowAxis::Visible,
-            y: OverflowAxis::Scroll,
-        },
-        min_height: Val::Px(400.0),
-        max_height: Val::Px(400.0),
-        ..default()
-    }
-}
-
-fn chat_message_input_node() -> Node {
-    Node {
-        margin: UiRect::px(0.0, 0.0, 15.0, 0.0),
-        padding: UiRect::all(Val::Px(10.0)),
-        height: Val::Px(20.0),
-        display: Display::Flex,
-        ..default()
-    }
-}
-
-pub fn setup_chat_container(mut commands: Commands) {
+pub fn setup_chat_container(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
-        .spawn((root_node(), BackgroundColor(COLOR_UNFOCUSED)))
+        .spawn((
+            Node::default(),
+            Name::new("root"),
+            NodeStyleSheet::new(asset_server.load("chat.css")),
+        ))
         .with_children(|parent| {
             parent.spawn((
-                chat_message_container_node(),
+                Node::default(),
+                Name::new("chat_message_container"),
+                ClassList::new(),
                 chat_components::ChatMessageContainer { focused: false },
                 Text::new(""),
             ));
 
             parent.spawn((
-                chat_message_input_node(),
+                Node::default(),
+                Name::new("chat_message_input"),
+                ClassList::new(),
                 chat_components::ChatMessageInputElement { focused: false },
                 Text::new(MESSAGE_PROMPT),
             ));
@@ -63,15 +34,12 @@ pub fn setup_chat_container(mut commands: Commands) {
 pub fn handle_focus_events(
     mut focus_change_events: EventReader<ChatFocusStateChangeEvent>,
     mut chat_container_query: Query<
-        (
-            &mut BackgroundColor,
-            &mut chat_components::ChatMessageContainer,
-        ),
+        (&mut ClassList, &mut chat_components::ChatMessageContainer),
         Without<chat_components::ChatMessageInputElement>,
     >,
     mut chat_input_query: Query<
         (
-            &mut BackgroundColor,
+            &mut ClassList,
             &mut chat_components::ChatMessageInputElement,
         ),
         Without<chat_components::ChatMessageContainer>,
@@ -80,7 +48,10 @@ pub fn handle_focus_events(
     mut window_query: Query<&mut Window>,
 ) {
     if let Ok(mut window) = window_query.get_single_mut() {
-        if let (Ok((mut container_bg, mut chat_container)), Ok((mut input_bg, mut chat_input))) = (
+        if let (
+            Ok((mut container_classes, mut chat_container)),
+            Ok((mut input_classes, mut chat_input)),
+        ) = (
             chat_container_query.get_single_mut(),
             chat_input_query.get_single_mut(),
         ) {
@@ -88,9 +59,9 @@ pub fn handle_focus_events(
                 match event.state {
                     FocusState::Focus => {
                         info!("Handling focus state");
-                        container_bg.0 = COLOR_FOCUSED;
+                        container_classes.add_class("focused");
                         chat_container.focused = true;
-                        input_bg.0 = COLOR_FOCUSED;
+                        input_classes.add_class("focused");
                         chat_input.focused = true;
                         for mut controller in &mut controller_query.iter_mut() {
                             controller.enable_input = false;
@@ -98,9 +69,9 @@ pub fn handle_focus_events(
                     }
                     FocusState::Unfocus => {
                         info!("Handling unfocus state");
-                        container_bg.0 = COLOR_UNFOCUSED;
+                        container_classes.remove_class("focused");
                         chat_container.focused = false;
-                        input_bg.0 = COLOR_UNFOCUSED;
+                        input_classes.remove_class("focused");
                         chat_input.focused = false;
                         for mut controller in &mut controller_query.iter_mut() {
                             controller.enable_input = true;
@@ -280,16 +251,9 @@ pub fn add_message_to_chat_container_system(
 
             commands.entity(entity).with_children(|parent| {
                 parent.spawn((
-                    Node {
-                        margin: UiRect::all(Val::Px(5.0)),
-                        ..default()
-                    },
+                    Node::default(),
+                    Name::new("chat_entry"),
                     Text::new(event.0.message.clone()),
-                    TextColor(TEXT_COLOR),
-                    TextFont {
-                        font_size: FONT_SIZE,
-                        ..default()
-                    },
                 ));
             });
         }
