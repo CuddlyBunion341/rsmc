@@ -1,3 +1,5 @@
+use bevy::winit::WinitSettings;
+
 use crate::prelude::*;
 
 pub mod components;
@@ -23,8 +25,10 @@ impl Plugin for ChatPlugin {
                 systems::handle_focus_events,
                 systems::handle_chat_message_sync_event,
                 systems::add_message_to_chat_container_system,
+                systems::update_scroll_position_system
             ),
         );
+        app.insert_resource(WinitSettings::desktop_app());
         app.insert_resource(resources::ChatHistory::default());
         app.insert_resource(resources::ChatState::default());
         app.add_event::<events::ChatSyncEvent>();
