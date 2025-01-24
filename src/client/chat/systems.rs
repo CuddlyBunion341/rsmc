@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use bevy::{
-    color::palettes::css::RED, input::{keyboard::KeyboardInput, ButtonState}, utils::tracing::Span
-};
+use bevy::input::{keyboard::KeyboardInput, ButtonState};
 use chat_events::{ChatFocusStateChangeEvent, ChatMessageSendEvent, FocusState};
 
 const COLOR_UNFOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
@@ -54,12 +52,11 @@ pub fn setup_chat_container(mut commands: Commands) {
                 Text::new(""),
             ));
 
-            parent
-                .spawn((
-                    chat_message_input_node(),
-                    chat_components::ChatMessageInputElement { focused: false },
-                    Text::new(MESSAGE_PROMPT),
-                ));
+            parent.spawn((
+                chat_message_input_node(),
+                chat_components::ChatMessageInputElement { focused: false },
+                Text::new(MESSAGE_PROMPT),
+            ));
         });
 }
 
@@ -227,8 +224,7 @@ pub fn process_chat_input_system(
 
             match &event.logical_key {
                 Key::Enter if !message.trim().is_empty() => {
-                    send_event_writer
-                        .send(ChatMessageSendEvent(message.trim().to_string()));
+                    send_event_writer.send(ChatMessageSendEvent(message.trim().to_string()));
                     message.clear();
                 }
                 Key::Backspace => {
@@ -280,7 +276,7 @@ pub fn add_message_to_chat_container_system(
     for event in events.read() {
         if let Ok((entity, _, mut scroll_position)) = query.get_single_mut() {
             // Offset does not need to be exact, just needs to be large enough to see the new message
-            scroll_position.offset_y = scroll_position.offset_y + 100.0;
+            scroll_position.offset_y += 100.0;
 
             commands.entity(entity).with_children(|parent| {
                 parent.spawn((
