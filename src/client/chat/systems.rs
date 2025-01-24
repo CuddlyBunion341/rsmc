@@ -180,6 +180,7 @@ pub fn process_chat_input_system(
     mut chat_input_query: Query<(&mut Text, &mut chat_components::ChatMessageInputElement)>,
     mut send_event_writer: EventWriter<ChatMessageSendEvent>,
     mut chat_state: ResMut<chat_resources::ChatState>,
+    mut chat_clear_writer: EventWriter<chat_events::ChatClearEvent>,
 ) {
     if let Ok((mut text, input_component)) = chat_input_query.get_single_mut() {
         if !input_component.focused {
@@ -204,7 +205,11 @@ pub fn process_chat_input_system(
 
             match &event.logical_key {
                 Key::Enter if !message.trim().is_empty() => {
-                    send_event_writer.send(ChatMessageSendEvent(message.trim().to_string()));
+                    if message.trim() == "CLEAR" {
+                        chat_clear_writer.send(chat_events::ChatClearEvent);
+                    } else {
+                        send_event_writer.send(ChatMessageSendEvent(message.trim().to_string()));
+                    }
                     message.clear();
                 }
                 Key::Backspace => {
@@ -265,6 +270,18 @@ pub fn add_message_to_chat_container_system(
                     Text::new(event.0.message.clone()),
                 ));
             });
+        }
+    }
+}
+
+pub fn handle_chat_clear_events_system(
+    mut chat_clear_events: EventReader<chat_events::ChatClearEvent>,
+    mut commands: Commands,
+    query: Query<Entity, With<chat_components::ChatMessageContainer>>,
+) {
+    for _ in chat_clear_events.read() {
+        if let Ok(entity) = query.get_single() {
+            commands.entity(entity).despawn_descendants();
         }
     }
 }

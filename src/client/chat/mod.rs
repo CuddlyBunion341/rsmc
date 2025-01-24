@@ -23,6 +23,7 @@ impl Plugin for ChatPlugin {
                 systems::handle_focus_events,
                 systems::handle_chat_message_sync_event,
                 systems::add_message_to_chat_container_system,
+                systems::handle_chat_clear_events_system,
             ),
         );
         app.insert_resource(resources::ChatHistory::default());
@@ -31,5 +32,6 @@ impl Plugin for ChatPlugin {
         app.add_event::<events::ChatFocusStateChangeEvent>();
         app.add_event::<events::ChatMessageSendEvent>();
         app.add_event::<events::SingleChatSendEvent>();
+        app.add_event::<events::ChatClearEvent>();
     }
 }
