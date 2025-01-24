@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 const RAY_DIST: Vec3 = Vec3::new(0.0, 0.0, -20.0);
+const HIGHLIGHT_CUBE_ORIGIN: Vec3 = Vec3::new(0.0, 2.0, 0.0);
 
 pub fn setup_highlight_cube_system(
     mut commands: Commands,
@@ -60,7 +61,7 @@ pub fn raycast_system(
         .map(|(_, intersection)| intersection.normal());
 
     if hover_position.is_none() {
-        highlight_transform.translation = Vec3::new(-100.0, -100.0, -100.0);
+        highlight_transform.translation = HIGHLIGHT_CUBE_ORIGIN.clone();
         return;
     }
 
