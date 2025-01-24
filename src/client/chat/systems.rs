@@ -10,9 +10,10 @@ const FONT_SIZE: f32 = 20.0;
 
 fn root_node() -> Node {
     Node {
-        margin: UiRect::all(Val::Px(5.0)),
-        width: Val::Percent(50.0),
-        height: Val::Percent(80.0),
+        margin: UiRect::px(0.0, 0.0, 30.0, 0.0),
+        padding: UiRect::all(Val::Px(15.0)),
+        width: Val::Percent(60.0),
+        height: Val::Percent(100.0),
         flex_direction: FlexDirection::Column,
         ..default()
     }
@@ -20,47 +21,40 @@ fn root_node() -> Node {
 
 fn chat_message_container_node() -> Node {
     Node {
-        flex_direction: FlexDirection::ColumnReverse,
-        height: Val::Percent(50.0),
+        flex_direction: FlexDirection::Column,
+        overflow: Overflow {
+            x: OverflowAxis::Scroll,
+            y: OverflowAxis::Scroll,
+        },
+        flex_grow: 1.0,
+        max_height: Val::Px(200.0),
         ..default()
     }
 }
 
 fn chat_message_input_node() -> Node {
     Node {
-        padding: UiRect {
-            top: Val::Px(10.0),
-            left: Val::Px(10.0),
-            bottom: Val::Px(10.0),
-            right: Val::Px(10.0),
-        },
+        padding: UiRect::all(Val::Px(10.0)),
         height: Val::Px(20.0),
         ..default()
     }
 }
 
-
 pub fn setup_chat_container(mut commands: Commands) {
     commands
         .spawn((root_node(), BackgroundColor(COLOR_UNFOCUSED)))
         .with_children(|parent| {
-            parent
-                .spawn((
-                    chat_message_container_node(),
-                    chat_components::ChatMessageContainer { focused: false },
-                ))
-                .with_children(|parent| {
-                    parent.spawn(Text::new(""));
-                });
+            parent.spawn((
+                chat_message_container_node(),
+                chat_components::ChatMessageContainer { focused: false },
+                Text::new(""),
+            ));
 
-            parent
-                .spawn((
-                        chat_message_input_node(),
-                        chat_components::ChatMessageInputElement { focused: false },
-                ))
-                .with_children(|parent| {
-                    parent.spawn(Text::new("<Empty>"));
-                });
+            parent.spawn((
+                chat_message_input_node(),
+                chat_components::ChatMessageInputElement { focused: false },
+                Text::new("<Empty>"),
+            ));
         });
 }
 
@@ -268,21 +262,18 @@ pub fn add_message_to_chat_container_system(
     for event in events.read() {
         if let Ok((entity, _)) = query.get_single() {
             commands.entity(entity).with_children(|parent| {
-                parent
-                    .spawn(Node {
+                parent.spawn((
+                    Node {
                         margin: UiRect::all(Val::Px(5.0)),
                         ..default()
-                    })
-                    .with_children(|parent| {
-                        parent.spawn((
-                            Text::new(event.0.message.clone()),
-                            TextColor(TEXT_COLOR),
-                            TextFont {
-                                font_size: FONT_SIZE,
-                                ..default()
-                            },
-                        ));
-                    });
+                    },
+                    Text::new(event.0.message.clone()),
+                    TextColor(TEXT_COLOR),
+                    TextFont {
+                        font_size: FONT_SIZE,
+                        ..default()
+                    },
+                ));
             });
         }
     }
