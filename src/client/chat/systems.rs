@@ -1,15 +1,12 @@
 use crate::prelude::*;
-use bevy::{
-    input::{keyboard::KeyboardInput, ButtonState},
-    picking::focus::HoverMap,
-};
+use bevy::input::{keyboard::KeyboardInput, ButtonState};
 use chat_events::{ChatFocusStateChangeEvent, ChatMessageSendEvent, FocusState};
 
 const COLOR_UNFOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
 const COLOR_FOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
 const TEXT_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 0.5);
+
 const FONT_SIZE: f32 = 20.0;
-const LINE_HEIGHT: f32 = 21.0;
 
 fn root_node() -> Node {
     Node {
@@ -46,11 +43,11 @@ fn chat_message_input_node() -> Node {
 pub fn setup_chat_container(mut commands: Commands) {
     commands
         .spawn((root_node(), BackgroundColor(COLOR_UNFOCUSED)))
-        .insert(PickingBehavior::IGNORE)
         .with_children(|parent| {
             parent.spawn((
                 chat_message_container_node(),
                 chat_components::ChatMessageContainer { focused: false },
+                Text::new(""),
             ));
 
             parent.spawn((
@@ -139,12 +136,12 @@ pub fn focus_chat_input_system(
     mut chat_state: ResMut<chat_resources::ChatState>,
 ) {
     if let Ok(chat_input_component) = chat_input_query.get_single_mut() {
-        // if mouse_button_input.just_pressed(MouseButton::Left) {
-        //     info!("Unfocusing chat via Left click");
-        //     focus_change_events.send(ChatFocusStateChangeEvent {
-        //         state: FocusState::Unfocus,
-        //     });
-        // }
+        if mouse_button_input.just_pressed(MouseButton::Left) {
+            info!("Unfocusing chat via Left click");
+            focus_change_events.send(ChatFocusStateChangeEvent {
+                state: FocusState::Unfocus,
+            });
+        }
         if keyboard_input.just_pressed(KeyCode::KeyT) && !chat_input_component.focused {
             info!("Focusing chat via KeyT");
             focus_change_events.send(ChatFocusStateChangeEvent {
@@ -265,58 +262,19 @@ pub fn add_message_to_chat_container_system(
     for event in events.read() {
         if let Ok((entity, _)) = query.get_single() {
             commands.entity(entity).with_children(|parent| {
-                parent
-                    .spawn((
-                        Node {
-                            margin: UiRect::all(Val::Px(5.0)),
-                            ..default()
-                        },
-                        Text::new(event.0.message.clone()),
-                        TextColor(TEXT_COLOR),
-                        TextFont {
-                            font_size: FONT_SIZE,
-                            ..default()
-                        },
-                    ))
-                    .insert(PickingBehavior {
-                        should_block_lower: false,
+                parent.spawn((
+                    Node {
+                        margin: UiRect::all(Val::Px(5.0)),
                         ..default()
-                    });
+                    },
+                    Text::new(event.0.message.clone()),
+                    TextColor(TEXT_COLOR),
+                    TextFont {
+                        font_size: FONT_SIZE,
+                        ..default()
+                    },
+                ));
             });
-        }
-    }
-}
-
-pub fn update_scroll_position_system(
-    mut mouse_wheel_events: EventReader<MouseWheel>,
-    hover_map: Res<HoverMap>,
-    mut scrolled_node_query: Query<&mut ScrollPosition>,
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-) {
-    // joinked from https://bevyengine.org/examples/ui-user-interface/scroll/
-
-    for mouse_wheel_event in mouse_wheel_events.read() {
-        let (mut dx, mut dy) = match mouse_wheel_event.unit {
-            MouseScrollUnit::Line => (
-                mouse_wheel_event.x * LINE_HEIGHT,
-                mouse_wheel_event.y * LINE_HEIGHT,
-            ),
-            MouseScrollUnit::Pixel => (mouse_wheel_event.x, mouse_wheel_event.y),
-        };
-
-        if keyboard_input.pressed(KeyCode::ControlLeft)
-            || keyboard_input.pressed(KeyCode::ControlRight)
-        {
-            std::mem::swap(&mut dx, &mut dy);
-        }
-
-        for (_pointer, pointer_map) in hover_map.iter() {
-            for (entity, _hit) in pointer_map.iter() {
-                if let Ok(mut scroll_position) = scrolled_node_query.get_mut(*entity) {
-                    scroll_position.offset_x -= dx;
-                    scroll_position.offset_y -= dy;
-                }
-            }
         }
     }
 }
