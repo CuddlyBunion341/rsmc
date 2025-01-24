@@ -291,41 +291,8 @@ pub fn handle_chat_clear_events_system(
 mod tests {
     use super::*;
     use bevy::ecs::event::Events;
-    use bevy::ecs::schedule::Schedule;
-    use bevy::ecs::world::World;
-    use bevy_rapier3d::parry::either::IntoEither;
-    use chat_events::SingleChatSendEvent;
+    use chat_events::{ChatClearEvent, SingleChatSendEvent};
     use rsmc::ChatMessage;
-
-    #[test]
-    fn test_focus_events() {
-        // let mut world = World::new();
-        // let mut schedule = Schedule::default();
-        //
-        // world.spawn((
-        //     chat_components::ChatMessageContainer { focused: false },
-        //     chat_components::ChatMessageInputElement { focused: false },
-        // ));
-        //
-        // let mut focus_events = Events::<ChatFocusStateChangeEvent>::default();
-        // focus_events.send(ChatFocusStateChangeEvent {
-        //     state: FocusState::Focus,
-        // });
-        //
-        // world.insert_resource(focus_events);
-        //
-        // schedule.add_system(handle_focus_events);
-        // schedule.run(&mut world);
-        //
-        // let container = world
-        //     .query::<(&chat_components::ChatMessageContainer, &chat_components::ChatMessageInputElement)>()
-        //     .iter(&world)
-        //     .next()
-        //     .unwrap();
-        //
-        // assert!(container.0.focused);
-        // assert!(container.1.focused);
-    }
 
     #[test]
     fn test_send_message_system() {
@@ -358,5 +325,51 @@ mod tests {
         let message_count = messages.iter(app.world()).count();
         assert_eq!(message_count, 1);
         assert_eq!(messages.iter(app.world()).next().unwrap().0.0, "Hello World");
+    }
+
+    fn get_chat_messages(app: &mut App) -> Vec<String> {
+        let mut messages = app
+            .world_mut()
+            .query::<(&Text, &chat_components::ChatMessageElement)>();
+
+        messages.iter(app.world()).map(|(text, _)| text.0.clone()).collect()
+    }
+
+    #[test]
+    fn test_chat_clear_system() {
+        let mut app = App::new();
+
+        app.add_plugins(MinimalPlugins)
+            .add_systems(Update, handle_chat_clear_events_system)
+            .insert_resource(Events::<ChatClearEvent>::default());
+
+        app.world_mut().spawn((
+            chat_components::ChatMessageContainer { focused: false },
+        )).with_children(|parent| {
+            parent.spawn((
+                Node::default(),
+                chat_components::ChatMessageElement,
+                Text::new("Message 1"),
+            ));
+
+            parent.spawn((
+                Node::default(),
+                chat_components::ChatMessageElement,
+                Text::new("Message 2"),
+            ));
+        });
+
+        let messages = get_chat_messages(&mut app);
+        assert_eq!(messages.len(), 2);
+        assert_eq!(messages[0], "Message 1");
+        assert_eq!(messages[1], "Message 2");
+
+        let mut event_writer = app.world_mut().get_resource_mut::<Events<chat_events::ChatClearEvent>>().unwrap();
+        event_writer.send(chat_events::ChatClearEvent);
+
+        app.update();
+
+        let messages = get_chat_messages(&mut app);
+        assert_eq!(messages.len(), 0);
     }
 }
