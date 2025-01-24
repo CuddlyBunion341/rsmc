@@ -1,11 +1,14 @@
 use crate::prelude::*;
-use bevy::input::{keyboard::KeyboardInput, ButtonState};
+use bevy::{
+    color::palettes::css::RED, input::{keyboard::KeyboardInput, ButtonState}, utils::tracing::Span
+};
 use chat_events::{ChatFocusStateChangeEvent, ChatMessageSendEvent, FocusState};
 
 const COLOR_UNFOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
 const COLOR_FOCUSED: Color = Color::srgba(0.0, 0.0, 0.0, 0.5);
 const TEXT_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 0.5);
 const FONT_SIZE: f32 = 20.0;
+const MESSAGE_PROMPT: &str = "> ";
 
 fn root_node() -> Node {
     Node {
@@ -22,7 +25,7 @@ fn chat_message_container_node() -> Node {
     Node {
         flex_direction: FlexDirection::Column,
         overflow: Overflow {
-            x: OverflowAxis::Scroll,
+            x: OverflowAxis::Visible,
             y: OverflowAxis::Scroll,
         },
         flex_grow: 1.0,
@@ -33,8 +36,10 @@ fn chat_message_container_node() -> Node {
 
 fn chat_message_input_node() -> Node {
     Node {
+        margin: UiRect::px(0.0, 0.0, 15.0, 0.0),
         padding: UiRect::all(Val::Px(10.0)),
         height: Val::Px(20.0),
+        display: Display::Flex,
         ..default()
     }
 }
@@ -49,11 +54,12 @@ pub fn setup_chat_container(mut commands: Commands) {
                 Text::new(""),
             ));
 
-            parent.spawn((
-                chat_message_input_node(),
-                chat_components::ChatMessageInputElement { focused: false },
-                Text::new("<Empty>"),
-            ));
+            parent
+                .spawn((
+                    chat_message_input_node(),
+                    chat_components::ChatMessageInputElement { focused: false },
+                    Text::new(MESSAGE_PROMPT),
+                ));
         });
 }
 
@@ -217,29 +223,38 @@ pub fn process_chat_input_system(
 
             info!("Chat state: {}", chat_input_value);
 
+            let mut message = extract_message(&chat_input_value);
+
             match &event.logical_key {
-                Key::Enter if !chat_input_value.trim().is_empty() => {
+                Key::Enter if !message.trim().is_empty() => {
                     send_event_writer
-                        .send(ChatMessageSendEvent(chat_input_value.trim().to_string()));
-                    chat_input_value.clear();
+                        .send(ChatMessageSendEvent(message.trim().to_string()));
+                    message.clear();
                 }
                 Key::Backspace => {
-                    chat_input_value.pop();
+                    message.pop();
                 }
-                Key::Space => chat_input_value.push(' '),
+                Key::Space => message.push(' '),
                 Key::Character(input) => {
                     if input.chars().all(|c| !c.is_control()) {
-                        chat_input_value.push_str(input);
+                        message.push_str(input);
                     }
                 }
                 _ => {}
             }
+
+            chat_input_value = MESSAGE_PROMPT.to_string() + &message;
         }
 
         text.clear();
 
         text.0 += &chat_input_value;
     }
+}
+
+fn extract_message(value: &String) -> String {
+    let message = value.trim_start_matches(MESSAGE_PROMPT);
+    message.to_string()
 }
 
 pub fn handle_chat_message_sync_event(
@@ -255,11 +270,16 @@ pub fn handle_chat_message_sync_event(
 
 pub fn add_message_to_chat_container_system(
     mut commands: Commands,
-    mut query: Query<(Entity, &chat_components::ChatMessageContainer, &mut ScrollPosition)>,
+    mut query: Query<(
+        Entity,
+        &chat_components::ChatMessageContainer,
+        &mut ScrollPosition,
+    )>,
     mut events: EventReader<chat_events::SingleChatSendEvent>,
 ) {
     for event in events.read() {
         if let Ok((entity, _, mut scroll_position)) = query.get_single_mut() {
+            // Offset does not need to be exact, just needs to be large enough to see the new message
             scroll_position.offset_y = scroll_position.offset_y + 100.0;
 
             commands.entity(entity).with_children(|parent| {
