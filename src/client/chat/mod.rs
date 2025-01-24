@@ -17,7 +17,7 @@ impl Plugin for ChatPlugin {
             (
                 systems::handle_chat_message_sync_event,
                 systems::add_message_to_chat_container_system,
-                systems::chat_state_transition_system
+                systems::chat_state_transition_system,
             ),
         );
         app.add_systems(

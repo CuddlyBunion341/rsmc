@@ -54,7 +54,7 @@ pub fn chat_state_transition_system(
     mut next_state: ResMut<NextState<GameState>>,
     mut chat_state: ResMut<chat_resources::ChatState>,
 ) {
-    let current_state_value = current_state.get() ;
+    let current_state_value = current_state.get();
     let mut next_state_value = current_state_value.clone();
 
     if mouse_button_input.just_pressed(MouseButton::Left) {
