@@ -73,12 +73,12 @@ pub fn chat_state_transition_system(
 
 pub fn process_chat_input_system(
     mut evr_kbd: EventReader<KeyboardInput>,
-    mut chat_input_query: Query<(&mut Text, &mut chat_components::ChatMessageInputElement)>,
+    mut chat_input_query: Query<&mut Text, With<chat_components::ChatMessageInputElement>>,
     mut send_event_writer: EventWriter<ChatMessageSendEvent>,
     mut chat_state: ResMut<chat_resources::ChatState>,
     mut chat_clear_writer: EventWriter<chat_events::ChatClearEvent>,
 ) {
-    if let Ok((mut text, _input_component)) = chat_input_query.get_single_mut() {
+    if let Ok(mut text) = chat_input_query.get_single_mut() {
         let mut chat_input_value = text.0.clone();
 
         for event in evr_kbd.read() {
@@ -182,18 +182,21 @@ pub fn handle_chat_clear_events_system(
 
 pub fn unfocus_chat_system(
     mut chat_container_query: Query<
-        (&mut ClassList, &mut chat_components::ChatMessageContainer),
-        Without<chat_components::ChatMessageInputElement>,
+        &mut ClassList,
+        (
+            With<chat_components::ChatMessageContainer>,
+            Without<chat_components::ChatMessageInputElement>,
+        ),
     >,
     mut chat_input_query: Query<
+        &mut ClassList,
         (
-            &mut ClassList,
-            &mut chat_components::ChatMessageInputElement,
+            With<chat_components::ChatMessageInputElement>,
+            Without<chat_components::ChatMessageContainer>,
         ),
-        Without<chat_components::ChatMessageContainer>,
     >,
 ) {
-    if let (Ok((mut container_classes, _chat_container)), Ok((mut input_classes, _chat_input))) = (
+    if let (Ok(mut container_classes), Ok(mut input_classes)) = (
         chat_container_query.get_single_mut(),
         chat_input_query.get_single_mut(),
     ) {
@@ -208,33 +211,30 @@ pub fn unfocus_chat_system(
 
 pub fn focus_chat_system(
     mut chat_container_query: Query<
-        (&mut ClassList, &mut chat_components::ChatMessageContainer),
-        Without<chat_components::ChatMessageInputElement>,
+        &mut ClassList,
+        (
+            With<chat_components::ChatMessageContainer>,
+            Without<chat_components::ChatMessageInputElement>,
+        ),
     >,
     mut chat_input_query: Query<
+        &mut ClassList,
         (
-            &mut ClassList,
-            &mut chat_components::ChatMessageInputElement,
+            With<chat_components::ChatMessageInputElement>,
+            Without<chat_components::ChatMessageContainer>,
         ),
-        Without<chat_components::ChatMessageContainer>,
     >,
-    mut window_query: Query<&mut Window>,
 ) {
-    if let Ok(mut _window) = window_query.get_single_mut() {
-        if let (
-            Ok((mut container_classes, _chat_container)),
-            Ok((mut input_classes, _chat_input)),
-        ) = (
-            chat_container_query.get_single_mut(),
-            chat_input_query.get_single_mut(),
-        ) {
-            info!("Handling focus state");
-            container_classes.add_class("focused");
-            container_classes.remove_class("unfocused");
+    if let (Ok(mut container_classes), Ok(mut input_classes)) = (
+        chat_container_query.get_single_mut(),
+        chat_input_query.get_single_mut(),
+    ) {
+        info!("Handling focus state");
+        container_classes.add_class("focused");
+        container_classes.remove_class("unfocused");
 
-            input_classes.add_class("focused");
-            input_classes.remove_class("unfocused");
-        }
+        input_classes.add_class("focused");
+        input_classes.remove_class("unfocused");
     }
 }
 
