@@ -82,7 +82,13 @@ impl ChunkManager {
         self.chunks.contains_key(&[x as i32, y as i32, z as i32])
     }
 
-    pub fn get_chunk(&mut self, position: Vec3) -> Option<&mut lib::Chunk> {
+    pub fn get_chunk(&self, position: Vec3) -> Option<&lib::Chunk> {
+        let Vec3 { x, y, z } = position.floor();
+
+        self.chunks.get(&[x as i32, y as i32, z as i32])
+    }
+
+    pub fn get_chunk_mut(&mut self, position: Vec3) -> Option<&mut lib::Chunk> {
         let Vec3 { x, y, z } = position.floor();
 
         self.chunks.get_mut(&[x as i32, y as i32, z as i32])
@@ -134,7 +140,7 @@ impl ChunkManager {
 
     fn chunk_from_selection(&mut self, position: Vec3) -> Option<&mut lib::Chunk> {
         let chunk_position = position / CHUNK_SIZE as f32;
-        self.get_chunk(chunk_position)
+        self.get_chunk_mut(chunk_position)
     }
 }
 
@@ -174,13 +180,13 @@ mod tests {
     }
 
     #[test]
-    fn test_set_and_get_chunk() {
+    fn test_set_and_get_chunk_mut() {
         let mut chunk_manager = ChunkManager::new();
         let position = Vec3::new(0.0, 0.0, 0.0);
         let chunk = Chunk::new(position);
 
         chunk_manager.set_chunk(position, chunk);
-        let retrieved_chunk = chunk_manager.get_chunk(position).unwrap();
+        let retrieved_chunk = chunk_manager.get_chunk_mut(position).unwrap();
         assert_eq!(retrieved_chunk.position, chunk.position);
     }
 
@@ -198,7 +204,18 @@ mod tests {
         let retrieved_block = chunk_manager.get_block(block_position).unwrap();
         assert_eq!(retrieved_block, block_id);
     }
-    
+
+    #[test]
+    fn test_set_and_get_chunk() {
+        let mut chunk_manager = ChunkManager::new();
+        let position = Vec3::new(0.0, 0.0, 0.0);
+        let chunk = Chunk::new(position);
+
+        chunk_manager.set_chunk(position, chunk);
+        let retrieved_chunk = chunk_manager.get_chunk(position).unwrap();
+        assert_eq!(retrieved_chunk.position, chunk.position);
+    }
+
     #[test]
     fn test_chunk_exists() {
         let mut chunk_manager = ChunkManager::new();

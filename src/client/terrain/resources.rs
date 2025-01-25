@@ -58,7 +58,7 @@ impl ChunkManager {
             .into_iter()
             .filter(|chunk| {
                 let chunk_position = chunk.position;
-                let chunk = self.get_chunk(chunk_position);
+                let chunk = self.get_chunk_mut(chunk_position);
                 chunk.is_some()
             })
             .collect()
@@ -85,7 +85,7 @@ impl ChunkManager {
         self.chunks.insert([x as i32, y as i32, z as i32], chunk);
     }
 
-    pub fn get_chunk(&mut self, position: Vec3) -> Option<&mut lib::Chunk> {
+    pub fn get_chunk_mut(&mut self, position: Vec3) -> Option<&mut lib::Chunk> {
         let Vec3 { x, y, z } = position.floor();
 
         self.chunks.get_mut(&[x as i32, y as i32, z as i32])
@@ -137,7 +137,7 @@ impl ChunkManager {
 
     fn chunk_from_selection(&mut self, position: Vec3) -> Option<&mut lib::Chunk> {
         let chunk_position = position / CHUNK_SIZE as f32;
-        self.get_chunk(chunk_position)
+        self.get_chunk_mut(chunk_position)
     }
 }
 
@@ -177,13 +177,13 @@ mod tests {
     }
 
     #[test]
-    fn test_set_and_get_chunk() {
+    fn test_set_and_get_chunk_mut() {
         let mut chunk_manager = ChunkManager::new();
         let position = Vec3::new(0.0, 0.0, 0.0);
         let chunk = Chunk::new(position);
 
         chunk_manager.set_chunk(position, chunk);
-        let retrieved_chunk = chunk_manager.get_chunk(position).unwrap();
+        let retrieved_chunk = chunk_manager.get_chunk_mut(position).unwrap();
         assert_eq!(retrieved_chunk.position, chunk.position);
     }
 

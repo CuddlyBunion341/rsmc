@@ -2,6 +2,8 @@
 use bevy_inspector_egui::bevy_egui::EguiContexts;
 #[cfg(feature = "renet_visualizer")]
 use renet_visualizer::RenetServerVisualizer;
+use rayon::iter::IntoParallelIterator;
+use rayon::iter::ParallelIterator;
 
 use crate::prelude::*;
 
@@ -9,7 +11,7 @@ pub fn receive_message_system(
     mut server: ResMut<RenetServer>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
-    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    chunk_manager: ResMut<terrain_resources::ChunkManager>,
     mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
 ) {
     for client_id in server.clients_id() {
@@ -69,7 +71,7 @@ pub fn receive_message_system(
                     );
 
                     let chunks: Vec<Chunk> = positions
-                        .into_iter()
+                        .into_par_iter()
                         .map(|position| {
                             let chunk = chunk_manager.get_chunk(position);
 
