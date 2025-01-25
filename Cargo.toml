@@ -41,4 +41,5 @@ path = "src/server/main.rs"
 [features]
 wireframe = []
 debug_ui = []
+renet_visualizer = []
 

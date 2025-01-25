@@ -1,5 +1,6 @@
-// TODO: feature flag these imports
+#[cfg(feature = "renet_visualizer")]
 use bevy_inspector_egui::bevy_egui::EguiContexts;
+#[cfg(feature = "renet_visualizer")]
 use renet_visualizer::RenetServerVisualizer;
 
 use crate::prelude::*;
@@ -166,7 +167,7 @@ pub fn handle_events_system(
     }
 }
 
-// TODO: feature flag this
+#[cfg(feature = "renet_visualizer")]
 pub fn handle_events_for_visualizer_system(
     mut server_events: EventReader<ServerEvent>,
     mut visualizer: ResMut<RenetServerVisualizer<200>>,
@@ -183,7 +184,7 @@ pub fn handle_events_for_visualizer_system(
     }
 }
 
-// TODO: Feature flag this
+#[cfg(feature = "renet_visualizer")]
 pub fn update_visulizer_system(
     mut egui_contexts: EguiContexts,
     mut visualizer: ResMut<RenetServerVisualizer<200>>,

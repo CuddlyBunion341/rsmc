@@ -2,7 +2,9 @@ use std::time::Duration;
 
 pub mod systems;
 
+#[cfg(feature = "renet_visualizer")]
 use bevy_inspector_egui::bevy_egui::EguiPlugin;
+#[cfg(feature = "renet_visualizer")]
 use renet_visualizer::RenetServerVisualizer;
 
 use crate::prelude::*;
@@ -15,8 +17,8 @@ impl Plugin for NetworkingPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(RenetServerPlugin);
 
+        #[cfg(feature = "renet_visualizer")]
         {
-            // TODO: feature flag this
             app.add_plugins(EguiPlugin);
             app.insert_resource(RenetServerVisualizer::<200>::default());
             app.add_systems(
