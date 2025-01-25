@@ -9,7 +9,7 @@ pub fn receive_message_system(
     mut server: ResMut<RenetServer>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
-    chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    chunk_manager: ResMut<lib::ChunkManager>,
     mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
 ) {
     for client_id in server.clients_id() {

@@ -5,10 +5,7 @@ pub fn prepare_spawn_area_system(mut client: ResMut<RenetClient>) {
 
     info!("Sending chunk requests for spawn area");
 
-    let chunks = terrain_resources::ChunkManager::instantiate_chunks(
-        Vec3::new(0.0, 0.0, 0.0),
-        render_distance,
-    );
+    let chunks = lib::ChunkManager::instantiate_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
 
     let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
     let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(positions));
@@ -18,7 +15,7 @@ pub fn prepare_spawn_area_system(mut client: ResMut<RenetClient>) {
 
 pub fn generate_world_system(
     mut client: ResMut<RenetClient>,
-    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chunk_manager: ResMut<lib::ChunkManager>,
 ) {
     let render_distance = 2;
 
@@ -49,7 +46,7 @@ pub fn handle_chunk_mesh_update_events(
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    chunk_manager: ResMut<lib::ChunkManager>,
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
     texture_manager: ResMut<terrain_util::TextureManager>,

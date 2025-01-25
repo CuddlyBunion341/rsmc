@@ -7,7 +7,7 @@ pub fn receive_message_system(
     mut player_despawn_events: ResMut<Events<remote_player_events::RemotePlayerDespawnedEvent>>,
     mut player_sync_events: ResMut<Events<remote_player_events::RemotePlayerSyncEvent>>,
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
-    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chunk_manager: ResMut<lib::ChunkManager>,
     mut chunk_mesh_events: ResMut<Events<terrain_events::ChunkMeshUpdateEvent>>,
     mut chat_events: ResMut<Events<chat_events::ChatSyncEvent>>,
     mut single_chat_events: ResMut<Events<chat_events::SingleChatSendEvent>>,

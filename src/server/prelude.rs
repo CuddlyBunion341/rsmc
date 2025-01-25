@@ -26,6 +26,7 @@ pub use rayon::iter::IntoParallelRefMutIterator;
 pub use rayon::iter::ParallelIterator;
 
 pub use self::lib::Chunk;
+pub use self::lib::ChunkManager;
 pub use self::terrain_util::Block;
 pub use noise::NoiseFn;
 pub use noise::Perlin;

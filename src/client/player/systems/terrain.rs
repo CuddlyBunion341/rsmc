@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub fn handle_block_update_events(
-    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chunk_manager: ResMut<lib::ChunkManager>,
     mut block_update_events: EventReader<terrain_events::BlockUpdateEvent>,
     mut chunk_mesh_update_events: EventWriter<terrain_events::ChunkMeshUpdateEvent>,
     mut player_collider_events: EventWriter<player_events::PlayerColliderUpdateEvent>,

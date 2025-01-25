@@ -39,7 +39,7 @@ pub fn setup_coliders_system(mut commands: Commands) {
 pub fn handle_collider_update_events_system(
     mut collider_grid_events: EventReader<collider_events::ColliderUpdateEvent>,
     mut query: Query<(&mut Transform, &collider_components::BlockCollider)>,
-    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chunk_manager: ResMut<lib::ChunkManager>,
 ) {
     for event in collider_grid_events.read() {
         let event_position = Vec3::new(
@@ -102,7 +102,7 @@ mod tests {
 
         app.add_event::<collider_events::ColliderUpdateEvent>();
         app.add_systems(Update, handle_collider_update_events_system);
-        app.insert_resource(terrain_resources::ChunkManager::new());
+        app.insert_resource(lib::ChunkManager::new());
 
         app.world_mut().spawn((
             Transform {
@@ -125,9 +125,9 @@ mod tests {
         let block = BlockId::Dirt;
         let mut resource = app
             .world_mut()
-            .get_resource_mut::<terrain_resources::ChunkManager>()
+            .get_resource_mut::<lib::ChunkManager>()
             .unwrap();
-        let chunks = terrain_resources::ChunkManager::instantiate_chunks(
+        let chunks = lib::ChunkManager::instantiate_chunks(
             Vec3 {
                 x: 0.0,
                 y: 0.0,
