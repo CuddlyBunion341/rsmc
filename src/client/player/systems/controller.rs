@@ -83,3 +83,22 @@ pub fn handle_controller_movement_system(
         last_position.0 = controller_position.floor();
     }
 }
+
+pub fn activate_fps_controller_system(mut controller_query: Query<&mut FpsController>) {
+    for mut controller in &mut controller_query.iter_mut() {
+        controller.enable_input = true;
+    }
+}
+
+pub fn lock_cursor_system(mut window_query: Query<&mut Window>) {
+    if let Ok(mut window) = window_query.get_single_mut() {
+        window.cursor_options.grab_mode = CursorGrabMode::Locked;
+        window.cursor_options.visible = false;
+    }
+}
+
+pub fn deactivate_fps_controller_system(mut controller_query: Query<&mut FpsController>) {
+    for mut controller in &mut controller_query.iter_mut() {
+        controller.enable_input = false;
+    }
+}

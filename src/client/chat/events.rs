@@ -11,13 +11,3 @@ pub struct ChatMessageSendEvent(pub String);
 
 #[derive(Event)]
 pub struct ChatClearEvent;
-
-pub enum FocusState {
-    Focus,
-    Unfocus,
-}
-
-#[derive(Event)]
-pub struct ChatFocusStateChangeEvent {
-    pub state: FocusState,
-}

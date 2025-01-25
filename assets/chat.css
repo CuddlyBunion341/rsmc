@@ -17,6 +17,7 @@
 
 #chat_message_input {
   margin: 0px;
+  margin-top: 15px;
   padding: 10px;
   height: 20px;
   display: flex;

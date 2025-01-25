@@ -15,21 +15,28 @@ impl Plugin for ChatPlugin {
         app.add_systems(
             Update,
             (
-                systems::process_chat_input_system,
-                systems::handle_chat_focus_player_controller_events,
-                systems::handle_window_focus_events,
-                systems::focus_chat_input_system,
-                systems::send_messages_system,
-                systems::handle_focus_events,
                 systems::handle_chat_message_sync_event,
                 systems::add_message_to_chat_container_system,
-                systems::handle_chat_clear_events_system,
+                systems::chat_state_transition_system,
             ),
         );
+        app.add_systems(
+            Update,
+            (
+                systems::process_chat_input_system,
+                systems::send_messages_system,
+                systems::handle_chat_clear_events_system,
+            )
+                .run_if(in_state(GameState::Chatting)),
+        );
+
+        app.add_systems(OnEnter(GameState::Chatting), systems::focus_chat_system);
+        app.add_systems(OnExit(GameState::Chatting), systems::unfocus_chat_system);
+
         app.insert_resource(resources::ChatHistory::default());
         app.insert_resource(resources::ChatState::default());
+
         app.add_event::<events::ChatSyncEvent>();
-        app.add_event::<events::ChatFocusStateChangeEvent>();
         app.add_event::<events::ChatMessageSendEvent>();
         app.add_event::<events::SingleChatSendEvent>();
         app.add_event::<events::ChatClearEvent>();

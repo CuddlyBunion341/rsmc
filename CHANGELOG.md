@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Add `bevy_flair` stylesheets
+- Add `bevy-inspector-egui`
+- Update state management to use bevy `State` instead of a custom `StateMachine`
 
 ## 0.1.1
 

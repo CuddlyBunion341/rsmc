@@ -42,6 +42,7 @@ pub use noise::Perlin;
 pub use terrain_util::CubeFace;
 
 // my crates
+pub use crate::states::GameState;
 pub use rsmc as lib;
 pub use rsmc::BlockId;
 pub use rsmc::NetworkingMessage;

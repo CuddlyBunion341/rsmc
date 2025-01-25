@@ -9,6 +9,7 @@ mod networking;
 mod player;
 mod remote_player;
 mod scene;
+mod states;
 mod terrain;
 
 use bevy::color::palettes::css::WHITE;
@@ -48,6 +49,7 @@ fn main() {
             remote_player::RemotePlayerPlugin,
             chat::ChatPlugin,
         ))
+        .insert_state(GameState::Playing)
         .insert_resource(WireframeConfig {
             #[cfg(not(feature = "wireframe"))]
             global: false,
