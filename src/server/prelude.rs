@@ -20,6 +20,11 @@ pub use bevy_renet::RenetServerPlugin;
 pub use renet::DefaultChannel;
 pub use renet::*;
 
+// other crates
+pub use rayon::iter::IntoParallelIterator;
+pub use rayon::iter::IntoParallelRefMutIterator;
+pub use rayon::iter::ParallelIterator;
+
 pub use self::lib::Chunk;
 pub use self::terrain_util::Block;
 pub use noise::NoiseFn;

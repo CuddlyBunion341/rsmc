@@ -31,6 +31,9 @@ pub use renet::{ClientId, ConnectionConfig, DefaultChannel, RenetClient};
 
 // other crates
 pub use iyes_perf_ui::prelude::*;
+pub use rayon::iter::IntoParallelIterator;
+pub use rayon::iter::IntoParallelRefMutIterator;
+pub use rayon::iter::ParallelIterator;
 pub use serde::*;
 
 pub use self::lib::Chunk;

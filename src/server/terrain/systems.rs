@@ -1,6 +1,3 @@
-use rayon::iter::IntoParallelRefMutIterator;
-use rayon::iter::ParallelIterator;
-
 use crate::prelude::*;
 
 pub fn setup_world_system(mut chunk_manager: ResMut<terrain_resources::ChunkManager>) {
