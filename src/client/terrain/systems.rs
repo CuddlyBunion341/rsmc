@@ -20,7 +20,7 @@ pub fn generate_world_system(
     mut client: ResMut<RenetClient>,
     mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
 ) {
-    let render_distance = 6;
+    let render_distance = 2;
 
     info!("Sending chunk requests for chunks");
 
@@ -29,6 +29,7 @@ pub fn generate_world_system(
     let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
 
     let batched_positions = positions.chunks(32);
+    assert!(batched_positions.len() > 0, "Batched positions is empty");
 
     batched_positions.for_each(|batch| {
         let request_positions = batch.to_vec();

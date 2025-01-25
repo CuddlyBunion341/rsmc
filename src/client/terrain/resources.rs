@@ -27,16 +27,20 @@ impl ChunkManager {
         }
     }
 
-    pub fn instantiate_chunks(position: Vec3, render_distance: i32) -> Vec<lib::Chunk> {
+    pub fn instantiate_chunks_vec(position: Vec3, render_distance: Vec3) -> Vec<lib::Chunk> {
+        let render_distance_x = render_distance.x as i32;
+        let render_distance_y = render_distance.y as i32;
+        let render_distance_z = render_distance.z as i32;
+
         let mut chunks: Vec<lib::Chunk> = Vec::new();
 
-        for x in 0..render_distance {
-            for y in 0..render_distance {
-                for z in 0..render_distance {
+        for x in -render_distance_x..render_distance_x {
+            for y in -render_distance_y..render_distance_y {
+                for z in -render_distance_z..render_distance_z {
                     let chunk_position = Vec3::new(
-                        (x - render_distance / 2) as f32 + position.x,
-                        (y - render_distance / 2) as f32 + position.y,
-                        (z - render_distance / 2) as f32 + position.z,
+                        x as f32 + position.x,
+                        y as f32 + position.y,
+                        z as f32 + position.z,
                     );
                     let chunk = lib::Chunk::new(chunk_position);
                     chunks.push(chunk);
@@ -45,6 +49,17 @@ impl ChunkManager {
         }
 
         chunks
+    }
+
+    pub fn instantiate_chunks(position: Vec3, render_distance: i32) -> Vec<lib::Chunk> {
+        Self::instantiate_chunks_vec(
+            position,
+            Vec3::new(
+                render_distance as f32,
+                render_distance as f32,
+                render_distance as f32,
+            ),
+        )
     }
 
     pub fn instantiate_new_chunks(
@@ -59,7 +74,7 @@ impl ChunkManager {
             .filter(|chunk| {
                 let chunk_position = chunk.position;
                 let chunk = self.get_chunk_mut(chunk_position);
-                chunk.is_some()
+                !chunk.is_some()
             })
             .collect()
     }
