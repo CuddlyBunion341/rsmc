@@ -39,4 +39,5 @@ path = "src/server/main.rs"
 
 [features]
 wireframe = []
+debug_ui = []
 
