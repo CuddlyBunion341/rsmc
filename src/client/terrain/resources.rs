@@ -175,12 +175,15 @@ mod tests {
     #[test]
     fn test_instantiate_chunks() {
         let position = Vec3::new(0.0, 0.0, 0.0);
-        let render_distance = 2;
-        let chunks = ChunkManager::instantiate_chunks(position, render_distance);
-        assert_eq!(
-            chunks.len(),
-            (render_distance * render_distance * render_distance) as usize
-        );
+
+        let width = 2;
+        let height = 3;
+        let depth = 4;
+
+        let render_distance = Vec3::new(width as f32, height as f32, depth as f32);
+
+        let chunks = ChunkManager::instantiate_chunks_vec(position, render_distance);
+        assert_eq!(chunks.len(), (2 * width * 2 * height * 2 * depth) as usize,);
     }
 
     #[test]
@@ -190,10 +193,12 @@ mod tests {
         let render_distance = 2;
         let chunks = ChunkManager::instantiate_chunks(position, render_distance);
 
+        let render_diameter = render_distance * 2;
+
         chunk_manager.insert_chunks(chunks);
         assert_eq!(
             chunk_manager.chunks.len(),
-            (render_distance * render_distance * render_distance) as usize
+            (render_diameter * render_diameter * render_diameter) as usize
         );
     }
 
