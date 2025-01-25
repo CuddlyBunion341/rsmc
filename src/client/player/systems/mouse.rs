@@ -5,9 +5,10 @@ pub fn manage_cursor_system(
     key: Res<ButtonInput<KeyCode>>,
     mut window_query: Query<&mut Window>,
     mut controller_query: Query<&mut FpsController>,
+    current_state: Res<State<GameState>>,
 ) {
     let mut window = window_query.single_mut();
-    if btn.just_pressed(MouseButton::Left) {
+    if btn.just_pressed(MouseButton::Left) && *current_state.get() != GameState::Debugging {
         window.cursor_options.grab_mode = CursorGrabMode::Locked;
         window.cursor_options.visible = false;
         for mut controller in &mut controller_query {
