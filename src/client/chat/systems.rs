@@ -48,7 +48,6 @@ pub fn send_messages_system(
 }
 
 pub fn chat_state_transition_system(
-    mouse_button_input: Res<ButtonInput<MouseButton>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     current_state: Res<State<GameState>>,
     mut next_state: ResMut<NextState<GameState>>,
@@ -57,10 +56,6 @@ pub fn chat_state_transition_system(
     let current_state_value = current_state.get();
     let mut next_state_value = current_state_value.clone();
 
-    if mouse_button_input.just_pressed(MouseButton::Left) {
-        info!("Unfocusing chat via Left click");
-        next_state_value = GameState::Playing;
-    }
     if keyboard_input.just_pressed(KeyCode::KeyT) {
         info!("Focusing chat via KeyT");
         if *current_state_value == GameState::Playing {
@@ -197,26 +192,20 @@ pub fn unfocus_chat_system(
         ),
         Without<chat_components::ChatMessageContainer>,
     >,
-    mut window_query: Query<&mut Window>,
 ) {
-    if let Ok(mut window) = window_query.get_single_mut() {
-        if let (
-            Ok((mut container_classes, _chat_container)),
-            Ok((mut input_classes, _chat_input)),
-        ) = (
-            chat_container_query.get_single_mut(),
-            chat_input_query.get_single_mut(),
-        ) {
-            info!("Handling unfocus state");
-            container_classes.remove_class("focused");
-            container_classes.add_class("unfocused");
+    if let (
+        Ok((mut container_classes, _chat_container)),
+        Ok((mut input_classes, _chat_input)),
+    ) = (
+    chat_container_query.get_single_mut(),
+    chat_input_query.get_single_mut(),
+    ) {
+        info!("Handling unfocus state");
+        container_classes.remove_class("focused");
+        container_classes.add_class("unfocused");
 
-            input_classes.remove_class("focused");
-            input_classes.add_class("unfocused");
-
-            window.cursor_options.grab_mode = CursorGrabMode::Locked;
-            window.cursor_options.visible = false;
-        }
+        input_classes.remove_class("focused");
+        input_classes.add_class("unfocused");
     }
 }
 

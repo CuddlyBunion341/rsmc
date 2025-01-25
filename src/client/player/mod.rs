@@ -27,7 +27,10 @@ impl Plugin for PlayerPlugin {
         );
         app.add_systems(
             Update,
-            (player_systems::setup_controller_on_area_ready_system,)
+            (
+                player_systems::setup_controller_on_area_ready_system,
+                player_systems::handle_player_collider_events_system,
+            )
                 .run_if(terrain_resources::SpawnAreaLoaded::is_loaded)
                 .run_if(player_resources::PlayerSpawned::is_not_spawned),
         );
@@ -41,7 +44,6 @@ impl Plugin for PlayerPlugin {
                 player_systems::raycast_system,
                 player_systems::handle_block_update_events,
                 player_systems::broadcast_player_attributes_system,
-                player_systems::handle_player_collider_events_system,
             )
                 .run_if(player_resources::PlayerSpawned::is_spawned)
                 .run_if(in_state(GameState::Playing)),
@@ -49,7 +51,10 @@ impl Plugin for PlayerPlugin {
 
         app.add_systems(
             OnEnter(GameState::Playing),
-            player_systems::activate_fps_controller_system,
+            (
+                player_systems::activate_fps_controller_system,
+                player_systems::lock_cursor_system,
+            ),
         );
 
         app.add_systems(
