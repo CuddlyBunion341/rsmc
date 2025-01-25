@@ -74,7 +74,7 @@ impl ChunkManager {
             .filter(|chunk| {
                 let chunk_position = chunk.position;
                 let chunk = self.get_chunk_mut(chunk_position);
-                !chunk.is_some()
+                chunk.is_none()
             })
             .collect()
     }
