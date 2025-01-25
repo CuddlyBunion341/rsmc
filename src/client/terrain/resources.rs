@@ -85,6 +85,12 @@ impl ChunkManager {
         self.chunks.insert([x as i32, y as i32, z as i32], chunk);
     }
 
+    pub fn get_chunk(&self, position: Vec3) -> Option<&lib::Chunk> {
+        let Vec3 { x, y, z } = position.floor();
+
+        self.chunks.get(&[x as i32, y as i32, z as i32])
+    }
+
     pub fn get_chunk_mut(&mut self, position: Vec3) -> Option<&mut lib::Chunk> {
         let Vec3 { x, y, z } = position.floor();
 
