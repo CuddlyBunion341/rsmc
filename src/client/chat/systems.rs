@@ -4,6 +4,7 @@ use bevy_flair::style::components::{ClassList, NodeStyleSheet};
 use chat_events::ChatMessageSendEvent;
 
 const MESSAGE_PROMPT: &str = "> ";
+const MAX_MESSAGE_LENGTH: usize = 42;
 
 pub fn setup_chat_container(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
@@ -108,10 +109,16 @@ pub fn process_chat_input_system(
                 Key::Backspace => {
                     message.pop();
                 }
-                Key::Space => message.push(' '),
+                Key::Space => {
+                    if message.len() < MAX_MESSAGE_LENGTH {
+                        message.push(' ');
+                    }
+                }
                 Key::Character(input) => {
-                    if input.chars().all(|c| !c.is_control()) {
-                        message.push_str(input);
+                    if message.len() < MAX_MESSAGE_LENGTH {
+                        if input.chars().all(|c| !c.is_control()) {
+                            message.push_str(input);
+                        }
                     }
                 }
                 _ => {}
