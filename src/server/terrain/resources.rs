@@ -77,6 +77,11 @@ impl ChunkManager {
         self.chunks.insert([x as i32, y as i32, z as i32], chunk);
     }
 
+    pub fn chunk_exists(&self, position: Vec3) -> bool {
+        let Vec3 { x, y, z } = position;
+        self.chunks.contains_key(&[x as i32, y as i32, z as i32])
+    }
+
     pub fn get_chunk(&mut self, position: Vec3) -> Option<&mut lib::Chunk> {
         let Vec3 { x, y, z } = position.floor();
 
@@ -192,5 +197,15 @@ mod tests {
         chunk_manager.set_block(block_position, block_id);
         let retrieved_block = chunk_manager.get_block(block_position).unwrap();
         assert_eq!(retrieved_block, block_id);
+    }
+    
+    #[test]
+    fn test_chunk_exists() {
+        let mut chunk_manager = ChunkManager::new();
+        let position = Vec3::new(0.0, 0.0, 0.0);
+        let chunk = Chunk::new(position);
+
+        chunk_manager.set_chunk(position, chunk);
+        assert!(chunk_manager.chunk_exists(position));
     }
 }
