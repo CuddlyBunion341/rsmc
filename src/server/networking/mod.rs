@@ -19,7 +19,13 @@ impl Plugin for NetworkingPlugin {
             // TODO: feature flag this
             app.add_plugins(EguiPlugin);
             app.insert_resource(RenetServerVisualizer::<200>::default());
-            app.add_systems(Update, networking_systems::update_visulizer_system);
+            app.add_systems(
+                Update,
+                (
+                    networking_systems::update_visulizer_system,
+                    networking_systems::handle_events_for_visualizer_system,
+                ),
+            );
         }
 
         let channel_config_unreliable = ChannelConfig {
