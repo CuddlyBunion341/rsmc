@@ -27,10 +27,7 @@ impl Plugin for PlayerPlugin {
         );
         app.add_systems(
             Update,
-            (
-                player_systems::setup_controller_on_area_ready_system,
-                player_systems::handle_player_collider_events_system,
-            )
+            (player_systems::setup_controller_on_area_ready_system,)
                 .run_if(terrain_resources::SpawnAreaLoaded::is_loaded)
                 .run_if(player_resources::PlayerSpawned::is_not_spawned),
         );
@@ -38,6 +35,13 @@ impl Plugin for PlayerPlugin {
             Update,
             (
                 player_systems::handle_controller_movement_system,
+                player_systems::handle_player_collider_events_system,
+            )
+                .run_if(player_resources::PlayerSpawned::is_spawned),
+        );
+        app.add_systems(
+            Update,
+            (
                 player_systems::manage_cursor_system,
                 player_systems::handle_mouse_events_system,
                 player_systems::handle_keyboard_events_system,
