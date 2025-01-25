@@ -4,6 +4,7 @@ use bevy_flair::style::components::{ClassList, NodeStyleSheet};
 use chat_events::ChatMessageSendEvent;
 
 const MESSAGE_PROMPT: &str = "> ";
+const MAX_MESSAGE_LENGTH: usize = 42;
 
 pub fn setup_chat_container(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
@@ -108,9 +109,14 @@ pub fn process_chat_input_system(
                 Key::Backspace => {
                     message.pop();
                 }
-                Key::Space => message.push(' '),
+                Key::Space => {
+                    if message.len() < MAX_MESSAGE_LENGTH {
+                        message.push(' ');
+                    }
+                }
                 Key::Character(input) => {
-                    if input.chars().all(|c| !c.is_control()) {
+                    if message.len() < MAX_MESSAGE_LENGTH && input.chars().all(|c| !c.is_control())
+                    {
                         message.push_str(input);
                     }
                 }
@@ -245,6 +251,17 @@ mod tests {
     use chat_events::{ChatClearEvent, SingleChatSendEvent};
     use rsmc::ChatMessage;
 
+    fn get_chat_messages(app: &mut App) -> Vec<String> {
+        let mut messages = app
+            .world_mut()
+            .query::<(&Text, &chat_components::ChatMessageElement)>();
+
+        messages
+            .iter(app.world())
+            .map(|(text, _)| text.0.clone())
+            .collect()
+    }
+
     #[test]
     fn test_send_message_system() {
         let mut app = App::new();
@@ -282,17 +299,6 @@ mod tests {
             messages.iter(app.world()).next().unwrap().0 .0,
             "Hello World"
         );
-    }
-
-    fn get_chat_messages(app: &mut App) -> Vec<String> {
-        let mut messages = app
-            .world_mut()
-            .query::<(&Text, &chat_components::ChatMessageElement)>();
-
-        messages
-            .iter(app.world())
-            .map(|(text, _)| text.0.clone())
-            .collect()
     }
 
     #[test]
