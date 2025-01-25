@@ -63,11 +63,9 @@ pub fn chat_state_transition_system(
             next_state_value = GameState::Chatting;
         }
     }
-    if keyboard_input.just_pressed(KeyCode::Escape) {
-        if *current_state_value == GameState::Chatting {
-            info!("Unfocusing chat via Escape");
-            next_state_value = GameState::Playing;
-        }
+    if keyboard_input.just_pressed(KeyCode::Escape) && *current_state_value == GameState::Chatting {
+        info!("Unfocusing chat via Escape");
+        next_state_value = GameState::Playing;
     }
 
     next_state.set(next_state_value);
