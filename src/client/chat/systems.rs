@@ -115,10 +115,9 @@ pub fn process_chat_input_system(
                     }
                 }
                 Key::Character(input) => {
-                    if message.len() < MAX_MESSAGE_LENGTH {
-                        if input.chars().all(|c| !c.is_control()) {
-                            message.push_str(input);
-                        }
+                    if message.len() < MAX_MESSAGE_LENGTH && input.chars().all(|c| !c.is_control())
+                    {
+                        message.push_str(input);
                     }
                 }
                 _ => {}
