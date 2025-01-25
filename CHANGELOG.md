@@ -5,6 +5,7 @@
 - Add `bevy_flair` stylesheets
 - Add `bevy-inspector-egui`
 - Update state management to use bevy `State` instead of a custom `StateMachine`
+- Add `renet_visualizer` to visualize network traffic on the server
 
 ## 0.1.1
 

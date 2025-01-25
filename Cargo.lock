@@ -4352,6 +4352,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "renet_visualizer"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3000d08a1d1682a01bc76a7b8d4d8172f5e7ea3eee18546d7c22c76eb36c609b"
+dependencies = [
+ "bevy_ecs",
+ "egui",
+ "renet",
+]
+
+[[package]]
 name = "renetcode"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4415,6 +4426,7 @@ dependencies = [
  "rand",
  "rayon",
  "renet",
+ "renet_visualizer",
  "serde",
  "serde-big-array",
 ]
