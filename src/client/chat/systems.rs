@@ -193,12 +193,9 @@ pub fn unfocus_chat_system(
         Without<chat_components::ChatMessageContainer>,
     >,
 ) {
-    if let (
-        Ok((mut container_classes, _chat_container)),
-        Ok((mut input_classes, _chat_input)),
-    ) = (
-    chat_container_query.get_single_mut(),
-    chat_input_query.get_single_mut(),
+    if let (Ok((mut container_classes, _chat_container)), Ok((mut input_classes, _chat_input))) = (
+        chat_container_query.get_single_mut(),
+        chat_input_query.get_single_mut(),
     ) {
         info!("Handling unfocus state");
         container_classes.remove_class("focused");
