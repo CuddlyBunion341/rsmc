@@ -1,3 +1,7 @@
+// TODO: feature flag these imports
+use bevy_inspector_egui::bevy_egui::EguiContexts;
+use renet_visualizer::RenetServerVisualizer;
+
 use crate::prelude::*;
 
 pub fn receive_message_system(
@@ -106,11 +110,14 @@ pub fn handle_events_system(
     past_block_updates: Res<terrain_resources::PastBlockUpdates>,
     mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
     mut chat_sync_events: EventWriter<chat_events::SyncPlayerChatMessagesEvent>,
+    mut visualizer: ResMut<RenetServerVisualizer<200>>,
 ) {
     for event in server_events.read() {
         match event {
             ServerEvent::ClientConnected { client_id } => {
                 println!("Client {client_id} connected");
+                // TODO: Feature flag this, move this to separate system
+                visualizer.add_client(*client_id);
                 player_states.players.insert(
                     *client_id,
                     lib::PlayerState {
@@ -148,6 +155,8 @@ pub fn handle_events_system(
             ServerEvent::ClientDisconnected { client_id, reason } => {
                 println!("Client {client_id} disconnected: {reason}");
                 player_states.players.remove(client_id);
+                // TODO: Feature flag this, move this to separate system
+                visualizer.remove_client(*client_id);
 
                 chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
                     client_id: lib::SERVER_MESSAGE_ID,
@@ -160,4 +169,14 @@ pub fn handle_events_system(
             }
         }
     }
+}
+
+// TODO: Feature flag this
+pub fn update_visulizer_system(
+    mut egui_contexts: EguiContexts,
+    mut visualizer: ResMut<RenetServerVisualizer<200>>,
+    server: Res<RenetServer>,
+) {
+    visualizer.update(&server);
+    visualizer.show_window(egui_contexts.ctx_mut());
 }

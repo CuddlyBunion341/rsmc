@@ -2,6 +2,9 @@ use std::time::Duration;
 
 pub mod systems;
 
+use bevy_inspector_egui::bevy_egui::EguiPlugin;
+use renet_visualizer::RenetServerVisualizer;
+
 use crate::prelude::*;
 
 const SERVER_ADDR: &str = "127.0.0.1:5000";
@@ -11,6 +14,13 @@ pub struct NetworkingPlugin;
 impl Plugin for NetworkingPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(RenetServerPlugin);
+
+        {
+            // TODO: feature flag this
+            app.add_plugins(EguiPlugin);
+            app.insert_resource(RenetServerVisualizer::<200>::default());
+            app.add_systems(Update, networking_systems::update_visulizer_system);
+        }
 
         let channel_config_unreliable = ChannelConfig {
             channel_id: 0,
