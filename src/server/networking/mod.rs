@@ -1,11 +1,10 @@
-use std::time::Duration;
-
 pub mod systems;
 
 #[cfg(feature = "renet_visualizer")]
 use bevy_inspector_egui::bevy_egui::EguiPlugin;
 #[cfg(feature = "renet_visualizer")]
 use renet_visualizer::RenetServerVisualizer;
+use rsmc::connection_config;
 
 use crate::prelude::*;
 
@@ -30,36 +29,9 @@ impl Plugin for NetworkingPlugin {
             );
         }
 
-        let channel_config_unreliable = ChannelConfig {
-            channel_id: 0,
-            max_memory_usage_bytes: 1000 * 1024 * 1024 * 1024,
-            send_type: SendType::Unreliable,
-        };
+        info!("Config: {:?}", connection_config());
 
-        let channel_config_reliable_ordered = ChannelConfig {
-            channel_id: 1,
-            max_memory_usage_bytes: 1000 * 1024 * 1024 * 1024,
-            send_type: SendType::ReliableOrdered {
-                resend_time: Duration::from_millis(300),
-            },
-        };
-
-        let channel_config_reliable_unordered = ChannelConfig {
-            channel_id: 2,
-            max_memory_usage_bytes: 1000 * 1024 * 1024 * 1024,
-            send_type: SendType::ReliableUnordered {
-                resend_time: Duration::from_millis(300),
-            },
-        };
-
-        let server = RenetServer::new(ConnectionConfig {
-            server_channels_config: Vec::from([
-                channel_config_unreliable,
-                channel_config_reliable_ordered,
-                channel_config_reliable_unordered,
-            ]),
-            ..Default::default()
-        });
+        let server = RenetServer::new(connection_config());
 
         app.insert_resource(server);
 

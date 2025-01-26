@@ -1,11 +1,11 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use bevy::{
     math::{Quat, Vec3},
     prelude::Resource,
 };
 use chrono::DateTime;
-use renet::ClientId;
+use renet::{ChannelConfig, ClientId, ConnectionConfig, SendType};
 use serde::{Deserialize, Serialize};
 
 pub const SERVER_MESSAGE_ID: ClientId = 0;
@@ -91,6 +91,35 @@ enum_from_u8! {
         RedTerracotta,
         Terracotta,
         YellowTerracotta,
+    }
+}
+
+const CHANNELS: [ChannelConfig; 3] = [
+    ChannelConfig {
+        channel_id: 0,
+        max_memory_usage_bytes: 1024 * 1024 * 1024 * 1024,
+        send_type: SendType::Unreliable,
+    },
+    ChannelConfig {
+        channel_id: 1,
+        max_memory_usage_bytes: 1024 * 1024 * 1024 * 1024,
+        send_type: SendType::ReliableOrdered {
+            resend_time: Duration::from_millis(300),
+        },
+    },
+    ChannelConfig {
+        channel_id: 2,
+        max_memory_usage_bytes: 1024 * 1024 * 1024 * 1024,
+        send_type: SendType::ReliableUnordered {
+            resend_time: Duration::from_millis(300),
+        },
+    },
+];
+
+pub fn connection_config() -> ConnectionConfig {
+    ConnectionConfig {
+        client_channels_config: CHANNELS.to_vec(),
+        ..Default::default()
     }
 }
 
