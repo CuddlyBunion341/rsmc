@@ -130,7 +130,7 @@ mod tests {
                 y: 0.0,
                 z: 0.0,
             },
-            1,
+            Vec3::new(1.0, 1.0, 1.0),
         );
         resource.insert_chunks(chunks);
         resource.set_block(

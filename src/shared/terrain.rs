@@ -77,7 +77,7 @@ impl ChunkManager {
         }
     }
 
-    pub fn instantiate_chunks_vec(position: Vec3, render_distance: Vec3) -> Vec<Chunk> {
+    pub fn instantiate_chunks(position: Vec3, render_distance: Vec3) -> Vec<Chunk> {
         let render_distance_x = render_distance.x as i32;
         let render_distance_y = render_distance.y as i32;
         let render_distance_z = render_distance.z as i32;
@@ -101,18 +101,7 @@ impl ChunkManager {
         chunks
     }
 
-    pub fn instantiate_chunks(position: Vec3, render_distance: i32) -> Vec<Chunk> {
-        Self::instantiate_chunks_vec(
-            position,
-            Vec3::new(
-                render_distance as f32,
-                render_distance as f32,
-                render_distance as f32,
-            ),
-        )
-    }
-
-    pub fn instantiate_new_chunks(&mut self, position: Vec3, render_distance: i32) -> Vec<Chunk> {
+    pub fn instantiate_new_chunks(&mut self, position: Vec3, render_distance: Vec3) -> Vec<Chunk> {
         let chunks = Self::instantiate_chunks(position, render_distance);
 
         chunks
@@ -228,7 +217,7 @@ mod tests {
 
         let render_distance = Vec3::new(width as f32, height as f32, depth as f32);
 
-        let chunks = ChunkManager::instantiate_chunks_vec(position, render_distance);
+        let chunks = ChunkManager::instantiate_chunks(position, render_distance);
         assert_eq!(chunks.len(), (2 * width * 2 * height * 2 * depth) as usize,);
     }
 
@@ -237,7 +226,14 @@ mod tests {
         let mut chunk_manager = ChunkManager::new();
         let position = Vec3::new(0.0, 0.0, 0.0);
         let render_distance = 2;
-        let chunks = ChunkManager::instantiate_chunks(position, render_distance);
+        let chunks = ChunkManager::instantiate_chunks(
+            position,
+            Vec3::new(
+                render_distance as f32,
+                render_distance as f32,
+                render_distance as f32,
+            ),
+        );
 
         let render_diameter = render_distance * 2;
 
