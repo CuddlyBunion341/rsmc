@@ -33,7 +33,7 @@ pub fn create_cube_geometry_data(
     y: f32,
     z: f32,
     faces: u8,
-    block_id: BlockId,
+    block_id: lib::BlockId,
     texture_manager: &TextureManager,
 ) -> GeometryData {
     let mut position = Vec::new();
@@ -78,7 +78,7 @@ pub fn create_cube_geometry_data(
     }
 }
 
-pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Option<Mesh> {
+pub fn create_chunk_mesh(chunk: &lib::Chunk, texture_manager: &TextureManager) -> Option<Mesh> {
     let mut geometry_data = GeometryData {
         position: Vec::new(),
         uv: Vec::new(),
@@ -86,24 +86,24 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
         indices: Vec::new(),
     };
 
-    for x in 1..CHUNK_SIZE + 1 {
-        for y in 1..CHUNK_SIZE + 1 {
-            for z in 1..CHUNK_SIZE + 1 {
+    for x in 1..lib::CHUNK_SIZE + 1 {
+        for y in 1..lib::CHUNK_SIZE + 1 {
+            for z in 1..lib::CHUNK_SIZE + 1 {
                 let block_id = chunk.get_unpadded(x, y, z);
 
-                if block_id == BlockId::Air {
+                if block_id == lib::BlockId::Air {
                     continue;
                 }
 
                 fn update_mask(
-                    chunk: &Chunk,
+                    chunk: &lib::Chunk,
                     mask: &mut u8,
                     value: u8,
                     x: usize,
                     y: usize,
                     z: usize,
                 ) {
-                    if chunk.get_unpadded(x, y, z) == BlockId::Air {
+                    if chunk.get_unpadded(x, y, z) == lib::BlockId::Air {
                         *mask |= value;
                     }
                 }
@@ -245,7 +245,7 @@ mod tests {
     fn test_create_cube_geometry_data() {
         let texture_manager = TextureManager::new();
         let geometry_data =
-            create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111, BlockId::Stone, &texture_manager);
+            create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111, lib::BlockId::Stone, &texture_manager);
 
         assert_eq!(geometry_data.position.len(), 6 * 4);
         assert_eq!(geometry_data.uv.len(), 6 * 4);
@@ -256,12 +256,12 @@ mod tests {
     #[test]
     fn test_create_chunk_mesh() {
         let texture_manager = TextureManager::new();
-        let mut chunk = Chunk::new(Vec3::new(0.0, 0.0, 0.0));
+        let mut chunk = lib::Chunk::new(Vec3::new(0.0, 0.0, 0.0));
 
-        for x in 1..CHUNK_SIZE + 1 {
-            for y in 1..CHUNK_SIZE + 1 {
-                for z in 1..CHUNK_SIZE + 1 {
-                    chunk.set_unpadded(x, y, z, BlockId::Stone);
+        for x in 1..lib::CHUNK_SIZE + 1 {
+            for y in 1..lib::CHUNK_SIZE + 1 {
+                for z in 1..lib::CHUNK_SIZE + 1 {
+                    chunk.set_unpadded(x, y, z, lib::BlockId::Stone);
                 }
             }
         }

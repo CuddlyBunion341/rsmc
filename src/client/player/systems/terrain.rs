@@ -12,7 +12,7 @@ pub fn handle_block_update_events(
         info!("Block update message: {:?}", event.position);
 
         chunk_mesh_update_events.send(terrain_events::ChunkMeshUpdateEvent {
-            position: event.position / CHUNK_SIZE as f32,
+            position: event.position / lib::CHUNK_SIZE as f32,
         });
 
         player_collider_events.send(player_events::PlayerColliderUpdateEvent);
@@ -21,7 +21,7 @@ pub fn handle_block_update_events(
             info!("sending block update event");
             client.send_message(
                 DefaultChannel::ReliableOrdered,
-                bincode::serialize(&NetworkingMessage::BlockUpdate {
+                bincode::serialize(&lib::NetworkingMessage::BlockUpdate {
                     position: event.position,
                     block: event.block,
                 })

@@ -56,7 +56,7 @@ pub fn handle_collider_update_events_system(
 
             match block {
                 Some(block) => {
-                    if block != BlockId::Air {
+                    if block != lib::BlockId::Air {
                         transform.translation = collider_position + COLLIDER_CUBOID_WIDTH / 2.0;
                     } else {
                         transform.translation = COLLIDER_RESTING_POSITION;
@@ -122,7 +122,7 @@ mod tests {
             },
         ));
 
-        let block = BlockId::Dirt;
+        let block = lib::BlockId::Dirt;
         let mut resource = app
             .world_mut()
             .get_resource_mut::<lib::ChunkManager>()

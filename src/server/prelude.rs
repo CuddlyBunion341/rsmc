@@ -18,6 +18,7 @@ pub use bevy_renet::netcode::ServerAuthentication;
 pub use bevy_renet::netcode::ServerConfig;
 pub use bevy_renet::RenetServerPlugin;
 pub use renet::DefaultChannel;
+pub use serde::Deserialize;
 pub use renet::*;
 
 // other crates
@@ -25,16 +26,11 @@ pub use rayon::iter::IntoParallelIterator;
 pub use rayon::iter::IntoParallelRefMutIterator;
 pub use rayon::iter::ParallelIterator;
 
-pub use self::lib::Chunk;
-pub use self::lib::ChunkManager;
-pub use self::terrain_util::Block;
 pub use noise::NoiseFn;
 pub use noise::Perlin;
+pub use rsmc as lib;
 
 // my crates
-pub use rsmc as lib;
-pub use rsmc::BlockId;
-
 pub use crate::networking::systems as networking_systems;
 
 pub use crate::player::resources as player_resources;

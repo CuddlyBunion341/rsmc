@@ -1,14 +1,12 @@
 use crate::prelude::*;
 
 pub fn prepare_spawn_area_system(mut client: ResMut<RenetClient>) {
-    let render_distance = 2;
-
     info!("Sending chunk requests for spawn area");
 
-    let chunks = lib::ChunkManager::instantiate_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
+    let chunks = lib::ChunkManager::instantiate_chunks(Vec3::ZERO, 1);
 
     let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
-    let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(positions));
+    let message = bincode::serialize(&lib::NetworkingMessage::ChunkBatchRequest(positions));
     info!("requesting world");
     client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
 }
@@ -25,7 +23,7 @@ pub fn generate_world_system(
 
     let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
 
-    let batched_positions = positions.chunks(32);
+    let batched_positions = positions.chunks(16);
     assert!(batched_positions.len() > 0, "Batched positions is empty");
 
     batched_positions.for_each(|batch| {
@@ -34,7 +32,7 @@ pub fn generate_world_system(
             "Sending chunk batch request for {:?}",
             request_positions.len()
         );
-        let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(request_positions));
+        let message = bincode::serialize(&lib::NetworkingMessage::ChunkBatchRequest(request_positions));
         info!("requesting chunks");
         client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
     });
@@ -149,9 +147,9 @@ fn spawn_chunk(
     commands.spawn((
         Mesh3d(meshes.add(mesh)),
         Transform::from_xyz(
-            chunk.position.x * CHUNK_SIZE as f32,
-            chunk.position.y * CHUNK_SIZE as f32,
-            chunk.position.z * CHUNK_SIZE as f32,
+            chunk.position.x * lib::CHUNK_SIZE as f32,
+            chunk.position.y * lib::CHUNK_SIZE as f32,
+            chunk.position.z * lib::CHUNK_SIZE as f32,
         ),
         MeshMaterial3d(material),
         player_components::Raycastable,

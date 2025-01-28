@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use lib::CHUNK_SIZE;
 
 pub struct Generator {
     pub seed: u32,
@@ -14,15 +13,15 @@ impl Generator {
         }
     }
 
-    pub fn generate_chunk(&self, chunk: &mut Chunk) {
-        let chunk_origin = chunk.position * CHUNK_SIZE as f32;
+    pub fn generate_chunk(&self, chunk: &mut lib::Chunk) {
+        let chunk_origin = chunk.position * lib::CHUNK_SIZE as f32;
         if chunk_origin.y < 0.0 {
             return;
         }
 
-        for x in 0..CHUNK_SIZE + 2 {
-            for y in 0..CHUNK_SIZE + 2 {
-                for z in 0..CHUNK_SIZE + 2 {
+        for x in 0..lib::CHUNK_SIZE + 2 {
+            for y in 0..lib::CHUNK_SIZE + 2 {
+                for z in 0..lib::CHUNK_SIZE + 2 {
                     let local_position = Vec3::new(x as f32, y as f32, z as f32);
                     let block_position = chunk_origin + local_position;
                     let block = self.generate_block(block_position);
@@ -32,7 +31,7 @@ impl Generator {
         }
     }
 
-    fn generate_block(&self, position: Vec3) -> BlockId {
+    fn generate_block(&self, position: Vec3) -> lib::BlockId {
         let base_height = -50.0;
 
         let mut density = self.sample_3d(
@@ -45,17 +44,17 @@ impl Generator {
         );
         density -= position.y as f64 * 0.02;
         if density > 0.7 {
-            BlockId::Stone
+            lib::BlockId::Stone
         } else if density > 0.40 {
-            BlockId::Dirt
+            lib::BlockId::Dirt
         } else if density > 0.0 {
-            if self.generate_block(position + Vec3::new(0.0, 1.0, 0.0)) == BlockId::Air {
-                BlockId::Grass
+            if self.generate_block(position + Vec3::new(0.0, 1.0, 0.0)) == lib::BlockId::Air {
+                lib::BlockId::Grass
             } else {
-                BlockId::Dirt
+                lib::BlockId::Dirt
             }
         } else {
-            BlockId::Air
+            lib::BlockId::Air
         }
     }
 
@@ -97,11 +96,11 @@ mod tests {
     fn test_generate_chunk() {
         let seed = 42;
         let generator = Generator::new(seed);
-        let mut chunk = Chunk::new(Vec3::new(0.0, 0.0, 0.0));
+        let mut chunk = lib::Chunk::new(Vec3::new(0.0, 0.0, 0.0));
 
         generator.generate_chunk(&mut chunk);
 
-        assert_ne!(chunk.get(0, 0, 0), BlockId::Air);
+        assert_ne!(chunk.get(0, 0, 0), lib::BlockId::Air);
     }
 
     #[test]

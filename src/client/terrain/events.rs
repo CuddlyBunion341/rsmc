@@ -8,6 +8,6 @@ pub struct ChunkMeshUpdateEvent {
 #[derive(Event)]
 pub struct BlockUpdateEvent {
     pub position: Vec3,
-    pub block: BlockId,
+    pub block: lib::BlockId,
     pub from_network: bool,
 }

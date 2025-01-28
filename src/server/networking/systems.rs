@@ -68,7 +68,7 @@ pub fn receive_message_system(
                         positions, client_id
                     );
 
-                    let chunks: Vec<Chunk> = positions
+                    let chunks: Vec<lib::Chunk> = positions
                         .into_par_iter()
                         .map(|position| {
                             let chunk = chunk_manager.get_chunk(position);
@@ -90,11 +90,14 @@ pub fn receive_message_system(
 
                     let message =
                         bincode::serialize(&lib::NetworkingMessage::ChunkBatchResponse(chunks));
-                    server.send_message(
-                        client_id,
-                        DefaultChannel::ReliableUnordered,
-                        message.unwrap(),
-                    );
+
+                    info!("Byte count: {}", message.unwrap().len());
+
+                    // server.send_message(
+                    //     client_id,
+                    //     DefaultChannel::ReliableUnordered,
+                    //     message.unwrap(),
+                    // );
                 }
                 _ => {
                     warn!("Received unknown message type. (ReliableUnordered)");

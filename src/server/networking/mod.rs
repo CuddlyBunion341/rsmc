@@ -4,7 +4,7 @@ pub mod systems;
 use bevy_inspector_egui::bevy_egui::EguiPlugin;
 #[cfg(feature = "renet_visualizer")]
 use renet_visualizer::RenetServerVisualizer;
-use rsmc::connection_config;
+use crate::lib::connection_config;
 
 use crate::prelude::*;
 

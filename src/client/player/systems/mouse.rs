@@ -40,13 +40,13 @@ pub fn handle_mouse_events_system(
         if event.button == MouseButton::Left && event.state.is_pressed() {
             block_update_events.send(terrain_events::BlockUpdateEvent {
                 position,
-                block: BlockId::Air,
+                block: lib::BlockId::Air,
                 from_network: false,
             });
         } else if event.button == MouseButton::Right && event.state.is_pressed() {
             block_update_events.send(terrain_events::BlockUpdateEvent {
                 position: position + normal,
-                block: BlockId::Dirt,
+                block: lib::BlockId::Dirt,
                 from_network: false,
             });
         }
