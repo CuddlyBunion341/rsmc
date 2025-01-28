@@ -43,7 +43,7 @@ pub fn send_messages_system(
 
         client.send_message(
             DefaultChannel::ReliableOrdered,
-            bincode::serialize(&lib::NetworkingMessage::ChatMessageSend(message)).unwrap(),
+            bincode::serialize(&NetworkingMessage::ChatMessageSend(message)).unwrap(),
         );
     }
 }
@@ -249,7 +249,7 @@ mod tests {
     use super::*;
     use bevy::ecs::event::Events;
     use chat_events::{ChatClearEvent, SingleChatSendEvent};
-    use crate::lib::ChatMessage;
+    use crate::ChatMessage;
 
     fn get_chat_messages(app: &mut App) -> Vec<String> {
         let mut messages = app

@@ -4,7 +4,7 @@ use bevy_renet::{
     netcode::{ClientAuthentication, NetcodeClientPlugin, NetcodeClientTransport},
     RenetClientPlugin,
 };
-use crate::lib::connection_config;
+use crate::connection_config;
 
 use crate::prelude::*;
 

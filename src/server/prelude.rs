@@ -29,6 +29,7 @@ pub use rayon::iter::ParallelIterator;
 pub use noise::NoiseFn;
 pub use noise::Perlin;
 pub use rsmc as lib;
+pub use lib::*;
 
 // my crates
 pub use crate::networking::systems as networking_systems;

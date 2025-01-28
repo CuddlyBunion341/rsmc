@@ -12,13 +12,13 @@ pub fn broadcast_player_attributes_system(
     let (_, transform) = query.single();
     let (_, _, camera_transform) = camera_query.single();
 
-    let player_state = lib::PlayerState {
+    let player_state = PlayerState {
         position: transform.translation,
         rotation: camera_transform.rotation,
     };
 
     client.send_message(
         DefaultChannel::ReliableUnordered,
-        bincode::serialize(&lib::NetworkingMessage::PlayerUpdate(player_state)).unwrap(),
+        bincode::serialize(&NetworkingMessage::PlayerUpdate(player_state)).unwrap(),
     );
 }

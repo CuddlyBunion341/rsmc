@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Resource)]
 pub struct PlayerStates {
-    pub players: HashMap<ClientId, lib::PlayerState>,
+    pub players: HashMap<ClientId, PlayerState>,
 }
 
 impl PlayerStates {

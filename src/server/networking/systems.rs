@@ -9,7 +9,7 @@ pub fn receive_message_system(
     mut server: ResMut<RenetServer>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
-    chunk_manager: ResMut<lib::ChunkManager>,
+    chunk_manager: ResMut<ChunkManager>,
     mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
 ) {
     for client_id in server.clients_id() {
@@ -18,7 +18,7 @@ pub fn receive_message_system(
             let message = bincode::deserialize(&message).unwrap();
 
             match message {
-                lib::NetworkingMessage::BlockUpdate { position, block } => {
+                NetworkingMessage::BlockUpdate { position, block } => {
                     info!(
                         "Received block update from client {} {} {:?}",
                         client_id, position, block
@@ -30,14 +30,14 @@ pub fn receive_message_system(
                     server.broadcast_message_except(
                         client_id,
                         DefaultChannel::ReliableOrdered,
-                        bincode::serialize(&lib::NetworkingMessage::BlockUpdate {
+                        bincode::serialize(&NetworkingMessage::BlockUpdate {
                             position,
                             block,
                         })
                         .unwrap(),
                     );
                 }
-                lib::NetworkingMessage::ChatMessageSend(message) => {
+                NetworkingMessage::ChatMessageSend(message) => {
                     info!("Received chat message from {}", client_id);
                     chat_message_events
                         .send(chat_events::PlayerChatMessageSendEvent { client_id, message });
@@ -55,20 +55,20 @@ pub fn receive_message_system(
             debug!("Received message: {:?}", message);
 
             match message {
-                lib::NetworkingMessage::PlayerUpdate(player) => {
+                NetworkingMessage::PlayerUpdate(player) => {
                     debug!(
                         "Received player update from client {} {}",
                         client_id, player.position
                     );
                     player_states.players.insert(client_id, player);
                 }
-                lib::NetworkingMessage::ChunkBatchRequest(positions) => {
+                NetworkingMessage::ChunkBatchRequest(positions) => {
                     info!(
                         "Received chunk batch request at {:?} from client {}",
                         positions, client_id
                     );
 
-                    let chunks: Vec<lib::Chunk> = positions
+                    let chunks: Vec<Chunk> = positions
                         .into_par_iter()
                         .map(|position| {
                             let chunk = chunk_manager.get_chunk(position);
@@ -76,7 +76,7 @@ pub fn receive_message_system(
                             match chunk {
                                 Some(chunk) => *chunk,
                                 None => {
-                                    let mut chunk = lib::Chunk::new(position);
+                                    let mut chunk = Chunk::new(position);
 
                                     let generator = terrain_util::generator::Generator::new(0);
 
@@ -89,7 +89,7 @@ pub fn receive_message_system(
                         .collect();
 
                     let message =
-                        bincode::serialize(&lib::NetworkingMessage::ChunkBatchResponse(chunks));
+                        bincode::serialize(&NetworkingMessage::ChunkBatchResponse(chunks));
 
                     info!("Byte count: {}", message.unwrap().len());
 
@@ -121,7 +121,7 @@ pub fn handle_events_system(
                 println!("Client {client_id} connected");
                 player_states.players.insert(
                     *client_id,
-                    lib::PlayerState {
+                    PlayerState {
                         position: Vec3::ZERO,
                         rotation: Quat::IDENTITY,
                     },
@@ -132,12 +132,12 @@ pub fn handle_events_system(
                 });
 
                 chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
-                    client_id: lib::SERVER_MESSAGE_ID,
+                    client_id: SERVER_MESSAGE_ID,
                     message: format!("Player {} joined the game", *client_id),
                 });
 
                 let message =
-                    bincode::serialize(&lib::NetworkingMessage::PlayerJoin(*client_id)).unwrap();
+                    bincode::serialize(&NetworkingMessage::PlayerJoin(*client_id)).unwrap();
                 server.broadcast_message_except(
                     *client_id,
                     DefaultChannel::ReliableOrdered,
@@ -145,7 +145,7 @@ pub fn handle_events_system(
                 );
 
                 for update in past_block_updates.updates.iter() {
-                    let message = bincode::serialize(&lib::NetworkingMessage::BlockUpdate {
+                    let message = bincode::serialize(&NetworkingMessage::BlockUpdate {
                         position: update.position,
                         block: update.block,
                     })
@@ -158,12 +158,12 @@ pub fn handle_events_system(
                 player_states.players.remove(client_id);
 
                 chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
-                    client_id: lib::SERVER_MESSAGE_ID,
+                    client_id: SERVER_MESSAGE_ID,
                     message: format!("Player {} left the game", client_id),
                 });
 
                 let message =
-                    bincode::serialize(&lib::NetworkingMessage::PlayerLeave(*client_id)).unwrap();
+                    bincode::serialize(&NetworkingMessage::PlayerLeave(*client_id)).unwrap();
                 server.broadcast_message(DefaultChannel::ReliableOrdered, message);
             }
         }

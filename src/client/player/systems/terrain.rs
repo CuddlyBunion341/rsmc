@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub fn handle_block_update_events(
-    mut chunk_manager: ResMut<lib::ChunkManager>,
+    mut chunk_manager: ResMut<ChunkManager>,
     mut block_update_events: EventReader<terrain_events::BlockUpdateEvent>,
     mut chunk_mesh_update_events: EventWriter<terrain_events::ChunkMeshUpdateEvent>,
     mut player_collider_events: EventWriter<player_events::PlayerColliderUpdateEvent>,
@@ -12,7 +12,7 @@ pub fn handle_block_update_events(
         info!("Block update message: {:?}", event.position);
 
         chunk_mesh_update_events.send(terrain_events::ChunkMeshUpdateEvent {
-            position: event.position / lib::CHUNK_SIZE as f32,
+            position: event.position / CHUNK_SIZE as f32,
         });
 
         player_collider_events.send(player_events::PlayerColliderUpdateEvent);
@@ -21,7 +21,7 @@ pub fn handle_block_update_events(
             info!("sending block update event");
             client.send_message(
                 DefaultChannel::ReliableOrdered,
-                bincode::serialize(&lib::NetworkingMessage::BlockUpdate {
+                bincode::serialize(&NetworkingMessage::BlockUpdate {
                     position: event.position,
                     block: event.block,
                 })

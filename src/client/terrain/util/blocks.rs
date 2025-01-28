@@ -57,7 +57,7 @@ impl TextureManager {
 }
 
 pub struct Block {
-    pub id: lib::BlockId,
+    pub id: BlockId,
     pub texture_names: [TextureName; 6],
     pub is_solid: bool,
 }
@@ -73,9 +73,9 @@ macro_rules! add_block {
 }
 
 pub static BLOCKS: [Block; 14] = [
-    add_block!(lib::BlockId::Air, [TextureName::Air; 6], false),
+    add_block!(BlockId::Air, [TextureName::Air; 6], false),
     add_block!(
-        lib::BlockId::Grass,
+        BlockId::Grass,
         [
             TextureName::GrassTop,
             TextureName::Dirt,
@@ -86,43 +86,43 @@ pub static BLOCKS: [Block; 14] = [
         ],
         true
     ),
-    add_block!(lib::BlockId::Dirt, [TextureName::Dirt; 6], true),
-    add_block!(lib::BlockId::Stone, [TextureName::Stone; 6], true),
-    add_block!(lib::BlockId::Bedrock, [TextureName::Bedrock; 6], true),
-    add_block!(lib::BlockId::RedSand, [TextureName::RedSand; 6], true),
+    add_block!(BlockId::Dirt, [TextureName::Dirt; 6], true),
+    add_block!(BlockId::Stone, [TextureName::Stone; 6], true),
+    add_block!(BlockId::Bedrock, [TextureName::Bedrock; 6], true),
+    add_block!(BlockId::RedSand, [TextureName::RedSand; 6], true),
     add_block!(
-        lib::BlockId::BrownTerracotta,
+        BlockId::BrownTerracotta,
         [TextureName::BrownTerracotta; 6],
         true
     ),
     add_block!(
-        lib::BlockId::CyanTerracotta,
+        BlockId::CyanTerracotta,
         [TextureName::CyanTerracotta; 6],
         true
     ),
     add_block!(
-        lib::BlockId::GrayTerracotta,
+        BlockId::GrayTerracotta,
         [TextureName::GrayTerracotta; 6],
         true
     ),
     add_block!(
-        lib::BlockId::LightGrayTerracotta,
+        BlockId::LightGrayTerracotta,
         [TextureName::LightGrayTerracotta; 6],
         true
     ),
     add_block!(
-        lib::BlockId::OrangeTerracotta,
+        BlockId::OrangeTerracotta,
         [TextureName::OrangeTerracotta; 6],
         true
     ),
     add_block!(
-        lib::BlockId::RedTerracotta,
+        BlockId::RedTerracotta,
         [TextureName::RedTerracotta; 6],
         true
     ),
-    add_block!(lib::BlockId::Terracotta, [TextureName::Terracotta; 6], true),
+    add_block!(BlockId::Terracotta, [TextureName::Terracotta; 6], true),
     add_block!(
-        lib::BlockId::YellowTerracotta,
+        BlockId::YellowTerracotta,
         [TextureName::YellowTerracotta; 6],
         true
     ),
@@ -132,7 +132,7 @@ type TextureUV = [f32; 2];
 
 impl Block {
     pub fn get_block_face_uvs(
-        block_id: lib::BlockId,
+        block_id: BlockId,
         face: CubeFace,
         texture_manager: &TextureManager,
     ) -> Option<[f32; 2]> {

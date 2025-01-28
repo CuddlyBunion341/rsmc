@@ -3,17 +3,17 @@ use crate::prelude::*;
 pub fn prepare_spawn_area_system(mut client: ResMut<RenetClient>) {
     info!("Sending chunk requests for spawn area");
 
-    let chunks = lib::ChunkManager::instantiate_chunks(Vec3::ZERO, 1);
+    let chunks = ChunkManager::instantiate_chunks(Vec3::ZERO, 1);
 
     let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
-    let message = bincode::serialize(&lib::NetworkingMessage::ChunkBatchRequest(positions));
+    let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(positions));
     info!("requesting world");
     client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
 }
 
 pub fn generate_world_system(
     mut client: ResMut<RenetClient>,
-    mut chunk_manager: ResMut<lib::ChunkManager>,
+    mut chunk_manager: ResMut<ChunkManager>,
 ) {
     let render_distance = 2;
 
@@ -32,7 +32,7 @@ pub fn generate_world_system(
             "Sending chunk batch request for {:?}",
             request_positions.len()
         );
-        let message = bincode::serialize(&lib::NetworkingMessage::ChunkBatchRequest(request_positions));
+        let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(request_positions));
         info!("requesting chunks");
         client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
     });
@@ -44,7 +44,7 @@ pub fn handle_chunk_mesh_update_events(
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    chunk_manager: ResMut<lib::ChunkManager>,
+    chunk_manager: ResMut<ChunkManager>,
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
     texture_manager: ResMut<terrain_util::TextureManager>,
@@ -58,7 +58,7 @@ pub fn handle_chunk_mesh_update_events(
         match chunk_option {
             Some(chunk) => {
                 for (entity, chunk_mesh) in mesh_query.iter_mut() {
-                    if lib::Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
+                    if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
                         commands.entity(entity).despawn();
                     }
                 }
@@ -83,7 +83,7 @@ fn add_chunk_objects(
     asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
-    chunk: &lib::Chunk,
+    chunk: &Chunk,
     texture_manager: &terrain_util::TextureManager,
 ) {
     if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
@@ -100,7 +100,7 @@ fn add_chunk_objects(
 }
 
 fn create_chunk_mesh(
-    chunk: &lib::Chunk,
+    chunk: &Chunk,
     texture_manager: &terrain_util::TextureManager,
 ) -> Option<Mesh> {
     terrain_util::create_chunk_mesh(chunk, texture_manager)
@@ -142,14 +142,14 @@ fn spawn_chunk(
     meshes: &mut Mut<Assets<Mesh>>,
     material: Handle<StandardMaterial>,
     mesh: Mesh,
-    chunk: &lib::Chunk,
+    chunk: &Chunk,
 ) {
     commands.spawn((
         Mesh3d(meshes.add(mesh)),
         Transform::from_xyz(
-            chunk.position.x * lib::CHUNK_SIZE as f32,
-            chunk.position.y * lib::CHUNK_SIZE as f32,
-            chunk.position.z * lib::CHUNK_SIZE as f32,
+            chunk.position.x * CHUNK_SIZE as f32,
+            chunk.position.y * CHUNK_SIZE as f32,
+            chunk.position.z * CHUNK_SIZE as f32,
         ),
         MeshMaterial3d(material),
         player_components::Raycastable,

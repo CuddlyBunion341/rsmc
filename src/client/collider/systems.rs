@@ -39,7 +39,7 @@ pub fn setup_coliders_system(mut commands: Commands) {
 pub fn handle_collider_update_events_system(
     mut collider_grid_events: EventReader<collider_events::ColliderUpdateEvent>,
     mut query: Query<(&mut Transform, &collider_components::BlockCollider)>,
-    mut chunk_manager: ResMut<lib::ChunkManager>,
+    mut chunk_manager: ResMut<ChunkManager>,
 ) {
     for event in collider_grid_events.read() {
         let event_position = Vec3::new(
@@ -56,7 +56,7 @@ pub fn handle_collider_update_events_system(
 
             match block {
                 Some(block) => {
-                    if block != lib::BlockId::Air {
+                    if block != BlockId::Air {
                         transform.translation = collider_position + COLLIDER_CUBOID_WIDTH / 2.0;
                     } else {
                         transform.translation = COLLIDER_RESTING_POSITION;
@@ -102,7 +102,7 @@ mod tests {
 
         app.add_event::<collider_events::ColliderUpdateEvent>();
         app.add_systems(Update, handle_collider_update_events_system);
-        app.insert_resource(lib::ChunkManager::new());
+        app.insert_resource(ChunkManager::new());
 
         app.world_mut().spawn((
             Transform {
@@ -122,12 +122,12 @@ mod tests {
             },
         ));
 
-        let block = lib::BlockId::Dirt;
+        let block = BlockId::Dirt;
         let mut resource = app
             .world_mut()
-            .get_resource_mut::<lib::ChunkManager>()
+            .get_resource_mut::<ChunkManager>()
             .unwrap();
-        let chunks = lib::ChunkManager::instantiate_chunks(
+        let chunks = ChunkManager::instantiate_chunks(
             Vec3 {
                 x: 0.0,
                 y: 0.0,

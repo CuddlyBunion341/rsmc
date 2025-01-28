@@ -11,7 +11,7 @@ pub fn broadcast_player_attributes_system(
         server.send_message(
             client_id,
             DefaultChannel::ReliableUnordered,
-            bincode::serialize(&lib::NetworkingMessage::PlayerSync(other_player_states)).unwrap(),
+            bincode::serialize(&NetworkingMessage::PlayerSync(other_player_states)).unwrap(),
         );
     }
 }
