@@ -8,7 +8,7 @@ pub fn setup_coliders_system(mut commands: Commands) {
     let collider_range = 0..COLLIDER_GRID_SIZE;
 
     commands.spawn((
-        Collider::cuboid(32.0, 1.0, 32.0),
+        Collider::cuboid(256.0, 1.0, 256.0),
         Transform::from_xyz(0.0, 0.0, 0.0),
     ));
 
