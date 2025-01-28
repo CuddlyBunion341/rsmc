@@ -88,13 +88,11 @@ pub fn receive_message_system(
                     let message =
                         bincode::serialize(&NetworkingMessage::ChunkBatchResponse(chunks));
 
-                    info!("Byte count: {}", message.unwrap().len());
-
-                    // server.send_message(
-                    //     client_id,
-                    //     DefaultChannel::ReliableUnordered,
-                    //     message.unwrap(),
-                    // );
+                    server.send_message(
+                        client_id,
+                        DefaultChannel::ReliableUnordered,
+                        message.unwrap(),
+                    );
                 }
                 _ => {
                     warn!("Received unknown message type. (ReliableUnordered)");

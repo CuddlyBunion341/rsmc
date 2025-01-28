@@ -26,14 +26,14 @@ pub fn generate_world_system(
     let batched_positions = positions.chunks(16);
     assert!(batched_positions.len() > 0, "Batched positions is empty");
 
-    batched_positions.for_each(|batch| {
+    batched_positions.enumerate().for_each(|(index, batch)| {
         let request_positions = batch.to_vec();
         info!(
             "Sending chunk batch request for {:?}",
             request_positions.len()
         );
         let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(request_positions));
-        info!("requesting chunks");
+        info!("requesting chunks #{}", index);
         client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
     });
 }
