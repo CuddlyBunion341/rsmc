@@ -1,10 +1,10 @@
 pub mod systems;
 
+use crate::connection_config;
 use bevy_renet::{
     netcode::{ClientAuthentication, NetcodeClientPlugin, NetcodeClientTransport},
     RenetClientPlugin,
 };
-use crate::connection_config;
 
 use crate::prelude::*;
 

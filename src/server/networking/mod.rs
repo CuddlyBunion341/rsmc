@@ -1,10 +1,10 @@
 pub mod systems;
 
+use crate::connection_config;
 #[cfg(feature = "renet_visualizer")]
 use bevy_inspector_egui::bevy_egui::EguiPlugin;
 #[cfg(feature = "renet_visualizer")]
 use renet_visualizer::RenetServerVisualizer;
-use crate::connection_config;
 
 use crate::prelude::*;
 

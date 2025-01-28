@@ -18,18 +18,18 @@ pub use bevy_renet::netcode::ServerAuthentication;
 pub use bevy_renet::netcode::ServerConfig;
 pub use bevy_renet::RenetServerPlugin;
 pub use renet::DefaultChannel;
-pub use serde::Deserialize;
 pub use renet::*;
+pub use serde::Deserialize;
 
 // other crates
 pub use rayon::iter::IntoParallelIterator;
 pub use rayon::iter::IntoParallelRefMutIterator;
 pub use rayon::iter::ParallelIterator;
 
+pub use lib::*;
 pub use noise::NoiseFn;
 pub use noise::Perlin;
 pub use rsmc as lib;
-pub use lib::*;
 
 // my crates
 pub use crate::networking::systems as networking_systems;

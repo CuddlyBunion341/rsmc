@@ -45,8 +45,8 @@ pub use terrain_util::CubeFace;
 
 // my crates
 pub use crate::states::GameState;
-pub use rsmc as lib;
 pub use lib::*;
+pub use rsmc as lib;
 
 pub use crate::collider::components as collider_components;
 pub use crate::collider::events as collider_events;

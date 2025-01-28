@@ -123,10 +123,7 @@ mod tests {
         ));
 
         let block = BlockId::Dirt;
-        let mut resource = app
-            .world_mut()
-            .get_resource_mut::<ChunkManager>()
-            .unwrap();
+        let mut resource = app.world_mut().get_resource_mut::<ChunkManager>().unwrap();
         let chunks = ChunkManager::instantiate_chunks(
             Vec3 {
                 x: 0.0,

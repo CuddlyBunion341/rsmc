@@ -7,8 +7,7 @@ pub fn setup_world_system(mut chunk_manager: ResMut<ChunkManager>) {
 
     info!("Generating chunks");
 
-    let mut chunks =
-        ChunkManager::instantiate_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
+    let mut chunks = ChunkManager::instantiate_chunks(Vec3::new(0.0, 0.0, 0.0), render_distance);
 
     chunks.par_iter_mut().for_each(|chunk| {
         info!("Generating chunk at {:?}", chunk.position);

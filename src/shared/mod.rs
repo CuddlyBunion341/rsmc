@@ -6,6 +6,5 @@ pub mod terrain;
 
 pub use blocks::*;
 pub use buffer_serializer::*;
-pub use chunk_serializer::*;
 pub use networking::*;
 pub use terrain::*;

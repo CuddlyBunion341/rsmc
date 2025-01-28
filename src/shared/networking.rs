@@ -1,10 +1,10 @@
 use std::time::Duration;
 
-use std::collections::HashMap;
-use bevy::{math::{Quat, Vec3}};
+use bevy::math::{Quat, Vec3};
 use chrono::DateTime;
 use renet::{ChannelConfig, ClientId, ConnectionConfig, SendType};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use super::{BlockId, Chunk};
 

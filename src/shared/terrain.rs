@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use bevy::{math::Vec3, prelude::Resource};
-use serde_big_array::BigArray;
 
 use super::BlockId;
 

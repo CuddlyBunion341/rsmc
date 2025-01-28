@@ -30,11 +30,8 @@ pub fn receive_message_system(
                     server.broadcast_message_except(
                         client_id,
                         DefaultChannel::ReliableOrdered,
-                        bincode::serialize(&NetworkingMessage::BlockUpdate {
-                            position,
-                            block,
-                        })
-                        .unwrap(),
+                        bincode::serialize(&NetworkingMessage::BlockUpdate { position, block })
+                            .unwrap(),
                     );
                 }
                 NetworkingMessage::ChatMessageSend(message) => {

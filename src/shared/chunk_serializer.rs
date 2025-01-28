@@ -1,11 +1,11 @@
+use crate::deserialize_buffer;
+use crate::serialize_buffer;
+use crate::BlockId;
+use crate::Chunk;
+use crate::CHUNK_LENGTH;
 use bevy::math::Vec3;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize};
-use crate::deserialize_buffer;
-use crate::BlockId;
-use crate::Chunk;
-use crate::serialize_buffer;
-use crate::CHUNK_LENGTH;
 
 impl Serialize for Chunk {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
