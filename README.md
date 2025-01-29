@@ -29,12 +29,25 @@ cargo run --bin client
 
 ```
 
-In order to create a more optimized build, you can pass the `release` flag:
+### More optimal setup
+
+Release Builds (for better performance):
 
 ```bash
 cargo run --bin server --release
 cargo run --bin client --release
+```
 
+Dynamic Linking (to reduce compile times):
+```bash
+cargo run --bin server --features dynamic_linking
+cargo run --bin client --features dynamic_linking
+```
+
+Automatic Reloading (with [cargo watch](https://docs.rs/crate/cargo-watch)):
+```bash
+cargo watch -x 'run --bin server'
+cargo watch -x 'run --bin client'
 ```
 
 ### Installation on NixOS
