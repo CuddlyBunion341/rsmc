@@ -1,10 +1,10 @@
 pub mod systems;
 
+use crate::connection_config;
 use bevy_renet::{
     netcode::{ClientAuthentication, NetcodeClientPlugin, NetcodeClientTransport},
     RenetClientPlugin,
 };
-use renet::{ChannelConfig, SendType};
 
 use crate::prelude::*;
 
@@ -15,36 +15,7 @@ impl Plugin for NetworkingPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins((RenetClientPlugin, NetcodeClientPlugin));
 
-        let channel_config_unreliable = ChannelConfig {
-            channel_id: 0,
-            max_memory_usage_bytes: 1000 * 1024 * 1024,
-            send_type: SendType::Unreliable,
-        };
-
-        let channel_config_reliable_ordered = ChannelConfig {
-            channel_id: 1,
-            max_memory_usage_bytes: 1000 * 1024 * 1024,
-            send_type: SendType::ReliableOrdered {
-                resend_time: Duration::from_millis(300),
-            },
-        };
-
-        let channel_config_reliable_unordered = ChannelConfig {
-            channel_id: 2,
-            max_memory_usage_bytes: 1000 * 1024 * 1024,
-            send_type: SendType::ReliableUnordered {
-                resend_time: Duration::from_millis(300),
-            },
-        };
-
-        let client = RenetClient::new(ConnectionConfig {
-            client_channels_config: Vec::from([
-                channel_config_unreliable,
-                channel_config_reliable_ordered,
-                channel_config_reliable_unordered,
-            ]),
-            ..Default::default()
-        });
+        let client = RenetClient::new(connection_config());
         app.insert_resource(client);
 
         let client_id = rand::random::<u64>();

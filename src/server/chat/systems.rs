@@ -15,7 +15,7 @@ pub fn sync_single_player_chat_messages_system(
         let message_count = chat_messages.messages.len();
         let message_id = message_count;
 
-        let chat_message = lib::ChatMessage {
+        let chat_message = ChatMessage {
             client_id,
             message_id,
             message,
@@ -24,7 +24,7 @@ pub fn sync_single_player_chat_messages_system(
 
         chat_messages.messages.push(chat_message.clone());
 
-        let response_message = lib::NetworkingMessage::SingleChatMessageSync(chat_message);
+        let response_message = NetworkingMessage::SingleChatMessageSync(chat_message);
 
         server.broadcast_message(
             DefaultChannel::ReliableOrdered,
@@ -44,7 +44,7 @@ pub fn sync_player_chat_messages_event(
 
         let history = chat_messages.messages.clone();
         let response_message =
-            bincode::serialize(&lib::NetworkingMessage::ChatMessageSync(history)).unwrap();
+            bincode::serialize(&NetworkingMessage::ChatMessageSync(history)).unwrap();
         server.send_message(client_id, DefaultChannel::ReliableOrdered, response_message);
     }
 }

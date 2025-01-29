@@ -247,9 +247,9 @@ pub fn focus_chat_system(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ChatMessage;
     use bevy::ecs::event::Events;
     use chat_events::{ChatClearEvent, SingleChatSendEvent};
-    use rsmc::ChatMessage;
 
     fn get_chat_messages(app: &mut App) -> Vec<String> {
         let mut messages = app

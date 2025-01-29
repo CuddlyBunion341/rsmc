@@ -13,5 +13,5 @@ pub struct RemotePlayerDespawnedEvent {
 
 #[derive(Event)]
 pub struct RemotePlayerSyncEvent {
-    pub players: HashMap<ClientId, lib::PlayerState>,
+    pub players: HashMap<ClientId, PlayerState>,
 }

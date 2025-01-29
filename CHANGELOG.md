@@ -6,6 +6,10 @@
 - Add `bevy-inspector-egui`
 - Update state management to use bevy `State` instead of a custom `StateMachine`
 - Add `renet_visualizer` to visualize network traffic on the server
+- Refactor shared code into `lib` namespace
+- Drop `lib::` prefix
+- Increase world size
+- Fix issue where chunks were only serialized on the client
 
 ## 0.1.1
 

@@ -31,9 +31,11 @@ pub use renet::{ClientId, ConnectionConfig, DefaultChannel, RenetClient};
 
 // other crates
 pub use iyes_perf_ui::prelude::*;
+pub use rayon::iter::IntoParallelIterator;
+pub use rayon::iter::IntoParallelRefMutIterator;
+pub use rayon::iter::ParallelIterator;
 pub use serde::*;
 
-pub use self::lib::Chunk;
 pub use self::terrain_util::Block;
 pub use bevy::render::mesh::{Indices, PrimitiveTopology};
 pub use bevy::render::render_asset::RenderAssetUsages;
@@ -43,10 +45,8 @@ pub use terrain_util::CubeFace;
 
 // my crates
 pub use crate::states::GameState;
+pub use lib::*;
 pub use rsmc as lib;
-pub use rsmc::BlockId;
-pub use rsmc::NetworkingMessage;
-pub use rsmc::CHUNK_SIZE;
 
 pub use crate::collider::components as collider_components;
 pub use crate::collider::events as collider_events;

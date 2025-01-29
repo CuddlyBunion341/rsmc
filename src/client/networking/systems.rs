@@ -7,7 +7,7 @@ pub fn receive_message_system(
     mut player_despawn_events: ResMut<Events<remote_player_events::RemotePlayerDespawnedEvent>>,
     mut player_sync_events: ResMut<Events<remote_player_events::RemotePlayerSyncEvent>>,
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
-    mut chunk_manager: ResMut<terrain_resources::ChunkManager>,
+    mut chunk_manager: ResMut<ChunkManager>,
     mut chunk_mesh_events: ResMut<Events<terrain_events::ChunkMeshUpdateEvent>>,
     mut chat_events: ResMut<Events<chat_events::ChatSyncEvent>>,
     mut single_chat_events: ResMut<Events<chat_events::SingleChatSendEvent>>,
@@ -16,18 +16,18 @@ pub fn receive_message_system(
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
         match bincode::deserialize(&message) {
             Ok(message) => match message {
-                lib::NetworkingMessage::PlayerJoin(event) => {
+                NetworkingMessage::PlayerJoin(event) => {
                     player_spawn_events.send(remote_player_events::RemotePlayerSpawnedEvent {
                         client_id: event,
                         position: Vec3::ZERO,
                     });
                 }
-                lib::NetworkingMessage::PlayerLeave(event) => {
+                NetworkingMessage::PlayerLeave(event) => {
                     player_despawn_events.send(remote_player_events::RemotePlayerDespawnedEvent {
                         client_id: event,
                     });
                 }
-                lib::NetworkingMessage::BlockUpdate { position, block } => {
+                NetworkingMessage::BlockUpdate { position, block } => {
                     debug!("Client received block update message: {:?}", position);
                     block_update_events.send(terrain_events::BlockUpdateEvent {
                         position,
@@ -35,11 +35,11 @@ pub fn receive_message_system(
                         from_network: true,
                     });
                 }
-                lib::NetworkingMessage::ChatMessageSync(messages) => {
+                NetworkingMessage::ChatMessageSync(messages) => {
                     info!("Client received {} chat messages", messages.len());
                     chat_events.send(chat_events::ChatSyncEvent(messages));
                 }
-                lib::NetworkingMessage::SingleChatMessageSync(message) => {
+                NetworkingMessage::SingleChatMessageSync(message) => {
                     info!("Client received chat message {}", message.message);
                     single_chat_events.send(chat_events::SingleChatSendEvent(message));
                 }
@@ -64,7 +64,7 @@ pub fn receive_message_system(
         if let Ok(message) = message {
             debug!("Received message: {:?}", message);
             match message {
-                lib::NetworkingMessage::ChunkBatchResponse(chunks) => {
+                NetworkingMessage::ChunkBatchResponse(chunks) => {
                     info!("Client received chunk batch response message.");
                     for chunk in chunks {
                         info!(
@@ -87,7 +87,7 @@ pub fn receive_message_system(
                         }
                     }
                 }
-                lib::NetworkingMessage::PlayerSync(event) => {
+                NetworkingMessage::PlayerSync(event) => {
                     player_sync_events
                         .send(remote_player_events::RemotePlayerSyncEvent { players: event });
                 }

@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
 #[derive(Event)]
-pub struct ChatSyncEvent(pub Vec<lib::ChatMessage>);
+pub struct ChatSyncEvent(pub Vec<ChatMessage>);
 
 #[derive(Event)]
-pub struct SingleChatSendEvent(pub lib::ChatMessage);
+pub struct SingleChatSendEvent(pub ChatMessage);
 
 #[derive(Event)]
 pub struct ChatMessageSendEvent(pub String);

@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Resource, Debug)]
 pub struct ChatHistory {
-    pub messages: Vec<lib::ChatMessage>,
+    pub messages: Vec<ChatMessage>,
 }
 
 impl ChatHistory {
