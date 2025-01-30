@@ -22,7 +22,7 @@ pub fn setup_highlight_cube_system(
 #[allow(clippy::type_complexity)]
 pub fn raycast_system(
     mut raycast: Raycast,
-    mut gizmos: Gizmos,
+    #[cfg(feature = "raycast_debug")] mut gizmos: Gizmos,
     raycast_origin: Query<&Transform, With<player_components::PlayerCamera>>,
     mut selection_query: Query<
         (&mut Transform, &player_components::HighlightCube),
@@ -41,6 +41,7 @@ pub fn raycast_system(
     let dir = camera_transform.rotation.mul_vec3(Vec3::Z).normalize();
     let dir = dir * RAY_DIST.z;
 
+    #[cfg(feature = "raycast_debug")]
     let intersections = raycast.debug_cast_ray(
         Ray3d::new(pos, Dir3::new(dir).expect("Ray can be cast")),
         &RaycastSettings {
@@ -48,6 +49,15 @@ pub fn raycast_system(
             ..default()
         },
         &mut gizmos,
+    );
+
+    #[cfg(not(feature = "raycast_debug"))]
+    let intersections = raycast.cast_ray(
+        Ray3d::new(pos, Dir3::new(dir).expect("Ray can be cast")),
+        &RaycastSettings {
+            filter: &filter,
+            ..default()
+        },
     );
 
     let (mut highlight_transform, _) = selection_query.single_mut();

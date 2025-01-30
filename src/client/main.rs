@@ -12,10 +12,15 @@ mod scene;
 mod states;
 mod terrain;
 
-use bevy::color::palettes::css::WHITE;
 use bevy_flair::FlairPlugin;
 use scene::setup_scene;
+
+#[cfg(feature = "wireframe")]
+use bevy::color::palettes::css::WHITE;
+#[cfg(feature = "wireframe")]
 use wireframe::WireframeConfig;
+#[cfg(feature = "wireframe")]
+use wireframe::WireframePlugin;
 
 fn main() {
     let window_plugin = WindowPlugin {
@@ -31,32 +36,34 @@ fn main() {
         .set(window_plugin)
         .set(ImagePlugin::default_nearest());
 
-    App::new()
-        .add_plugins((
-            default_plugins,
-            FlairPlugin,
-            #[cfg(feature = "wireframe")]
-            WireframePlugin,
-            FrameTimeDiagnosticsPlugin,
-            EntityCountDiagnosticsPlugin,
-            SystemInformationDiagnosticsPlugin,
-            PerfUiPlugin,
-            gui::GuiPlugin,
-            networking::NetworkingPlugin,
-            terrain::TerrainPlugin,
-            collider::ColliderPlugin,
-            player::PlayerPlugin,
-            remote_player::RemotePlayerPlugin,
-            chat::ChatPlugin,
-        ))
-        .insert_state(GameState::Playing)
-        .insert_resource(WireframeConfig {
-            #[cfg(not(feature = "wireframe"))]
-            global: false,
-            #[cfg(feature = "wireframe")]
-            global: true,
-            default_color: WHITE.into(),
-        })
-        .add_systems(Startup, setup_scene)
-        .run();
+    let mut app = App::new();
+    app.add_plugins((
+        default_plugins,
+        FlairPlugin,
+        #[cfg(feature = "wireframe")]
+        WireframePlugin,
+        FrameTimeDiagnosticsPlugin,
+        EntityCountDiagnosticsPlugin,
+        SystemInformationDiagnosticsPlugin,
+        PerfUiPlugin,
+        gui::GuiPlugin,
+        networking::NetworkingPlugin,
+        terrain::TerrainPlugin,
+        collider::ColliderPlugin,
+        player::PlayerPlugin,
+        remote_player::RemotePlayerPlugin,
+        chat::ChatPlugin,
+    ));
+    app.insert_state(GameState::Playing);
+
+    #[cfg(feature = "wireframe")]
+    app.insert_resource(WireframeConfig {
+        #[cfg(not(feature = "wireframe"))]
+        global: false,
+        #[cfg(feature = "wireframe")]
+        global: true,
+        default_color: WHITE.into(),
+    });
+
+    app.add_systems(Startup, setup_scene).run();
 }
