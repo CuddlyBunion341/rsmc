@@ -79,6 +79,27 @@ impl Generator {
 
         density
     }
+
+    fn sample_2d(&self, position: Vec2, octaves: i32) -> f64 {
+        let mut height = 0.0;
+        let lacuranity = 2.0;
+        let mut frequency = 1.0 / 60.0;
+        let mut amplitude = 10.0;
+        let mut persistence = 0.5;
+
+        for _ in 0..octaves {
+            height += self.perlin.get([
+                position.x as f64 * frequency,
+                position.y as f64 * frequency,
+            ]) * amplitude;
+
+            amplitude *= persistence;
+            frequency *= lacuranity;
+            persistence *= 0.5;
+        }
+
+        height
+    }
 }
 
 #[cfg(test)]
