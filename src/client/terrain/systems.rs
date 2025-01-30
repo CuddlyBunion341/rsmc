@@ -123,7 +123,7 @@ fn create_chunk_material(
 
 #[cfg(feature = "wireframe")]
 fn create_chunk_material(
-    texture_handle: Handle<Image>,
+    _texture_handle: Handle<Image>,
     materials: &mut Mut<Assets<StandardMaterial>>,
 ) -> Handle<StandardMaterial> {
     materials.add(StandardMaterial {
