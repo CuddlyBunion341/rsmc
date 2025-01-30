@@ -17,8 +17,8 @@ use scene::setup_scene;
 
 #[cfg(feature = "wireframe")]
 mod wireframe_config {
-    use bevy::color::palettes::css::WHITE;
     use crate::wireframe::{WireframeConfig, WireframePlugin};
+    use bevy::color::palettes::css::WHITE;
 
     pub fn wireframe_plugin() -> WireframePlugin {
         WireframePlugin
