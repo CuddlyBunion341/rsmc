@@ -45,4 +45,4 @@ renet_visualizer = []
 physics_debug = []
 raycast_debug = []
 visual_debug = ["wireframe", "physics_debug", "raycast_debug"]
-
+dynamic_linking = ["bevy/dynamic_linking"]
