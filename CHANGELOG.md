@@ -10,6 +10,7 @@
 - Drop `lib::` prefix
 - Increase world size
 - Fix issue where chunks were only serialized on the client
+- Add feature flags for debug rendering
 
 ## 0.1.1
 
