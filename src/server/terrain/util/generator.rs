@@ -32,30 +32,48 @@ impl Generator {
     }
 
     fn generate_block(&self, position: Vec3) -> BlockId {
-        let base_height = -50.0;
 
-        let mut density = self.sample_3d(
-            Vec3 {
+        let default_params = GeneratorParams {
+            octaves: 4,
+            height: 0.0,
+            lacuranity: 2.0,
+            frequency: 1.0 / 60.0,
+            amplitude: 10.0,
+            persistence: 0.5,
+        };
+
+        let terrain_height = self.sample_2d(
+            Vec2 {
                 x: position.x,
-                y: position.y + base_height,
-                z: position.z,
+                y: position.z,
             },
-            4,
+            default_params
         );
-        density -= position.y as f64 * 0.02;
-        if density > 0.7 {
-            BlockId::Stone
-        } else if density > 0.40 {
-            BlockId::Dirt
-        } else if density > 0.0 {
-            if self.generate_block(position + Vec3::new(0.0, 1.0, 0.0)) == BlockId::Air {
-                BlockId::Grass
-            } else {
-                BlockId::Dirt
-            }
-        } else {
-            BlockId::Air
+
+        if (position.y as f64) < terrain_height + 20.0 {
+            return BlockId::Stone;
         }
+
+
+        // density -= position.y as f64 * 0.02;
+        //
+        // let base_block = BlockId::Stone;
+
+        // if density > 0.7 {
+        //     BlockId::Stone
+        // } else if density > 0.40 {
+        //     BlockId::Dirt
+        // } else if density > 0.0 {
+        //     if self.generate_block(position + Vec3::new(0.0, 1.0, 0.0)) == BlockId::Air {
+        //         BlockId::Grass
+        //     } else {
+        //         BlockId::Dirt
+        //     }
+        // } else {
+        //     BlockId::Air
+        // }
+
+        BlockId::Air 
     }
 
     fn sample_3d(&self, position: Vec3, octaves: i32) -> f64 {
@@ -80,26 +98,34 @@ impl Generator {
         density
     }
 
-    fn sample_2d(&self, position: Vec2, octaves: i32) -> f64 {
-        let mut height = 0.0;
-        let lacuranity = 2.0;
-        let mut frequency = 1.0 / 60.0;
-        let mut amplitude = 10.0;
-        let mut persistence = 0.5;
+    fn sample_2d(&self, position: Vec2, params: GeneratorParams) -> f64 {
+        let sample = self.perlin.get([
+            position.x as f64 * params.frequency,
+            position.y as f64 * params.frequency,
+        ]) * params.amplitude;
 
-        for _ in 0..octaves {
-            height += self.perlin.get([
-                position.x as f64 * frequency,
-                position.y as f64 * frequency,
-            ]) * amplitude;
-
-            amplitude *= persistence;
-            frequency *= lacuranity;
-            persistence *= 0.5;
+        if params.octaves == 0 {
+            return sample;
         }
 
-        height
+        sample + self.sample_2d(position, GeneratorParams {
+            octaves: params.octaves - 1,
+            height: params.height + sample,
+            lacuranity: params.lacuranity,
+            frequency: params.frequency,
+            amplitude: params.amplitude * params.persistence,
+            persistence: params.persistence * 0.5,
+        })
     }
+}
+
+struct GeneratorParams {
+    octaves: i32,
+    height: f64,
+    lacuranity: f64,
+    frequency: f64,
+    amplitude: f64,
+    persistence: f64,
 }
 
 #[cfg(test)]
