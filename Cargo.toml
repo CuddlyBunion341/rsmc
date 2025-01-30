@@ -42,4 +42,5 @@ path = "src/server/main.rs"
 wireframe = []
 debug_ui = []
 renet_visualizer = []
+physics_debug = []
 
