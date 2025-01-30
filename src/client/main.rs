@@ -16,11 +16,21 @@ use bevy_flair::FlairPlugin;
 use scene::setup_scene;
 
 #[cfg(feature = "wireframe")]
-use bevy::color::palettes::css::WHITE;
-#[cfg(feature = "wireframe")]
-use wireframe::WireframeConfig;
-#[cfg(feature = "wireframe")]
-use wireframe::WireframePlugin;
+mod wireframe_config {
+    use bevy::color::palettes::css::WHITE;
+    use crate::wireframe::{WireframeConfig, WireframePlugin};
+
+    pub fn wireframe_plugin() -> WireframePlugin {
+        WireframePlugin
+    }
+
+    pub fn wireframe_config() -> WireframeConfig {
+        WireframeConfig {
+            global: true,
+            default_color: WHITE.into(),
+        }
+    }
+}
 
 fn main() {
     let window_plugin = WindowPlugin {
@@ -41,7 +51,7 @@ fn main() {
         default_plugins,
         FlairPlugin,
         #[cfg(feature = "wireframe")]
-        WireframePlugin,
+        wireframe_config::wireframe_plugin(),
         FrameTimeDiagnosticsPlugin,
         EntityCountDiagnosticsPlugin,
         SystemInformationDiagnosticsPlugin,
@@ -57,13 +67,7 @@ fn main() {
     app.insert_state(GameState::Playing);
 
     #[cfg(feature = "wireframe")]
-    app.insert_resource(WireframeConfig {
-        #[cfg(not(feature = "wireframe"))]
-        global: false,
-        #[cfg(feature = "wireframe")]
-        global: true,
-        default_color: WHITE.into(),
-    });
+    app.insert_resource(wireframe_config::wireframe_config());
 
     app.add_systems(Startup, setup_scene).run();
 }
