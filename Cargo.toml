@@ -39,6 +39,8 @@ name = "server"
 path = "src/server/main.rs"
 
 [features]
+chat = ["bevy/dynamic_linking"]
+
 wireframe = []
 debug_ui = []
 renet_visualizer = []

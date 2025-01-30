@@ -26,6 +26,7 @@ fn main() {
     app.add_plugins(player::PlayerPlugin);
     app.add_plugins(networking::NetworkingPlugin);
     app.add_plugins(terrain::TerrainPlugin);
+    #[cfg(feature = "chat")]
     app.add_plugins(chat::ChatPlugin);
     app.run();
 }

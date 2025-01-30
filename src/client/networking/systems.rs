@@ -9,8 +9,10 @@ pub fn receive_message_system(
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
     mut chunk_manager: ResMut<ChunkManager>,
     mut chunk_mesh_events: ResMut<Events<terrain_events::ChunkMeshUpdateEvent>>,
-    mut chat_events: ResMut<Events<chat_events::ChatSyncEvent>>,
-    mut single_chat_events: ResMut<Events<chat_events::SingleChatSendEvent>>,
+    #[cfg(feature = "chat")] mut chat_events: ResMut<Events<chat_events::ChatSyncEvent>>,
+    #[cfg(feature = "chat")] mut single_chat_events: ResMut<
+        Events<chat_events::SingleChatSendEvent>,
+    >,
     mut spawn_area_loaded: ResMut<terrain_resources::SpawnAreaLoaded>,
 ) {
     while let Some(message) = client.receive_message(DefaultChannel::ReliableOrdered) {
@@ -35,10 +37,12 @@ pub fn receive_message_system(
                         from_network: true,
                     });
                 }
+                #[cfg(feature = "chat")]
                 NetworkingMessage::ChatMessageSync(messages) => {
                     info!("Client received {} chat messages", messages.len());
                     chat_events.send(chat_events::ChatSyncEvent(messages));
                 }
+                #[cfg(feature = "chat")]
                 NetworkingMessage::SingleChatMessageSync(message) => {
                     info!("Client received chat message {}", message.message);
                     single_chat_events.send(chat_events::SingleChatSendEvent(message));

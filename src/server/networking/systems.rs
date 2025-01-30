@@ -5,7 +5,9 @@ pub fn receive_message_system(
     mut player_states: ResMut<player_resources::PlayerStates>,
     mut past_block_updates: ResMut<terrain_resources::PastBlockUpdates>,
     chunk_manager: ResMut<ChunkManager>,
-    mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
+    #[cfg(feature = "chat")] mut chat_message_events: EventWriter<
+        chat_events::PlayerChatMessageSendEvent,
+    >,
 ) {
     for client_id in server.clients_id() {
         while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
@@ -29,6 +31,7 @@ pub fn receive_message_system(
                             .unwrap(),
                     );
                 }
+                #[cfg(feature = "chat")]
                 NetworkingMessage::ChatMessageSend(message) => {
                     info!("Received chat message from {}", client_id);
                     chat_message_events
@@ -102,8 +105,12 @@ pub fn handle_events_system(
     mut server_events: EventReader<ServerEvent>,
     mut player_states: ResMut<player_resources::PlayerStates>,
     past_block_updates: Res<terrain_resources::PastBlockUpdates>,
-    mut chat_message_events: EventWriter<chat_events::PlayerChatMessageSendEvent>,
-    mut chat_sync_events: EventWriter<chat_events::SyncPlayerChatMessagesEvent>,
+    #[cfg(feature = "chat")] mut chat_message_events: EventWriter<
+        chat_events::PlayerChatMessageSendEvent,
+    >,
+    #[cfg(feature = "chat")] mut chat_sync_events: EventWriter<
+        chat_events::SyncPlayerChatMessagesEvent,
+    >,
 ) {
     for event in server_events.read() {
         match event {
@@ -117,10 +124,12 @@ pub fn handle_events_system(
                     },
                 );
 
+                #[cfg(feature = "chat")]
                 chat_sync_events.send(chat_events::SyncPlayerChatMessagesEvent {
                     client_id: *client_id,
                 });
 
+                #[cfg(feature = "chat")]
                 chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
                     client_id: SERVER_MESSAGE_ID,
                     message: format!("Player {} joined the game", *client_id),
@@ -147,6 +156,7 @@ pub fn handle_events_system(
                 println!("Client {client_id} disconnected: {reason}");
                 player_states.players.remove(client_id);
 
+                #[cfg(feature = "chat")]
                 chat_message_events.send(chat_events::PlayerChatMessageSendEvent {
                     client_id: SERVER_MESSAGE_ID,
                     message: format!("Player {} left the game", client_id),

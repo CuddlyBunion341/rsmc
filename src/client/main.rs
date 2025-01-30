@@ -62,6 +62,7 @@ fn main() {
         collider::ColliderPlugin,
         player::PlayerPlugin,
         remote_player::RemotePlayerPlugin,
+        #[cfg(feature = "chat")]
         chat::ChatPlugin,
     ));
     app.insert_state(GameState::Playing);
