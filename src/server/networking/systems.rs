@@ -1,8 +1,3 @@
-#[cfg(feature = "renet_visualizer")]
-use bevy_inspector_egui::bevy_egui::EguiContexts;
-#[cfg(feature = "renet_visualizer")]
-use renet_visualizer::RenetServerVisualizer;
-
 use crate::prelude::*;
 
 pub fn receive_message_system(
@@ -166,28 +161,36 @@ pub fn handle_events_system(
 }
 
 #[cfg(feature = "renet_visualizer")]
-pub fn handle_events_for_visualizer_system(
-    mut server_events: EventReader<ServerEvent>,
-    mut visualizer: ResMut<RenetServerVisualizer<200>>,
-) {
-    for event in server_events.read() {
-        match event {
-            ServerEvent::ClientConnected { client_id } => {
-                visualizer.add_client(*client_id);
-            }
-            ServerEvent::ClientDisconnected { client_id, .. } => {
-                visualizer.remove_client(*client_id);
+pub use server_visualizer::*;
+
+#[cfg(feature = "renet_visualizer")]
+pub mod server_visualizer {
+    use crate::prelude::*;
+    use bevy_inspector_egui::bevy_egui::EguiContexts;
+    use renet_visualizer::RenetServerVisualizer;
+
+    pub fn handle_events_for_visualizer_system(
+        mut server_events: EventReader<ServerEvent>,
+        mut visualizer: ResMut<RenetServerVisualizer<200>>,
+    ) {
+        for event in server_events.read() {
+            match event {
+                ServerEvent::ClientConnected { client_id } => {
+                    visualizer.add_client(*client_id);
+                }
+                ServerEvent::ClientDisconnected { client_id, .. } => {
+                    visualizer.remove_client(*client_id);
+                }
             }
         }
     }
-}
 
-#[cfg(feature = "renet_visualizer")]
-pub fn update_visulizer_system(
-    mut egui_contexts: EguiContexts,
-    mut visualizer: ResMut<RenetServerVisualizer<200>>,
-    server: Res<RenetServer>,
-) {
-    visualizer.update(&server);
-    visualizer.show_window(egui_contexts.ctx_mut());
+    pub fn update_visulizer_system(
+        mut egui_contexts: EguiContexts,
+        mut visualizer: ResMut<RenetServerVisualizer<200>>,
+        server: Res<RenetServer>,
+    ) {
+        visualizer.update(&server);
+        visualizer.show_window(egui_contexts.ctx_mut());
+    }
 }
