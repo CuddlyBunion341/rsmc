@@ -13,6 +13,7 @@ impl Plugin for PlayerPlugin {
         info!("Building PlayerPlugin");
         app.add_plugins(FpsControllerPlugin);
         app.add_plugins(RapierPhysicsPlugin::<NoUserData>::default());
+        #[cfg(feature = "physics_debug")]
         app.add_plugins(RapierDebugRenderPlugin::default());
         app.add_event::<player_events::PlayerColliderUpdateEvent>();
         app.insert_resource(player_resources::BlockSelection::new());

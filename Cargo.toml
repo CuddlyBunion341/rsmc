@@ -42,4 +42,7 @@ path = "src/server/main.rs"
 wireframe = []
 debug_ui = []
 renet_visualizer = []
+physics_debug = []
+raycast_debug = []
+visual_debug = ["wireframe", "physics_debug", "raycast_debug"]
 
