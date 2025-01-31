@@ -8,6 +8,7 @@ pub fn receive_message_system(
     #[cfg(feature = "chat")] mut chat_message_events: EventWriter<
         chat_events::PlayerChatMessageSendEvent,
     >,
+    generator: Res<terrain_resources::Generator>,
 ) {
     for client_id in server.clients_id() {
         while let Some(message) = server.receive_message(client_id, DefaultChannel::ReliableOrdered)
@@ -57,9 +58,6 @@ pub fn receive_message_system(
                     );
                     player_states.players.insert(client_id, player);
                 }
-                NetworkingMessage::UpdateGeneratorParams(params) => {
-
-                }
                 NetworkingMessage::ChunkBatchRequest(positions) => {
                     info!(
                         "Received chunk batch request at {:?} from client {}",
@@ -75,11 +73,7 @@ pub fn receive_message_system(
                                 Some(chunk) => *chunk,
                                 None => {
                                     let mut chunk = Chunk::new(position);
-
-                                    let generator = terrain_util::generator::Generator::new(0);
-
                                     generator.generate_chunk(&mut chunk);
-
                                     chunk
                                 }
                             }

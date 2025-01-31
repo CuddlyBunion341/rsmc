@@ -1,13 +1,13 @@
+use terrain_resources::{Generator, TerrainGeneratorParams};
+
 use crate::prelude::*;
 
-pub struct Generator {
-    pub seed: u32,
-    perlin: Perlin,
-    params: TerrainGeneratorParams,
-}
-
 impl Generator {
-    pub fn new(seed: u32, params: TerrainGeneratorParams) -> Generator {
+    pub fn new(seed: u32) -> Generator {
+        Self::new_with_params(seed, TerrainGeneratorParams::default())
+    }
+
+    pub fn new_with_params(seed: u32, params: TerrainGeneratorParams) -> Generator {
         Generator {
             seed,
             perlin: Perlin::new(seed),
@@ -41,13 +41,12 @@ impl Generator {
                 x: position.x,
                 y: position.z,
             },
-            default_params
+            default_params,
         );
 
         if (position.y as f64) < terrain_height + 20.0 {
             return BlockId::Stone;
         }
-
 
         // density -= position.y as f64 * 0.02;
         //
@@ -67,7 +66,7 @@ impl Generator {
         //     BlockId::Air
         // }
 
-        BlockId::Air 
+        BlockId::Air
     }
 
     fn sample_3d(&self, position: Vec3, octaves: i32) -> f64 {
@@ -102,32 +101,29 @@ impl Generator {
             return sample;
         }
 
-        sample + self.sample_2d(position, &NoiseFunctionParams {
-            octaves: params.octaves - 1,
-            height: params.height + sample,
-            lacuranity: params.lacuranity,
-            frequency: params.frequency,
-            amplitude: params.amplitude * params.persistence,
-            persistence: params.persistence * 0.5,
-        })
+        sample
+            + self.sample_2d(
+                position,
+                &NoiseFunctionParams {
+                    octaves: params.octaves - 1,
+                    height: params.height + sample,
+                    lacuranity: params.lacuranity,
+                    frequency: params.frequency,
+                    amplitude: params.amplitude * params.persistence,
+                    persistence: params.persistence * 0.5,
+                },
+            )
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_generator_new() {
-        let seed = 42;
-        let generator = Generator::new(seed);
-        assert_eq!(generator.seed, seed);
-    }
+    use terrain_resources::Generator;
 
     #[test]
     fn test_generate_chunk() {
-        let seed = 42;
-        let generator = Generator::new(seed);
+        let generator = Generator::default();
         let mut chunk = Chunk::new(Vec3::new(0.0, 0.0, 0.0));
 
         generator.generate_chunk(&mut chunk);
@@ -137,8 +133,7 @@ mod tests {
 
     #[test]
     fn test_sample_3d() {
-        let seed = 42;
-        let generator = Generator::new(seed);
+        let generator = Generator::default();
 
         let position = Vec3::new(0.0, 0.0, 0.0);
         let density = generator.sample_3d(position, 4);

@@ -13,6 +13,9 @@ impl Plugin for TerrainPlugin {
         app.add_event::<terrain_events::BlockUpdateEvent>();
         app.insert_resource(resources::PastBlockUpdates::new());
         app.add_systems(Startup, terrain_systems::setup_world_system);
-        app.insert_resource(TerrainGeneratorParams::default());
+        app.insert_resource(resources::Generator::default());
+
+        // visualizer
+        app.add_systems(Update, terrain_systems::render_visualizer_system);
     }
 }
