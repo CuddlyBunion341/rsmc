@@ -1,3 +1,6 @@
+use bevy::ui::Node;
+use bevy_flair::style::components::NodeStyleSheet;
+
 use crate::prelude::*;
 
 pub fn setup_world_system(
@@ -24,4 +27,25 @@ pub fn setup_world_system(
     });
 
     chunk_manager.insert_chunks(chunks);
+}
+
+// visualizer
+
+struct NoiseImageNode {}
+
+pub fn setup_visualizer_system(
+    mut commands: Commands,
+    mut asset_server: ResMut<AssetServer>,
+) {
+    commands.spawn((
+            Node::default(),
+            Name::new("visualizer"),
+            NodeStyleSheet::new(asset_server.load("visualizer.css")),
+    )).with_children(|parent| {
+        parent.spawn((
+                Node::default(),
+                ImageNode::new(),
+                Name::new("noise_image"),
+        )
+    })
 }
