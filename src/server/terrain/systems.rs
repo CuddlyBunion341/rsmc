@@ -25,14 +25,19 @@ pub use visualizer::*;
 mod visualizer {
 
     use bevy::{
-        asset::RenderAssetUsages, image::Image, log::info, math::{Vec2, Vec3}, prelude::Res, render::render_resource::{Extent3d, TextureDimension, TextureFormat}
+        asset::RenderAssetUsages,
+        image::Image,
+        log::info,
+        math::{Vec2, Vec3},
+        prelude::{Res, ResMut},
+        render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     };
     use bevy_inspector_egui::{
         bevy_egui::EguiContexts,
         egui::{self, load::SizedTexture, Color32, ColorImage, ImageData, TextureOptions},
     };
 
-    use super::terrain_resources;
+    use super::{chat_resources, player_resources, terrain_resources};
 
     fn generate_terrain_heightmap(
         generator: &terrain_resources::Generator,
@@ -46,7 +51,8 @@ mod visualizer {
 
         for x in 0..width {
             for z in 0..height {
-                let sample_position = Vec2::new((origin.x + x as f32) / 20.0, (origin.z + z as f32) / 20.0);
+                let sample_position =
+                    Vec2::new((origin.x + x as f32) / 1.0, (origin.z + z as f32) / 1.0);
                 let value = generator.sample_2d(
                     sample_position.try_into().unwrap(),
                     &generator.params.height_params,
@@ -57,7 +63,10 @@ mod visualizer {
             }
         }
 
-        let color_data: Vec<Color32> = data.iter().map(|&value| Color32::from_gray(value)).collect();
+        let color_data: Vec<Color32> = data
+            .iter()
+            .map(|&value| Color32::from_gray(value))
+            .collect();
 
         let color_image: ColorImage = ColorImage {
             size: [width, height],
@@ -67,18 +76,37 @@ mod visualizer {
         ImageData::Color(color_image.into())
     }
 
-    pub fn render_visualizer_system(
+    pub fn prepare_visualizer_texture_system(
         mut contexts: EguiContexts,
-        generator: Res<terrain_resources::Generator>,
+        generator: ResMut<terrain_resources::Generator>,
+        mut noise_texture: ResMut<terrain_resources::NoiseTexture>,
     ) {
         let image_data =
             generate_terrain_heightmap(&generator, Vec3::ZERO, Vec3::new(128.0, 128.0, 128.0));
 
-        let texture_handle = contexts.ctx_mut().load_texture("Foo", image_data, TextureOptions::default());
+        noise_texture.texture = Some(contexts.ctx_mut().load_texture(
+            "terrain-texture",
+            image_data,
+            TextureOptions::default(),
+        ));
+        noise_texture.size = Vec2::new(128.0, 128.0);
+    }
 
-        egui::Window::new("Hello").show(contexts.ctx_mut(), |ui| {
-            ui.label("world");
-            ui.image(&texture_handle);
-        });
+    pub fn render_visualizer_system(
+        mut contexts: EguiContexts,
+        noise_texture: ResMut<terrain_resources::NoiseTexture>,
+    ) {
+        match &noise_texture.texture {
+            Some(texture_handle) => {
+                egui::Window::new("Hello").show(contexts.ctx_mut(), |ui| {
+                    ui.label("world");
+                    ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
+                        texture_handle.id(),
+                        texture_handle.size_vec2(),
+                    )));
+                });
+            }
+            None => { }
+        }
     }
 }

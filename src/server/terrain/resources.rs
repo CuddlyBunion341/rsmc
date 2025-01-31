@@ -1,6 +1,9 @@
+use std::sync::Arc;
+
 use crate::prelude::*;
 
 use bevy::{asset::Handle, image::Image};
+use bevy_inspector_egui::egui::{epaint::TextureManager, mutex::RwLock, TextureHandle};
 use terrain_events::BlockUpdateEvent;
 
 #[derive(Resource)]
@@ -67,14 +70,14 @@ impl Default for TerrainGeneratorParams {
 
 #[derive(Resource)]
 pub struct NoiseTexture {
-    pub texture: Handle<Image>,
+    pub texture: Option<TextureHandle>,
     pub size: Vec2,
 }
 
 impl Default for NoiseTexture {
     fn default() -> Self {
         NoiseTexture {
-            texture: Handle::default(),
+            texture: None,
             size: Vec2::ZERO,
         }
     }
