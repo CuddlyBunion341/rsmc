@@ -91,7 +91,7 @@ impl Generator {
         density
     }
 
-    fn sample_2d(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
+    pub fn sample_2d(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
         let sample = self.perlin.get([
             position.x as f64 * params.frequency,
             position.y as f64 * params.frequency,

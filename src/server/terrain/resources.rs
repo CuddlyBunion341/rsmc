@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+use bevy::{asset::Handle, image::Image};
 use terrain_events::BlockUpdateEvent;
 
 #[derive(Resource)]
@@ -58,6 +59,23 @@ impl Default for TerrainGeneratorParams {
                 amplitude: 10.0,
                 persistence: 0.5,
             },
+        }
+    }
+}
+
+// visualizer
+
+#[derive(Resource)]
+pub struct NoiseTexture {
+    pub texture: Handle<Image>,
+    pub size: Vec2,
+}
+
+impl Default for NoiseTexture {
+    fn default() -> Self {
+        NoiseTexture {
+            texture: Handle::default(),
+            size: Vec2::ZERO,
         }
     }
 }
