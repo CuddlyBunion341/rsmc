@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bevy::math::{Quat, Vec3};
+use bevy::{math::{Quat, Vec3}, prelude::Resource};
 use chrono::DateTime;
 use renet::{ChannelConfig, ClientId, ConnectionConfig, SendType};
 use serde::{Deserialize, Serialize};
@@ -50,6 +50,46 @@ pub enum NetworkingMessage {
     SingleChatMessageSync(ChatMessage),
     ChatMessageSync(Vec<ChatMessage>),
     BlockUpdate { position: Vec3, block: BlockId },
+    UpdateGeneratorParams(TerrainGeneratorParams),
+}
+
+#[derive(Serialize, Deserialize, Debug, Resource, Copy, Clone)]
+pub struct TerrainGeneratorParams {
+    pub height_params: NoiseFunctionParams,
+    pub density_params: NoiseFunctionParams,
+}
+
+impl Default for TerrainGeneratorParams {
+    fn default() -> Self {
+        Self {
+            height_params: NoiseFunctionParams {
+                octaves: 4,
+                height: 0.0,
+                lacuranity: 2.0,
+                frequency: 1.0 / 60.0,
+                amplitude: 10.0,
+                persistence: 0.5,
+            },
+            density_params: NoiseFunctionParams {
+                octaves: 4,
+                height: 0.0,
+                lacuranity: 2.0,
+                frequency: 1.0 / 60.0,
+                amplitude: 10.0,
+                persistence: 0.5,
+            },
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+pub struct NoiseFunctionParams {
+    pub octaves: i32,
+    pub height: f64,
+    pub lacuranity: f64,
+    pub frequency: f64,
+    pub amplitude: f64,
+    pub persistence: f64,
 }
 
 const CHANNELS: [ChannelConfig; 3] = [

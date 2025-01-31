@@ -57,6 +57,9 @@ pub fn receive_message_system(
                     );
                     player_states.players.insert(client_id, player);
                 }
+                NetworkingMessage::UpdateGeneratorParams(params) => {
+
+                }
                 NetworkingMessage::ChunkBatchRequest(positions) => {
                     info!(
                         "Received chunk batch request at {:?} from client {}",

@@ -36,7 +36,7 @@ pub fn setup_controller_on_area_ready_system(
             },
             ActiveEvents::COLLISION_EVENTS,
             Velocity::zero(),
-            RigidBody::Dynamic,
+            RigidBody::Fixed,
             Sleeping::disabled(),
             LockedAxes::ROTATION_LOCKED,
             AdditionalMassProperties::Mass(1.0),
@@ -45,8 +45,8 @@ pub fn setup_controller_on_area_ready_system(
             Transform::from_translation(SPAWN_POINT),
             LogicalPlayer,
             FpsControllerInput {
-                pitch: -TAU / 12.0,
-                yaw: TAU * 5.0 / 8.0,
+                pitch: -TAU / 20.0,
+                yaw: TAU * 5.0 / 12.0,
                 ..default()
             },
             FpsController {

@@ -3,13 +3,15 @@ use crate::prelude::*;
 pub struct Generator {
     pub seed: u32,
     perlin: Perlin,
+    params: TerrainGeneratorParams,
 }
 
 impl Generator {
-    pub fn new(seed: u32) -> Generator {
+    pub fn new(seed: u32, params: TerrainGeneratorParams) -> Generator {
         Generator {
             seed,
             perlin: Perlin::new(seed),
+            params,
         }
     }
 
@@ -32,15 +34,7 @@ impl Generator {
     }
 
     fn generate_block(&self, position: Vec3) -> BlockId {
-
-        let default_params = GeneratorParams {
-            octaves: 4,
-            height: 0.0,
-            lacuranity: 2.0,
-            frequency: 1.0 / 60.0,
-            amplitude: 10.0,
-            persistence: 0.5,
-        };
+        let default_params = &self.params.height_params;
 
         let terrain_height = self.sample_2d(
             Vec2 {
@@ -98,7 +92,7 @@ impl Generator {
         density
     }
 
-    fn sample_2d(&self, position: Vec2, params: GeneratorParams) -> f64 {
+    fn sample_2d(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
         let sample = self.perlin.get([
             position.x as f64 * params.frequency,
             position.y as f64 * params.frequency,
@@ -108,7 +102,7 @@ impl Generator {
             return sample;
         }
 
-        sample + self.sample_2d(position, GeneratorParams {
+        sample + self.sample_2d(position, &NoiseFunctionParams {
             octaves: params.octaves - 1,
             height: params.height + sample,
             lacuranity: params.lacuranity,
@@ -117,15 +111,6 @@ impl Generator {
             persistence: params.persistence * 0.5,
         })
     }
-}
-
-struct GeneratorParams {
-    octaves: i32,
-    height: f64,
-    lacuranity: f64,
-    frequency: f64,
-    amplitude: f64,
-    persistence: f64,
 }
 
 #[cfg(test)]
