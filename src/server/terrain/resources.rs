@@ -48,7 +48,7 @@ impl Default for TerrainGeneratorParams {
                 height: 0.0,
                 lacuranity: 2.0,
                 frequency: 1.0 / 120.0,
-                amplitude: 20.0,
+                amplitude: 30.0,
                 persistence: 0.5,
             },
             density_params: NoiseFunctionParams {

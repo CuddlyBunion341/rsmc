@@ -45,8 +45,16 @@ impl Generator {
         );
 
         if (position.y as f64) < terrain_height + 20.0 {
-            return BlockId::Stone;
+            let max_slope = self.calculate_max_slope(position, &default_params);
+            if max_slope > 3.0 {
+                return BlockId::Stone;
+            } else if max_slope > 1.0 {
+                return BlockId::Dirt;
+            } else {
+                return BlockId::Grass;
+            }
         }
+
 
         // density -= position.y as f64 * 0.02;
         //
@@ -67,6 +75,45 @@ impl Generator {
         // }
 
         BlockId::Air
+    }
+
+    fn get_sample_positions(&self, position: Vec3, epsilon: f32) -> [Vec2; 5] {
+        let mut positions = [Vec2::ZERO; 5];
+
+        let Vec3 { x, y: _, z: y } = position;
+
+        positions[0] = Vec2 { x, y };
+        positions[1] = Vec2 { x: x + epsilon, y };
+        positions[2] = Vec2 { x: x - epsilon, y };
+        positions[3] = Vec2 { x, y: y + epsilon };
+        positions[4] = Vec2 { x, y: y - epsilon };
+
+        positions
+    }
+
+    fn get_terrain_samples(&self, position: Vec3, params: &NoiseFunctionParams) -> [f64; 5] {
+        let sample_positions = self.get_sample_positions(position, 1.0);
+
+        sample_positions.map(|sample_position| {
+            self.sample_2d(sample_position, &params).abs()
+        })
+    }
+
+    fn calculate_max_slope(&self, position: Vec3, params: &NoiseFunctionParams) -> f64 {
+        let samples = self.get_terrain_samples(position, params);
+
+        let mut max = 0.0;
+
+        let main_sample = samples[0];
+
+        for i in 1..samples.len() {
+            let sample = samples[i];
+            if main_sample - sample > max {
+                max = main_sample - sample;
+            }
+        }
+
+        max
     }
 
     fn sample_3d(&self, position: Vec3, octaves: i32) -> f64 {
