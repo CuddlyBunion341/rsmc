@@ -197,7 +197,10 @@ impl ChunkManager {
     }
 
     pub fn get_all_chunk_positions(&self) -> Vec<Vec3> {
-        self.chunks.keys().into_iter().map(|key| Vec3::new(key[0] as f32, key[1] as f32, key[2] as f32)).collect()
+        self.chunks
+            .keys()
+            .map(|key| Vec3::new(key[0] as f32, key[1] as f32, key[2] as f32))
+            .collect()
     }
 }
 

@@ -9,3 +9,6 @@ pub struct BlockUpdateEvent {
 // visualizer
 #[derive(Event)]
 pub struct RegenerateHeightMapEvent;
+
+#[derive(Event)]
+pub struct WorldRegenerateEvent;

@@ -58,7 +58,7 @@ pub fn receive_message_system(
                     );
                     player_states.players.insert(client_id, player);
                 }
-                NetworkingMessage::ChunkBatchRequest { positions, force } => {
+                NetworkingMessage::ChunkBatchRequest(positions) => {
                     info!(
                         "Received chunk batch request at {:?} from client {}",
                         positions, client_id
@@ -69,19 +69,12 @@ pub fn receive_message_system(
                         .map(|position| {
                             let chunk = chunk_manager.get_chunk(position);
 
-                            // visualizer? I don't think we want to allow this in prod
-                            if force {
-                                let mut chunk = Chunk::new(position);
-                                generator.generate_chunk(&mut chunk);
-                                chunk
-                            } else {
-                                match chunk {
-                                    Some(chunk) => *chunk,
-                                    None => {
-                                        let mut chunk = Chunk::new(position);
-                                        generator.generate_chunk(&mut chunk);
-                                        chunk
-                                    }
+                            match chunk {
+                                Some(chunk) => *chunk,
+                                None => {
+                                    let mut chunk = Chunk::new(position);
+                                    generator.generate_chunk(&mut chunk);
+                                    chunk
                                 }
                             }
                         })

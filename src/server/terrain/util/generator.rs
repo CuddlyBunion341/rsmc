@@ -45,7 +45,7 @@ impl Generator {
         );
 
         if (position.y as f64) < terrain_height + 20.0 {
-            let max_slope = self.calculate_max_slope(position, &default_params);
+            let max_slope = self.calculate_max_slope(position, default_params);
             if max_slope > 4.0 {
                 return BlockId::Stone;
             } else if max_slope > 1.0 {
@@ -75,9 +75,7 @@ impl Generator {
     fn get_terrain_samples(&self, position: Vec3, params: &NoiseFunctionParams) -> [f64; 5] {
         let sample_positions = self.get_sample_positions(position, 0.001);
 
-        sample_positions.map(|sample_position| {
-            self.sample_2d(sample_position, &params).abs()
-        })
+        sample_positions.map(|sample_position| self.sample_2d(sample_position, params).abs())
     }
 
     fn calculate_max_slope(&self, position: Vec3, params: &NoiseFunctionParams) -> f64 {
@@ -96,27 +94,27 @@ impl Generator {
         max
     }
 
-    fn sample_3d(&self, position: Vec3, octaves: i32) -> f64 {
-        let mut density = 0.0;
-        let lacuranity = 2.0;
-        let mut frequency = 0.04;
-        let mut amplitude = 1.0;
-        let mut persistence = 0.5;
-
-        for _ in 0..octaves {
-            density += self.perlin.get([
-                position.x as f64 * frequency,
-                position.y as f64 * frequency,
-                position.z as f64 * frequency,
-            ]) * amplitude;
-
-            amplitude *= persistence;
-            frequency *= lacuranity;
-            persistence *= 0.5;
-        }
-
-        density
-    }
+    // fn sample_3d(&self, position: Vec3, octaves: i32) -> f64 {
+    //     let mut density = 0.0;
+    //     let lacuranity = 2.0;
+    //     let mut frequency = 0.04;
+    //     let mut amplitude = 1.0;
+    //     let mut persistence = 0.5;
+    //
+    //     for _ in 0..octaves {
+    //         density += self.perlin.get([
+    //             position.x as f64 * frequency,
+    //             position.y as f64 * frequency,
+    //             position.z as f64 * frequency,
+    //         ]) * amplitude;
+    //
+    //         amplitude *= persistence;
+    //         frequency *= lacuranity;
+    //         persistence *= 0.5;
+    //     }
+    //
+    //     density
+    // }
 
     pub fn sample_2d(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
         let sample = self.perlin.get([
@@ -161,13 +159,13 @@ mod tests {
         assert_ne!(chunk.get(0, 0, 0), BlockId::Air);
     }
 
-    #[test]
-    fn test_sample_3d() {
-        let generator = Generator::default();
-
-        let position = Vec3::new(0.0, 0.0, 0.0);
-        let density = generator.sample_3d(position, 4);
-
-        assert!((0.0..=1.0).contains(&density));
-    }
+    // #[test]
+    // fn test_sample_3d() {
+    //     let generator = Generator::default();
+    //
+    //     let position = Vec3::new(0.0, 0.0, 0.0);
+    //     let density = generator.sample_3d(position, 4);
+    //
+    //     assert!((0.0..=1.0).contains(&density));
+    // }
 }
