@@ -29,7 +29,7 @@ mod visualizer {
         image::Image,
         log::info,
         math::{Vec2, Vec3},
-        prelude::{Res, ResMut},
+        prelude::{EventReader, EventWriter, Res, ResMut},
         render::render_resource::{Extent3d, TextureDimension, TextureFormat},
     };
     use bevy_inspector_egui::{
@@ -37,7 +37,7 @@ mod visualizer {
         egui::{self, load::SizedTexture, Color32, ColorImage, ImageData, TextureOptions},
     };
 
-    use super::{chat_resources, player_resources, terrain_resources};
+    use super::{chat_resources, player_resources, terrain_events, terrain_resources};
 
     fn generate_terrain_heightmap(
         generator: &terrain_resources::Generator,
@@ -76,37 +76,86 @@ mod visualizer {
         ImageData::Color(color_image.into())
     }
 
-    pub fn prepare_visualizer_texture_system(
-        mut contexts: EguiContexts,
+    pub fn regenerate_heightmap_system(
+        mut events: EventReader<terrain_events::RegenerateHeightMapEvent>,
         generator: ResMut<terrain_resources::Generator>,
         mut noise_texture: ResMut<terrain_resources::NoiseTexture>,
+        mut contexts: EguiContexts,
     ) {
-        let image_data =
-            generate_terrain_heightmap(&generator, Vec3::ZERO, Vec3::new(128.0, 128.0, 128.0));
 
-        noise_texture.texture = Some(contexts.ctx_mut().load_texture(
-            "terrain-texture",
-            image_data,
-            TextureOptions::default(),
-        ));
-        noise_texture.size = Vec2::new(128.0, 128.0);
+        for _ in events.read() {
+            let width = 1024;
+            let height = 1024;
+            let depth = 1024;
+
+            let image_data = generate_terrain_heightmap(
+                &generator,
+                Vec3::ZERO,
+                Vec3::new(width as f32, height as f32, depth as f32),
+            );
+
+            noise_texture.texture = Some(contexts.ctx_mut().load_texture(
+                    "terrain-texture",
+                    image_data,
+                    TextureOptions::default(),
+            ));
+            noise_texture.size = Vec2::new(width as f32, height as f32);
+        }
+    }
+
+    pub fn prepare_visualizer_texture_system(
+        mut event_writer: EventWriter<terrain_events::RegenerateHeightMapEvent>,
+    ) {
+        event_writer.send(terrain_events::RegenerateHeightMapEvent);
     }
 
     pub fn render_visualizer_system(
         mut contexts: EguiContexts,
         noise_texture: ResMut<terrain_resources::NoiseTexture>,
+        mut generator: ResMut<terrain_resources::Generator>,
+        mut event_writer: EventWriter<terrain_events::RegenerateHeightMapEvent>,
     ) {
         match &noise_texture.texture {
             Some(texture_handle) => {
                 egui::Window::new("Hello").show(contexts.ctx_mut(), |ui| {
                     ui.label("world");
+
+                    ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.octaves,
+                        1..=8,
+                    ));
+                    ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.height,
+                        0.0..=10.0,
+                    ));
+                    ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.lacuranity,
+                        0.0..=4.0,
+                    ));
+                    ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.frequency,
+                        0.0..=1.0,
+                    ));
+                    ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.amplitude,
+                        0.0..=20.0,
+                    ));
+                    ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.persistence,
+                        0.0..=1.0,
+                    ));
+
+                    if ui.button("Regenerate").clicked() {
+                        event_writer.send(terrain_events::RegenerateHeightMapEvent);
+                    };
+
                     ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
                         texture_handle.id(),
                         texture_handle.size_vec2(),
                     )));
                 });
             }
-            None => { }
+            None => {}
         }
     }
 }

@@ -19,5 +19,8 @@ impl Plugin for TerrainPlugin {
         app.insert_resource(resources::NoiseTexture::default());
         app.add_systems(Startup, terrain_systems::prepare_visualizer_texture_system);
         app.add_systems(Update, terrain_systems::render_visualizer_system);
+        app.add_systems(Update, terrain_systems::regenerate_heightmap_system);
+
+        app.add_event::<terrain_events::RegenerateHeightMapEvent>();
     }
 }
