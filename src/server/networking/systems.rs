@@ -69,7 +69,7 @@ pub fn receive_message_system(
                         .map(|position| {
                             let chunk = chunk_manager.get_chunk(position);
 
-                            // visualizer?
+                            // visualizer? I don't think we want to allow this in prod
                             if force {
                                 let mut chunk = Chunk::new(position);
                                 generator.generate_chunk(&mut chunk);
