@@ -1,9 +1,6 @@
-use std::sync::Arc;
-
 use crate::prelude::*;
 
-use bevy::{asset::Handle, image::Image};
-use bevy_inspector_egui::egui::{epaint::TextureManager, mutex::RwLock, TextureHandle};
+use bevy_inspector_egui::egui::TextureHandle;
 use terrain_events::BlockUpdateEvent;
 
 #[derive(Resource)]
