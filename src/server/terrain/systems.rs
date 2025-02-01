@@ -141,14 +141,6 @@ mod visualizer {
         event_writer.send(terrain_events::RegenerateHeightMapEvent);
     }
 
-    macro_rules! add_slider {
-        ($ui:expr, $changed:expr, $value:expr, $range:expr, $text:expr) => {{
-            $changed |= $ui
-                .add(egui::widgets::Slider::new($value, $range).text($text))
-                .changed();
-        }};
-    }
-
     #[rustfmt::skip]
     pub fn render_visualizer_system(
         mut contexts: EguiContexts,
@@ -160,6 +152,14 @@ mod visualizer {
         if let Some(texture_handle) = &noise_texture.texture {
             egui::Window::new("Hello").show(contexts.ctx_mut(), |ui| {
                 ui.label("world");
+
+                macro_rules! add_slider {
+                    ($ui:expr, $changed:expr, $value:expr, $range:expr, $text:expr) => {{
+                        $changed |= $ui
+                            .add(egui::widgets::Slider::new($value, $range).text($text))
+                            .changed();
+                        }};
+                }
 
                 let mut changed = false;
 

@@ -1,4 +1,4 @@
-use terrain_resources::{Generator, TerrainGeneratorParams};
+use terrain_resources::{Generator, NoiseFunctionParams, TerrainGeneratorParams};
 
 use crate::prelude::*;
 
@@ -36,26 +36,75 @@ impl Generator {
     fn generate_block(&self, position: Vec3) -> BlockId {
         let default_params = &self.params.height_params;
 
-        let terrain_height = self.sample_2d(
+        let terrain_height = self.determine_terrain_height(position);
+
+        if (position.y as f64) < terrain_height {
+            return BlockId::Stone;
+        }
+
+        // let terrain_height = self.sample_2d(
+        //     Vec2 {
+        //         x: position.x,
+        //         y: position.z,
+        //     },
+        //     default_params,
+        // );
+
+        // if (position.y as f64) < terrain_height + 20.0 {
+        //     let max_slope = self.calculate_max_slope(position, default_params);
+        //     if max_slope > 4.0 {
+        //         return BlockId::Stone;
+        //     } else if max_slope > 1.0 {
+        //         return BlockId::Dirt;
+        //     } else {
+        //         return BlockId::Grass;
+        //     }
+        // }
+
+        BlockId::Air
+    }
+
+    fn determine_terrain_height(&self, position: Vec3) -> f64 {
+        let noise_value = self.sample_2d_normalized(
             Vec2 {
                 x: position.x,
                 y: position.z,
             },
-            default_params,
+            &self.params.height_params,
         );
+        let lerped_height = self.spline_lerp(noise_value);
 
-        if (position.y as f64) < terrain_height + 20.0 {
-            let max_slope = self.calculate_max_slope(position, default_params);
-            if max_slope > 4.0 {
-                return BlockId::Stone;
-            } else if max_slope > 1.0 {
-                return BlockId::Dirt;
-            } else {
-                return BlockId::Grass;
+        lerped_height
+    }
+
+    fn spline_lerp(&self, x: f64) -> f64 {
+        // x is the noise function value
+        // y is the mapped terrain height
+
+        let x: f32 = x as f32;
+
+        assert!(self.params.splines.len() > 2);
+
+        let min_x = self.params.splines[0].x;
+        let max_x = self.params.splines[self.params.splines.len() - 1].x;
+
+        assert!(min_x == 0.0);
+        assert!(max_x == 1.0);
+
+        for i in 0..self.params.splines.len() - 1 {
+            let current = self.params.splines[i];
+            let next = self.params.splines[i + 1];
+
+            if x >= current.x && x <= next.x {
+                return self.lerp(current, x, next);
             }
         }
 
-        BlockId::Air
+        panic!("Could not find matching spline points for x value {}", x);
+    }
+
+    fn lerp(&self, point0: Vec2, x: f32, point1: Vec2) -> f64 {
+        ((point0.y * (point1.x - x) + point1.y * (x - point0.x)) / (point1.x - point0.x)) as f64
     }
 
     fn get_sample_positions(&self, position: Vec3, epsilon: f32) -> [Vec2; 5] {
@@ -94,27 +143,12 @@ impl Generator {
         max
     }
 
-    // fn sample_3d(&self, position: Vec3, octaves: i32) -> f64 {
-    //     let mut density = 0.0;
-    //     let lacuranity = 2.0;
-    //     let mut frequency = 0.04;
-    //     let mut amplitude = 1.0;
-    //     let mut persistence = 0.5;
-    //
-    //     for _ in 0..octaves {
-    //         density += self.perlin.get([
-    //             position.x as f64 * frequency,
-    //             position.y as f64 * frequency,
-    //             position.z as f64 * frequency,
-    //         ]) * amplitude;
-    //
-    //         amplitude *= persistence;
-    //         frequency *= lacuranity;
-    //         persistence *= 0.5;
-    //     }
-    //
-    //     density
-    // }
+    pub fn sample_2d_normalized(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
+        self.perlin.get([
+            position.x as f64 * params.frequency,
+            position.y as f64 * params.frequency,
+        ]) / 2.0 + 0.5
+    }
 
     pub fn sample_2d(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
         let sample = self.perlin.get([
@@ -158,14 +192,4 @@ mod tests {
 
         assert_ne!(chunk.get(0, 0, 0), BlockId::Air);
     }
-
-    // #[test]
-    // fn test_sample_3d() {
-    //     let generator = Generator::default();
-    //
-    //     let position = Vec3::new(0.0, 0.0, 0.0);
-    //     let density = generator.sample_3d(position, 4);
-    //
-    //     assert!((0.0..=1.0).contains(&density));
-    // }
 }

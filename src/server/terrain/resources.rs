@@ -29,6 +29,16 @@ pub struct Generator {
     pub params: TerrainGeneratorParams,
 }
 
+#[derive(Debug, Copy, Clone)]
+pub struct NoiseFunctionParams {
+    pub octaves: i32,
+    pub height: f64,
+    pub lacuranity: f64,
+    pub frequency: f64,
+    pub amplitude: f64,
+    pub persistence: f64,
+}
+
 impl Default for Generator {
     fn default() -> Self {
         Self::new(0)
@@ -36,6 +46,7 @@ impl Default for Generator {
 }
 
 pub struct TerrainGeneratorParams {
+    pub splines: Vec<Vec2>,
     pub height_params: NoiseFunctionParams,
     pub density_params: NoiseFunctionParams,
 }
@@ -43,6 +54,11 @@ pub struct TerrainGeneratorParams {
 impl Default for TerrainGeneratorParams {
     fn default() -> Self {
         Self {
+            splines: vec![
+                Vec2::new(0.0, 0.0),
+                Vec2::new(0.5, 50.0),
+                Vec2::new(1.0, 100.0)
+            ],
             height_params: NoiseFunctionParams {
                 octaves: 4,
                 height: 0.0,

@@ -54,16 +54,6 @@ pub enum NetworkingMessage {
     ServerAsksClientNicelyToRerequestChunkBatch(),
 }
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
-pub struct NoiseFunctionParams {
-    pub octaves: i32,
-    pub height: f64,
-    pub lacuranity: f64,
-    pub frequency: f64,
-    pub amplitude: f64,
-    pub persistence: f64,
-}
-
 const CHANNELS: [ChannelConfig; 3] = [
     ChannelConfig {
         channel_id: 0,
