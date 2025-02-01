@@ -141,6 +141,15 @@ mod visualizer {
         event_writer.send(terrain_events::RegenerateHeightMapEvent);
     }
 
+    macro_rules! add_slider {
+        ($ui:expr, $changed:expr, $value:expr, $range:expr, $text:expr) => {{
+            $changed |= $ui
+                .add(egui::widgets::Slider::new($value, $range).text($text))
+                .changed();
+        }};
+    }
+
+    #[rustfmt::skip]
     pub fn render_visualizer_system(
         mut contexts: EguiContexts,
         noise_texture: ResMut<terrain_resources::NoiseTexture>,
@@ -154,60 +163,12 @@ mod visualizer {
 
                 let mut changed = false;
 
-                changed |= ui
-                    .add(
-                        egui::widgets::Slider::new(
-                            &mut generator.params.height_params.octaves,
-                            1..=8,
-                        )
-                        .text("octaves"),
-                    )
-                    .changed();
-                changed |= ui
-                    .add(
-                        egui::widgets::Slider::new(
-                            &mut generator.params.height_params.height,
-                            0.0..=10.0,
-                        )
-                        .text("height"),
-                    )
-                    .changed();
-                changed |= ui
-                    .add(
-                        egui::widgets::Slider::new(
-                            &mut generator.params.height_params.lacuranity,
-                            0.0..=4.0,
-                        )
-                        .text("lacuranity"),
-                    )
-                    .changed();
-                changed |= ui
-                    .add(
-                        egui::widgets::Slider::new(
-                            &mut generator.params.height_params.frequency,
-                            0.0..=1.0,
-                        )
-                        .text("frequency"),
-                    )
-                    .changed();
-                changed |= ui
-                    .add(
-                        egui::widgets::Slider::new(
-                            &mut generator.params.height_params.amplitude,
-                            0.0..=20.0,
-                        )
-                        .text("amplitude"),
-                    )
-                    .changed();
-                changed |= ui
-                    .add(
-                        egui::widgets::Slider::new(
-                            &mut generator.params.height_params.persistence,
-                            0.0..=1.0,
-                        )
-                        .text("persistence"),
-                    )
-                    .changed();
+                add_slider!(ui, changed, &mut generator.params.height_params.octaves, 1..=8, "octaves");
+                add_slider!(ui, changed, &mut generator.params.height_params.height, 0.0..=10.0, "height");
+                add_slider!(ui, changed, &mut generator.params.height_params.lacuranity, 0.0..=4.0, "lacuranity");
+                add_slider!(ui, changed, &mut generator.params.height_params.frequency, 0.0..=1.0, "frequency");
+                add_slider!(ui, changed, &mut generator.params.height_params.amplitude, 0.0..=20.0, "amplitude");
+                add_slider!(ui, changed, &mut generator.params.height_params.persistence, 0.0..=1.0, "persistence");
 
                 if changed {
                     event_writer.send(terrain_events::RegenerateHeightMapEvent);
