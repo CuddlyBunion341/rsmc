@@ -1,12 +1,10 @@
 use crate::prelude::*;
 
 pub fn setup_world_system(
-    chunk_manager: ResMut<ChunkManager>,
+    mut chunk_manager: ResMut<ChunkManager>,
     generator: Res<terrain_resources::Generator>,
 ) {
     let render_distance = Vec3::new(12.0, 2.0, 12.0);
-
-    return;
 
     info!("Generating chunks");
 
