@@ -112,7 +112,7 @@ impl Generator {
                     amplitude: params.amplitude * params.persistence,
                     persistence: params.persistence * 0.5,
                 },
-            )
+            ) * params.persistence
     }
 }
 

@@ -79,9 +79,9 @@ mod visualizer {
         mut contexts: EguiContexts,
     ) {
         for _ in events.read() {
-            let width = 1024;
-            let height = 1024;
-            let depth = 1024;
+            let width = 512;
+            let height = 512;
+            let depth = 512;
 
             let image_data = generate_terrain_heightmap(
                 &generator,
@@ -114,32 +114,34 @@ mod visualizer {
             egui::Window::new("Hello").show(contexts.ctx_mut(), |ui| {
                 ui.label("world");
 
-                ui.add(egui::widgets::Slider::new(
-                    &mut generator.params.height_params.octaves,
-                    1..=8,
-                ));
-                ui.add(egui::widgets::Slider::new(
-                    &mut generator.params.height_params.height,
-                    0.0..=10.0,
-                ));
-                ui.add(egui::widgets::Slider::new(
-                    &mut generator.params.height_params.lacuranity,
-                    0.0..=4.0,
-                ));
-                ui.add(egui::widgets::Slider::new(
-                    &mut generator.params.height_params.frequency,
-                    0.0..=1.0,
-                ));
-                ui.add(egui::widgets::Slider::new(
-                    &mut generator.params.height_params.amplitude,
-                    0.0..=20.0,
-                ));
-                ui.add(egui::widgets::Slider::new(
-                    &mut generator.params.height_params.persistence,
-                    0.0..=1.0,
-                ));
+                let mut changed = false;
 
-                if ui.button("Regenerate").clicked() {
+                changed |= ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.octaves,
+                        1..=8,
+                ).text("octaves")).changed();
+                changed |= ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.height,
+                        0.0..=10.0,
+                ).text("height")).changed();
+                changed |= ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.lacuranity,
+                        0.0..=4.0,
+                ).text("lacuranity")).changed();
+                changed |= ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.frequency,
+                        0.0..=1.0,
+                ).text("frequency")).changed();
+                changed |= ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.amplitude,
+                        0.0..=20.0,
+                ).text("amplitude")).changed();
+                changed |= ui.add(egui::widgets::Slider::new(
+                        &mut generator.params.height_params.persistence,
+                        0.0..=1.0,
+                ).text("persistence")).changed();
+
+                if changed {
                     event_writer.send(terrain_events::RegenerateHeightMapEvent);
                 };
 
