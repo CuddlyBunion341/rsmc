@@ -103,14 +103,17 @@ impl Generator {
 
         sample
             + self.sample_2d(
-                position,
+                Vec2 {
+                    x: position.x * params.lacuranity as f32,
+                    y: position.y * params.lacuranity as f32,
+                },
                 &NoiseFunctionParams {
                     octaves: params.octaves - 1,
                     height: params.height + sample,
                     lacuranity: params.lacuranity,
                     frequency: params.frequency,
-                    amplitude: params.amplitude * params.persistence,
-                    persistence: params.persistence * 0.5,
+                    amplitude: params.amplitude,
+                    persistence: params.persistence,
                 },
             ) * params.persistence
     }
