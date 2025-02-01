@@ -6,7 +6,7 @@ pub fn prepare_spawn_area_system(mut client: ResMut<RenetClient>) {
     let chunks = ChunkManager::instantiate_chunks(Vec3::ZERO, Vec3::ONE);
 
     let positions: Vec<Vec3> = chunks.into_iter().map(|chunk| chunk.position).collect();
-    let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(positions));
+    let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest{ positions, force: false });
     info!("requesting world");
     client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
 }
@@ -32,7 +32,7 @@ pub fn generate_world_system(
             "Sending chunk batch request for {:?}",
             request_positions.len()
         );
-        let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest(request_positions));
+        let message = bincode::serialize(&NetworkingMessage::ChunkBatchRequest{ positions: request_positions, force: false });
         info!("requesting chunks #{}", index);
         client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
     });
@@ -161,4 +161,11 @@ fn spawn_chunk(
             ],
         },
     ));
+}
+
+// visualizer
+pub fn handle_terrain_regeneration_events(
+    mut client: ResMut<RenetClient>,
+    mut world_regenerate_events: ResMut<Events<terrain_events::WorldRegenerateEvent>>,
+) {
 }

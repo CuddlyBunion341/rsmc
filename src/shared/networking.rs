@@ -44,12 +44,14 @@ pub enum NetworkingMessage {
     PlayerLeave(ClientId),
     PlayerUpdate(PlayerState),
     PlayerSync(HashMap<ClientId, PlayerState>),
-    ChunkBatchRequest(Vec<Vec3>),
+    ChunkBatchRequest{ positions: Vec<Vec3>, force: bool },
     ChunkBatchResponse(Vec<Chunk>),
     ChatMessageSend(String),
     SingleChatMessageSync(ChatMessage),
     ChatMessageSync(Vec<ChatMessage>),
     BlockUpdate { position: Vec3, block: BlockId },
+    // visualizer
+    ServerAsksClientNicelyToRerequestChunkBatch(),
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]

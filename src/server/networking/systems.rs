@@ -58,7 +58,7 @@ pub fn receive_message_system(
                     );
                     player_states.players.insert(client_id, player);
                 }
-                NetworkingMessage::ChunkBatchRequest(positions) => {
+                NetworkingMessage::ChunkBatchRequest { positions, force } => {
                     info!(
                         "Received chunk batch request at {:?} from client {}",
                         positions, client_id
@@ -69,12 +69,19 @@ pub fn receive_message_system(
                         .map(|position| {
                             let chunk = chunk_manager.get_chunk(position);
 
-                            match chunk {
-                                Some(chunk) => *chunk,
-                                None => {
-                                    let mut chunk = Chunk::new(position);
-                                    generator.generate_chunk(&mut chunk);
-                                    chunk
+                            // visualizer?
+                            if force {
+                                let mut chunk = Chunk::new(position);
+                                generator.generate_chunk(&mut chunk);
+                                chunk
+                            } else {
+                                match chunk {
+                                    Some(chunk) => *chunk,
+                                    None => {
+                                        let mut chunk = Chunk::new(position);
+                                        generator.generate_chunk(&mut chunk);
+                                        chunk
+                                    }
                                 }
                             }
                         })

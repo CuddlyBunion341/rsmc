@@ -16,6 +16,7 @@ impl Plugin for TerrainPlugin {
         app.insert_resource(util::TextureManager::new());
         app.add_event::<terrain_events::BlockUpdateEvent>();
         app.add_event::<terrain_events::ChunkMeshUpdateEvent>();
+        app.add_event::<terrain_events::WorldRegenerateEvent>();
         app.add_systems(Startup, terrain_systems::prepare_spawn_area_system);
         app.add_systems(Startup, terrain_systems::generate_world_system);
         app.add_systems(Update, terrain_systems::handle_chunk_mesh_update_events);

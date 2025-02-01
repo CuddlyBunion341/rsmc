@@ -11,3 +11,6 @@ pub struct BlockUpdateEvent {
     pub block: BlockId,
     pub from_network: bool,
 }
+
+#[derive(Event)]
+pub struct WorldRegenerateEvent;
