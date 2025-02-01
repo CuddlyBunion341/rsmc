@@ -72,9 +72,8 @@ impl Generator {
             },
             &self.params.height_params,
         );
-        let lerped_height = self.spline_lerp(noise_value);
 
-        lerped_height
+        self.spline_lerp(noise_value)
     }
 
     fn spline_lerp(&self, x: f64) -> f64 {
@@ -147,7 +146,8 @@ impl Generator {
         self.perlin.get([
             position.x as f64 * params.frequency,
             position.y as f64 * params.frequency,
-        ]) / 2.0 + 0.5
+        ]) / 2.0
+            + 0.5
     }
 
     pub fn sample_2d(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {

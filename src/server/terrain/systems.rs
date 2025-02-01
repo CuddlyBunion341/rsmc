@@ -30,6 +30,7 @@ mod visualizer {
         bevy_egui::EguiContexts,
         egui::{self, Color32, ColorImage, ImageData, TextureOptions},
     };
+    use egui_plot::{Line, PlotPoint, PlotPoints};
     use rayon::iter::IntoParallelIterator;
 
     use rayon::iter::ParallelIterator;
@@ -169,6 +170,20 @@ mod visualizer {
                 add_slider!(ui, changed, &mut generator.params.height_params.frequency, 0.0..=1.0, "frequency");
                 add_slider!(ui, changed, &mut generator.params.height_params.amplitude, 0.0..=20.0, "amplitude");
                 add_slider!(ui, changed, &mut generator.params.height_params.persistence, 0.0..=1.0, "persistence");
+
+                generator.params.splines.iter_mut().for_each(|spline| {
+                    add_slider!(ui, changed, &mut spline.x, 0.0..=1.0, "x");
+                    add_slider!(ui, changed, &mut spline.y, 0.0..=100.0, "y");
+                });
+
+
+                egui_plot::Plot::new("splines")
+                    .show(ui, |plot_ui| {
+                        let plot_points: Vec<PlotPoint> = generator.params.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
+                        let line_chart = Line::new(PlotPoints::Owned(plot_points));
+                        plot_ui.line(line_chart);
+                    });
+
 
                 if changed {
                     event_writer.send(terrain_events::RegenerateHeightMapEvent);

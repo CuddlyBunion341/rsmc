@@ -172,6 +172,7 @@ pub use server_visualizer::*;
 
 #[cfg(feature = "renet_visualizer")]
 pub mod server_visualizer {
+
     use crate::prelude::*;
     use bevy_inspector_egui::bevy_egui::EguiContexts;
     use renet_visualizer::RenetServerVisualizer;
