@@ -68,25 +68,24 @@ impl Generator {
     }
 
     fn determine_terrain_height(&self, position: Vec3) -> f64 {
-        let noise_value = self.sample_2d(
-            Vec2 {
-                x: position.x,
-                y: position.z,
-            },
-            &self.params.height_params,
-        ).abs();
+        let noise_value = self
+            .sample_2d(
+                Vec2 {
+                    x: position.x,
+                    y: position.z,
+                },
+                &self.params.height_params,
+            )
+            .abs();
 
         self.spline_lerp(noise_value)
     }
 
     pub fn normalized_spline_terrain_sample(&self, position: Vec2) -> f64 {
-        let noise_value = self.sample_2d(
-            position,
-            &self.params.height_params,
-        );
+        let noise_value = self.sample_2d(position, &self.params.height_params);
 
         let min_height = self.params.splines[0].y as f64;
-        let max_height = self.params.splines[self.params.splines.len() - 1].y  as f64;
+        let max_height = self.params.splines[self.params.splines.len() - 1].y as f64;
 
         let splined_value = self.spline_lerp(noise_value);
 
@@ -168,10 +167,9 @@ impl Generator {
         let mut weight_sum = 0.0;
 
         for _ in 0..params.octaves {
-            let new_sample = self.perlin.get([
-                position.x as f64 * frequency,
-                position.y as f64 * frequency,
-            ]);
+            let new_sample = self
+                .perlin
+                .get([position.x as f64 * frequency, position.y as f64 * frequency]);
 
             frequency *= params.lacuranity;
             sample += new_sample * weight;
@@ -181,7 +179,9 @@ impl Generator {
 
         sample /= weight_sum;
 
-        sample
+        sample as f64
+
+        // sample.abs() * 2.0 - 1.0
     }
 }
 

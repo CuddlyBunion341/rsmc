@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 // const SPAWN_POINT: Vec3 = Vec3::new(0.0, 32.0, 0.0);
-const SPAWN_POINT: Vec3 = Vec3::new(128.0, 64.0, -128.0);
+const SPAWN_POINT: Vec3 = Vec3::new(128.0, 96.0, -128.0);
 
 pub fn setup_player_camera(mut commands: Commands) {
     commands.spawn((
@@ -58,8 +58,10 @@ pub fn setup_controller_on_area_ready_system(
             Transform::from_translation(SPAWN_POINT),
             LogicalPlayer,
             FpsControllerInput {
-                pitch: -TAU / 20.0,
-                yaw: TAU * 5.0 / 12.0,
+                // pitch: -TAU / 20.0,
+                // yaw: TAU * 5.0 / 12.0,
+                pitch: 0.0,
+                yaw: 0.0,
                 ..default()
             },
             FpsController {

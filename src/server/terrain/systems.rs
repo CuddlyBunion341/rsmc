@@ -37,7 +37,7 @@ mod visualizer {
     use renet::{DefaultChannel, RenetServer};
     use rsmc::{Chunk, ChunkManager, NetworkingMessage, CHUNK_SIZE};
 
-    use super::{terrain_events, terrain_resources};
+    use super::{terrain_events, terrain_resources::{self, NoiseFunctionParams}};
 
     fn generate_terrain_heightmap(
         generator: &terrain_resources::Generator,
@@ -49,7 +49,7 @@ mod visualizer {
         let width = size.x as usize;
         let height = size.z as usize;
 
-        let draw_chunk_border = true;
+        let draw_chunk_border = false;
 
         for x in 0..width {
             for z in 0..height {
@@ -152,6 +152,29 @@ mod visualizer {
         event_writer.send(terrain_events::RegenerateHeightMapEvent);
     }
 
+    macro_rules! add_slider {
+        ($ui:expr, $changed:expr, $value:expr, $range:expr, $text:expr) => {{
+            $changed = $changed || $ui
+                .add(egui::widgets::Slider::new($value, $range).text($text))
+                .changed();
+            }};
+    }
+
+    fn add_sliders_for_noise_params(ui: &mut egui::Ui, changed: &mut bool, params: &mut NoiseFunctionParams) {
+        params.frequency = 1.0 / params.frequency;
+
+        let mut loc_changed = false;
+
+        add_slider!(ui, loc_changed, &mut params.octaves, 1..=8, "octaves");
+        add_slider!(ui, loc_changed, &mut params.lacuranity, 0.001..=4.0, "lacuranity");
+        add_slider!(ui, loc_changed, &mut params.frequency, 10.0..=800.0, "frequency");
+        add_slider!(ui, loc_changed, &mut params.persistence, 0.001..=1.0, "persistence");
+
+        params.frequency = 1.0 / params.frequency;
+
+        *changed = *changed || loc_changed;
+    }
+
     #[rustfmt::skip]
     pub fn render_visualizer_system(
         mut contexts: EguiContexts,
@@ -161,27 +184,26 @@ mod visualizer {
         mut world_regenerate_event_writer: EventWriter<terrain_events::WorldRegenerateEvent>,
     ) {
         if let Some(texture_handle) = &noise_texture.texture {
-            egui::Window::new("Hello").show(contexts.ctx_mut(), |ui| {
-                ui.label("world");
 
-                macro_rules! add_slider {
-                    ($ui:expr, $changed:expr, $value:expr, $range:expr, $text:expr) => {{
-                        $changed |= $ui
-                            .add(egui::widgets::Slider::new($value, $range).text($text))
-                            .changed();
-                        }};
-                }
+            egui::Window::new("Splines").show(contexts.ctx_mut(), |ui| {
+                egui_plot::Plot::new("splines")
+                    .show(ui, |plot_ui| {
+                        let plot_points: Vec<PlotPoint> = generator.params.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
+                        let line_chart = Line::new(PlotPoints::Owned(plot_points));
+                        plot_ui.line(line_chart);
+                    });
+            });
+
+            egui::Window::new("Secondary Height Map").show(contexts.ctx_mut(), |ui| {
+            });
+
+            egui::Window::new("Height Map").show(contexts.ctx_mut(), |ui| {
+                ui.label("Main height map");
+
 
                 let mut changed = false;
 
-                generator.params.height_params.frequency = 1.0 / generator.params.height_params.frequency;
-
-                add_slider!(ui, changed, &mut generator.params.height_params.octaves, 1..=8, "octaves");
-                add_slider!(ui, changed, &mut generator.params.height_params.lacuranity, 0.0..=4.0, "lacuranity");
-                add_slider!(ui, changed, &mut generator.params.height_params.frequency, 10.0..=400.0, "frequency");
-                add_slider!(ui, changed, &mut generator.params.height_params.persistence, 0.0..=1.0, "persistence");
-
-                generator.params.height_params.frequency = 1.0 / generator.params.height_params.frequency;
+                add_sliders_for_noise_params(ui, &mut changed, &mut generator.params.height_params);
 
                 let length = generator.params.splines.len();
 
@@ -190,7 +212,7 @@ mod visualizer {
                         // Ensure range from 0 to 1 by locking the first and last splines
                         add_slider!(ui, changed, &mut generator.params.splines[index].x, -1.0..=1.0, format!("x{}", index));
                     }
-                    add_slider!(ui, changed, &mut generator.params.splines[index].y, -40.0..=40.0, format!("y{}", index));
+                    add_slider!(ui, changed, &mut generator.params.splines[index].y, -40.0..=80.0, format!("y{}", index));
                 }
 
 
@@ -210,12 +232,6 @@ mod visualizer {
                     texture_handle.size_vec2(),
                 )));
 
-                egui_plot::Plot::new("splines")
-                    .show(ui, |plot_ui| {
-                        let plot_points: Vec<PlotPoint> = generator.params.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
-                        let line_chart = Line::new(PlotPoints::Owned(plot_points));
-                        plot_ui.line(line_chart);
-                    });
             });
 
             // egui::Window::new("Heightmap").show(contexts.ctx_mut(), |ui| {
