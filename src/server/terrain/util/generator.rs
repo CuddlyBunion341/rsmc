@@ -159,41 +159,27 @@ impl Generator {
         max
     }
 
-    // pub fn sample_2d_normalized(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
-    //     let mut height = self.perlin.get([
-    //         position.x as f64 * params.frequency,
-    //         position.y as f64 * params.frequency,
-    //     ]);
-    //
-    //     for o in 0..params.octaves {
-    //         height += self.perlin.get([
-    //             position.x as f64 * params.frequency * o as f64,
-    //             position.y as f64 * params.frequency * o as f64,
-    //         ]) * params.amplitude;
-    //     }
-    //
-    //     height
-    // }
-
     pub fn sample_2d(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
-        let mut den_sum = 0.0;
-
-        let pers_f = 1.0 / params.persistence;
-
-        for o in 0..params.octaves {
-            den_sum += pers_f.powi(o);
-        }
-
         let mut sample = 0.0;
 
-        for o in 1..params.octaves {
+        let mut frequency = params.frequency;
+        let mut weight = 1.0;
+
+        let mut weight_sum = 0.0;
+
+        for _ in 0..params.octaves {
             let new_sample = self.perlin.get([
-                position.x as f64 * params.frequency * params.lacuranity.powi(o) as f64,
-                position.y as f64 * params.frequency * params.lacuranity.powi(o) as f64,
+                position.x as f64 * frequency,
+                position.y as f64 * frequency,
             ]);
 
-            sample += new_sample * pers_f.powi(o) / den_sum;
+            frequency *= params.lacuranity;
+            sample += new_sample * weight;
+            weight_sum += weight;
+            weight *= params.persistence;
         }
+
+        sample /= weight_sum;
 
         sample
     }
