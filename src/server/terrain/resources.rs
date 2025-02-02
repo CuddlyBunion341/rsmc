@@ -55,9 +55,8 @@ impl Default for TerrainGeneratorParams {
     fn default() -> Self {
         Self {
             splines: vec![
-                Vec2::new(0.0, 0.0),
-                Vec2::new(0.5, 50.0),
-                Vec2::new(1.0, 100.0),
+                Vec2::new(-1.0, 0.0),
+                Vec2::new(1.0, 50.0),
             ],
             height_params: NoiseFunctionParams {
                 octaves: 4,

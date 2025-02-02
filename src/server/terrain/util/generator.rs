@@ -65,15 +65,29 @@ impl Generator {
     }
 
     fn determine_terrain_height(&self, position: Vec3) -> f64 {
-        let noise_value = self.sample_2d_normalized(
+        let noise_value = self.sample_2d(
             Vec2 {
                 x: position.x,
                 y: position.z,
             },
             &self.params.height_params,
-        );
+        ).abs();
 
         self.spline_lerp(noise_value)
+    }
+
+    pub fn normalized_spline_terrain_sample(&self, position: Vec2) -> f64 {
+        let noise_value = self.sample_2d(
+            position,
+            &self.params.height_params,
+        );
+
+        let min_height = self.params.splines[0].y as f64;
+        let max_height = self.params.splines[self.params.splines.len() - 1].y  as f64;
+
+        let splined_value = self.spline_lerp(noise_value);
+
+        (splined_value - min_height) / (max_height - min_height)
     }
 
     fn spline_lerp(&self, x: f64) -> f64 {
@@ -82,12 +96,12 @@ impl Generator {
 
         let x: f32 = x as f32;
 
-        assert!(self.params.splines.len() > 2);
+        assert!(self.params.splines.len() >= 2);
 
         let min_x = self.params.splines[0].x;
         let max_x = self.params.splines[self.params.splines.len() - 1].x;
 
-        assert!(min_x == 0.0);
+        assert!(min_x == -1.0);
         assert!(max_x == 1.0);
 
         for i in 0..self.params.splines.len() - 1 {
@@ -142,39 +156,43 @@ impl Generator {
         max
     }
 
-    pub fn sample_2d_normalized(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
-        self.perlin.get([
-            position.x as f64 * params.frequency,
-            position.y as f64 * params.frequency,
-        ]) / 2.0
-            + 0.5
-    }
+    // pub fn sample_2d_normalized(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
+    //     let mut height = self.perlin.get([
+    //         position.x as f64 * params.frequency,
+    //         position.y as f64 * params.frequency,
+    //     ]);
+    //
+    //     for o in 0..params.octaves {
+    //         height += self.perlin.get([
+    //             position.x as f64 * params.frequency * o as f64,
+    //             position.y as f64 * params.frequency * o as f64,
+    //         ]) * params.amplitude;
+    //     }
+    //
+    //     height
+    // }
 
     pub fn sample_2d(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
-        let sample = self.perlin.get([
-            position.x as f64 * params.frequency,
-            position.y as f64 * params.frequency,
-        ]) * params.amplitude;
+        let mut den_sum = 0.0;
 
-        if params.octaves == 0 {
-            return sample;
+        let pers_f = 1.0 / params.persistence;
+
+        for o in 0..params.octaves {
+            den_sum += pers_f.powi(o);
+        }
+
+        let mut sample = 0.0;
+
+        for o in 1..params.octaves {
+            let new_sample = self.perlin.get([
+                position.x as f64 * params.frequency * params.lacuranity.powi(o) as f64,
+                position.y as f64 * params.frequency * params.lacuranity.powi(o) as f64,
+            ]);
+
+            sample += new_sample * pers_f.powi(o) / den_sum;
         }
 
         sample
-            + self.sample_2d(
-                Vec2 {
-                    x: position.x * params.lacuranity as f32,
-                    y: position.y * params.lacuranity as f32,
-                },
-                &NoiseFunctionParams {
-                    octaves: params.octaves - 1,
-                    height: params.height + sample,
-                    lacuranity: params.lacuranity,
-                    frequency: params.frequency,
-                    amplitude: params.amplitude,
-                    persistence: params.persistence,
-                },
-            ) * params.persistence
     }
 }
 

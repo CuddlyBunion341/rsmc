@@ -35,7 +35,7 @@ mod visualizer {
 
     use rayon::iter::ParallelIterator;
     use renet::{DefaultChannel, RenetServer};
-    use rsmc::{Chunk, ChunkManager, NetworkingMessage};
+    use rsmc::{Chunk, ChunkManager, NetworkingMessage, CHUNK_SIZE};
 
     use super::{terrain_events, terrain_resources};
 
@@ -49,13 +49,23 @@ mod visualizer {
         let width = size.x as usize;
         let height = size.z as usize;
 
+        let draw_chunk_border = true;
+
         for x in 0..width {
             for z in 0..height {
                 let sample_position =
                     Vec2::new((origin.x + x as f32) / 1.0, (origin.z + z as f32) / 1.0);
-                let value = generator.sample_2d(sample_position, &generator.params.height_params);
-                let value = value * size.y as f64;
-                let value = value as u8;
+                // let value = generator.sample_2d(sample_position, &generator.params.height_params);
+                let value = generator.normalized_spline_terrain_sample(sample_position);
+                let value = ( value * size.y as f64 ) / 2.0 + 0.5;
+                let mut value = value as u8;
+
+                if draw_chunk_border {
+                    if x % CHUNK_SIZE == 0 || z % CHUNK_SIZE == 0 {
+                        value = 255;
+                    }
+                }
+
                 data[x + z * width] = value;
             }
         }
@@ -164,25 +174,25 @@ mod visualizer {
 
                 let mut changed = false;
 
+                generator.params.height_params.frequency = 1.0 / generator.params.height_params.frequency;
+
                 add_slider!(ui, changed, &mut generator.params.height_params.octaves, 1..=8, "octaves");
-                add_slider!(ui, changed, &mut generator.params.height_params.height, 0.0..=10.0, "height");
                 add_slider!(ui, changed, &mut generator.params.height_params.lacuranity, 0.0..=4.0, "lacuranity");
-                add_slider!(ui, changed, &mut generator.params.height_params.frequency, 0.0..=1.0, "frequency");
-                add_slider!(ui, changed, &mut generator.params.height_params.amplitude, 0.0..=20.0, "amplitude");
+                add_slider!(ui, changed, &mut generator.params.height_params.frequency, 10.0..=300.0, "frequency");
                 add_slider!(ui, changed, &mut generator.params.height_params.persistence, 0.0..=1.0, "persistence");
 
-                generator.params.splines.iter_mut().for_each(|spline| {
-                    add_slider!(ui, changed, &mut spline.x, 0.0..=1.0, "x");
-                    add_slider!(ui, changed, &mut spline.y, 0.0..=100.0, "y");
-                });
+                generator.params.height_params.frequency = 1.0 / generator.params.height_params.frequency;
 
+                let length = generator.params.splines.len();
 
-                egui_plot::Plot::new("splines")
-                    .show(ui, |plot_ui| {
-                        let plot_points: Vec<PlotPoint> = generator.params.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
-                        let line_chart = Line::new(PlotPoints::Owned(plot_points));
-                        plot_ui.line(line_chart);
-                    });
+                for index in 0..length {
+                    if index != 0 && index != length - 1 {
+                        // Ensure range from 0 to 1 by locking the first and last splines
+                        add_slider!(ui, changed, &mut generator.params.splines[index].x, -1.0..=1.0, format!("x{}", index));
+                    }
+                    add_slider!(ui, changed, &mut generator.params.splines[index].y, -40.0..=40.0, format!("y{}", index));
+                }
+
 
 
                 if changed {
@@ -199,7 +209,22 @@ mod visualizer {
                     texture_handle.id(),
                     texture_handle.size_vec2(),
                 )));
+
+                egui_plot::Plot::new("splines")
+                    .show(ui, |plot_ui| {
+                        let plot_points: Vec<PlotPoint> = generator.params.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
+                        let line_chart = Line::new(PlotPoints::Owned(plot_points));
+                        plot_ui.line(line_chart);
+                    });
             });
+
+            // egui::Window::new("Heightmap").show(contexts.ctx_mut(), |ui| {
+            //     ui.label(format!("{:?}", noise_texture.size));
+            //     ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
+            //         noise_texture.texture.unwrap().id(),
+            //         noise_texture.size_vec2(),
+            //     )));
+            // });
         }
     }
 }
