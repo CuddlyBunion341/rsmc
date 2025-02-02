@@ -178,7 +178,7 @@ mod visualizer {
 
                 add_slider!(ui, changed, &mut generator.params.height_params.octaves, 1..=8, "octaves");
                 add_slider!(ui, changed, &mut generator.params.height_params.lacuranity, 0.0..=4.0, "lacuranity");
-                add_slider!(ui, changed, &mut generator.params.height_params.frequency, 10.0..=300.0, "frequency");
+                add_slider!(ui, changed, &mut generator.params.height_params.frequency, 10.0..=400.0, "frequency");
                 add_slider!(ui, changed, &mut generator.params.height_params.persistence, 0.0..=1.0, "persistence");
 
                 generator.params.height_params.frequency = 1.0 / generator.params.height_params.frequency;
