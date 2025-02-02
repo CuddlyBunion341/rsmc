@@ -1,14 +1,27 @@
 use crate::prelude::*;
 
-const SPAWN_POINT: Vec3 = Vec3::new(0.0, 32.0, 0.0);
+// const SPAWN_POINT: Vec3 = Vec3::new(0.0, 32.0, 0.0);
+const SPAWN_POINT: Vec3 = Vec3::new(128.0, 64.0, -128.0);
 
 pub fn setup_player_camera(mut commands: Commands) {
     commands.spawn((
+            Name::new("Player cam?"),
         Camera3d::default(),
-        Projection::Perspective(PerspectiveProjection {
-            fov: TAU / 5.0,
-            ..default()
-        }),
+        // Projection::Perspective(PerspectiveProjection {
+        //     fov: TAU / 5.0,
+        //     ..default()
+        // }),
+        Projection::Orthographic(
+            OrthographicProjection {
+                scale: 0.125,
+                near: 0.0001,
+                far: 1000.0,
+                viewport_origin: Vec2::new(0.5, 0.5),
+                scaling_mode: ScalingMode::WindowSize,
+                area: Rect::new(-1.0, -1.0, 1.0, 1.0),
+            }
+            .into(),
+        ),
         RenderPlayer {
             logical_entity: Entity::from_raw(0),
         },
