@@ -92,7 +92,42 @@ impl Default for TerrainGeneratorParams {
 
 // visualizer
 
+#[derive(PartialEq, Hash, Eq, Clone)]
+pub enum TextureType {
+    Height,
+    HeightAdjust,
+    Density
+}
+
+impl Display for TextureType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result<&str> {
+        match self {
+            Self::Height => Ok("terrain-height-texture"),
+            Self::HeightAdjust => Ok("terrain-height-adjust-texture"),
+            Self::Density => Ok("terrain-density-texture")
+        }
+    }
+} 
+
 #[derive(Resource)]
+pub struct NoiseTextureList {
+    pub noise_textures: HashMap<TextureType, NoiseTexture>
+}
+
+impl Default for NoiseTextureList {
+    fn default() -> Self {
+        let mut noise_textures = HashMap::new();
+
+        noise_textures.insert(TextureType::Height, NoiseTexture::default());
+        noise_textures.insert(TextureType::HeightAdjust, NoiseTexture::default());
+        noise_textures.insert(TextureType::Density, NoiseTexture::default());
+
+        NoiseTextureList {
+            noise_textures,
+        }
+    }
+}
+
 pub struct NoiseTexture {
     pub texture: Option<TextureHandle>,
     pub size: Vec2,
