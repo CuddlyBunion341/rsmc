@@ -40,7 +40,6 @@ mod visualizer {
     use rsmc::{Chunk, ChunkManager, NetworkingMessage, CHUNK_SIZE};
 
     use super::{
-        prelude::*,
         terrain_events,
         terrain_resources::{self, NoiseFunctionParams, TextureType},
     };
@@ -80,7 +79,7 @@ mod visualizer {
                     TextureType::HeightAdjust => {
                         let sample_position = Vec2::new(x as f32, z as f32);
                         let value = generator
-                            .sample_2d(sample_position, &generator.params.height_adjust_params);
+                            .sample_2d(sample_position, &generator.params.height_adjust.noise);
                         let value = map_range(value, -1.0, 1.0, 0.0, 255.0);
 
                         data[index] = value as u8;
@@ -88,7 +87,7 @@ mod visualizer {
                     TextureType::Density => {
                         // TODO: change to sample3D
                         let pos = Vec2::new(x as f32, z as f32);
-                        let value = generator.sample_2d(pos, &generator.params.density_params);
+                        let value = generator.sample_2d(pos, &generator.params.density.noise);
                         let value = map_range(value, -1.0, 1.0, 0.0, 255.0);
 
                         data[index] = value as u8;
@@ -258,14 +257,14 @@ mod visualizer {
 
             let mut changed = false;
 
-            let length = generator.params.splines.len();
+            let length = generator.params.height.splines.len();
 
             for index in 0..length {
                 if index != 0 && index != length - 1 {
                     // Ensure range from 0 to 1 by locking the first and last splines
-                    add_slider!(ui, changed, &mut generator.params.splines[index].x, -1.0..=1.0, format!("x{}", index));
+                    add_slider!(ui, changed, &mut generator.params.height.splines[index].x, -1.0..=1.0, format!("x{}", index));
                 }
-                add_slider!(ui, changed, &mut generator.params.splines[index].y, -40.0..=80.0, format!("y{}", index));
+                add_slider!(ui, changed, &mut generator.params.height.splines[index].y, -40.0..=80.0, format!("y{}", index));
             }
 
             if changed {
@@ -278,7 +277,7 @@ mod visualizer {
 
             egui_plot::Plot::new("splines")
                 .show(ui, |plot_ui| {
-                    let plot_points: Vec<PlotPoint> = generator.params.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
+                    let plot_points: Vec<PlotPoint> = generator.params.height.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
                     let line_chart = Line::new(PlotPoints::Owned(plot_points));
                     plot_ui.line(line_chart);
                 });
@@ -301,9 +300,9 @@ mod visualizer {
                     };
 
                     let params: &mut NoiseFunctionParams = match texture_type {
-                        TextureType::Height => &mut generator.params.height_params,
-                        TextureType::HeightAdjust => &mut generator.params.height_adjust_params,
-                        TextureType::Density => &mut generator.params.density_params
+                        TextureType::Height => &mut generator.params.height.noise,
+                        TextureType::HeightAdjust => &mut generator.params.height_adjust.noise,
+                        TextureType::Density => &mut generator.params.density.noise
                     };
 
                     egui::Window::new(window_name).show(contexts.ctx_mut(), |ui| {

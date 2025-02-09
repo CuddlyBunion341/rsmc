@@ -38,6 +38,10 @@ pub struct DensityParams {
     pub squash_factor: f64
 }
 
+pub struct HeightAdjustParams {
+    pub noise: NoiseFunctionParams,
+}
+
 #[derive(Debug)]
 pub struct NoiseFunctionParams {
     pub octaves: u32,
@@ -56,8 +60,8 @@ impl Default for Generator {
 
 pub struct TerrainGeneratorParams {
     pub height: HeightParams,
-    pub height_adjust: NoiseFunctionParams,
-    pub density: DensityParams ,
+    pub height_adjust: HeightAdjustParams,
+    pub density: DensityParams,
 }
 
 impl Default for TerrainGeneratorParams {
@@ -80,25 +84,27 @@ impl Default for TerrainGeneratorParams {
                     persistence: 0.5,
                 }
             },
-            height_adjust: NoiseFunctionParams {
-                octaves: 4,
-                height: 0.0,
-                lacuranity: 2.0,
-                frequency: 1.0 / 120.0,
-                amplitude: 30.0,
-                persistence: 0.5,
+            height_adjust: HeightAdjustParams {
+                noise: NoiseFunctionParams {
+                    octaves: 4,
+                    height: 0.0,
+                    lacuranity: 2.0,
+                    frequency: 1.0 / 120.0,
+                    amplitude: 30.0,
+                    persistence: 0.5,
+                }
             },
             density: DensityParams {
-                    squash_factor: 1.0 / 200.0,
-                    noise: NoiseFunctionParams {
-                        octaves: 4,
-                        height: 0.0,
-                        lacuranity: 2.0,
-                        frequency: 1.0 / 60.0,
-                        amplitude: 10.0,
-                        persistence: 0.5,
-                    },
-                }
+                squash_factor: 1.0 / 200.0,
+                noise: NoiseFunctionParams {
+                    octaves: 4,
+                    height: 0.0,
+                    lacuranity: 2.0,
+                    frequency: 1.0 / 60.0,
+                    amplitude: 10.0,
+                    persistence: 0.5,
+                },
+            }
         }
     }
 }
