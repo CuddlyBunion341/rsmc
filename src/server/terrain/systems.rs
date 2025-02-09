@@ -39,34 +39,57 @@ mod visualizer {
 
     use super::{terrain_events, terrain_resources::{self, NoiseFunctionParams, NoiseTexture, TextureType}};
 
+    fn map_range(value: f64, min: f64, max: f64, new_min: f64, new_max: f64) -> f64 {
+        ((value - min) / (max - min)) * (new_max - new_min) + new_min
+    }
+
     fn generate_terrain_heightmap(
         generator: &terrain_resources::Generator,
+        texture_type: &TextureType,
         origin: Vec3,
         size: Vec3,
+        draw_chunk_border: bool,
     ) -> ImageData {
         let mut data = vec![0; (size.x * size.z) as usize];
 
         let width = size.x as usize;
         let height = size.z as usize;
 
-        let draw_chunk_border = false;
-
         for x in 0..width {
             for z in 0..height {
-                let sample_position =
-                    Vec2::new((origin.x + x as f32) / 1.0, (origin.z + z as f32) / 1.0);
-                // let value = generator.sample_2d(sample_position, &generator.params.height_params);
-                let value = generator.normalized_spline_terrain_sample(sample_position);
-                let value = ( value * size.y as f64 ) / 2.0 + 0.5;
-                let mut value = value as u8;
+                let index = x + z * width;
 
                 if draw_chunk_border {
                     if x % CHUNK_SIZE == 0 || z % CHUNK_SIZE == 0 {
-                        value = 255;
+                        data[index] = 255;
+                        continue;
                     }
                 }
 
-                data[x + z * width] = value;
+                match texture_type {
+                    TextureType::Height => {
+                        let sample_position = Vec2::new((origin.x + x as f32) / 1.0, (origin.z + z as f32) / 1.0);
+                        let value = generator.normalized_spline_terrain_sample(sample_position);
+                        let value = ( value * size.y as f64 ) / 2.0 + 0.5;
+
+                        data[index] = value as u8; 
+                    }
+                    TextureType::HeightAdjust => {
+                        let sample_position = Vec2::new((origin.x + x as f32) / 1.0, (origin.z + z as f32) / 1.0);
+                        let value = generator.sample_2d(sample_position, &generator.params.height_adjust_params);
+                        let value = map_range(value, -1.0, 1.0, 0.0, 255.0);
+
+                        data[index] = value as u8; 
+                    }
+                    TextureType::Density => {
+                        // TODO: change to sample3D
+                        let pos = Vec2::new(origin.x + x as f32, origin.z + z as f32);
+                        let value = generator.sample_2d(pos, &generator.params.density_params);
+                        let value = map_range(value, -1.0, 1.0, 0.0, 255.0);
+
+                        data[index] = value as u8;
+                    }
+                };
             }
         }
 
@@ -137,8 +160,10 @@ mod visualizer {
 
             let image_data = generate_terrain_heightmap(
                 &generator,
+                &texture_type,
                 Vec3::ZERO,
                 Vec3::new(width as f32, height as f32, depth as f32),
+                true
             );
 
             let entry = noise_texture_list.noise_textures.get_mut(&texture_type).expect("Noise texture not loaded, please initialize the resource properly.");
