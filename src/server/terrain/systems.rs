@@ -22,7 +22,7 @@ pub use visualizer::*;
 
 mod visualizer {
     use bevy::{
-        log::info,
+        log::{info, warn},
         math::{Vec2, Vec3},
         prelude::{EventReader, EventWriter, ResMut},
     };
@@ -37,7 +37,7 @@ mod visualizer {
     use renet::{DefaultChannel, RenetServer};
     use rsmc::{Chunk, ChunkManager, NetworkingMessage, CHUNK_SIZE};
 
-    use super::{terrain_events, terrain_resources::{self, NoiseFunctionParams}};
+    use super::{terrain_events, terrain_resources::{self, NoiseFunctionParams, NoiseTexture, TextureType}};
 
     fn generate_terrain_heightmap(
         generator: &terrain_resources::Generator,
@@ -101,7 +101,7 @@ mod visualizer {
                     generator.generate_chunk(&mut chunk);
                     chunk
                 })
-                .collect();
+            .collect();
 
             new_chunks.into_iter().for_each(|chunk| {
                 chunk_manager.insert_chunk(chunk);
@@ -123,10 +123,12 @@ mod visualizer {
     pub fn regenerate_heightmap_system(
         mut events: EventReader<terrain_events::RegenerateHeightMapEvent>,
         generator: ResMut<terrain_resources::Generator>,
-        mut noise_texture: ResMut<terrain_resources::NoiseTexture>,
+        mut noise_texture_list: ResMut<terrain_resources::NoiseTextureList>,
         mut contexts: EguiContexts,
     ) {
-        for _ in events.read() {
+        for event in events.read() {
+            let texture_type = event.0.clone();
+
             let width = 512;
             let height = 512;
             let depth = 512;
@@ -137,19 +139,23 @@ mod visualizer {
                 Vec3::new(width as f32, height as f32, depth as f32),
             );
 
-            noise_texture.texture = Some(contexts.ctx_mut().load_texture(
-                "terrain-texture",
-                image_data,
-                TextureOptions::default(),
+            let entry = noise_texture_list.noise_textures.get_mut(&texture_type).expect("Noise texture not loaded, please initialize the resource properly.");
+
+            entry.texture = Some(contexts.ctx_mut().load_texture(
+                    "terrain-texture",
+                    image_data,
+                    TextureOptions::default(),
             ));
-            noise_texture.size = Vec2::new(width as f32, height as f32);
+            entry.size = Vec2::new(width as f32, height as f32);
         }
     }
 
     pub fn prepare_visualizer_texture_system(
         mut event_writer: EventWriter<terrain_events::RegenerateHeightMapEvent>,
     ) {
-        event_writer.send(terrain_events::RegenerateHeightMapEvent);
+        event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::Height));
+        event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::HeightAdjust));
+        event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::Density));
     }
 
     macro_rules! add_slider {
@@ -178,69 +184,78 @@ mod visualizer {
     #[rustfmt::skip]
     pub fn render_visualizer_system(
         mut contexts: EguiContexts,
-        noise_texture: ResMut<terrain_resources::NoiseTexture>,
+        noise_texture_list: ResMut<terrain_resources::NoiseTextureList>,
         mut generator: ResMut<terrain_resources::Generator>,
         mut event_writer: EventWriter<terrain_events::RegenerateHeightMapEvent>,
         mut world_regenerate_event_writer: EventWriter<terrain_events::WorldRegenerateEvent>,
     ) {
-        if let Some(texture_handle) = &noise_texture.texture {
+        egui::Window::new("Splines").show(contexts.ctx_mut(), |ui| {
+            egui_plot::Plot::new("splines")
+                .show(ui, |plot_ui| {
+                    let plot_points: Vec<PlotPoint> = generator.params.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
+                    let line_chart = Line::new(PlotPoints::Owned(plot_points));
+                    plot_ui.line(line_chart);
+                });
 
-            egui::Window::new("Splines").show(contexts.ctx_mut(), |ui| {
-                egui_plot::Plot::new("splines")
-                    .show(ui, |plot_ui| {
-                        let plot_points: Vec<PlotPoint> = generator.params.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
-                        let line_chart = Line::new(PlotPoints::Owned(plot_points));
-                        plot_ui.line(line_chart);
+            let mut changed = false;
+
+            let length = generator.params.splines.len();
+
+            for index in 0..length {
+                if index != 0 && index != length - 1 {
+                    // Ensure range from 0 to 1 by locking the first and last splines
+                    add_slider!(ui, changed, &mut generator.params.splines[index].x, -1.0..=1.0, format!("x{}", index));
+                }
+                add_slider!(ui, changed, &mut generator.params.splines[index].y, -40.0..=80.0, format!("y{}", index));
+            }
+
+            if changed {
+                event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::Height));
+            }
+
+            if ui.button("Regenerate world").clicked() {
+                world_regenerate_event_writer.send(terrain_events::WorldRegenerateEvent);
+            }
+        });
+
+        let noise_textures = &noise_texture_list.noise_textures;
+
+        for (texture_type, noise_texture) in noise_textures {
+            let texture_handle = noise_texture.texture.as_ref();
+
+            match texture_handle {
+                None => {
+                    warn!("Noise texture handle could not be borrowed")
+                },
+                Some(texture_handle) => {
+                    let window_name = match texture_type {
+                        TextureType::Height => "Base Height",
+                        TextureType::HeightAdjust => "Height adjustment",
+                        TextureType::Density => "Density",
+                    };
+
+                    egui::Window::new(window_name).show(contexts.ctx_mut(), |ui| {
+                        ui.label(window_name);
+
+                        let mut changed = false;
+
+                        add_sliders_for_noise_params(ui, &mut changed, &mut generator.params.height_params);
+
+
+                        if changed {
+                            event_writer.send(terrain_events::RegenerateHeightMapEvent(texture_type.clone()));
+                        };
+
+                        ui.label(format!("{:?}", generator.params.height_params));
+
+                        ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
+                                    texture_handle.id(),
+                                    texture_handle.size_vec2(),
+                        )));
                     });
-            });
-
-            egui::Window::new("Secondary Height Map").show(contexts.ctx_mut(), |ui| {
-            });
-
-            egui::Window::new("Height Map").show(contexts.ctx_mut(), |ui| {
-                ui.label("Main height map");
-
-
-                let mut changed = false;
-
-                add_sliders_for_noise_params(ui, &mut changed, &mut generator.params.height_params);
-
-                let length = generator.params.splines.len();
-
-                for index in 0..length {
-                    if index != 0 && index != length - 1 {
-                        // Ensure range from 0 to 1 by locking the first and last splines
-                        add_slider!(ui, changed, &mut generator.params.splines[index].x, -1.0..=1.0, format!("x{}", index));
-                    }
-                    add_slider!(ui, changed, &mut generator.params.splines[index].y, -40.0..=80.0, format!("y{}", index));
                 }
+            }
 
-
-
-                if changed {
-                    event_writer.send(terrain_events::RegenerateHeightMapEvent);
-                };
-
-                ui.label(format!("{:?}", generator.params.height_params));
-
-                if ui.button("Regenerate world").clicked() {
-                    world_regenerate_event_writer.send(terrain_events::WorldRegenerateEvent);
-                }
-
-                ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
-                    texture_handle.id(),
-                    texture_handle.size_vec2(),
-                )));
-
-            });
-
-            // egui::Window::new("Heightmap").show(contexts.ctx_mut(), |ui| {
-            //     ui.label(format!("{:?}", noise_texture.size));
-            //     ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
-            //         noise_texture.texture.unwrap().id(),
-            //         noise_texture.size_vec2(),
-            //     )));
-            // });
-        }
+        };
     }
 }

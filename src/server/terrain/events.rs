@@ -1,3 +1,5 @@
+use terrain_resources::TextureType;
+
 use crate::prelude::*;
 
 #[derive(Event)]
@@ -8,7 +10,7 @@ pub struct BlockUpdateEvent {
 
 // visualizer
 #[derive(Event)]
-pub struct RegenerateHeightMapEvent;
+pub struct RegenerateHeightMapEvent(pub TextureType);
 
 #[derive(Event)]
 pub struct WorldRegenerateEvent;
