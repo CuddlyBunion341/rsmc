@@ -40,9 +40,9 @@ mod visualizer {
     use rsmc::{Chunk, ChunkManager, NetworkingMessage, CHUNK_SIZE};
 
     use super::{
+        prelude::*,
         terrain_events,
         terrain_resources::{self, NoiseFunctionParams, TextureType},
-        prelude::*,
     };
 
     fn map_range(value: f64, min: f64, max: f64, new_min: f64, new_max: f64) -> f64 {

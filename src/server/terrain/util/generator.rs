@@ -24,7 +24,13 @@ impl Generator {
             for y in 0..CHUNK_SIZE + 2 {
                 for z in 0..CHUNK_SIZE + 2 {
                     #[cfg(feature = "skip_chunk_padding")]
-                    if x == 0 || x == CHUNK_SIZE + 1 || y == 0 || y == CHUNK_SIZE + 1 || z == 0 || z == CHUNK_SIZE + 1 {
+                    if x == 0
+                        || x == CHUNK_SIZE + 1
+                        || y == 0
+                        || y == CHUNK_SIZE + 1
+                        || z == 0
+                        || z == CHUNK_SIZE + 1
+                    {
                         continue;
                     }
 
@@ -183,7 +189,7 @@ impl Generator {
 
         sample
 
-            // sample.abs() * 2.0 - 1.0
+        // sample.abs() * 2.0 - 1.0
     }
 }
 

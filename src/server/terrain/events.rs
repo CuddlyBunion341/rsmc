@@ -1,4 +1,3 @@
-
 use crate::prelude::*;
 
 #[derive(Event)]
@@ -20,4 +19,3 @@ mod visualizer {
     #[derive(Event)]
     pub struct WorldRegenerateEvent;
 }
-
