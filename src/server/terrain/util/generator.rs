@@ -10,10 +10,10 @@ macro_rules! for_each_chunk_coordinate {
                     #[cfg(feature = "skip_chunk_padding")]
                     if x == 0
                         || x == CHUNK_SIZE + 1
-                            || y == 0
-                            || y == CHUNK_SIZE + 1
-                            || z == 0
-                            || z == CHUNK_SIZE + 1
+                        || y == 0
+                        || y == CHUNK_SIZE + 1
+                        || z == 0
+                        || z == CHUNK_SIZE + 1
                     {
                         continue;
                     }
@@ -28,7 +28,6 @@ macro_rules! for_each_chunk_coordinate {
         }
     };
 }
-
 
 impl Generator {
     pub fn new(seed: u32) -> Generator {
@@ -57,12 +56,7 @@ impl Generator {
             let block = chunk.get_unpadded(x, y, z);
 
             if block == BlockId::Stone {
-
-                let x = x as usize;
-                let y = y as usize;
-                let z = z as usize;
-
-                if Chunk::valid_unpadded(x,y + 1,z) {
+                if Chunk::valid_unpadded(x, y + 1, z) {
                     let top_block = chunk.get_unpadded(x, y + 1, z);
                     if top_block == BlockId::Air {
                         chunk.set_unpadded(x, y, z, BlockId::Grass);
@@ -141,42 +135,6 @@ impl Generator {
 
     fn lerp(&self, point0: Vec2, x: f32, point1: Vec2) -> f64 {
         ((point0.y * (point1.x - x) + point1.y * (x - point0.x)) / (point1.x - point0.x)) as f64
-    }
-
-    fn get_sample_positions(&self, position: Vec3, epsilon: f32) -> [Vec2; 5] {
-        let mut positions = [Vec2::ZERO; 5];
-
-        let Vec3 { x, y: _, z: y } = position;
-
-        positions[0] = Vec2 { x, y };
-        positions[1] = Vec2 { x: x + epsilon, y };
-        positions[2] = Vec2 { x: x - epsilon, y };
-        positions[3] = Vec2 { x, y: y + epsilon };
-        positions[4] = Vec2 { x, y: y - epsilon };
-
-        positions
-    }
-
-    fn get_terrain_samples(&self, position: Vec3, params: &NoiseFunctionParams) -> [f64; 5] {
-        let sample_positions = self.get_sample_positions(position, 0.001);
-
-        sample_positions.map(|sample_position| self.sample_2d(sample_position, params).abs())
-    }
-
-    fn calculate_max_slope(&self, position: Vec3, params: &NoiseFunctionParams) -> f64 {
-        let samples = self.get_terrain_samples(position, params);
-
-        let mut max = 0.0;
-
-        let main_sample = samples[0];
-
-        for sample in samples.iter().skip(1) {
-            if main_sample - sample > max {
-                max = main_sample - sample;
-            }
-        }
-
-        max
     }
 
     pub fn sample_2d(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
