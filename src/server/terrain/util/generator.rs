@@ -10,19 +10,19 @@ macro_rules! for_each_chunk_coordinate {
                     #[cfg(feature = "skip_chunk_padding")]
                     if x == 0
                         || x == CHUNK_SIZE + 1
-                        || y == 0
-                        || y == CHUNK_SIZE + 1
-                        || z == 0
-                        || z == CHUNK_SIZE + 1
+                            || y == 0
+                            || y == CHUNK_SIZE + 1
+                            || z == 0
+                            || z == CHUNK_SIZE + 1
                     {
                         continue;
                     }
 
                     let chunk_origin = $chunk.position * CHUNK_SIZE as f32;
                     let local_position = Vec3::new(x as f32, y as f32, z as f32);
-                    let block_position = chunk_origin + local_position;
+                    let world_position = chunk_origin + local_position;
 
-                    $body(x, y, z, block_position);
+                    $body(x, y, z, world_position);
                 }
             }
         }
@@ -47,21 +47,56 @@ impl Generator {
             return;
         }
 
-        for_each_chunk_coordinate!(chunk, |x, y, z, block_position| {
-            let block = self.generate_block(block_position);
+        for_each_chunk_coordinate!(chunk, |x, y, z, world_position| {
+            let block = self.generate_block(world_position);
             chunk.set_unpadded(x, y, z, block);
         });
 
         for_each_chunk_coordinate!(chunk, |x, y, z, _| {
-            let block = chunk.get_unpadded(x, y, z);
+            let pos = Vec3 {
+                x: x as f32,
+                y: y as f32,
+                z: z as f32,
+            };
 
-            if block == BlockId::Stone && Chunk::valid_unpadded(x, y + 1, z) {
-                let top_block = chunk.get_unpadded(x, y + 1, z);
-                if top_block == BlockId::Air {
-                    chunk.set_unpadded(x, y, z, BlockId::Grass);
-                }
-            }
+            let block = self.decorate_block(chunk, pos);
+            chunk.set_unpadded(x, y, z, block);
         });
+    }
+
+    fn decorate_block(&self, chunk: &Chunk, position: Vec3) -> BlockId {
+        let x = position.x as usize;
+        let y = position.y as usize;
+        let z = position.z as usize;
+
+        let block = chunk.get_unpadded(x,y,z);
+        if block == BlockId::Air  {
+            return block; 
+        }
+
+
+        let mut depth_below_nearest_air = 0;
+        let depth_check = 5;
+
+        for delta_height in 0..depth_check {
+            if !Chunk::valid_unpadded(x, y + delta_height, z) {
+                break
+            }
+
+            let block = chunk.get_unpadded(x,y + delta_height,z);
+
+            if block == BlockId::Air {
+                break
+            }
+
+            depth_below_nearest_air += 1;
+        }
+
+        match depth_below_nearest_air {
+            0_i32..=1_i32 => BlockId::Grass,
+            2..5 => BlockId::Dirt,
+            _ => BlockId::Stone
+        }
     }
 
     fn generate_block(&self, position: Vec3) -> BlockId {
