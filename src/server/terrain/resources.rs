@@ -55,15 +55,15 @@ impl Default for Generator {
 }
 
 pub struct TerrainGeneratorParams {
-    pub height_params: HeightParams,
-    pub height_adjust_params: NoiseFunctionParams,
-    pub density_params: DensityParams ,
+    pub height: HeightParams,
+    pub height_adjust: NoiseFunctionParams,
+    pub density: DensityParams ,
 }
 
 impl Default for TerrainGeneratorParams {
     fn default() -> Self {
         Self {
-            height_params: HeightParams {
+            height: HeightParams {
                 splines: vec![
                     Vec2::new(-1.0, -20.0),
                     Vec2::new(-0.5, 0.0),
@@ -80,7 +80,7 @@ impl Default for TerrainGeneratorParams {
                     persistence: 0.5,
                 }
             },
-            height_adjust_params: NoiseFunctionParams {
+            height_adjust: NoiseFunctionParams {
                 octaves: 4,
                 height: 0.0,
                 lacuranity: 2.0,
@@ -88,7 +88,7 @@ impl Default for TerrainGeneratorParams {
                 amplitude: 30.0,
                 persistence: 0.5,
             },
-            density_params: DensityParams {
+            density: DensityParams {
                     squash_factor: 1.0 / 200.0,
                     noise: NoiseFunctionParams {
                         octaves: 4,
