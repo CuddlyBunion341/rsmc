@@ -129,7 +129,10 @@ impl Generator {
     }
 
     fn determine_terrain_density(&self, position: Vec3) -> f64 {
-        self.sample_3d(position, &self.params.density_params)
+        let density = self.sample_3d(position, &self.params.density_params);
+        let density_falloff = (position.y as f64) / 200.0;
+
+        density - density_falloff
     }
 
     pub fn normalized_spline_terrain_sample(&self, position: Vec2) -> f64 {
