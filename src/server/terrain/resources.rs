@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use crate::prelude::*;
 
 use bevy::utils::HashMap;
@@ -99,12 +97,12 @@ impl Default for TerrainGeneratorParams {
 pub enum TextureType {
     Height,
     HeightAdjust,
-    Density
+    Density,
 }
 
 #[derive(Resource)]
 pub struct NoiseTextureList {
-    pub noise_textures: HashMap<TextureType, NoiseTexture>
+    pub noise_textures: HashMap<TextureType, NoiseTexture>,
 }
 
 impl Default for NoiseTextureList {
@@ -115,9 +113,7 @@ impl Default for NoiseTextureList {
         noise_textures.insert(TextureType::HeightAdjust, NoiseTexture::default());
         noise_textures.insert(TextureType::Density, NoiseTexture::default());
 
-        NoiseTextureList {
-            noise_textures,
-        }
+        NoiseTextureList { noise_textures }
     }
 }
 

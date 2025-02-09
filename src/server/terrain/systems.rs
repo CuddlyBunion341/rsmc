@@ -37,7 +37,10 @@ mod visualizer {
     use renet::{DefaultChannel, RenetServer};
     use rsmc::{Chunk, ChunkManager, NetworkingMessage, CHUNK_SIZE};
 
-    use super::{terrain_events, terrain_resources::{self, NoiseFunctionParams, NoiseTexture, TextureType}};
+    use super::{
+        terrain_events,
+        terrain_resources::{self, NoiseFunctionParams, TextureType},
+    };
 
     fn map_range(value: f64, min: f64, max: f64, new_min: f64, new_max: f64) -> f64 {
         ((value - min) / (max - min)) * (new_max - new_min) + new_min
@@ -46,7 +49,6 @@ mod visualizer {
     fn generate_terrain_heightmap(
         generator: &terrain_resources::Generator,
         texture_type: &TextureType,
-        origin: Vec3,
         size: Vec3,
         draw_chunk_border: bool,
     ) -> ImageData {
@@ -59,31 +61,30 @@ mod visualizer {
             for z in 0..height {
                 let index = x + z * width;
 
-                if draw_chunk_border {
-                    if x % CHUNK_SIZE == 0 || z % CHUNK_SIZE == 0 {
-                        data[index] = 255;
-                        continue;
-                    }
+                if draw_chunk_border && (x % CHUNK_SIZE == 0 || z % CHUNK_SIZE == 0) {
+                    data[index] = 255;
+                    continue;
                 }
 
                 match texture_type {
                     TextureType::Height => {
-                        let sample_position = Vec2::new((origin.x + x as f32) / 1.0, (origin.z + z as f32) / 1.0);
+                        let sample_position = Vec2::new(x as f32, z as f32);
                         let value = generator.normalized_spline_terrain_sample(sample_position);
-                        let value = ( value * size.y as f64 ) / 2.0 + 0.5;
+                        let value = (value * size.y as f64) / 2.0 + 0.5;
 
-                        data[index] = value as u8; 
+                        data[index] = value as u8;
                     }
                     TextureType::HeightAdjust => {
-                        let sample_position = Vec2::new((origin.x + x as f32) / 1.0, (origin.z + z as f32) / 1.0);
-                        let value = generator.sample_2d(sample_position, &generator.params.height_adjust_params);
+                        let sample_position = Vec2::new(x as f32, z as f32);
+                        let value = generator
+                            .sample_2d(sample_position, &generator.params.height_adjust_params);
                         let value = map_range(value, -1.0, 1.0, 0.0, 255.0);
 
-                        data[index] = value as u8; 
+                        data[index] = value as u8;
                     }
                     TextureType::Density => {
                         // TODO: change to sample3D
-                        let pos = Vec2::new(origin.x + x as f32, origin.z + z as f32);
+                        let pos = Vec2::new(x as f32, z as f32);
                         let value = generator.sample_2d(pos, &generator.params.density_params);
                         let value = map_range(value, -1.0, 1.0, 0.0, 255.0);
 
@@ -124,7 +125,7 @@ mod visualizer {
                     generator.generate_chunk(&mut chunk);
                     chunk
                 })
-            .collect();
+                .collect();
 
             new_chunks.into_iter().for_each(|chunk| {
                 chunk_manager.insert_chunk(chunk);
@@ -161,17 +162,19 @@ mod visualizer {
             let image_data = generate_terrain_heightmap(
                 &generator,
                 &texture_type,
-                Vec3::ZERO,
                 Vec3::new(width as f32, height as f32, depth as f32),
-                true
+                true,
             );
 
-            let entry = noise_texture_list.noise_textures.get_mut(&texture_type).expect("Noise texture not loaded, please initialize the resource properly.");
+            let entry = noise_texture_list
+                .noise_textures
+                .get_mut(&texture_type)
+                .expect("Noise texture not loaded, please initialize the resource properly.");
 
             entry.texture = Some(contexts.ctx_mut().load_texture(
-                    "terrain-texture",
-                    image_data,
-                    TextureOptions::default(),
+                "terrain-texture",
+                image_data,
+                TextureOptions::default(),
             ));
             entry.size = Vec2::new(width as f32, height as f32);
         }
@@ -180,28 +183,57 @@ mod visualizer {
     pub fn prepare_visualizer_texture_system(
         mut event_writer: EventWriter<terrain_events::RegenerateHeightMapEvent>,
     ) {
-        event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::Height));
-        event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::HeightAdjust));
-        event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::Density));
+        event_writer.send(terrain_events::RegenerateHeightMapEvent(
+            TextureType::Height,
+        ));
+        event_writer.send(terrain_events::RegenerateHeightMapEvent(
+            TextureType::HeightAdjust,
+        ));
+        event_writer.send(terrain_events::RegenerateHeightMapEvent(
+            TextureType::Density,
+        ));
     }
 
     macro_rules! add_slider {
         ($ui:expr, $changed:expr, $value:expr, $range:expr, $text:expr) => {{
-            $changed = $changed || $ui
-                .add(egui::widgets::Slider::new($value, $range).text($text))
-                .changed();
-            }};
+            $changed = $changed
+                || $ui
+                    .add(egui::widgets::Slider::new($value, $range).text($text))
+                    .changed();
+        }};
     }
 
-    fn add_sliders_for_noise_params(ui: &mut egui::Ui, changed: &mut bool, params: &mut NoiseFunctionParams) {
+    fn add_sliders_for_noise_params(
+        ui: &mut egui::Ui,
+        changed: &mut bool,
+        params: &mut NoiseFunctionParams,
+    ) {
         params.frequency = 1.0 / params.frequency;
 
         let mut loc_changed = false;
 
         add_slider!(ui, loc_changed, &mut params.octaves, 1..=8, "octaves");
-        add_slider!(ui, loc_changed, &mut params.lacuranity, 0.001..=4.0, "lacuranity");
-        add_slider!(ui, loc_changed, &mut params.frequency, 10.0..=800.0, "frequency");
-        add_slider!(ui, loc_changed, &mut params.persistence, 0.001..=1.0, "persistence");
+        add_slider!(
+            ui,
+            loc_changed,
+            &mut params.lacuranity,
+            0.001..=4.0,
+            "lacuranity"
+        );
+        add_slider!(
+            ui,
+            loc_changed,
+            &mut params.frequency,
+            10.0..=800.0,
+            "frequency"
+        );
+        add_slider!(
+            ui,
+            loc_changed,
+            &mut params.persistence,
+            0.001..=1.0,
+            "persistence"
+        );
 
         params.frequency = 1.0 / params.frequency;
 

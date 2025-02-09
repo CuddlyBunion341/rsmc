@@ -179,7 +179,7 @@ impl Generator {
 
         sample /= weight_sum;
 
-        sample as f64
+        sample
 
         // sample.abs() * 2.0 - 1.0
     }
