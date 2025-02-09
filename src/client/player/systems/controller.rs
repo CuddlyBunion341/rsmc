@@ -7,10 +7,12 @@ pub fn setup_player_camera(mut commands: Commands) {
     commands.spawn((
         Name::new("Player cam?"),
         Camera3d::default(),
-        // Projection::Perspective(PerspectiveProjection {
-        //     fov: TAU / 5.0,
-        //     ..default()
-        // }),
+        #[cfg(not(feature = "ortho_camera"))]
+        Projection::Perspective(PerspectiveProjection {
+            fov: TAU / 5.0,
+            ..default()
+        }),
+        #[cfg(feature = "ortho_camera")]
         Projection::Orthographic(OrthographicProjection {
             scale: 0.125,
             near: 0.0001,

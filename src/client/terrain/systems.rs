@@ -163,7 +163,6 @@ fn spawn_chunk(
     ));
 }
 
-// visualizer
 pub fn handle_terrain_regeneration_events(
     mut client: ResMut<RenetClient>,
     mut world_regenerate_events: EventReader<terrain_events::WorldRegenerateEvent>,

@@ -18,8 +18,10 @@ pub fn setup_world_system(
     chunk_manager.insert_chunks(chunks);
 }
 
+#[cfg(feature = "generator_visualizer")]
 pub use visualizer::*;
 
+#[cfg(feature = "generator_visualizer")]
 mod visualizer {
     use bevy::{
         log::{info, warn},
@@ -40,6 +42,7 @@ mod visualizer {
     use super::{
         terrain_events,
         terrain_resources::{self, NoiseFunctionParams, TextureType},
+        prelude::*,
     };
 
     fn map_range(value: f64, min: f64, max: f64, new_min: f64, new_max: f64) -> f64 {

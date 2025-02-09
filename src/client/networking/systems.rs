@@ -9,7 +9,6 @@ pub fn receive_message_system(
     mut block_update_events: ResMut<Events<terrain_events::BlockUpdateEvent>>,
     mut chunk_manager: ResMut<ChunkManager>,
     mut chunk_mesh_events: ResMut<Events<terrain_events::ChunkMeshUpdateEvent>>,
-    // visualizer
     mut world_regenerate_events: ResMut<Events<terrain_events::WorldRegenerateEvent>>,
     #[cfg(feature = "chat")] mut chat_events: ResMut<Events<chat_events::ChatSyncEvent>>,
     #[cfg(feature = "chat")] mut single_chat_events: ResMut<
@@ -97,7 +96,6 @@ pub fn receive_message_system(
                     player_sync_events
                         .send(remote_player_events::RemotePlayerSyncEvent { players: event });
                 }
-                // visualizer
                 NetworkingMessage::ServerAsksClientNicelyToRerequestChunkBatch() => {
                     info!("Client asked for chunk batch.");
                     world_regenerate_events.send(terrain_events::WorldRegenerateEvent);

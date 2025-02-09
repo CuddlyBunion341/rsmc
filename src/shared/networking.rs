@@ -50,7 +50,6 @@ pub enum NetworkingMessage {
     SingleChatMessageSync(ChatMessage),
     ChatMessageSync(Vec<ChatMessage>),
     BlockUpdate { position: Vec3, block: BlockId },
-    // visualizer
     ServerAsksClientNicelyToRerequestChunkBatch(),
 }
 

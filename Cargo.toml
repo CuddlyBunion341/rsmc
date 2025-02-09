@@ -42,12 +42,23 @@ name = "server"
 path = "src/server/main.rs"
 
 [features]
-chat = ["bevy/dynamic_linking"]
+default = ["chat", "player_controller"]
+dynamic_linking = ["bevy/dynamic_linking"]
 
+# both
+chat = ["dynamic_linking"]
+
+# server
+renet_visualizer = ["egui_layer"]
+generator_visualizer = ["egui_layer"]
+egui_layer = []
+skip_chunk_padding = []
+
+# client
 wireframe = []
 debug_ui = []
-renet_visualizer = []
+ortho_camera = []
+player_controller = []
 physics_debug = []
 raycast_debug = []
 visual_debug = ["wireframe", "physics_debug", "raycast_debug"]
-dynamic_linking = ["bevy/dynamic_linking"]
