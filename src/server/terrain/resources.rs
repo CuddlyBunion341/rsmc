@@ -35,7 +35,7 @@ pub struct HeightParams {
 
 pub struct DensityParams {
     pub noise: NoiseFunctionParams,
-    pub squash_factor: f64
+    pub squash_factor: f64,
 }
 
 pub struct HeightAdjustParams {
@@ -82,7 +82,7 @@ impl Default for TerrainGeneratorParams {
                     frequency: 1.0 / 120.0,
                     amplitude: 30.0,
                     persistence: 0.5,
-                }
+                },
             },
             height_adjust: HeightAdjustParams {
                 noise: NoiseFunctionParams {
@@ -92,7 +92,7 @@ impl Default for TerrainGeneratorParams {
                     frequency: 1.0 / 120.0,
                     amplitude: 30.0,
                     persistence: 0.5,
-                }
+                },
             },
             density: DensityParams {
                 squash_factor: 1.0 / 200.0,
@@ -104,7 +104,7 @@ impl Default for TerrainGeneratorParams {
                     amplitude: 10.0,
                     persistence: 0.5,
                 },
-            }
+            },
         }
     }
 }

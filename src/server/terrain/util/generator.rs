@@ -129,7 +129,7 @@ impl Generator {
 
     fn determine_terrain_density(&self, position: Vec3) -> f64 {
         let density = self.sample_3d(position, &self.params.density.noise);
-        let density_falloff = (position.y as f64) * &self.params.density.squash_factor;
+        let density_falloff = position.y as f64 * self.params.density.squash_factor;
 
         density - density_falloff
     }
