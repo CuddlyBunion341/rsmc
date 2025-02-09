@@ -129,6 +129,8 @@ mod visualizer {
         for event in events.read() {
             let texture_type = event.0.clone();
 
+            info!("Regenerating noise preview for {:?}", texture_type);
+
             let width = 512;
             let height = 512;
             let depth = 512;
@@ -190,12 +192,9 @@ mod visualizer {
         mut world_regenerate_event_writer: EventWriter<terrain_events::WorldRegenerateEvent>,
     ) {
         egui::Window::new("Splines").show(contexts.ctx_mut(), |ui| {
-            egui_plot::Plot::new("splines")
-                .show(ui, |plot_ui| {
-                    let plot_points: Vec<PlotPoint> = generator.params.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
-                    let line_chart = Line::new(PlotPoints::Owned(plot_points));
-                    plot_ui.line(line_chart);
-                });
+            if ui.button("Organize windows").clicked() {
+                ui.ctx().memory_mut(|mem| mem.reset_areas());
+            }
 
             let mut changed = false;
 
@@ -216,6 +215,13 @@ mod visualizer {
             if ui.button("Regenerate world").clicked() {
                 world_regenerate_event_writer.send(terrain_events::WorldRegenerateEvent);
             }
+
+            egui_plot::Plot::new("splines")
+                .show(ui, |plot_ui| {
+                    let plot_points: Vec<PlotPoint> = generator.params.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
+                    let line_chart = Line::new(PlotPoints::Owned(plot_points));
+                    plot_ui.line(line_chart);
+                });
         });
 
         let noise_textures = &noise_texture_list.noise_textures;
@@ -234,19 +240,24 @@ mod visualizer {
                         TextureType::Density => "Density",
                     };
 
+                    let mut params = match texture_type {
+                        TextureType::Height => generator.params.height_params,
+                        TextureType::HeightAdjust => generator.params.height_adjust_params,
+                        TextureType::Density => generator.params.density_params
+                    };
+
                     egui::Window::new(window_name).show(contexts.ctx_mut(), |ui| {
                         ui.label(window_name);
 
                         let mut changed = false;
 
-                        add_sliders_for_noise_params(ui, &mut changed, &mut generator.params.height_params);
-
+                        add_sliders_for_noise_params(ui, &mut changed, &mut params);
 
                         if changed {
                             event_writer.send(terrain_events::RegenerateHeightMapEvent(texture_type.clone()));
                         };
 
-                        ui.label(format!("{:?}", generator.params.height_params));
+                        ui.label(format!("{:?}", params));
 
                         ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
                                     texture_handle.id(),

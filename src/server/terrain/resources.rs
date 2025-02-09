@@ -95,7 +95,7 @@ impl Default for TerrainGeneratorParams {
 
 // visualizer
 
-#[derive(PartialEq, Hash, Eq, Clone)]
+#[derive(PartialEq, Hash, Eq, Clone, Debug)]
 pub enum TextureType {
     Height,
     HeightAdjust,
