@@ -45,32 +45,16 @@ impl Generator {
     }
 
     fn generate_block(&self, position: Vec3) -> BlockId {
-        let default_params = &self.params.height_params;
-
         let terrain_height = self.determine_terrain_height(position);
+        let terrain_density = self.determine_terrain_density(position);
 
         if (position.y as f64) < terrain_height {
             return BlockId::Stone;
         }
 
-        // let terrain_height = self.sample_2d(
-        //     Vec2 {
-        //         x: position.x,
-        //         y: position.z,
-        //     },
-        //     default_params,
-        // );
-
-        // if (position.y as f64) < terrain_height + 20.0 {
-        //     let max_slope = self.calculate_max_slope(position, default_params);
-        //     if max_slope > 4.0 {
-        //         return BlockId::Stone;
-        //     } else if max_slope > 1.0 {
-        //         return BlockId::Dirt;
-        //     } else {
-        //         return BlockId::Grass;
-        //     }
-        // }
+        if terrain_density > 0.0 {
+            return BlockId::Stone;
+        }
 
         BlockId::Air
     }
@@ -89,6 +73,10 @@ impl Generator {
         self.spline_lerp(noise_value)
     }
 
+    fn determine_terrain_density(&self, position: Vec3) -> f64 {
+        self.sample_3d(position, &self.params.density_params)
+    }
+
     pub fn normalized_spline_terrain_sample(&self, position: Vec2) -> f64 {
         let noise_value = self.sample_2d(position, &self.params.height_params);
 
@@ -101,9 +89,6 @@ impl Generator {
     }
 
     fn spline_lerp(&self, x: f64) -> f64 {
-        // x is the noise function value
-        // y is the mapped terrain height
-
         let x: f32 = x as f32;
 
         assert!(self.params.splines.len() >= 2);
