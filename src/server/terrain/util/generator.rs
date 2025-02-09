@@ -173,14 +173,18 @@ impl Generator {
         let mut weight_sum = 0.0;
 
         for _ in 0..params.octaves {
-            let pos: Vec<f64> = position.clone().into_iter().map(|v| v * frequency).collect();
+            let pos: Vec<f64> = position
+                .clone()
+                .into_iter()
+                .map(|v| v * frequency)
+                .collect();
 
             let new_sample = match pos.len() {
                 1 => self.perlin.get([pos[0]]),
                 2 => self.perlin.get([pos[0], pos[1]]),
                 3 => self.perlin.get([pos[0], pos[1], pos[2]]),
                 4 => self.perlin.get([pos[0], pos[1], pos[2], pos[3]]),
-                _ => panic!("Incorrect dimension for noise sample, must be either 2, 3 or 4")
+                _ => panic!("Incorrect dimension for noise sample, must be either 2, 3 or 4"),
             };
 
             frequency *= params.lacuranity;
@@ -193,11 +197,45 @@ impl Generator {
     }
 
     pub fn sample_2d(&self, position: Vec2, params: &NoiseFunctionParams) -> f64 {
-        self.sample(position.to_array().map(|v| v as f64).to_vec(), params)
+        let mut sample = 0.0;
+        let mut frequency = params.frequency;
+        let mut weight = 1.0;
+        let mut weight_sum = 0.0;
+
+        for _ in 0..params.octaves {
+            let new_sample = self
+                .perlin
+                .get([position.x as f64 * frequency, position.y as f64 * frequency]);
+
+            frequency *= params.lacuranity;
+            sample += new_sample * weight;
+            weight_sum += weight;
+            weight *= params.persistence;
+        }
+
+        sample / weight_sum
     }
 
     pub fn sample_3d(&self, position: Vec3, params: &NoiseFunctionParams) -> f64 {
-        self.sample(position.to_array().map(|v| v as f64).to_vec(), params)
+        let mut sample = 0.0;
+        let mut frequency = params.frequency;
+        let mut weight = 1.0;
+        let mut weight_sum = 0.0;
+
+        for _ in 0..params.octaves {
+            let new_sample = self.perlin.get([
+                position.x as f64 * frequency,
+                position.y as f64 * frequency,
+                position.z as f64 * frequency,
+            ]);
+
+            frequency *= params.lacuranity;
+            sample += new_sample * weight;
+            weight_sum += weight;
+            weight *= params.persistence;
+        }
+
+        sample / weight_sum
     }
 }
 
