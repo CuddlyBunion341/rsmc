@@ -55,12 +55,10 @@ impl Generator {
         for_each_chunk_coordinate!(chunk, |x, y, z, _| {
             let block = chunk.get_unpadded(x, y, z);
 
-            if block == BlockId::Stone {
-                if Chunk::valid_unpadded(x, y + 1, z) {
-                    let top_block = chunk.get_unpadded(x, y + 1, z);
-                    if top_block == BlockId::Air {
-                        chunk.set_unpadded(x, y, z, BlockId::Grass);
-                    }
+            if block == BlockId::Stone && Chunk::valid_unpadded(x, y + 1, z) {
+                let top_block = chunk.get_unpadded(x, y + 1, z);
+                if top_block == BlockId::Air {
+                    chunk.set_unpadded(x, y, z, BlockId::Grass);
                 }
             }
         });
