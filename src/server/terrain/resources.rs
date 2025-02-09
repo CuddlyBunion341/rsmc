@@ -1,5 +1,8 @@
+use std::fmt::Display;
+
 use crate::prelude::*;
 
+use bevy::utils::HashMap;
 use bevy_inspector_egui::egui::TextureHandle;
 use terrain_events::BlockUpdateEvent;
 
@@ -98,16 +101,6 @@ pub enum TextureType {
     HeightAdjust,
     Density
 }
-
-impl Display for TextureType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result<&str> {
-        match self {
-            Self::Height => Ok("terrain-height-texture"),
-            Self::HeightAdjust => Ok("terrain-height-adjust-texture"),
-            Self::Density => Ok("terrain-density-texture")
-        }
-    }
-} 
 
 #[derive(Resource)]
 pub struct NoiseTextureList {
