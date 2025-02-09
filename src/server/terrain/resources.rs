@@ -30,7 +30,7 @@ pub struct Generator {
     pub params: TerrainGeneratorParams,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct NoiseFunctionParams {
     pub octaves: i32,
     pub height: f64,

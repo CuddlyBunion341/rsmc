@@ -297,10 +297,10 @@ mod visualizer {
                         TextureType::Density => "Density",
                     };
 
-                    let mut params = match texture_type {
-                        TextureType::Height => generator.params.height_params,
-                        TextureType::HeightAdjust => generator.params.height_adjust_params,
-                        TextureType::Density => generator.params.density_params
+                    let params: &mut NoiseFunctionParams = match texture_type {
+                        TextureType::Height => &mut generator.params.height_params,
+                        TextureType::HeightAdjust => &mut generator.params.height_adjust_params,
+                        TextureType::Density => &mut generator.params.density_params
                     };
 
                     egui::Window::new(window_name).show(contexts.ctx_mut(), |ui| {
@@ -308,7 +308,7 @@ mod visualizer {
 
                         let mut changed = false;
 
-                        add_sliders_for_noise_params(ui, &mut changed, &mut params);
+                        add_sliders_for_noise_params(ui, &mut changed, params);
 
                         if changed {
                             event_writer.send(terrain_events::RegenerateHeightMapEvent(texture_type.clone()));
