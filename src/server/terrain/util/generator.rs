@@ -2,6 +2,34 @@ use terrain_resources::{Generator, NoiseFunctionParams, TerrainGeneratorParams};
 
 use crate::prelude::*;
 
+macro_rules! for_each_chunk_coordinate {
+    ($chunk:expr, $body:expr) => {
+        for x in 0..CHUNK_SIZE + 2 {
+            for y in 0..CHUNK_SIZE + 2 {
+                for z in 0..CHUNK_SIZE + 2 {
+                    #[cfg(feature = "skip_chunk_padding")]
+                    if x == 0
+                        || x == CHUNK_SIZE + 1
+                        || y == 0
+                        || y == CHUNK_SIZE + 1
+                        || z == 0
+                        || z == CHUNK_SIZE + 1
+                    {
+                        continue;
+                    }
+
+                    let chunk_origin = $chunk.position * CHUNK_SIZE as f32;
+                    let local_position = Vec3::new(x as f32, y as f32, z as f32);
+                    let block_position = chunk_origin + local_position;
+
+                    $body(x, y, z, block_position);
+                }
+            }
+        }
+    };
+}
+
+
 impl Generator {
     pub fn new(seed: u32) -> Generator {
         Self::new_with_params(seed, TerrainGeneratorParams::default())
@@ -20,28 +48,10 @@ impl Generator {
             return;
         }
 
-        for x in 0..CHUNK_SIZE + 2 {
-            for y in 0..CHUNK_SIZE + 2 {
-                for z in 0..CHUNK_SIZE + 2 {
-                    #[cfg(feature = "skip_chunk_padding")]
-                    if x == 0
-                        || x == CHUNK_SIZE + 1
-                        || y == 0
-                        || y == CHUNK_SIZE + 1
-                        || z == 0
-                        || z == CHUNK_SIZE + 1
-                    {
-                        continue;
-                    }
-
-                    let chunk_origin = chunk.position * CHUNK_SIZE as f32;
-                    let local_position = Vec3::new(x as f32, y as f32, z as f32);
-                    let block_position = chunk_origin + local_position;
-                    let block = self.generate_block(block_position);
-                    chunk.set_unpadded(x, y, z, block);
-                }
-            }
-        }
+        for_each_chunk_coordinate!(chunk, |x, y, z, block_position| {
+            let block = self.generate_block(block_position);
+            chunk.set_unpadded(x, y, z, block);
+        });
     }
 
     fn generate_block(&self, position: Vec3) -> BlockId {
