@@ -120,7 +120,7 @@ impl Generator {
                     x: position.x,
                     y: position.z,
                 },
-                &self.params.height_params,
+                &self.params.height_params.noise,
             )
             .abs();
 
@@ -135,10 +135,10 @@ impl Generator {
     }
 
     pub fn normalized_spline_terrain_sample(&self, position: Vec2) -> f64 {
-        let noise_value = self.sample_2d(position, &self.params.height_params);
+        let noise_value = self.sample_2d(position, &self.params.height_params.noise);
 
-        let min_height = self.params.splines[0].y as f64;
-        let max_height = self.params.splines[self.params.splines.len() - 1].y as f64;
+        let min_height = self.params.height_params.splines[0].y as f64;
+        let max_height = self.params.height_params.splines[self.params.height_params.splines.len() - 1].y as f64;
 
         let splined_value = self.spline_lerp(noise_value);
 
@@ -148,17 +148,17 @@ impl Generator {
     fn spline_lerp(&self, x: f64) -> f64 {
         let x: f32 = x as f32;
 
-        assert!(self.params.splines.len() >= 2);
+        assert!(self.params.height_params.splines.len() >= 2);
 
-        let min_x = self.params.splines[0].x;
-        let max_x = self.params.splines[self.params.splines.len() - 1].x;
+        let min_x = self.params.height_params.splines[0].x;
+        let max_x = self.params.height_params.splines[self.params.height_params.splines.len() - 1].x;
 
         assert!(min_x == -1.0);
         assert!(max_x == 1.0);
 
-        for i in 0..self.params.splines.len() - 1 {
-            let current = self.params.splines[i];
-            let next = self.params.splines[i + 1];
+        for i in 0..self.params.height_params.splines.len() - 1 {
+            let current = self.params.height_params.splines[i];
+            let next = self.params.height_params.splines[i + 1];
 
             if x >= current.x && x <= next.x {
                 return self.lerp(current, x, next);

@@ -28,6 +28,11 @@ pub struct Generator {
     pub params: TerrainGeneratorParams,
 }
 
+pub struct HeightParams {
+    pub noise: NoiseFunctionParams,
+    pub splines: Vec<Vec2>,
+}
+
 #[derive(Debug)]
 pub struct NoiseFunctionParams {
     pub octaves: i32,
@@ -45,8 +50,7 @@ impl Default for Generator {
 }
 
 pub struct TerrainGeneratorParams {
-    pub splines: Vec<Vec2>,
-    pub height_params: NoiseFunctionParams,
+    pub height_params: HeightParams,
     pub height_adjust_params: NoiseFunctionParams,
     pub density_params: NoiseFunctionParams,
 }
@@ -54,20 +58,22 @@ pub struct TerrainGeneratorParams {
 impl Default for TerrainGeneratorParams {
     fn default() -> Self {
         Self {
-            splines: vec![
-                Vec2::new(-1.0, -20.0),
-                Vec2::new(-0.5, 0.0),
-                Vec2::new(0.0, 20.0),
-                Vec2::new(0.5, 40.0),
-                Vec2::new(1.0, 60.0),
-            ],
-            height_params: NoiseFunctionParams {
-                octaves: 4,
-                height: 0.0,
-                lacuranity: 2.0,
-                frequency: 1.0 / 120.0,
-                amplitude: 30.0,
-                persistence: 0.5,
+            height_params: HeightParams {
+                splines: vec![
+                    Vec2::new(-1.0, -20.0),
+                    Vec2::new(-0.5, 0.0),
+                    Vec2::new(0.0, 20.0),
+                    Vec2::new(0.5, 40.0),
+                    Vec2::new(1.0, 60.0),
+                ],
+                noise: NoiseFunctionParams {
+                    octaves: 4,
+                    height: 0.0,
+                    lacuranity: 2.0,
+                    frequency: 1.0 / 120.0,
+                    amplitude: 30.0,
+                    persistence: 0.5,
+                }
             },
             height_adjust_params: NoiseFunctionParams {
                 octaves: 4,
