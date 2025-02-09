@@ -10,10 +10,10 @@ macro_rules! for_each_chunk_coordinate {
                     #[cfg(feature = "skip_chunk_padding")]
                     if x == 0
                         || x == CHUNK_SIZE + 1
-                            || y == 0
-                            || y == CHUNK_SIZE + 1
-                            || z == 0
-                            || z == CHUNK_SIZE + 1
+                        || y == 0
+                        || y == CHUNK_SIZE + 1
+                        || z == 0
+                        || z == CHUNK_SIZE + 1
                     {
                         continue;
                     }
@@ -69,24 +69,23 @@ impl Generator {
         let y = position.y as usize;
         let z = position.z as usize;
 
-        let block = chunk.get_unpadded(x,y,z);
-        if block == BlockId::Air  {
-            return block; 
+        let block = chunk.get_unpadded(x, y, z);
+        if block == BlockId::Air {
+            return block;
         }
-
 
         let mut depth_below_nearest_air = 0;
         let depth_check = 5;
 
         for delta_height in 0..depth_check {
             if !Chunk::valid_unpadded(x, y + delta_height, z) {
-                break
+                break;
             }
 
-            let block = chunk.get_unpadded(x,y + delta_height,z);
+            let block = chunk.get_unpadded(x, y + delta_height, z);
 
             if block == BlockId::Air {
-                break
+                break;
             }
 
             depth_below_nearest_air += 1;
@@ -95,7 +94,7 @@ impl Generator {
         match depth_below_nearest_air {
             0_i32..=1_i32 => BlockId::Grass,
             2..5 => BlockId::Dirt,
-            _ => BlockId::Stone
+            _ => BlockId::Stone,
         }
     }
 
