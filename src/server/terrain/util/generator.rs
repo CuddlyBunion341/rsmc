@@ -10,10 +10,10 @@ macro_rules! for_each_chunk_coordinate {
                     #[cfg(feature = "skip_chunk_padding")]
                     if x == 0
                         || x == CHUNK_SIZE + 1
-                        || y == 0
-                        || y == CHUNK_SIZE + 1
-                        || z == 0
-                        || z == CHUNK_SIZE + 1
+                            || y == 0
+                            || y == CHUNK_SIZE + 1
+                            || z == 0
+                            || z == CHUNK_SIZE + 1
                     {
                         continue;
                     }
@@ -51,6 +51,24 @@ impl Generator {
         for_each_chunk_coordinate!(chunk, |x, y, z, block_position| {
             let block = self.generate_block(block_position);
             chunk.set_unpadded(x, y, z, block);
+        });
+
+        for_each_chunk_coordinate!(chunk, |x, y, z, _| {
+            let block = chunk.get_unpadded(x, y, z);
+
+            if block == BlockId::Stone {
+
+                let x = x as usize;
+                let y = y as usize;
+                let z = z as usize;
+
+                if Chunk::valid_unpadded(x,y + 1,z) {
+                    let top_block = chunk.get_unpadded(x, y + 1, z);
+                    if top_block == BlockId::Air {
+                        chunk.set_unpadded(x, y, z, BlockId::Grass);
+                    }
+                }
+            }
         });
     }
 

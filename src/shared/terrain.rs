@@ -24,6 +24,18 @@ impl Chunk {
         }
     }
 
+    pub fn valid_padded(x: usize, y: usize, z: usize) -> bool {
+        (x >= 1 && x < CHUNK_SIZE) && 
+        (y >= 1 && y < CHUNK_SIZE) && 
+        (z >= 1 && z < CHUNK_SIZE)
+    }
+
+    pub fn valid_unpadded(x: usize, y: usize, z: usize) -> bool {
+        x < PADDED_CHUNK_SIZE && 
+        y < PADDED_CHUNK_SIZE && 
+        z < PADDED_CHUNK_SIZE
+    }
+
     pub fn get(&self, x: usize, y: usize, z: usize) -> BlockId {
         self.get_unpadded(x + 1, y + 1, z + 1)
     }
