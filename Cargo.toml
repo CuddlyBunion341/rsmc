@@ -42,7 +42,7 @@ name = "server"
 path = "src/server/main.rs"
 
 [features]
-default = ["chat", "player_controller"]
+default = ["chat"]
 dynamic_linking = ["bevy/dynamic_linking"]
 
 # both
@@ -58,7 +58,7 @@ skip_chunk_padding = []
 wireframe = []
 debug_ui = []
 ortho_camera = []
-player_controller = []
+lock_player = []
 physics_debug = []
 raycast_debug = []
 visual_debug = ["wireframe", "physics_debug", "raycast_debug"]

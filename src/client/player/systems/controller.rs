@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
-// const SPAWN_POINT: Vec3 = Vec3::new(0.0, 32.0, 0.0);
+#[cfg(not(feature = "lock_player"))]
+const SPAWN_POINT: Vec3 = Vec3::new(0.0, 32.0, 0.0);
+#[cfg(feature = "lock_player")]
 const SPAWN_POINT: Vec3 = Vec3::new(128.0, 96.0, -128.0);
 
 pub fn setup_player_camera(mut commands: Commands) {
@@ -48,7 +50,10 @@ pub fn setup_controller_on_area_ready_system(
             },
             ActiveEvents::COLLISION_EVENTS,
             Velocity::zero(),
+            #[cfg(feature = "lock_player")]
             RigidBody::Fixed,
+            #[cfg(not(feature = "lock_player"))]
+            RigidBody::Dynamic,
             Sleeping::disabled(),
             LockedAxes::ROTATION_LOCKED,
             AdditionalMassProperties::Mass(1.0),
@@ -56,9 +61,14 @@ pub fn setup_controller_on_area_ready_system(
             Ccd { enabled: true }, // Prevent clipping when going fast
             Transform::from_translation(SPAWN_POINT),
             LogicalPlayer,
+            #[cfg(not(feature = "lock_player"))]
             FpsControllerInput {
-                // pitch: -TAU / 20.0,
-                // yaw: TAU * 5.0 / 12.0,
+                pitch: -TAU / 20.0,
+                yaw: TAU * 5.0 / 12.0,
+                ..default()
+            },
+            #[cfg(feature = "lock_player")]
+            FpsControllerInput {
                 pitch: 0.0,
                 yaw: 0.0,
                 ..default()
