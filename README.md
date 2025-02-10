@@ -60,20 +60,6 @@ nix-shell --run "cargo run --bin server"
 nix-shell --run "cargo run --bin client"
 ```
 
-## Implementation notes
+## Notes
 
-### Terrain generation
-
-1. Step (terrain shaping)
-- 3D fractal perlin noise with low frequency, squash factor to determine terrain density at xyz.
-- 2D fractal perlin noise with higher frequency serving as a base layer. Use splines for ridged height map.
-- Subtract 3D fractal perlin noise to get cave generation.
-- Use strongly flattened 3D noise perlin or worley noise for different rock layers.
-
-- Place stone (base)
-
-2. Step (Decorating)
-- Place grass on blocks where there is air above
-- Use white noise to place some ores, grow them randomly?
-
-
+Checkout the [Wiki](https://github.com/CuddlyBunion341/rsmc/wiki) for additional project information.
