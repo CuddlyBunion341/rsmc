@@ -207,7 +207,7 @@ mod visualizer {
                 .changed();
             }};
     }
-    
+
     macro_rules! add_noise_sliders {
         ($ui:expr, $changed:expr, $params:expr) => {
             add_slider!($ui, $changed, &mut $params.octaves, 1..=8, "octaves");
@@ -217,16 +217,24 @@ mod visualizer {
         };
     }
 
-    #[rustfmt::skip]
-    fn add_sliders_for_noise_params(
-        ui: &mut egui::Ui,
-        changed: &mut bool,
-        params: &mut NoiseFunctionParams,
-    ) {
-        params.frequency = 1.0 / params.frequency;
-        add_noise_sliders!(ui, *changed, params);
-        params.frequency = 1.0 / params.frequency;
+    macro_rules! add_sliders_for_noise_params {
+        ($ui:expr, $changed:expr, $params:expr) => {
+            $params.frequency = 1.0 / $params.frequency;
+            add_noise_sliders!($ui, *$changed, $params);
+            $params.frequency = 1.0 / $params.frequency;
+        };
     }
+
+    // #[rustfmt::skip]
+    // fn add_sliders_for_noise_params(
+    //     ui: &mut egui::Ui,
+    //     changed: &mut bool,
+    //     params: &mut NoiseFunctionParams,
+    // ) {
+    //     params.frequency = 1.0 / params.frequency;
+    //     add_noise_sliders!(ui, *changed, params);
+    //     params.frequency = 1.0 / params.frequency;
+    // }
 
     #[rustfmt::skip]
     pub fn render_visualizer_system(
@@ -286,25 +294,25 @@ mod visualizer {
                         TextureType::Cave => "Cave",
                     };
 
-                    let params: &mut NoiseFunctionParams = match texture_type {
-                        TextureType::Height => &mut generator.params.height.noise,
-                        TextureType::HeightAdjust => &mut generator.params.height_adjust.noise,
-                        TextureType::Density => &mut generator.params.density.noise,
-                        TextureType::Cave => &mut generator.params.cave.noise,
-                    };
 
                     egui::Window::new(window_name).show(contexts.ctx_mut(), |ui| {
                         ui.label(window_name);
 
                         let mut changed = false;
 
-                        add_sliders_for_noise_params(ui, &mut changed, params);
+                        let params: &mut NoiseFunctionParams = match texture_type {
+                            TextureType::Height => &mut generator.params.height.noise,
+                            TextureType::HeightAdjust => &mut generator.params.height_adjust.noise,
+                            TextureType::Density => &mut generator.params.density.noise,
+                            TextureType::Cave => &mut generator.params.cave.noise,
+                        };
+
+                        add_slider!(ui, changed, &mut generator.params.cave.base_value, -1.0..=1.0, "base value");
+                        add_sliders_for_noise_params!(ui, &mut changed, params);
 
                         if changed {
                             event_writer.send(terrain_events::RegenerateHeightMapEvent(texture_type.clone()));
                         };
-
-                        ui.label(format!("{:?}", params));
 
                         ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
                                     texture_handle.id(),
