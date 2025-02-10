@@ -59,3 +59,7 @@ Strongly inspired by the [Bevy NixOS installation guide](https://github.com/bevy
 nix-shell --run "cargo run --bin server"
 nix-shell --run "cargo run --bin client"
 ```
+
+## Notes
+
+Checkout the [Wiki](https://github.com/CuddlyBunion341/rsmc/wiki) for additional project information.

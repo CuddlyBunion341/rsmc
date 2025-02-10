@@ -24,6 +24,14 @@ impl Chunk {
         }
     }
 
+    pub fn valid_padded(x: usize, y: usize, z: usize) -> bool {
+        (1..CHUNK_SIZE).contains(&x) && (1..CHUNK_SIZE).contains(&y) && (1..CHUNK_SIZE).contains(&z)
+    }
+
+    pub fn valid_unpadded(x: usize, y: usize, z: usize) -> bool {
+        x < PADDED_CHUNK_SIZE && y < PADDED_CHUNK_SIZE && z < PADDED_CHUNK_SIZE
+    }
+
     pub fn get(&self, x: usize, y: usize, z: usize) -> BlockId {
         self.get_unpadded(x + 1, y + 1, z + 1)
     }
@@ -195,6 +203,13 @@ impl ChunkManager {
         let chunk_position = position / CHUNK_SIZE as f32;
         self.get_chunk_mut(chunk_position)
     }
+
+    pub fn get_all_chunk_positions(&self) -> Vec<Vec3> {
+        self.chunks
+            .keys()
+            .map(|key| Vec3::new(key[0] as f32, key[1] as f32, key[2] as f32))
+            .collect()
+    }
 }
 
 #[cfg(test)]
@@ -268,5 +283,16 @@ mod tests {
         chunk_manager.set_block(block_position, block_id);
         let retrieved_block = chunk_manager.get_block(block_position).unwrap();
         assert_eq!(retrieved_block, block_id);
+    }
+
+    #[test]
+    fn test_get_all_chunk_positions() {
+        let mut chunk_manager = ChunkManager::new();
+        chunk_manager.set_chunk(Vec3::new(0.0, 0.0, 0.0), Chunk::default());
+        chunk_manager.set_chunk(Vec3::new(2.0, 0.0, 0.0), Chunk::default());
+        chunk_manager.set_chunk(Vec3::new(1.0, 0.0, 3.0), Chunk::default());
+
+        let retrieved_chunk_positions = chunk_manager.get_all_chunk_positions();
+        assert_eq!(retrieved_chunk_positions.len(), 3);
     }
 }
