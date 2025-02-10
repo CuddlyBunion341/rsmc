@@ -224,14 +224,8 @@ mod visualizer {
         params: &mut NoiseFunctionParams,
     ) {
         params.frequency = 1.0 / params.frequency;
-
-        let mut loc_changed = false;
-
-        add_noise_sliders!(ui, loc_changed, params);
-
+        add_noise_sliders!(ui, *changed, params);
         params.frequency = 1.0 / params.frequency;
-
-        *changed = *changed || loc_changed;
     }
 
     #[rustfmt::skip]
