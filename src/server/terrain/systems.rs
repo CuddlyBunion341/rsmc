@@ -92,6 +92,13 @@ mod visualizer {
 
                         data[index] = value as u8;
                     }
+                    TextureType::Cave => {
+                        let pos = Vec3::new(x as f32, z as f32, 0.0);
+                        let value = generator.sample_3d(pos, &generator.params.cave.noise);
+                        let value = map_range(value, -1.0, 1.0, 0.0, 255.0);
+
+                        data[index] = value as u8;
+                    }
                 };
             }
         }
@@ -127,7 +134,7 @@ mod visualizer {
                     generator.generate_chunk(&mut chunk);
                     chunk
                 })
-                .collect();
+            .collect();
 
             new_chunks.into_iter().for_each(|chunk| {
                 chunk_manager.insert_chunk(chunk);
@@ -174,37 +181,43 @@ mod visualizer {
                 .expect("Noise texture not loaded, please initialize the resource properly.");
 
             entry.texture = Some(contexts.ctx_mut().load_texture(
-                "terrain-texture",
-                image_data,
-                TextureOptions::default(),
+                    "terrain-texture",
+                    image_data,
+                    TextureOptions::default(),
             ));
             entry.size = Vec2::new(width as f32, height as f32);
         }
     }
 
+    #[rustfmt::skip]
     pub fn prepare_visualizer_texture_system(
         mut event_writer: EventWriter<terrain_events::RegenerateHeightMapEvent>,
     ) {
-        event_writer.send(terrain_events::RegenerateHeightMapEvent(
-            TextureType::Height,
-        ));
-        event_writer.send(terrain_events::RegenerateHeightMapEvent(
-            TextureType::HeightAdjust,
-        ));
-        event_writer.send(terrain_events::RegenerateHeightMapEvent(
-            TextureType::Density,
-        ));
+        event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::Height));
+        event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::HeightAdjust));
+        event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::Density));
+        event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::Cave));
     }
 
     macro_rules! add_slider {
         ($ui:expr, $changed:expr, $value:expr, $range:expr, $text:expr) => {{
             $changed = $changed
                 || $ui
-                    .add(egui::widgets::Slider::new($value, $range).text($text))
-                    .changed();
-        }};
+                .add(egui::widgets::Slider::new($value, $range).text($text))
+                .changed();
+            }};
+    }
+    
+    macro_rules! add_noise_sliders {
+        ($ui:expr, $changed:expr, $params:expr) => {
+            add_slider!($ui, $changed, &mut $params.octaves, 1..=8, "octaves");
+            add_slider!($ui, $changed, &mut $params.lacuranity, 0.001..=4.0, "lacuranity");
+            add_slider!($ui, $changed, &mut $params.frequency, 10.0..=800.0, "frequency");
+            add_slider!($ui, $changed, &mut $params.persistence, 0.001..=1.0, "persistence");
+        };
     }
 
+    #[rustfmt::skip]
     fn add_sliders_for_noise_params(
         ui: &mut egui::Ui,
         changed: &mut bool,
@@ -214,28 +227,7 @@ mod visualizer {
 
         let mut loc_changed = false;
 
-        add_slider!(ui, loc_changed, &mut params.octaves, 1..=8, "octaves");
-        add_slider!(
-            ui,
-            loc_changed,
-            &mut params.lacuranity,
-            0.001..=4.0,
-            "lacuranity"
-        );
-        add_slider!(
-            ui,
-            loc_changed,
-            &mut params.frequency,
-            10.0..=800.0,
-            "frequency"
-        );
-        add_slider!(
-            ui,
-            loc_changed,
-            &mut params.persistence,
-            0.001..=1.0,
-            "persistence"
-        );
+        add_noise_sliders!(ui, loc_changed, params);
 
         params.frequency = 1.0 / params.frequency;
 
@@ -297,12 +289,14 @@ mod visualizer {
                         TextureType::Height => "Base Height",
                         TextureType::HeightAdjust => "Height adjustment",
                         TextureType::Density => "Density",
+                        TextureType::Cave => "Cave",
                     };
 
                     let params: &mut NoiseFunctionParams = match texture_type {
                         TextureType::Height => &mut generator.params.height.noise,
                         TextureType::HeightAdjust => &mut generator.params.height_adjust.noise,
-                        TextureType::Density => &mut generator.params.density.noise
+                        TextureType::Density => &mut generator.params.density.noise,
+                        TextureType::Cave => &mut generator.params.cave.noise,
                     };
 
                     egui::Window::new(window_name).show(contexts.ctx_mut(), |ui| {

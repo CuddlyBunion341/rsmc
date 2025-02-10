@@ -38,6 +38,12 @@ pub struct DensityParams {
     pub squash_factor: f64,
 }
 
+pub struct CaveParams {
+    pub noise: NoiseFunctionParams,
+    pub base_value: f64,
+    pub threshold: f64
+}
+
 pub struct HeightAdjustParams {
     pub noise: NoiseFunctionParams,
 }
@@ -62,6 +68,7 @@ pub struct TerrainGeneratorParams {
     pub height: HeightParams,
     pub height_adjust: HeightAdjustParams,
     pub density: DensityParams,
+    pub cave: CaveParams,
 }
 
 impl Default for TerrainGeneratorParams {
@@ -105,6 +112,18 @@ impl Default for TerrainGeneratorParams {
                     persistence: 0.5,
                 },
             },
+            cave: CaveParams {
+                noise: NoiseFunctionParams {
+                    octaves: 2,
+                    height: 0.0,
+                    lacuranity: 0.3,
+                    frequency: 1.0 / 50.0,
+                    amplitude: 30.0,
+                    persistence: 0.5,
+                },
+                base_value: 0.5,
+                threshold: 0.1,
+            }
         }
     }
 }
@@ -123,6 +142,7 @@ mod visualizer {
         Height,
         HeightAdjust,
         Density,
+        Cave
     }
 
     #[derive(Resource)]
@@ -137,6 +157,7 @@ mod visualizer {
             noise_textures.insert(TextureType::Height, NoiseTexture::default());
             noise_textures.insert(TextureType::HeightAdjust, NoiseTexture::default());
             noise_textures.insert(TextureType::Density, NoiseTexture::default());
+            noise_textures.insert(TextureType::Cave, NoiseTexture::default());
 
             NoiseTextureList { noise_textures }
         }
