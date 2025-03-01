@@ -102,7 +102,7 @@ impl Default for TerrainGeneratorParams {
                 },
             },
             density: DensityParams {
-                squash_factor: 1.0 / 200.0,
+                squash_factor: 1.0 / 300.0,
                 noise: NoiseFunctionParams {
                     octaves: 4,
                     height: 0.0,
@@ -116,12 +116,12 @@ impl Default for TerrainGeneratorParams {
                 noise: NoiseFunctionParams {
                     octaves: 2,
                     height: 0.0,
-                    lacuranity: 0.3,
-                    frequency: 1.0 / 50.0,
+                    lacuranity: 0.03,
+                    frequency: 1.0 / 20.0,
                     amplitude: 30.0,
                     persistence: 0.5,
                 },
-                base_value: 0.5,
+                base_value: 0.0,
                 threshold: 0.1,
             }
         }

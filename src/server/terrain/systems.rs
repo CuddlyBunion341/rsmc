@@ -32,6 +32,7 @@ mod visualizer {
         bevy_egui::EguiContexts,
         egui::{self, Color32, ColorImage, ImageData, TextureOptions},
     };
+    use bevy_renet::netcode::generate_random_bytes;
     use egui_plot::{Line, PlotPoint, PlotPoints};
     use rayon::iter::IntoParallelIterator;
 
@@ -85,16 +86,24 @@ mod visualizer {
                         data[index] = value as u8;
                     }
                     TextureType::Density => {
-                        // TODO: change to sample3D
-                        let pos = Vec2::new(x as f32, z as f32);
-                        let value = generator.sample_2d(pos, &generator.params.density.noise);
+                        let pos = Vec3::new(x as f32, z as f32, 0.0);
+                        let value = generator.sample_3d(pos, &generator.params.density.noise);
                         let value = map_range(value, -1.0, 1.0, 0.0, 255.0);
 
                         data[index] = value as u8;
                     }
                     TextureType::Cave => {
                         let pos = Vec3::new(x as f32, z as f32, 0.0);
-                        let value = generator.sample_3d(pos, &generator.params.cave.noise);
+                        let mut value = generator.sample_3d(pos, &generator.params.cave.noise);
+
+                        let base = generator.params.cave.base_value;
+                        let upper_bound = base + generator.params.cave.threshold;
+                        let lower_bound = base - generator.params.cave.threshold;
+
+                        if lower_bound <= value && value >= upper_bound {
+                            value = -1.0;
+                        }
+
                         let value = map_range(value, -1.0, 1.0, 0.0, 255.0);
 
                         data[index] = value as u8;
@@ -303,11 +312,19 @@ mod visualizer {
                         let params: &mut NoiseFunctionParams = match texture_type {
                             TextureType::Height => &mut generator.params.height.noise,
                             TextureType::HeightAdjust => &mut generator.params.height_adjust.noise,
-                            TextureType::Density => &mut generator.params.density.noise,
-                            TextureType::Cave => &mut generator.params.cave.noise,
+                            TextureType::Density => {
+                                generator.params.density.squash_factor = 1.0 / generator.params.density.squash_factor;
+                                add_slider!(ui, changed, &mut generator.params.density.squash_factor, 10.0..=500.0, "squash factor");
+                                generator.params.density.squash_factor = 1.0 / generator.params.density.squash_factor;
+                                &mut generator.params.density.noise 
+                            }
+                            TextureType::Cave => {
+                                add_slider!(ui, changed, &mut generator.params.cave.base_value, -1.0..=1.0, "base value");
+                                add_slider!(ui, changed, &mut generator.params.cave.threshold, -1.0..=1.0, "treshold");
+                                &mut generator.params.cave.noise
+                            },
                         };
 
-                        add_slider!(ui, changed, &mut generator.params.cave.base_value, -1.0..=1.0, "base value");
                         add_sliders_for_noise_params!(ui, &mut changed, params);
 
                         if changed {

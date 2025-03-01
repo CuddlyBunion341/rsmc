@@ -99,18 +99,28 @@ impl Generator {
     }
 
     fn generate_block(&self, position: Vec3) -> BlockId {
-        let terrain_height = self.determine_terrain_height(position);
-        let terrain_density = self.determine_terrain_density(position);
+        if self.is_inside_cave(position) {
+            return BlockId::Air;
+        }
 
-        if (position.y as f64) < terrain_height {
+        if (position.y as f64) < self.determine_terrain_height(position) {
             return BlockId::Stone;
         }
 
-        if terrain_density > 0.0 {
+        if self.determine_terrain_density(position) > 0.0 {
             return BlockId::Stone;
         }
 
         BlockId::Air
+    }
+
+    fn is_inside_cave(&self, position: Vec3) -> bool {
+        let density = self.sample_3d(position, &self.params.cave.noise);
+
+        let upper_bound = self.params.cave.base_value - self.params.cave.threshold;
+        let lower_bound = self.params.cave.base_value + self.params.cave.threshold;
+
+        return lower_bound <= density && density >= upper_bound
     }
 
     fn determine_terrain_height(&self, position: Vec3) -> f64 {
