@@ -120,7 +120,7 @@ impl Generator {
         let upper_bound = self.params.cave.base_value - self.params.cave.threshold;
         let lower_bound = self.params.cave.base_value + self.params.cave.threshold;
 
-        return lower_bound <= density && density >= upper_bound
+        lower_bound <= density && density >= upper_bound
     }
 
     fn determine_terrain_height(&self, position: Vec3) -> f64 {

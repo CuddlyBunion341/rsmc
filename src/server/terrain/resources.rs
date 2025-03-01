@@ -41,7 +41,7 @@ pub struct DensityParams {
 pub struct CaveParams {
     pub noise: NoiseFunctionParams,
     pub base_value: f64,
-    pub threshold: f64
+    pub threshold: f64,
 }
 
 pub struct HeightAdjustParams {
@@ -123,7 +123,7 @@ impl Default for TerrainGeneratorParams {
                 },
                 base_value: 0.0,
                 threshold: 0.1,
-            }
+            },
         }
     }
 }
@@ -142,7 +142,7 @@ mod visualizer {
         Height,
         HeightAdjust,
         Density,
-        Cave
+        Cave,
     }
 
     #[derive(Resource)]
