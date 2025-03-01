@@ -4,7 +4,7 @@ pub fn setup_world_system(
     mut chunk_manager: ResMut<ChunkManager>,
     generator: Res<terrain_resources::Generator>,
 ) {
-    let render_distance = Vec3::new(6.0, 2.0, 6.0);
+    let render_distance = Vec3::new(8.0, 3.0, 8.0);
 
     info!("Generating chunks");
 
@@ -32,7 +32,6 @@ mod visualizer {
         bevy_egui::EguiContexts,
         egui::{self, Color32, ColorImage, ImageData, TextureOptions},
     };
-    use bevy_renet::netcode::generate_random_bytes;
     use egui_plot::{Line, PlotPoint, PlotPoints};
     use rayon::iter::IntoParallelIterator;
 
@@ -252,17 +251,6 @@ mod visualizer {
         };
     }
 
-    // #[rustfmt::skip]
-    // fn add_sliders_for_noise_params(
-    //     ui: &mut egui::Ui,
-    //     changed: &mut bool,
-    //     params: &mut NoiseFunctionParams,
-    // ) {
-    //     params.frequency = 1.0 / params.frequency;
-    //     add_noise_sliders!(ui, *changed, params);
-    //     params.frequency = 1.0 / params.frequency;
-    // }
-
     #[rustfmt::skip]
     pub fn render_visualizer_system(
         mut contexts: EguiContexts,
@@ -367,16 +355,9 @@ mod visualizer {
 
                                     })
                                 });
-
-                                // egui::Window::new(window_name).show(contexts.ctx_mut(), |ui| {
-                                //     ui.label(window_name);
-                                //
-                                // });
                             }
                         }
-
                     }
-
                 });
             })
 

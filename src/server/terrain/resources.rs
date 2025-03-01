@@ -76,17 +76,17 @@ impl Default for TerrainGeneratorParams {
         Self {
             height: HeightParams {
                 splines: vec![
-                    Vec2::new(-1.0, -20.0),
-                    Vec2::new(-0.5, 0.0),
-                    Vec2::new(0.0, 20.0),
-                    Vec2::new(0.5, 40.0),
-                    Vec2::new(1.0, 60.0),
+                    Vec2::new(-1.0, -16.0),
+                    Vec2::new(0.0, 0.0),
+                    Vec2::new(0.0, 0.0),
+                    Vec2::new(0.05, 2.0),
+                    Vec2::new(1.0, 15.0),
                 ],
                 noise: NoiseFunctionParams {
                     octaves: 4,
                     height: 0.0,
                     lacuranity: 2.0,
-                    frequency: 1.0 / 120.0,
+                    frequency: 1.0 / 300.0,
                     amplitude: 30.0,
                     persistence: 0.5,
                 },
@@ -102,7 +102,7 @@ impl Default for TerrainGeneratorParams {
                 },
             },
             density: DensityParams {
-                squash_factor: 1.0 / 300.0,
+                squash_factor: 1.0 / 100.0,
                 noise: NoiseFunctionParams {
                     octaves: 4,
                     height: 0.0,
@@ -119,10 +119,10 @@ impl Default for TerrainGeneratorParams {
                     lacuranity: 0.03,
                     frequency: 1.0 / 20.0,
                     amplitude: 30.0,
-                    persistence: 0.5,
+                    persistence: 0.59,
                 },
                 base_value: 0.0,
-                threshold: 0.1,
+                threshold: 0.25,
             },
         }
     }
