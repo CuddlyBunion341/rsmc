@@ -270,10 +270,6 @@ mod visualizer {
                         ui.vertical(|ui| {
                             ui.label("Splines");
 
-                            if ui.button("Organize windows").clicked() {
-                                ui.ctx().memory_mut(|mem| mem.reset_areas());
-                            }
-
                             let mut changed = false;
 
                             let length = generator.params.height.splines.len();
@@ -332,6 +328,7 @@ mod visualizer {
                                             TextureType::Density => {
                                                 generator.params.density.squash_factor = 1.0 / generator.params.density.squash_factor;
                                                 add_slider!(ui, changed, &mut generator.params.density.squash_factor, 10.0..=500.0, "squash factor");
+                                                add_slider!(ui, changed, &mut generator.params.density.height_offset, -50.0..=50.0, "height offset");
                                                 generator.params.density.squash_factor = 1.0 / generator.params.density.squash_factor;
                                                 &mut generator.params.density.noise 
                                             }

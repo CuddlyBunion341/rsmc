@@ -36,6 +36,7 @@ pub struct HeightParams {
 pub struct DensityParams {
     pub noise: NoiseFunctionParams,
     pub squash_factor: f64,
+    pub height_offset: f64,
 }
 
 pub struct CaveParams {
@@ -76,11 +77,11 @@ impl Default for TerrainGeneratorParams {
         Self {
             height: HeightParams {
                 splines: vec![
-                    Vec2::new(-1.0, -16.0),
+                    Vec2::new(-1.0, 4.0),
                     Vec2::new(0.0, 0.0),
                     Vec2::new(0.0, 0.0),
-                    Vec2::new(0.05, 2.0),
-                    Vec2::new(1.0, 15.0),
+                    Vec2::new(0.05, 20.0),
+                    Vec2::new(1.0, 35.0),
                 ],
                 noise: NoiseFunctionParams {
                     octaves: 4,
@@ -103,6 +104,7 @@ impl Default for TerrainGeneratorParams {
             },
             density: DensityParams {
                 squash_factor: 1.0 / 100.0,
+                height_offset: -20.0,
                 noise: NoiseFunctionParams {
                     octaves: 4,
                     height: 0.0,
