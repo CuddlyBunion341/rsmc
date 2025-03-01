@@ -1,5 +1,7 @@
 use terrain_resources::{Generator, NoiseFunctionParams, TerrainGeneratorParams};
 
+use rand::prelude::*;
+
 use crate::prelude::*;
 
 macro_rules! for_each_chunk_coordinate {
@@ -62,6 +64,22 @@ impl Generator {
             let block = self.decorate_block(chunk, pos);
             chunk.set_unpadded(x, y, z, block);
         });
+
+        for _ in 0..30 {
+            self.attempt_spawn_tree(chunk);
+        }
+    }
+
+    fn attempt_spawn_tree(&self, chunk: &mut Chunk) {
+        let x: usize = rand::random_range(2..30);
+        let y: usize = rand::random_range(2..30);
+        let z: usize = rand::random_range(2..30);
+
+        if chunk.get(x,y,z) == BlockId::Grass {
+            chunk.set(x,y+1,z, BlockId::RedSand);
+            chunk.set(x,y+2,z, BlockId::RedSand);
+            chunk.set(x,y+3,z, BlockId::RedSand);
+        }
     }
 
     fn decorate_block(&self, chunk: &Chunk, position: Vec3) -> BlockId {
