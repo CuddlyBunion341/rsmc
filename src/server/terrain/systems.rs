@@ -143,7 +143,7 @@ mod visualizer {
                     generator.generate_chunk(&mut chunk);
                     chunk
                 })
-                .collect();
+            .collect();
 
             new_chunks.into_iter().for_each(|chunk| {
                 chunk_manager.insert_chunk(chunk);
@@ -190,9 +190,9 @@ mod visualizer {
                 .expect("Noise texture not loaded, please initialize the resource properly.");
 
             entry.texture = Some(contexts.ctx_mut().load_texture(
-                "terrain-texture",
-                image_data,
-                TextureOptions::default(),
+                    "terrain-texture",
+                    image_data,
+                    TextureOptions::default(),
             ));
             entry.size = Vec2::new(width as f32, height as f32);
         }
@@ -212,9 +212,9 @@ mod visualizer {
         ($ui:expr, $changed:expr, $value:expr, $range:expr, $text:expr) => {{
             $changed = $changed
                 || $ui
-                    .add(egui::widgets::Slider::new($value, $range).text($text))
-                    .changed();
-        }};
+                .add(egui::widgets::Slider::new($value, $range).text($text))
+                .changed();
+            }};
     }
 
     macro_rules! add_noise_sliders {
@@ -271,92 +271,114 @@ mod visualizer {
         mut event_writer: EventWriter<terrain_events::RegenerateHeightMapEvent>,
         mut world_regenerate_event_writer: EventWriter<terrain_events::WorldRegenerateEvent>,
     ) {
-        egui::Window::new("Splines").show(contexts.ctx_mut(), |ui| {
-            if ui.button("Organize windows").clicked() {
-                ui.ctx().memory_mut(|mem| mem.reset_areas());
-            }
-
-            let mut changed = false;
-
-            let length = generator.params.height.splines.len();
-
-            for index in 0..length {
-                if index != 0 && index != length - 1 {
-                    // Ensure range from 0 to 1 by locking the first and last splines
-                    add_slider!(ui, changed, &mut generator.params.height.splines[index].x, -1.0..=1.0, format!("x{}", index));
-                }
-                add_slider!(ui, changed, &mut generator.params.height.splines[index].y, -40.0..=80.0, format!("y{}", index));
-            }
-
-            if changed {
-                event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::Height));
-            }
-
-            if ui.button("Regenerate world").clicked() {
-                world_regenerate_event_writer.send(terrain_events::WorldRegenerateEvent);
-            }
-
-            egui_plot::Plot::new("splines")
-                .show(ui, |plot_ui| {
-                    let plot_points: Vec<PlotPoint> = generator.params.height.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
-                    let line_chart = Line::new(PlotPoints::Owned(plot_points));
-                    plot_ui.line(line_chart);
-                });
-        });
-
         let noise_textures = &noise_texture_list.noise_textures;
 
-        for (texture_type, noise_texture) in noise_textures {
-            let texture_handle = noise_texture.texture.as_ref();
+        egui::Window::new("Terrain Generator").show(contexts.ctx_mut(), |ui| {
 
-            match texture_handle {
-                None => {
-                    warn!("Noise texture handle could not be borrowed")
-                },
-                Some(texture_handle) => {
-                    let window_name = match texture_type {
-                        TextureType::Height => "Base Height",
-                        TextureType::HeightAdjust => "Height adjustment",
-                        TextureType::Density => "Density",
-                        TextureType::Cave => "Cave",
-                    };
+            ui.horizontal(|ui| {
 
+                ui.group(|ui| {
+                    ui.vertical(|ui| {
+                        ui.label("Splines");
 
-                    egui::Window::new(window_name).show(contexts.ctx_mut(), |ui| {
-                        ui.label(window_name);
+                        if ui.button("Organize windows").clicked() {
+                            ui.ctx().memory_mut(|mem| mem.reset_areas());
+                        }
 
                         let mut changed = false;
 
-                        let params: &mut NoiseFunctionParams = match texture_type {
-                            TextureType::Height => &mut generator.params.height.noise,
-                            TextureType::HeightAdjust => &mut generator.params.height_adjust.noise,
-                            TextureType::Density => {
-                                generator.params.density.squash_factor = 1.0 / generator.params.density.squash_factor;
-                                add_slider!(ui, changed, &mut generator.params.density.squash_factor, 10.0..=500.0, "squash factor");
-                                generator.params.density.squash_factor = 1.0 / generator.params.density.squash_factor;
-                                &mut generator.params.density.noise 
-                            }
-                            TextureType::Cave => {
-                                add_slider!(ui, changed, &mut generator.params.cave.base_value, -1.0..=1.0, "base value");
-                                add_slider!(ui, changed, &mut generator.params.cave.threshold, -1.0..=1.0, "treshold");
-                                &mut generator.params.cave.noise
-                            },
-                        };
+                        let length = generator.params.height.splines.len();
 
-                        add_sliders_for_noise_params!(ui, &mut changed, params);
+                        for index in 0..length {
+                            if index != 0 && index != length - 1 {
+                                // Ensure range from 0 to 1 by locking the first and last splines
+                                add_slider!(ui, changed, &mut generator.params.height.splines[index].x, -1.0..=1.0, format!("x{}", index));
+                            }
+                            add_slider!(ui, changed, &mut generator.params.height.splines[index].y, -40.0..=80.0, format!("y{}", index));
+                        }
 
                         if changed {
-                            event_writer.send(terrain_events::RegenerateHeightMapEvent(texture_type.clone()));
-                        };
+                            event_writer.send(terrain_events::RegenerateHeightMapEvent(TextureType::Height));
+                        }
 
-                        ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
-                                    texture_handle.id(),
-                                    texture_handle.size_vec2(),
-                        )));
-                    });
+                        if ui.button("Regenerate world").clicked() {
+                            world_regenerate_event_writer.send(terrain_events::WorldRegenerateEvent);
+                        }
+
+                        egui_plot::Plot::new("splines")
+                            .show(ui, |plot_ui| {
+                                let plot_points: Vec<PlotPoint> = generator.params.height.splines.iter().map(|spline| PlotPoint {x: spline.x as f64, y: spline.y as f64}).collect();
+                                let line_chart = Line::new(PlotPoints::Owned(plot_points));
+                                plot_ui.line(line_chart);
+                            });
+                    })
+
+
+
+                });
+
+                for (texture_type, noise_texture) in noise_textures {
+                    let texture_handle = noise_texture.texture.as_ref();
+
+                    match texture_handle {
+                        None => {
+                            warn!("Noise texture handle could not be borrowed")
+                        },
+                        Some(texture_handle) => {
+                            let window_name = match texture_type {
+                                TextureType::Height => "Base Height",
+                                TextureType::HeightAdjust => "Height adjustment",
+                                TextureType::Density => "Density",
+                                TextureType::Cave => "Cave",
+                            };
+
+                            ui.group(|ui| {
+                                ui.vertical(|ui| {
+                                    ui.label(window_name);
+
+                                    let mut changed = false;
+
+                                    let params: &mut NoiseFunctionParams = match texture_type {
+                                        TextureType::Height => &mut generator.params.height.noise,
+                                        TextureType::HeightAdjust => &mut generator.params.height_adjust.noise,
+                                        TextureType::Density => {
+                                            generator.params.density.squash_factor = 1.0 / generator.params.density.squash_factor;
+                                            add_slider!(ui, changed, &mut generator.params.density.squash_factor, 10.0..=500.0, "squash factor");
+                                            generator.params.density.squash_factor = 1.0 / generator.params.density.squash_factor;
+                                            &mut generator.params.density.noise 
+                                        }
+                                        TextureType::Cave => {
+                                            add_slider!(ui, changed, &mut generator.params.cave.base_value, -1.0..=1.0, "base value");
+                                            add_slider!(ui, changed, &mut generator.params.cave.threshold, -1.0..=1.0, "treshold");
+                                            &mut generator.params.cave.noise
+                                        },
+                                    };
+
+                                    add_sliders_for_noise_params!(ui, &mut changed, params);
+
+                                    if changed {
+                                        event_writer.send(terrain_events::RegenerateHeightMapEvent(texture_type.clone()));
+                                    };
+
+                                    ui.add(egui::widgets::Image::new(egui::load::SizedTexture::new(
+                                                texture_handle.id(),
+                                                texture_handle.size_vec2(),
+                                    )));
+
+                                })
+                            });
+
+                            // egui::Window::new(window_name).show(contexts.ctx_mut(), |ui| {
+                            //     ui.label(window_name);
+                            //
+                            // });
+                        }
+                    }
+
                 }
-            }
 
-        };
+            })
+
+        });
     }
 }
