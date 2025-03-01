@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[cfg(not(feature = "lock_player"))]
-const SPAWN_POINT: Vec3 = Vec3::new(0.0, 32.0, 0.0);
+const SPAWN_POINT: Vec3 = Vec3::new(0.0, 64.0, 0.0);
 #[cfg(feature = "lock_player")]
 const SPAWN_POINT: Vec3 = Vec3::new(128.0, 96.0, -128.0);
 

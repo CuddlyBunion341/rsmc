@@ -24,7 +24,7 @@ impl PastBlockUpdates {
 #[derive(Resource)]
 pub struct Generator {
     pub seed: u32,
-    pub perlin: Perlin, // TODO: reduce visibility of attributes on this struct decl
+    pub perlin: Perlin,
     pub params: TerrainGeneratorParams,
 }
 
