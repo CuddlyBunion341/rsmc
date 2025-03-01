@@ -14,10 +14,8 @@ impl Plugin for NetworkingPlugin {
 
         #[cfg(feature = "renet_visualizer")]
         {
-            use bevy_inspector_egui::bevy_egui::EguiPlugin;
             use renet_visualizer::RenetServerVisualizer;
 
-            app.add_plugins(EguiPlugin);
             app.insert_resource(RenetServerVisualizer::<200>::default());
             app.add_systems(
                 Update,

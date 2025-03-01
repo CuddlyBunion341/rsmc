@@ -162,3 +162,17 @@ fn spawn_chunk(
         },
     ));
 }
+
+pub fn handle_terrain_regeneration_events(
+    mut client: ResMut<RenetClient>,
+    mut world_regenerate_events: EventReader<terrain_events::WorldRegenerateEvent>,
+    chunk_manager: ResMut<ChunkManager>,
+) {
+    for _ in world_regenerate_events.read() {
+        info!("Rerequesting all chunks from server");
+        let all_chunk_positions = chunk_manager.get_all_chunk_positions();
+        let message =
+            bincode::serialize(&NetworkingMessage::ChunkBatchRequest(all_chunk_positions));
+        client.send_message(DefaultChannel::ReliableUnordered, message.unwrap());
+    }
+}

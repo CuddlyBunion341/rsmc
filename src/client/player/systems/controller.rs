@@ -1,13 +1,27 @@
 use crate::prelude::*;
 
-const SPAWN_POINT: Vec3 = Vec3::new(0.0, 32.0, 0.0);
+#[cfg(not(feature = "lock_player"))]
+const SPAWN_POINT: Vec3 = Vec3::new(0.0, 64.0, 0.0);
+#[cfg(feature = "lock_player")]
+const SPAWN_POINT: Vec3 = Vec3::new(128.0, 96.0, -128.0);
 
 pub fn setup_player_camera(mut commands: Commands) {
     commands.spawn((
+        Name::new("Player cam?"),
         Camera3d::default(),
+        #[cfg(not(feature = "ortho_camera"))]
         Projection::Perspective(PerspectiveProjection {
             fov: TAU / 5.0,
             ..default()
+        }),
+        #[cfg(feature = "ortho_camera")]
+        Projection::Orthographic(OrthographicProjection {
+            scale: 0.125,
+            near: 0.0001,
+            far: 1000.0,
+            viewport_origin: Vec2::new(0.5, 0.5),
+            scaling_mode: ScalingMode::WindowSize,
+            area: Rect::new(-1.0, -1.0, 1.0, 1.0),
         }),
         RenderPlayer {
             logical_entity: Entity::from_raw(0),
@@ -36,6 +50,9 @@ pub fn setup_controller_on_area_ready_system(
             },
             ActiveEvents::COLLISION_EVENTS,
             Velocity::zero(),
+            #[cfg(feature = "lock_player")]
+            RigidBody::Fixed,
+            #[cfg(not(feature = "lock_player"))]
             RigidBody::Dynamic,
             Sleeping::disabled(),
             LockedAxes::ROTATION_LOCKED,
@@ -44,9 +61,16 @@ pub fn setup_controller_on_area_ready_system(
             Ccd { enabled: true }, // Prevent clipping when going fast
             Transform::from_translation(SPAWN_POINT),
             LogicalPlayer,
+            #[cfg(not(feature = "lock_player"))]
             FpsControllerInput {
-                pitch: -TAU / 12.0,
-                yaw: TAU * 5.0 / 8.0,
+                pitch: -TAU / 20.0,
+                yaw: TAU * 5.0 / 12.0,
+                ..default()
+            },
+            #[cfg(feature = "lock_player")]
+            FpsControllerInput {
+                pitch: 0.0,
+                yaw: 0.0,
                 ..default()
             },
             FpsController {
