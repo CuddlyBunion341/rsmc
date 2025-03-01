@@ -75,7 +75,7 @@ impl Generator {
         }
 
         let mut depth_below_nearest_air = 0;
-        let depth_check = 5;
+        let depth_check = 3;
 
         for delta_height in 0..depth_check {
             if !Chunk::valid_unpadded(x, y + delta_height, z) {
@@ -93,7 +93,7 @@ impl Generator {
 
         match depth_below_nearest_air {
             0_i32..=1_i32 => BlockId::Grass,
-            2..5 => BlockId::Dirt,
+            2..3 => BlockId::Dirt,
             _ => BlockId::Stone,
         }
     }
