@@ -149,7 +149,7 @@ impl Generator {
             for dz in -bush_radius..bush_radius {
                 for dy in -bush_radius..bush_radius {
                     let distance_from_center = dx * dx + dy * dy + dz * dz;
-                    if distance_from_center <= bush_radius * bush_radius - 1 {
+                    if distance_from_center < bush_radius * bush_radius {
                         blocks.push((
                             Vec3 {
                                 x: dx as f32,
