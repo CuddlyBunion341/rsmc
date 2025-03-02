@@ -35,11 +35,14 @@ impl TextureManager {
         let mut textures = HashMap::new();
         textures.insert(TextureName::Air, [-1.0, -1.0]);
 
-        Self::get_texture_coordinates().iter().for_each(|(texture_name, (u, v))| {
-            if texture_name.clone() != Air { // exclude Air, it is special and used as Placeholder
-                textures.insert(*texture_name, [*u, *v]);
-            }
-        });
+        Self::get_texture_coordinates()
+            .iter()
+            .for_each(|(texture_name, (u, v))| {
+                if *texture_name != Air {
+                    // exclude Air, it is special and used as Placeholder
+                    textures.insert(*texture_name, [*u, *v]);
+                }
+            });
 
         Self { textures }
     }
@@ -49,25 +52,20 @@ impl TextureManager {
         const ATLAS_HEIGHT: usize = 4;
 
         let textures: [[TextureName; ATLAS_WIDTH]; ATLAS_HEIGHT] = [
-            [ Stone, CobbleStone, GrassTop, OakLeaves ],
-            [ IronOre, Sand, GrassSide, OakLogTop ],
-            [ CoalOre, Bedrock, Dirt, OakLogSide ],
-            [ Air, Air, Air, Air ]
+            [Stone, CobbleStone, GrassTop, OakLeaves],
+            [IronOre, Sand, GrassSide, OakLogTop],
+            [CoalOre, Bedrock, Dirt, OakLogSide],
+            [Air, Air, Air, Air],
         ];
 
         let mut texture_positions = Vec::new();
 
         for x in 0..ATLAS_WIDTH {
             for y in 0..ATLAS_HEIGHT {
-                texture_positions.push(
-                    (
-                        *textures.get(y).unwrap().get(x).unwrap(),
-                        (
-                            1.0 / 4.0 * (x as f32),
-                            1.0 / 4.0 * (y as f32),
-                        )
-                    )
-                )
+                texture_positions.push((
+                    *textures.get(y).unwrap().get(x).unwrap(),
+                    (1.0 / 4.0 * (x as f32), 1.0 / 4.0 * (y as f32)),
+                ))
             }
         }
 
@@ -115,23 +113,19 @@ pub static BLOCKS: [Block; 10] = [
     add_block!(BlockId::Bedrock, [TextureName::Bedrock; 6], true),
     add_block!(BlockId::IronOre, [TextureName::IronOre; 6], true),
     add_block!(BlockId::CoalOre, [TextureName::CoalOre; 6], true),
-    add_block!(
-        BlockId::OakLeaves,
-        [TextureName::OakLeaves; 6],
-        true
-    ),
+    add_block!(BlockId::OakLeaves, [TextureName::OakLeaves; 6], true),
     add_block!(
         BlockId::OakLog,
         [
-        TextureName::OakLogTop,
-        TextureName::OakLogTop,
-        TextureName::OakLogSide,
-        TextureName::OakLogSide,
-        TextureName::OakLogSide,
-        TextureName::OakLogSide,
+            TextureName::OakLogTop,
+            TextureName::OakLogTop,
+            TextureName::OakLogSide,
+            TextureName::OakLogSide,
+            TextureName::OakLogSide,
+            TextureName::OakLogSide,
         ],
         true
-    )
+    ),
 ];
 
 type TextureUV = [f32; 2];

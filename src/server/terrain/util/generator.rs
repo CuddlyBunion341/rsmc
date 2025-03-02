@@ -1,5 +1,3 @@
-use std::cmp;
-
 use terrain_resources::{Generator, NoiseFunctionParams, TerrainGeneratorParams};
 
 use rand::prelude::*;
@@ -77,14 +75,15 @@ impl Generator {
 
         struct Bounds {
             min: Vec3,
-            max: Vec3
+            max: Vec3,
         }
 
-        let proposal_bounds = proposal.iter().fold(Bounds {
-            min: Vec3::ZERO,
-            max: Vec3::ZERO,
-        }, |bounds, (relative_pos, _block_id)| {
+        let proposal_bounds = proposal.iter().fold(
             Bounds {
+                min: Vec3::ZERO,
+                max: Vec3::ZERO,
+            },
+            |bounds, (relative_pos, _block_id)| Bounds {
                 min: Vec3 {
                     x: bounds.min.x.min(relative_pos.x),
                     y: bounds.min.y.min(relative_pos.y),
@@ -94,13 +93,19 @@ impl Generator {
                     x: bounds.max.x.max(relative_pos.x),
                     y: bounds.max.y.max(relative_pos.y),
                     z: bounds.max.z.max(relative_pos.z),
-                }
-            }
-        });
+                },
+            },
+        );
 
-        let sapling_x: usize = rand::random_range(proposal_bounds.min.x.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.x)) as usize;
-        let sapling_y: usize = rand::random_range(proposal_bounds.min.y.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.y)) as usize;
-        let sapling_z: usize = rand::random_range(proposal_bounds.min.z.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.z)) as usize;
+        let sapling_x: usize = rand::random_range(
+            proposal_bounds.min.x.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.x),
+        ) as usize;
+        let sapling_y: usize = rand::random_range(
+            proposal_bounds.min.y.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.y),
+        ) as usize;
+        let sapling_z: usize = rand::random_range(
+            proposal_bounds.min.z.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.z),
+        ) as usize;
 
         if chunk.get(sapling_x, sapling_y, sapling_z) != BlockId::Grass {
             return;
