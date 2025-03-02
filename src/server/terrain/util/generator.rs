@@ -123,7 +123,7 @@ impl Generator {
                     y: dy as f32,
                     z: 0.0,
                 },
-                BlockId::RedSand,
+                BlockId::OakLog,
             ));
         }
 
@@ -139,7 +139,7 @@ impl Generator {
                                 y: (tree_stump_height + dy) as f32,
                                 z: dz as f32,
                             },
-                            BlockId::Terracotta,
+                            BlockId::OakLeaves,
                         ));
                     }
                 }

@@ -4,20 +4,20 @@ use crate::prelude::*;
 pub enum TextureName {
     Air,
     Stone,
+    CobbleStone,
     Dirt,
+    Sand,
     GrassTop,
     GrassSide,
+    IronOre,
+    CoalOre,
     Bedrock,
-    RedSand,
-    BrownTerracotta,
-    CyanTerracotta,
-    GrayTerracotta,
-    LightGrayTerracotta,
-    OrangeTerracotta,
-    RedTerracotta,
-    Terracotta,
-    YellowTerracotta,
+    OakLeaves,
+    OakLogTop,
+    OakLogSide,
 }
+
+use TextureName::*;
 
 #[derive(Resource)]
 pub struct TextureManager {
@@ -34,21 +34,37 @@ impl TextureManager {
     pub fn new() -> Self {
         let mut textures = HashMap::new();
         textures.insert(TextureName::Air, [-1.0, -1.0]);
-        textures.insert(TextureName::Stone, [0.0, 0.0]);
-        textures.insert(TextureName::Dirt, [0.25, 0.0]);
-        textures.insert(TextureName::GrassTop, [0.5, 0.0]);
-        textures.insert(TextureName::GrassSide, [0.75, 0.0]);
-        textures.insert(TextureName::Bedrock, [0.0, 0.25]);
-        textures.insert(TextureName::RedSand, [0.25, 0.25]);
-        textures.insert(TextureName::BrownTerracotta, [0.5, 0.25]);
-        textures.insert(TextureName::CyanTerracotta, [0.75, 0.25]);
-        textures.insert(TextureName::GrayTerracotta, [0.0, 0.5]);
-        textures.insert(TextureName::LightGrayTerracotta, [0.25, 0.5]);
-        textures.insert(TextureName::OrangeTerracotta, [0.5, 0.5]);
-        textures.insert(TextureName::RedTerracotta, [0.75, 0.5]);
-        textures.insert(TextureName::Terracotta, [0.0, 0.75]);
-        textures.insert(TextureName::YellowTerracotta, [0.25, 0.75]);
+
+        Self::get_texture_coordinates().iter().for_each(|(texture_name, (u, v))| {
+            if texture_name.clone() != Air { // exclude Air, it is special and used as Placeholder
+                textures.insert(*texture_name, [*u, *v]);
+            }
+        });
+
         Self { textures }
+    }
+
+    fn get_texture_coordinates() -> Vec<(TextureName, (f32, f32))> {
+        let textures: [[TextureName; 4]; 4] = [
+            [ Stone, CobbleStone, GrassTop, OakLeaves ],
+            [ IronOre, Sand, GrassSide, OakLogTop ],
+            [ CoalOre, Bedrock, Dirt, OakLogSide ],
+            [ Air, Air, Air, Air ]
+        ];
+
+        let items: Vec<(TextureName, (f32, f32))> = textures.iter().enumerate().flat_map(|(row_index, row)| {
+            row.iter().enumerate().map(|(col_index, texture)| {
+                (
+                    texture,
+                    (
+                        1.0 / 4.0 * (col_index as f32),
+                        1.0 / 4.0 * (row_index as f32),
+                    )
+                )
+            }).collect()
+        }).collect();
+
+        items
     }
 
     pub fn get_texture_uv(&self, name: TextureName) -> Option<&TextureUV> {
@@ -72,7 +88,7 @@ macro_rules! add_block {
     };
 }
 
-pub static BLOCKS: [Block; 14] = [
+pub static BLOCKS: [Block; 10] = [
     add_block!(BlockId::Air, [TextureName::Air; 6], false),
     add_block!(
         BlockId::Grass,
@@ -88,44 +104,27 @@ pub static BLOCKS: [Block; 14] = [
     ),
     add_block!(BlockId::Dirt, [TextureName::Dirt; 6], true),
     add_block!(BlockId::Stone, [TextureName::Stone; 6], true),
+    add_block!(BlockId::CobbleStone, [TextureName::CobbleStone; 6], true),
     add_block!(BlockId::Bedrock, [TextureName::Bedrock; 6], true),
-    add_block!(BlockId::RedSand, [TextureName::RedSand; 6], true),
+    add_block!(BlockId::IronOre, [TextureName::IronOre; 6], true),
+    add_block!(BlockId::CoalOre, [TextureName::CoalOre; 6], true),
     add_block!(
-        BlockId::BrownTerracotta,
-        [TextureName::BrownTerracotta; 6],
+        BlockId::OakLeaves,
+        [TextureName::OakLeaves; 6],
         true
     ),
     add_block!(
-        BlockId::CyanTerracotta,
-        [TextureName::CyanTerracotta; 6],
+        BlockId::OakLog,
+        [
+        TextureName::OakLogTop,
+        TextureName::OakLogTop,
+        TextureName::OakLogSide,
+        TextureName::OakLogSide,
+        TextureName::OakLogSide,
+        TextureName::OakLogSide,
+        ],
         true
-    ),
-    add_block!(
-        BlockId::GrayTerracotta,
-        [TextureName::GrayTerracotta; 6],
-        true
-    ),
-    add_block!(
-        BlockId::LightGrayTerracotta,
-        [TextureName::LightGrayTerracotta; 6],
-        true
-    ),
-    add_block!(
-        BlockId::OrangeTerracotta,
-        [TextureName::OrangeTerracotta; 6],
-        true
-    ),
-    add_block!(
-        BlockId::RedTerracotta,
-        [TextureName::RedTerracotta; 6],
-        true
-    ),
-    add_block!(BlockId::Terracotta, [TextureName::Terracotta; 6], true),
-    add_block!(
-        BlockId::YellowTerracotta,
-        [TextureName::YellowTerracotta; 6],
-        true
-    ),
+    )
 ];
 
 type TextureUV = [f32; 2];
