@@ -71,14 +71,22 @@ impl Generator {
     }
 
     fn attempt_spawn_tree(&self, chunk: &mut Chunk) {
-        let x: usize = rand::random_range(2..30);
-        let y: usize = rand::random_range(2..30);
-        let z: usize = rand::random_range(2..30);
+        let max_tree_width = 2;
+        let max_tree_height = 10;
+
+        let x: usize = rand::random_range(max_tree_width..(CHUNK_SIZE - max_tree_width));
+        let y: usize = rand::random_range(0..(CHUNK_SIZE - max_tree_height));
+        let z: usize = rand::random_range(max_tree_width..(CHUNK_SIZE - max_tree_width));
+
+        let min_tree_stump_height = 2;
+        let max_tree_stump_height = 8;
 
         if chunk.get(x,y,z) == BlockId::Grass {
-            chunk.set(x,y+1,z, BlockId::RedSand);
-            chunk.set(x,y+2,z, BlockId::RedSand);
-            chunk.set(x,y+3,z, BlockId::RedSand);
+            let tree_stump_height = rand::random_range(min_tree_stump_height..max_tree_stump_height);
+
+            for dy in 1..tree_stump_height {
+                chunk.set(x,y+dy,z, BlockId::RedSand);
+            }
         }
     }
 
