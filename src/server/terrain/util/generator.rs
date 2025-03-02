@@ -62,6 +62,123 @@ impl Generator {
             let block = self.decorate_block(chunk, pos);
             chunk.set_unpadded(x, y, z, block);
         });
+
+        for _ in 0..self.params.tree.spawn_attempts_per_chunk {
+            self.attempt_spawn_tree(chunk);
+        }
+    }
+
+    fn attempt_spawn_tree(&self, chunk: &mut Chunk) {
+        let proposal = Self::propose_tree_blocks(self);
+
+        struct Bounds {
+            min: Vec3,
+            max: Vec3,
+        }
+
+        let proposal_bounds = proposal.iter().fold(
+            Bounds {
+                min: Vec3::ZERO,
+                max: Vec3::ZERO,
+            },
+            |bounds, (relative_pos, _block_id)| Bounds {
+                min: Vec3 {
+                    x: bounds.min.x.min(relative_pos.x),
+                    y: bounds.min.y.min(relative_pos.y),
+                    z: bounds.min.z.min(relative_pos.z),
+                },
+                max: Vec3 {
+                    x: bounds.max.x.max(relative_pos.x),
+                    y: bounds.max.y.max(relative_pos.y),
+                    z: bounds.max.z.max(relative_pos.z),
+                },
+            },
+        );
+
+        let sapling_x: usize = rand::random_range(
+            proposal_bounds.min.x.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.x),
+        ) as usize;
+        let sapling_y: usize = rand::random_range(
+            proposal_bounds.min.y.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.y),
+        ) as usize;
+        let sapling_z: usize = rand::random_range(
+            proposal_bounds.min.z.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.z),
+        ) as usize;
+
+        if chunk.get(sapling_x, sapling_y, sapling_z) != BlockId::Grass {
+            return;
+        }
+
+        let proposal_valid = proposal.iter().all(|(relative_pos, _block)| {
+            let Vec3 { x, y, z } = relative_pos;
+            Chunk::valid_padded(
+                (sapling_x as f32 + *x) as usize,
+                (sapling_y as f32 + *y) as usize,
+                (sapling_z as f32 + *z) as usize,
+            ) && chunk.get(
+                (sapling_x as f32 + *x) as usize,
+                (sapling_y as f32 + *y) as usize,
+                (sapling_z as f32 + *z) as usize,
+            ) == BlockId::Air
+        });
+
+        if !proposal_valid {
+            return;
+        }
+
+        proposal.iter().for_each(|(relative_pos, block_id)| {
+            let Vec3 { x, y, z } = relative_pos;
+            chunk.set(
+                (sapling_x as f32 + *x) as usize,
+                (sapling_y as f32 + *y) as usize,
+                (sapling_z as f32 + *z) as usize,
+                *block_id,
+            );
+        });
+    }
+
+    fn propose_tree_blocks(&self) -> Vec<(Vec3, BlockId)> {
+        let mut blocks = Vec::new();
+
+        let min_tree_stump_height = self.params.tree.min_stump_height;
+        let max_tree_stump_height = self.params.tree.max_stump_height;
+
+        let tree_stump_height = rand::random_range(min_tree_stump_height..max_tree_stump_height);
+
+        let bush_radius: i32 =
+            rand::random_range(self.params.tree.min_bush_radius..self.params.tree.max_bush_radius)
+                as i32;
+
+        for dx in -bush_radius..bush_radius {
+            for dz in -bush_radius..bush_radius {
+                for dy in -bush_radius..bush_radius {
+                    let distance_from_center = dx * dx + dy * dy + dz * dz;
+                    if distance_from_center < bush_radius * bush_radius {
+                        blocks.push((
+                            Vec3 {
+                                x: dx as f32,
+                                y: (tree_stump_height as i32 + dy) as f32,
+                                z: dz as f32,
+                            },
+                            BlockId::OakLeaves,
+                        ));
+                    }
+                }
+            }
+        }
+
+        for dy in 1..tree_stump_height {
+            blocks.push((
+                Vec3 {
+                    x: 0.0,
+                    y: dy as f32,
+                    z: 0.0,
+                },
+                BlockId::OakLog,
+            ));
+        }
+
+        blocks
     }
 
     fn decorate_block(&self, chunk: &Chunk, position: Vec3) -> BlockId {

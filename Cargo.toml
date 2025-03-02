@@ -14,7 +14,7 @@ iyes_perf_ui = { git = "https://github.com/IyesGames/iyes_perf_ui.git", branch =
 noise = "0.9.0"
 bevy_renet = { git = "https://github.com/CuddlyBunion341/renet.git" }
 bincode = "1.3.3"
-rand = "0.8.5"
+rand = {version = "0.9.0", features = ["small_rng"]}
 renet = { git = "https://github.com/CuddlyBunion341/renet.git" }
 serde = { version = "1.0.203", features = ["derive"] }
 serde-big-array = "0.5.1"

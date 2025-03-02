@@ -29,15 +29,11 @@ enum_from_u8! {
         Grass,
         Dirt,
         Stone,
+        CobbleStone,
         Bedrock,
-        RedSand,
-        BrownTerracotta,
-        CyanTerracotta,
-        GrayTerracotta,
-        LightGrayTerracotta,
-        OrangeTerracotta,
-        RedTerracotta,
-        Terracotta,
-        YellowTerracotta,
+        IronOre,
+        CoalOre,
+        OakLeaves,
+        OakLog
     }
 }
