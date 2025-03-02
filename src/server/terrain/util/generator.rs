@@ -1,3 +1,5 @@
+use std::cmp;
+
 use terrain_resources::{Generator, NoiseFunctionParams, TerrainGeneratorParams};
 
 use rand::prelude::*;
@@ -65,24 +67,44 @@ impl Generator {
             chunk.set_unpadded(x, y, z, block);
         });
 
-        for _ in 0..30 {
+        for _ in 0..100 {
             self.attempt_spawn_tree(chunk);
         }
     }
 
     fn attempt_spawn_tree(&self, chunk: &mut Chunk) {
-        let max_tree_width = 5;
-        let max_tree_height = 10;
+        let proposal = Self::propose_tree_blocks();
 
-        let sapling_x: usize = rand::random_range(max_tree_width..(CHUNK_SIZE - max_tree_width));
-        let sapling_y: usize = rand::random_range(0..(CHUNK_SIZE - max_tree_height));
-        let sapling_z: usize = rand::random_range(max_tree_width..(CHUNK_SIZE - max_tree_width));
+        struct Bounds {
+            min: Vec3,
+            max: Vec3
+        }
+
+        let proposal_bounds = proposal.iter().fold(Bounds {
+            min: Vec3::ZERO,
+            max: Vec3::ZERO,
+        }, |bounds, (relative_pos, _block_id)| {
+            Bounds {
+                min: Vec3 {
+                    x: bounds.min.x.min(relative_pos.x),
+                    y: bounds.min.y.min(relative_pos.y),
+                    z: bounds.min.z.min(relative_pos.z),
+                },
+                max: Vec3 {
+                    x: bounds.max.x.max(relative_pos.x),
+                    y: bounds.max.y.max(relative_pos.y),
+                    z: bounds.max.z.max(relative_pos.z),
+                }
+            }
+        });
+
+        let sapling_x: usize = rand::random_range(proposal_bounds.min.x.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.x)) as usize;
+        let sapling_y: usize = rand::random_range(proposal_bounds.min.y.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.y)) as usize;
+        let sapling_z: usize = rand::random_range(proposal_bounds.min.z.abs()..(CHUNK_SIZE as f32 - proposal_bounds.max.z)) as usize;
 
         if chunk.get(sapling_x, sapling_y, sapling_z) != BlockId::Grass {
             return;
         }
-
-        let proposal = Self::propose_tree_blocks();
 
         let proposal_valid = proposal.iter().all(|(relative_pos, _block)| {
             let Vec3 { x, y, z } = relative_pos;
