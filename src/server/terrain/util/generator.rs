@@ -114,9 +114,9 @@ impl Generator {
         let proposal_valid = proposal.iter().all(|(relative_pos, _block)| {
             let Vec3 { x, y, z } = relative_pos;
             Chunk::valid_padded(
-                sapling_x + *x as usize,
-                sapling_y + *y as usize,
-                sapling_z + *z as usize,
+                (sapling_x as f32 + *x) as usize,
+                (sapling_y as f32 + *y) as usize,
+                (sapling_z as f32 + *z) as usize,
             )
         });
 
@@ -127,9 +127,9 @@ impl Generator {
         proposal.iter().for_each(|(relative_pos, block_id)| {
             let Vec3 { x, y, z } = relative_pos;
             chunk.set(
-                sapling_x + *x as usize,
-                sapling_y + *y as usize,
-                sapling_z + *z as usize,
+                (sapling_x as f32 + *x) as usize,
+                (sapling_y as f32 + *y) as usize,
+                (sapling_z as f32 + *z) as usize,
                 *block_id,
             );
         });
@@ -138,27 +138,16 @@ impl Generator {
     fn propose_tree_blocks() -> Vec<(Vec3, BlockId)> {
         let mut blocks = Vec::new();
 
-        let min_tree_stump_height = 2;
-        let max_tree_stump_height = 8;
+        let min_tree_stump_height = 5;
+        let max_tree_stump_height = 12;
 
         let tree_stump_height = rand::random_range(min_tree_stump_height..max_tree_stump_height);
 
-        for dy in 1..tree_stump_height {
-            blocks.push((
-                Vec3 {
-                    x: 0.0,
-                    y: dy as f32,
-                    z: 0.0,
-                },
-                BlockId::OakLog,
-            ));
-        }
+        let bush_radius: i32 = 5;
 
-        let bush_size: i32 = 5;
-
-        for dx in -bush_size..bush_size {
-            for dz in -bush_size..bush_size {
-                for dy in -bush_size..bush_size {
+        for dx in -bush_radius..bush_radius {
+            for dz in -bush_radius..bush_radius {
+                for dy in -bush_radius..bush_radius {
                     if dx * dx + dy * dy + dz * dz <= 3 * 3 {
                         blocks.push((
                             Vec3 {
@@ -171,6 +160,17 @@ impl Generator {
                     }
                 }
             }
+        }
+
+        for dy in 1..tree_stump_height {
+            blocks.push((
+                Vec3 {
+                    x: 0.0,
+                    y: dy as f32,
+                    z: 0.0,
+                },
+                BlockId::OakLog,
+            ));
         }
 
         blocks
