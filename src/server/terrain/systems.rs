@@ -216,6 +216,12 @@ mod visualizer {
         }};
     }
 
+    macro_rules! add_slider_const {
+        ($ui: expr, $value:expr, $range:expr, $text:expr) => {{
+            $ui.add(egui::widgets::Slider::new($value, $range).text($text))
+        }}
+    }
+
     macro_rules! add_noise_sliders {
         ($ui:expr, $changed:expr, $params:expr) => {
             add_slider!($ui, $changed, &mut $params.octaves, 1..=8, "octaves");
@@ -297,10 +303,20 @@ mod visualizer {
                                     plot_ui.line(line_chart);
                                 });
                         })
-
-
-
                     });
+
+                    ui.group(|ui| {
+                        ui.vertical(|ui| {
+                            ui.label("Trees");
+
+                            add_slider_const!(ui, &mut generator.params.tree.spawn_attempts_per_chunk, 0..=1000, "spawn attempts");
+                            add_slider_const!(ui, &mut generator.params.tree.min_stump_height, 0..=20, "min_stump_height");
+                            add_slider_const!(ui, &mut generator.params.tree.max_stump_height, 0..=20, "max_stump_height");
+                            add_slider_const!(ui, &mut generator.params.tree.min_bush_radius, 0..=10, "min_bush_radius");
+                            add_slider_const!(ui, &mut generator.params.tree.max_bush_radius, 0..=10, "max_bush_radius");
+                        });
+                    });
+
                     for (texture_type, noise_texture) in noise_textures {
                         let texture_handle = noise_texture.texture.as_ref();
 

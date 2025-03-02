@@ -65,13 +65,13 @@ impl Generator {
             chunk.set_unpadded(x, y, z, block);
         });
 
-        for _ in 0..150 {
+        for _ in 0..self.params.tree.spawn_attempts_per_chunk {
             self.attempt_spawn_tree(chunk);
         }
     }
 
     fn attempt_spawn_tree(&self, chunk: &mut Chunk) {
-        let proposal = Self::propose_tree_blocks();
+        let proposal = Self::propose_tree_blocks(self);
 
         struct Bounds {
             min: Vec3,
@@ -139,15 +139,15 @@ impl Generator {
         });
     }
 
-    fn propose_tree_blocks() -> Vec<(Vec3, BlockId)> {
+    fn propose_tree_blocks(&self) -> Vec<(Vec3, BlockId)> {
         let mut blocks = Vec::new();
 
-        let min_tree_stump_height = 5;
-        let max_tree_stump_height = 12;
+        let min_tree_stump_height = self.params.tree.min_stump_height;
+        let max_tree_stump_height = self.params.tree.max_stump_height;
 
         let tree_stump_height = rand::random_range(min_tree_stump_height..max_tree_stump_height);
 
-        let bush_radius: i32 = rand::random_range(3..5);
+        let bush_radius: i32 = rand::random_range(self.params.tree.min_bush_radius..self.params.tree.max_bush_radius) as i32;
 
         for dx in -bush_radius..bush_radius {
             for dz in -bush_radius..bush_radius {
@@ -157,7 +157,7 @@ impl Generator {
                         blocks.push((
                             Vec3 {
                                 x: dx as f32,
-                                y: (tree_stump_height + dy) as f32,
+                                y: (tree_stump_height as i32 + dy) as f32,
                                 z: dz as f32,
                             },
                             BlockId::OakLeaves,

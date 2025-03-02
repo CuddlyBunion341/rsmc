@@ -59,6 +59,14 @@ pub struct NoiseFunctionParams {
     pub persistence: f64,
 }
 
+pub struct TreeParams {
+    pub spawn_attempts_per_chunk: u32,
+    pub min_stump_height: u32,
+    pub max_stump_height: u32,
+    pub min_bush_radius: u32,
+    pub max_bush_radius: u32,
+}
+
 impl Default for Generator {
     fn default() -> Self {
         Self::new(0)
@@ -70,6 +78,7 @@ pub struct TerrainGeneratorParams {
     pub height_adjust: HeightAdjustParams,
     pub density: DensityParams,
     pub cave: CaveParams,
+    pub tree: TreeParams
 }
 
 impl Default for TerrainGeneratorParams {
@@ -126,6 +135,13 @@ impl Default for TerrainGeneratorParams {
                 base_value: 0.0,
                 threshold: 0.25,
             },
+            tree: TreeParams {
+                spawn_attempts_per_chunk: 500,
+                min_stump_height: 2,
+                max_stump_height: 20,
+                min_bush_radius: 3,
+                max_bush_radius: 5,
+            }
         }
     }
 }
