@@ -117,7 +117,11 @@ impl Generator {
                 (sapling_x as f32 + *x) as usize,
                 (sapling_y as f32 + *y) as usize,
                 (sapling_z as f32 + *z) as usize,
-            )
+            ) && chunk.get(
+                (sapling_x as f32 + *x) as usize,
+                (sapling_y as f32 + *y) as usize,
+                (sapling_z as f32 + *z) as usize,
+            ) == BlockId::Air
         });
 
         if !proposal_valid {
