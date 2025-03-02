@@ -1,7 +1,5 @@
 use terrain_resources::{Generator, NoiseFunctionParams, TerrainGeneratorParams};
 
-use rand::prelude::*;
-
 use crate::prelude::*;
 
 macro_rules! for_each_chunk_coordinate {
