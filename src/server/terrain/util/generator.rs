@@ -65,7 +65,7 @@ impl Generator {
             chunk.set_unpadded(x, y, z, block);
         });
 
-        for _ in 0..100 {
+        for _ in 0..150 {
             self.attempt_spawn_tree(chunk);
         }
     }
@@ -143,12 +143,13 @@ impl Generator {
 
         let tree_stump_height = rand::random_range(min_tree_stump_height..max_tree_stump_height);
 
-        let bush_radius: i32 = 5;
+        let bush_radius: i32 = rand::random_range(3..5);
 
         for dx in -bush_radius..bush_radius {
             for dz in -bush_radius..bush_radius {
                 for dy in -bush_radius..bush_radius {
-                    if dx * dx + dy * dy + dz * dz <= 3 * 3 {
+                    let distance_from_center = dx * dx + dy * dy + dz * dz;
+                    if distance_from_center <= bush_radius * bush_radius - 1 {
                         blocks.push((
                             Vec3 {
                                 x: dx as f32,
