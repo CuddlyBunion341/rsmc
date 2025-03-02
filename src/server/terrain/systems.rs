@@ -219,7 +219,7 @@ mod visualizer {
     macro_rules! add_slider_const {
         ($ui: expr, $value:expr, $range:expr, $text:expr) => {{
             $ui.add(egui::widgets::Slider::new($value, $range).text($text))
-        }}
+        }};
     }
 
     macro_rules! add_noise_sliders {

@@ -147,7 +147,9 @@ impl Generator {
 
         let tree_stump_height = rand::random_range(min_tree_stump_height..max_tree_stump_height);
 
-        let bush_radius: i32 = rand::random_range(self.params.tree.min_bush_radius..self.params.tree.max_bush_radius) as i32;
+        let bush_radius: i32 =
+            rand::random_range(self.params.tree.min_bush_radius..self.params.tree.max_bush_radius)
+                as i32;
 
         for dx in -bush_radius..bush_radius {
             for dz in -bush_radius..bush_radius {

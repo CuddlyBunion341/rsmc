@@ -78,7 +78,7 @@ pub struct TerrainGeneratorParams {
     pub height_adjust: HeightAdjustParams,
     pub density: DensityParams,
     pub cave: CaveParams,
-    pub tree: TreeParams
+    pub tree: TreeParams,
 }
 
 impl Default for TerrainGeneratorParams {
@@ -141,7 +141,7 @@ impl Default for TerrainGeneratorParams {
                 max_stump_height: 20,
                 min_bush_radius: 3,
                 max_bush_radius: 5,
-            }
+            },
         }
     }
 }
