@@ -74,34 +74,79 @@ impl Generator {
         let max_tree_width = 5;
         let max_tree_height = 10;
 
-        let x: usize = rand::random_range(max_tree_width..(CHUNK_SIZE - max_tree_width));
-        let y: usize = rand::random_range(0..(CHUNK_SIZE - max_tree_height));
-        let z: usize = rand::random_range(max_tree_width..(CHUNK_SIZE - max_tree_width));
+        let sapling_x: usize = rand::random_range(max_tree_width..(CHUNK_SIZE - max_tree_width));
+        let sapling_y: usize = rand::random_range(0..(CHUNK_SIZE - max_tree_height));
+        let sapling_z: usize = rand::random_range(max_tree_width..(CHUNK_SIZE - max_tree_width));
+
+        if chunk.get(sapling_x, sapling_y, sapling_z) != BlockId::Grass {
+            return;
+        }
+
+        let proposal = Self::propose_tree_blocks();
+
+        let proposal_valid = proposal.iter().all(|(relative_pos, _block)| {
+            let Vec3 { x, y, z } = relative_pos;
+            Chunk::valid_padded(
+                sapling_x + *x as usize,
+                sapling_y + *y as usize,
+                sapling_z + *z as usize,
+            )
+        });
+
+        if !proposal_valid {
+            return;
+        }
+
+        proposal.iter().for_each(|(relative_pos, block_id)| {
+            let Vec3 { x, y, z } = relative_pos;
+            chunk.set(
+                sapling_x + *x as usize,
+                sapling_y + *y as usize,
+                sapling_z + *z as usize,
+                *block_id,
+            );
+        });
+    }
+
+    fn propose_tree_blocks() -> Vec<(Vec3, BlockId)> {
+        let mut blocks = Vec::new();
 
         let min_tree_stump_height = 2;
         let max_tree_stump_height = 8;
 
-        if chunk.get(x,y,z) != BlockId::Grass {
-            return;
-        }
-
         let tree_stump_height = rand::random_range(min_tree_stump_height..max_tree_stump_height);
 
         for dy in 1..tree_stump_height {
-            chunk.set(x,y+dy,z, BlockId::RedSand);
+            blocks.push((
+                Vec3 {
+                    x: 0.0,
+                    y: dy as f32,
+                    z: 0.0,
+                },
+                BlockId::RedSand,
+            ));
         }
 
-        let bush_size: i32 = 4;
+        let bush_size: i32 = 5;
 
         for dx in -bush_size..bush_size {
             for dz in -bush_size..bush_size {
                 for dy in -bush_size..bush_size {
                     if dx * dx + dy * dy + dz * dz <= 3 * 3 {
-                        chunk.set(( x as i32 +dx ) as usize,(y as i32 +dy) as usize,(z as i32+dz) as usize, BlockId::Terracotta);
+                        blocks.push((
+                            Vec3 {
+                                x: dx as f32,
+                                y: (tree_stump_height + dy) as f32,
+                                z: dz as f32,
+                            },
+                            BlockId::Terracotta,
+                        ));
                     }
                 }
             }
         }
+
+        blocks
     }
 
     fn decorate_block(&self, chunk: &Chunk, position: Vec3) -> BlockId {
