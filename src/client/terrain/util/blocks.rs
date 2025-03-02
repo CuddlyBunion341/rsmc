@@ -45,26 +45,33 @@ impl TextureManager {
     }
 
     fn get_texture_coordinates() -> Vec<(TextureName, (f32, f32))> {
-        let textures: [[TextureName; 4]; 4] = [
+        const ATLAS_WIDTH: usize = 4;
+        const ATLAS_HEIGHT: usize = 4;
+
+        let textures: [[TextureName; ATLAS_WIDTH]; ATLAS_HEIGHT] = [
             [ Stone, CobbleStone, GrassTop, OakLeaves ],
             [ IronOre, Sand, GrassSide, OakLogTop ],
             [ CoalOre, Bedrock, Dirt, OakLogSide ],
             [ Air, Air, Air, Air ]
         ];
 
-        let items: Vec<(TextureName, (f32, f32))> = textures.iter().enumerate().flat_map(|(row_index, row)| {
-            row.iter().enumerate().map(|(col_index, texture)| {
-                (
-                    texture,
+        let mut texture_positions = Vec::new();
+
+        for x in 0..ATLAS_WIDTH {
+            for y in 0..ATLAS_HEIGHT {
+                texture_positions.push(
                     (
-                        1.0 / 4.0 * (col_index as f32),
-                        1.0 / 4.0 * (row_index as f32),
+                        *textures.get(y).unwrap().get(x).unwrap(),
+                        (
+                            1.0 / 4.0 * (x as f32),
+                            1.0 / 4.0 * (y as f32),
+                        )
                     )
                 )
-            }).collect()
-        }).collect();
+            }
+        }
 
-        items
+        texture_positions
     }
 
     pub fn get_texture_uv(&self, name: TextureName) -> Option<&TextureUV> {
