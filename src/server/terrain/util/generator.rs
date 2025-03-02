@@ -71,7 +71,7 @@ impl Generator {
     }
 
     fn attempt_spawn_tree(&self, chunk: &mut Chunk) {
-        let max_tree_width = 2;
+        let max_tree_width = 5;
         let max_tree_height = 10;
 
         let x: usize = rand::random_range(max_tree_width..(CHUNK_SIZE - max_tree_width));
@@ -81,11 +81,25 @@ impl Generator {
         let min_tree_stump_height = 2;
         let max_tree_stump_height = 8;
 
-        if chunk.get(x,y,z) == BlockId::Grass {
-            let tree_stump_height = rand::random_range(min_tree_stump_height..max_tree_stump_height);
+        if chunk.get(x,y,z) != BlockId::Grass {
+            return;
+        }
 
-            for dy in 1..tree_stump_height {
-                chunk.set(x,y+dy,z, BlockId::RedSand);
+        let tree_stump_height = rand::random_range(min_tree_stump_height..max_tree_stump_height);
+
+        for dy in 1..tree_stump_height {
+            chunk.set(x,y+dy,z, BlockId::RedSand);
+        }
+
+        let bush_size: i32 = 4;
+
+        for dx in -bush_size..bush_size {
+            for dz in -bush_size..bush_size {
+                for dy in -bush_size..bush_size {
+                    if dx * dx + dy * dy + dz * dz <= 3 * 3 {
+                        chunk.set(( x as i32 +dx ) as usize,(y as i32 +dy) as usize,(z as i32+dz) as usize, BlockId::Terracotta);
+                    }
+                }
             }
         }
     }
