@@ -1,40 +1,34 @@
-use serde::{Deserialize, Serialize};
-
-macro_rules! enum_from_u8 {
-    ($name:ident { $( $variant:ident ),* $(,)? }) => {
-        #[repr(u8)]
-        #[derive(Debug, PartialEq, Copy, Clone, Deserialize, Serialize)]
-        pub enum $name {
-            $( $variant ),*
-        }
-
-        impl $name {
-            pub fn from_u8(value: u8) -> Option<$name> {
-                match value {
-                    $(x if x == $name::$variant as u8 => Some($name::$variant),)*
-                        _ => None,
-                }
-            }
-
-            pub fn to_u8(&self) -> u8 {
-                self.clone() as u8
-            }
-        }
-    };
+#[derive(Copy, Clone, PartialEq, Debug)]
+pub enum BlockId {
+    Air = 0,
+    Grass = 1,
+    Dirt = 2,
+    Stone = 3,
+    CobbleStone = 4,
+    Bedrock = 5,
+    IronOre = 6,
+    CoalOre = 7,
+    OakLeaves = 8,
+    OakLog = 9,
+    Tallgrass = 10
 }
 
-enum_from_u8! {
-    BlockId {
-        Air,
-        Grass,
-        Dirt,
-        Stone,
-        CobbleStone,
-        Bedrock,
-        IronOre,
-        CoalOre,
-        OakLeaves,
-        OakLog,
-        Tallgrass
+impl BlockId {
+    pub fn from_u8(index: u8) -> BlockId {
+        use BlockId::*;
+        match index {
+            0 => Air,
+            1 => Grass,
+            2 => Dirt,
+            3 => Stone,
+            4 => CobbleStone,
+            5 => Bedrock,
+            6 => IronOre,
+            7 => CoalOre,
+            8 => OakLeaves,
+            9 => OakLog,
+            10 => Tallgrass,
+            _ => panic!("Invalid block id")
+        }
     }
 }
