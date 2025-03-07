@@ -18,6 +18,53 @@ pub enum TextureName {
     Tallgrass
 }
 
+pub enum MeshRepresentation {
+    None,
+    Cube([TextureName; 6]),
+    Cross([TextureName; 2])
+}
+
+pub struct BlockProperties {
+    has_collider: bool,
+    mesh_representation: MeshRepresentation
+}
+
+impl BlockProperties {
+    pub fn new(has_collider: bool, mesh_representation: MeshRepresentation) {
+        BlockProperties {has_collider, mesh_representation}
+    } 
+} 
+
+impl BlockId {
+    use MeshRepresentation::*;
+
+    pub fn block_properties(&self) -> BlockProperties {
+        let touple = match self {
+            BlockId::Air => (true, None()),
+            BlockId::Grass => (true, Cube([GrassTop, Dirt, GrassSide, GrassSide, GrassSide, GrassSide])),
+            BlockId::Dirt => (true, Cube([Dirt; 6])),
+            BlockId::Stone => (true, Cube([Stone; 6])),
+            BlockId::CobbleStone => (true, Cube([CobbleStone; 6])),
+            BlockId::Bedrock => (true, Cube([Bedrock; 6])),
+            BlockId::IronOre => (true, Cube([IronOre; 6])),
+            BlockId::CoalOre => (true, Cube([CoalOre; 6])),
+            BlockId::OakLeaves => (true, Cube([OakLeaves; 6])),
+            BlockId::OakLog => (true, Cube([OakLogTop, OakLogTop, OakLogSide, OakLogSide, OakLogSide, OakLogSide])),
+            BlockId::Tallgrass => (true, Cross([Tallgrass, Tallgrass])),
+        };
+
+        BlockProperties {
+            has_collider: touple.0,
+            mesh_representation: touple.1
+        }
+    }
+
+    pub fn collect_all_texture_names() {
+      // TODO: implement
+    }
+}
+
+use bevy_inspector_egui::egui::panel::TopBottomSide;
 use TextureName::*;
 
 #[derive(Resource)]
@@ -95,39 +142,17 @@ macro_rules! add_block {
 }
 
 pub static BLOCKS: [Block; 11] = [
-    add_block!(BlockId::Air, [TextureName::Air; 6], false),
-    add_block!(
-        BlockId::Grass,
-        [
-            TextureName::GrassTop,
-            TextureName::Dirt,
-            TextureName::GrassSide,
-            TextureName::GrassSide,
-            TextureName::GrassSide,
-            TextureName::GrassSide,
-        ],
-        true
-    ),
-    add_block!(BlockId::Dirt, [TextureName::Dirt; 6], true),
-    add_block!(BlockId::Stone, [TextureName::Stone; 6], true),
-    add_block!(BlockId::CobbleStone, [TextureName::CobbleStone; 6], true),
-    add_block!(BlockId::Bedrock, [TextureName::Bedrock; 6], true),
-    add_block!(BlockId::IronOre, [TextureName::IronOre; 6], true),
-    add_block!(BlockId::CoalOre, [TextureName::CoalOre; 6], true),
-    add_block!(BlockId::OakLeaves, [TextureName::OakLeaves; 6], true),
-    add_block!(
-        BlockId::OakLog,
-        [
-            TextureName::OakLogTop,
-            TextureName::OakLogTop,
-            TextureName::OakLogSide,
-            TextureName::OakLogSide,
-            TextureName::OakLogSide,
-            TextureName::OakLogSide,
-        ],
-        true
-    ),
-    add_block!(BlockId::Tallgrass, [TextureName::Tallgrass; 6], true)
+    (Air, [Air; 6], false),
+    (Grass, [GrassTop, Dirt, GrassSide, GrassSide, GrassSide, GrassSide], true),
+    (Dirt, [Dirt; 6], true),
+    (Stone, [Stone; 6], true),
+    (CobbleStone, [CobbleStone; 6], true),
+    (Bedrock, [Bedrock; 6], true),
+    (IronOre, [IronOre; 6], true),
+    (CoalOre, [CoalOre; 6], true),
+    (OakLeaves, [OakLeaves; 6], true),
+    (OakLog, [OakLogTop, OakLogTop, OakLogSide, OakLogSide, OakLogSide, OakLogSide], true),
+    (Tallgrass, [Tallgrass; 6], true)
 ];
 
 type TextureUV = [f32; 2];
