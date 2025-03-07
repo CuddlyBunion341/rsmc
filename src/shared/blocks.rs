@@ -34,6 +34,7 @@ enum_from_u8! {
         IronOre,
         CoalOre,
         OakLeaves,
-        OakLog
+        OakLog,
+        Tallgrass
     }
 }

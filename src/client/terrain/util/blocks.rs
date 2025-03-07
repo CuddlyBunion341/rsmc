@@ -15,6 +15,7 @@ pub enum TextureName {
     OakLeaves,
     OakLogTop,
     OakLogSide,
+    Tallgrass
 }
 
 use TextureName::*;
@@ -55,7 +56,7 @@ impl TextureManager {
             [Stone, CobbleStone, GrassTop, OakLeaves],
             [IronOre, Sand, GrassSide, OakLogTop],
             [CoalOre, Bedrock, Dirt, OakLogSide],
-            [Air, Air, Air, Air],
+            [Tallgrass, Air, Air, Air],
         ];
 
         let mut texture_positions = Vec::new();
@@ -93,7 +94,7 @@ macro_rules! add_block {
     };
 }
 
-pub static BLOCKS: [Block; 10] = [
+pub static BLOCKS: [Block; 11] = [
     add_block!(BlockId::Air, [TextureName::Air; 6], false),
     add_block!(
         BlockId::Grass,
@@ -126,6 +127,7 @@ pub static BLOCKS: [Block; 10] = [
         ],
         true
     ),
+    add_block!(BlockId::Tallgrass, [TextureName::Tallgrass; 6], true)
 ];
 
 type TextureUV = [f32; 2];
