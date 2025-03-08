@@ -13,13 +13,19 @@ impl SpawnAreaLoaded {
 
 #[derive(Resource)]
 pub struct Mesher {
-    pub mesh_handles: HashMap<MeshRepresentation, Handle<Mesh>>
+    pub mesh_handles: HashMap<MeshRepresentation, Handle<Mesh>>,
+}
+
+impl Default for Mesher {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Mesher {
     pub fn new() -> Mesher {
         Mesher {
-            mesh_handles: HashMap::new()
+            mesh_handles: HashMap::new(),
         }
     }
 }
