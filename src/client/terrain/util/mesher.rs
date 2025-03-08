@@ -95,9 +95,8 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                 let block_id = chunk.get_unpadded(x, y, z);
 
                 match block_properties(block_id).mesh_representation {
-                    MeshRepresentation::None => continue,
                     MeshRepresentation::Cube(_) => {}
-                    MeshRepresentation::Cross(_) => continue,
+                    _ => continue,
                 }
 
                 fn update_mask(
@@ -108,11 +107,9 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                     y: usize,
                     z: usize,
                 ) {
-                    if let MeshRepresentation::Cube(_) =
-                        block_properties(chunk.get_unpadded(x, y, z)).mesh_representation
-                    {
-                    } else {
-                        *mask |= value;
+                    match block_properties(chunk.get_unpadded(x, y, z)).mesh_representation {
+                        MeshRepresentation::Cube(_) => {}
+                        _ => *mask |= value,
                     }
                 }
 
