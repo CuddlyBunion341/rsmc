@@ -308,12 +308,14 @@ mod visualizer {
                     ui.group(|ui| {
                         ui.vertical(|ui| {
                             ui.label("Trees");
-
                             add_slider_const!(ui, &mut generator.params.tree.spawn_attempts_per_chunk, 0..=1000, "spawn attempts");
                             add_slider_const!(ui, &mut generator.params.tree.min_stump_height, 0..=20, "min_stump_height");
                             add_slider_const!(ui, &mut generator.params.tree.max_stump_height, 0..=20, "max_stump_height");
                             add_slider_const!(ui, &mut generator.params.tree.min_bush_radius, 0..=10, "min_bush_radius");
                             add_slider_const!(ui, &mut generator.params.tree.max_bush_radius, 0..=10, "max_bush_radius");
+
+                            ui.label("Grass");
+                            add_slider_const!(ui, &mut generator.params.grass.spawn_attempts_per_chunk, 0..=3000, "spawn attempts");
                         });
                     });
 
