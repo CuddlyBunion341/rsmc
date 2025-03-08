@@ -1,4 +1,7 @@
-use terrain_util::{client_block::{block_properties, MeshRepresentation}, TextureManager};
+use terrain_util::{
+    client_block::{block_properties, MeshRepresentation},
+    TextureManager,
+};
 
 use crate::prelude::*;
 
@@ -105,7 +108,9 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                     y: usize,
                     z: usize,
                 ) {
-                    if let MeshRepresentation::Cube(_) = block_properties(chunk.get_unpadded(x, y, z)).mesh_representation {
+                    if let MeshRepresentation::Cube(_) =
+                        block_properties(chunk.get_unpadded(x, y, z)).mesh_representation
+                    {
                     } else {
                         *mask |= value;
                     }
