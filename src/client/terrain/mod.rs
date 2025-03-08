@@ -18,6 +18,7 @@ impl Plugin for TerrainPlugin {
         app.add_event::<terrain_events::ChunkMeshUpdateEvent>();
         app.add_event::<terrain_events::WorldRegenerateEvent>();
         app.add_systems(Startup, terrain_systems::populate_mesher_meshes);
+        app.add_systems(Startup, terrain_systems::prepare_mesher_materials);
         #[cfg(feature = "skip_terrain")]
         {
             app.insert_resource(terrain_resources::SpawnAreaLoaded(true));

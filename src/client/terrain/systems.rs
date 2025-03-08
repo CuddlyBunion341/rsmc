@@ -1,5 +1,6 @@
+use bevy::asset;
 use terrain_resources::Mesher;
-use terrain_util::{client_block::block_properties, instance_mesh_for_repr};
+use terrain_util::{client_block::block_properties, get_cross_block_positions, instance_mesh_for_repr};
 
 use crate::prelude::*;
 
@@ -16,6 +17,16 @@ pub fn populate_mesher_meshes(
             mesher.mesh_handles.insert(mesh_repr, handle);
         }
     });
+}
+
+pub fn prepare_mesher_materials(
+    mut mesher: ResMut<Mesher>,
+    materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
+) {
+    let texture_handle = obtain_texture_handle(&asset_server).clone();
+    let material_handle = create_transparent_material(texture_handle, materials);
+    mesher.transparent_material_handle = Some(material_handle);
 }
 
 pub fn generate_simple_ground_system(
@@ -80,6 +91,7 @@ pub fn handle_chunk_mesh_update_events(
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
     texture_manager: ResMut<terrain_util::TextureManager>,
+    mesher: Res<Mesher>
 ) {
     for event in chunk_mesh_update_events.read() {
         info!(
@@ -102,6 +114,7 @@ pub fn handle_chunk_mesh_update_events(
                     chunk,
                     &texture_manager,
                 );
+                add_cross_objects(&mut commands, &chunk, &mesher);
             }
             None => {
                 println!("No chunk found");
@@ -131,11 +144,49 @@ fn add_chunk_objects(
     }
 }
 
+fn add_cross_objects(
+    commands: &mut Commands,
+    chunk: &Chunk,
+    mesher: &Mesher,
+) {
+    let values = get_cross_block_positions(chunk);
+    for (mesh_repr, positions) in values {
+        let mesh_handle = mesher.mesh_handles.get(&mesh_repr).expect("Handle is not yet populated");
+        let material_handle = mesher.transparent_material_handle.clone().expect("Material has not yet been set");
+
+        for position in positions {
+            commands.spawn((
+                Mesh3d(mesh_handle.clone()),
+                MeshMaterial3d(material_handle.clone()),
+                Transform::from_xyz(
+                    chunk.position.x * CHUNK_SIZE as f32 + position.x,
+                    chunk.position.y * CHUNK_SIZE as f32 + position.y,
+                    chunk.position.z * CHUNK_SIZE as f32 + position.z
+                )
+            ));
+        }
+    }
+}
+
 fn create_chunk_mesh(
     chunk: &Chunk,
     texture_manager: &terrain_util::TextureManager,
 ) -> Option<Mesh> {
     terrain_util::create_chunk_mesh(chunk, texture_manager)
+}
+
+fn create_transparent_material(
+    texture_handle: Handle<Image>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) -> Handle<StandardMaterial> {
+    materials.add(StandardMaterial {
+        perceptual_roughness: 0.5,
+        reflectance: 0.0,
+        unlit: false,
+        specular_transmission: 0.0,
+        base_color_texture: Some(texture_handle),
+        ..default()
+    })
 }
 
 #[cfg(not(feature = "wireframe"))]

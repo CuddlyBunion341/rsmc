@@ -24,47 +24,40 @@ fn create_cross_geometry(
     textures: [TextureName; 2],
     texture_manager: &TextureManager,
 ) -> GeometryData {
-    let position = vec![];
-    let uv = vec![];
-    let normal = vec![];
-    let indices = vec![];
+    let mut position = vec![];
+    let mut uv = vec![];
+    let mut normal = vec![];
+    let mut indices = vec![];
 
-    // prepare face 1
+    let index_offset = 0;
 
     {
-        let uv = texture_manager
+        let face_verticies = cross_face_vertices(CrossFace::Face1);
+
+        let face_uv = texture_manager
             .get_texture_uv(textures[0])
             .expect("Texture is not present in manager");
-        // let face_uv = Block::get_block_face_uvs(block_id, face, texture_manager)
+
+
+        for vertex in face_verticies {
+            position.push([
+                vertex.position[0] * 0.5 + 0.5,
+                vertex.position[1] * 0.5 + 0.5,
+                vertex.position[2] * 0.5 + 0.5,
+            ]);
+
+            uv.push([
+                face_uv[0] + vertex.uv[0] * 0.25,
+                face_uv[1] + (1.0 - vertex.uv[1]) * 0.25,
+            ]);
+            normal.push(vertex.normal);
+        }
+
+        let offsets = [0, 1, 2, 2, 1, 3];
+        offsets.iter().for_each(|offset| {
+            indices.push(index_offset + offset);
+        });
     }
-
-    // prepare face 2
-
-    // if faces & (1 << i) == 0 {
-    //     return;
-    // }
-    //
-    // let face_vertices = face_vertices(*face);
-    // for vertex in face_vertices.iter() {
-    //     position.push([
-    //         vertex.position[0] * 0.5 + x + 0.5,
-    //         vertex.position[1] * 0.5 + y + 0.5,
-    //         vertex.position[2] * 0.5 + z + 0.5,
-    //     ]);
-    //
-    //     let block_uvs = Block::get_block_face_uvs(block_id, *face, texture_manager).unwrap();
-    //     uv.push([
-    //         block_uvs[0] + vertex.uv[0] * 0.25 - 0.001,
-    //         block_uvs[1] + (1.0 - vertex.uv[1]) * 0.25,
-    //     ]);
-    //     normal.push(vertex.normal);
-    // }
-    //
-    // let offsets = [0, 1, 2, 2, 1, 3];
-    // offsets.iter().for_each(|offset| {
-    //     indices.push(index_offset + offset);
-    // });
-    // index_offset += 4;
 
     GeometryData {
         position,
@@ -74,22 +67,26 @@ fn create_cross_geometry(
     }
 }
 
-pub fn get_cross_block_positions(chunk: &Chunk) -> HashMap<BlockId, Vec<Vec3>> {
-    let mut map: HashMap<BlockId, Vec<Vec3>> = HashMap::new();
+pub fn get_cross_block_positions(chunk: &Chunk) -> HashMap<MeshRepresentation, Vec<Vec3>> {
+    let mut map: HashMap<MeshRepresentation, Vec<Vec3>> = HashMap::new();
 
     for x in 0..CHUNK_SIZE {
         for y in 0..CHUNK_SIZE {
             for z in 0..CHUNK_SIZE {
                 let block_id = chunk.get(x, y, z);
                 let pos = Vec3::new(x as f32, y as f32, z as f32);
-                if let MeshRepresentation::Cross(_) = block_properties(block_id).mesh_representation
-                {
-                    match map.get_mut(&block_id) {
-                        Some(positions) => positions.push(pos),
-                        None => {
-                            map.insert(block_id, vec![pos]);
-                        }
-                    };
+                let mesh_repr = block_properties(block_id).mesh_representation;
+
+                match mesh_repr {
+                    MeshRepresentation::Cross(_) => {
+                        match map.get_mut(&mesh_repr) {
+                            Some(positions) => positions.push(pos),
+                            None => {
+                                map.insert(mesh_repr, vec![pos]);
+                            }
+                        };
+                    }
+                    _ => {}
                 }
             }
         }
@@ -228,9 +225,9 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
 
                 geometry_data.indices.extend(
                     cube_data
-                        .indices
-                        .iter()
-                        .map(|i| i + geometry_data.position.len() as u32),
+                    .indices
+                    .iter()
+                    .map(|i| i + geometry_data.position.len() as u32),
                 );
                 geometry_data.position.extend(cube_data.position);
                 geometry_data.uv.extend(cube_data.uv);
@@ -250,6 +247,12 @@ pub enum CubeFace {
     Left,
     Back,
     Forward,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum CrossFace {
+    Face1,
+    Face2
 }
 
 const CUBE_FACES: [CubeFace; 6] = [
@@ -312,6 +315,24 @@ fn face_vertices(face_index: CubeFace) -> [Vertex; 4] {
             Vertex{ position: [1.0, -1.0, 1.0], normal: [0.0, 0.0, 1.0], uv: [1.0, 0.0] },
             Vertex{ position: [-1.0, 1.0, 1.0], normal: [0.0, 0.0, 1.0], uv: [0.0, 1.0] },
             Vertex{ position: [1.0, 1.0, 1.0], normal: [0.0, 0.0, 1.0], uv: [1.0, 1.0] }
+        ],
+    }
+}
+
+#[rustfmt::skip]
+fn cross_face_vertices(face: CrossFace) -> [Vertex; 4] {
+    match face {
+        CrossFace::Face1 => [
+            Vertex{ position: [-1.0,  1.0, -1.0], normal: [0.0, 0.0, 0.0], uv: [0.0, 0.0] },
+            Vertex{ position: [ 1.0,  1.0,  1.0], normal: [0.0, 0.0, 0.0], uv: [1.0, 0.0] },
+            Vertex{ position: [ 1.0, -1.0,  1.0], normal: [0.0, 0.0, 0.0], uv: [1.0, 1.0] },
+            Vertex{ position: [-1.0,  1.0, -1.0], normal: [0.0, 0.0, 0.0], uv: [0.0, 1.0] },
+        ],
+        CrossFace::Face2 => [
+            Vertex{ position: [-1.0,  1.0,  1.0], normal: [0.0, 0.0, 0.0], uv: [0.0, 0.0] },
+            Vertex{ position: [ 1.0,  1.0, -1.0], normal: [0.0, 0.0, 0.0], uv: [1.0, 0.0] },
+            Vertex{ position: [ 1.0, -1.0,  1.0], normal: [0.0, 0.0, 0.0], uv: [1.0, 1.0] },
+            Vertex{ position: [-1.0, -1.0,  1.0], normal: [0.0, 0.0, 0.0], uv: [0.0, 1.0] },
         ],
     }
 }
