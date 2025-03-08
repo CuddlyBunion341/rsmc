@@ -1,3 +1,5 @@
+use terrain_util::client_block::block_properties;
+
 use crate::prelude::*;
 
 static COLLIDER_GRID_SIZE: u32 = 4;
@@ -56,7 +58,7 @@ pub fn handle_collider_update_events_system(
 
             match block {
                 Some(block) => {
-                    if block != BlockId::Air {
+                    if block_properties(block).has_collider {
                         transform.translation = collider_position + COLLIDER_CUBOID_WIDTH / 2.0;
                     } else {
                         transform.translation = COLLIDER_RESTING_POSITION;
@@ -133,7 +135,7 @@ mod tests {
             Vec3::new(1.0, 1.0, 1.0),
         );
         resource.insert_chunks(chunks);
-        resource.set_block(
+        resource.update_block(
             Vec3 {
                 x: 6.0,
                 y: 7.0,

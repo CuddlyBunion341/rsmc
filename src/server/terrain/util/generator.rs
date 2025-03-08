@@ -66,6 +66,21 @@ impl Generator {
         for _ in 0..self.params.tree.spawn_attempts_per_chunk {
             self.attempt_spawn_tree(chunk);
         }
+
+        for _ in 0..self.params.grass.spawn_attempts_per_chunk {
+            self.attempt_spawn_grass(chunk);
+        }
+    }
+
+    fn attempt_spawn_grass(&self, chunk: &mut Chunk) {
+        let chunk_range = 0..CHUNK_SIZE;
+        let x = rand::random_range(chunk_range.clone());
+        let y = rand::random_range(0..(CHUNK_SIZE - 1));
+        let z = rand::random_range(chunk_range.clone());
+
+        if chunk.get(x, y, z) == BlockId::Grass {
+            chunk.set(x, y + 1, z, BlockId::Tallgrass);
+        }
     }
 
     fn attempt_spawn_tree(&self, chunk: &mut Chunk) {
@@ -187,6 +202,7 @@ impl Generator {
         let z = position.z as usize;
 
         let block = chunk.get_unpadded(x, y, z);
+
         if block == BlockId::Air {
             return block;
         }
