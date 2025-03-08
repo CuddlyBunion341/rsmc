@@ -18,39 +18,45 @@ pub enum TextureName {
     Tallgrass
 }
 
-pub enum MeshRepresentation {
-    None,
-    Cube([TextureName; 6]),
-    Cross([TextureName; 2])
-}
+mod client_block {
+    use rsmc::BlockId;
 
-pub struct BlockProperties {
-    has_collider: bool,
-    mesh_representation: MeshRepresentation
-}
+    use super::TextureName;
+    use super::TextureName::*;
+    use BlockId::*;
 
-impl BlockProperties {
-    pub fn new(has_collider: bool, mesh_representation: MeshRepresentation) {
-        BlockProperties {has_collider, mesh_representation}
-    } 
-} 
+    pub enum MeshRepresentation {
+        None,
+        Cube([TextureName; 6]),
+        Cross([TextureName; 2])
+    }
 
-impl BlockId {
     use MeshRepresentation::*;
 
-    pub fn block_properties(&self) -> BlockProperties {
+    pub struct BlockProperties {
+        pub has_collider: bool,
+        pub mesh_representation: MeshRepresentation
+    }
+
+    impl BlockProperties {
+        pub fn new(has_collider: bool, mesh_representation: MeshRepresentation) {
+            BlockProperties {has_collider, mesh_representation}
+        } 
+    } 
+
+    pub fn block_properties(block_id: BlockId) -> BlockProperties {
         let touple = match self {
-            BlockId::Air => (true, None()),
-            BlockId::Grass => (true, Cube([GrassTop, Dirt, GrassSide, GrassSide, GrassSide, GrassSide])),
-            BlockId::Dirt => (true, Cube([Dirt; 6])),
-            BlockId::Stone => (true, Cube([Stone; 6])),
-            BlockId::CobbleStone => (true, Cube([CobbleStone; 6])),
-            BlockId::Bedrock => (true, Cube([Bedrock; 6])),
-            BlockId::IronOre => (true, Cube([IronOre; 6])),
-            BlockId::CoalOre => (true, Cube([CoalOre; 6])),
-            BlockId::OakLeaves => (true, Cube([OakLeaves; 6])),
-            BlockId::OakLog => (true, Cube([OakLogTop, OakLogTop, OakLogSide, OakLogSide, OakLogSide, OakLogSide])),
-            BlockId::Tallgrass => (true, Cross([Tallgrass, Tallgrass])),
+            Air => (true, None()),
+            Grass => (true, Cube([GrassTop, Dirt, GrassSide, GrassSide, GrassSide, GrassSide])),
+            Dirt => (true, Cube([Dirt; 6])),
+            Stone => (true, Cube([Stone; 6])),
+            CobbleStone => (true, Cube([CobbleStone; 6])),
+            Bedrock => (true, Cube([Bedrock; 6])),
+            IronOre => (true, Cube([IronOre; 6])),
+            CoalOre => (true, Cube([CoalOre; 6])),
+            OakLeaves => (true, Cube([OakLeaves; 6])),
+            OakLog => (true, Cube([OakLogTop, OakLogTop, OakLogSide, OakLogSide, OakLogSide, OakLogSide])),
+            Tallgrass => (true, Cross([Tallgrass, Tallgrass])),
         };
 
         BlockProperties {
@@ -59,12 +65,22 @@ impl BlockId {
         }
     }
 
-    pub fn collect_all_texture_names() {
-      // TODO: implement
+    pub fn collect_all_texture_names() -> Vec<TextureName> {
+        BlockId::values().iter().map(|block_id| {
+            let properties = block_properties(block_id);
+            let mesh: MeshRepresentation = properties.mesh_representation;
+
+            match mesh {
+                MeshRepresentation::None => vec![],
+                MeshRepresentation::Cube(textures) => Vec::from(textures),
+                MeshRepresentation::Cross(textures) => Vec::from(textures),            
+            }
+        }).flatten()
     }
 }
 
 use bevy_inspector_egui::egui::panel::TopBottomSide;
+use client_block::block_properties;
 use TextureName::*;
 
 #[derive(Resource)]
@@ -106,18 +122,18 @@ impl TextureManager {
             [Tallgrass, Air, Air, Air],
         ];
 
-        let mut texture_positions = Vec::new();
+            let mut texture_positions = Vec::new();
 
-        for x in 0..ATLAS_WIDTH {
-            for y in 0..ATLAS_HEIGHT {
-                texture_positions.push((
-                    *textures.get(y).unwrap().get(x).unwrap(),
-                    (1.0 / 4.0 * (x as f32), 1.0 / 4.0 * (y as f32)),
-                ))
+            for x in 0..ATLAS_WIDTH {
+                for y in 0..ATLAS_HEIGHT {
+                    texture_positions.push((
+                            *textures.get(y).unwrap().get(x).unwrap(),
+                            (1.0 / 4.0 * (x as f32), 1.0 / 4.0 * (y as f32)),
+                    ))
+                }
             }
-        }
 
-        texture_positions
+            texture_positions
     }
 
     pub fn get_texture_uv(&self, name: TextureName) -> Option<&TextureUV> {
@@ -141,20 +157,6 @@ macro_rules! add_block {
     };
 }
 
-pub static BLOCKS: [Block; 11] = [
-    (Air, [Air; 6], false),
-    (Grass, [GrassTop, Dirt, GrassSide, GrassSide, GrassSide, GrassSide], true),
-    (Dirt, [Dirt; 6], true),
-    (Stone, [Stone; 6], true),
-    (CobbleStone, [CobbleStone; 6], true),
-    (Bedrock, [Bedrock; 6], true),
-    (IronOre, [IronOre; 6], true),
-    (CoalOre, [CoalOre; 6], true),
-    (OakLeaves, [OakLeaves; 6], true),
-    (OakLog, [OakLogTop, OakLogTop, OakLogSide, OakLogSide, OakLogSide, OakLogSide], true),
-    (Tallgrass, [Tallgrass; 6], true)
-];
-
 type TextureUV = [f32; 2];
 
 impl Block {
@@ -163,8 +165,18 @@ impl Block {
         face: CubeFace,
         texture_manager: &TextureManager,
     ) -> Option<[f32; 2]> {
-        let block = &BLOCKS[block_id as usize];
-        let texture_name = block.texture_names[face as usize];
-        texture_manager.get_texture_uv(texture_name).copied()
+        let properties = block_properties(block_id);
+        let mesh = properties.mesh_representation;
+
+        let texture_option: Option<TextureName> = match mesh {
+            client_block::MeshRepresentation::None => None(),
+            client_block::MeshRepresentation::Cube(textures) => Some(textures[face as usize]),
+            client_block::MeshRepresentation::Cross(textures) => Some(textures[face as usize])
+        };
+
+        match texture_option {
+            Some(texture_name) => Some(texture_manager.get_texture_uv(texture_name).copied()),
+            None() => None()
+        }
     }
 }
