@@ -31,8 +31,7 @@ fn create_cross_geometry(
 
     let mut index_offset = 0;
 
-    // let  cross_faces = [CrossFace::Face1, CrossFace::Face2];
-    let  cross_faces = [CrossFace::Face1];
+    let cross_faces = [CrossFace::Face1, CrossFace::Face2];
 
     cross_faces.iter().for_each(|cross_face| {
         let face_verticies = cross_face_vertices(*cross_face);
@@ -226,9 +225,9 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
 
                 geometry_data.indices.extend(
                     cube_data
-                    .indices
-                    .iter()
-                    .map(|i| i + geometry_data.position.len() as u32),
+                        .indices
+                        .iter()
+                        .map(|i| i + geometry_data.position.len() as u32),
                 );
                 geometry_data.position.extend(cube_data.position);
                 geometry_data.uv.extend(cube_data.uv);
