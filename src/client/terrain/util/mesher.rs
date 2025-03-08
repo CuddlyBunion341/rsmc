@@ -323,16 +323,16 @@ fn face_vertices(face_index: CubeFace) -> [Vertex; 4] {
 fn cross_face_vertices(face: CrossFace) -> [Vertex; 4] {
     match face {
         CrossFace::Face1 => [
-            Vertex{ position: [-1.0,  1.0, -1.0], normal: [0.7071, 0.0, -0.7071], uv: [0.0, 0.0] },
-            Vertex{ position: [ 1.0,  1.0,  1.0], normal: [0.7071, 0.0, -0.7071], uv: [1.0, 0.0] },
-            Vertex{ position: [ 1.0, -1.0,  1.0], normal: [0.7071, 0.0, -0.7071], uv: [1.0, 1.0] },
-            Vertex{ position: [-1.0, -1.0, -1.0], normal: [0.7071, 0.0, -0.7071], uv: [0.0, 1.0] },
+            Vertex{ position: [-1.0,  1.0, -1.0], normal: [FRAC_1_SQRT_2, 0.0, -FRAC_1_SQRT_2], uv: [0.0, 0.0] },
+            Vertex{ position: [ 1.0,  1.0,  1.0], normal: [FRAC_1_SQRT_2, 0.0, -FRAC_1_SQRT_2], uv: [1.0, 0.0] },
+            Vertex{ position: [ 1.0, -1.0,  1.0], normal: [FRAC_1_SQRT_2, 0.0, -FRAC_1_SQRT_2], uv: [1.0, 1.0] },
+            Vertex{ position: [-1.0, -1.0, -1.0], normal: [FRAC_1_SQRT_2, 0.0, -FRAC_1_SQRT_2], uv: [0.0, 1.0] },
         ],
         CrossFace::Face2 => [
-            Vertex{ position: [-1.0,  1.0,  1.0], normal: [-0.7071, 0.0, -0.7071], uv: [0.0, 0.0] },
-            Vertex{ position: [ 1.0,  1.0, -1.0], normal: [-0.7071, 0.0, -0.7071], uv: [1.0, 0.0] },
-            Vertex{ position: [ 1.0, -1.0, -1.0], normal: [-0.7071, 0.0, -0.7071], uv: [1.0, 1.0] },
-            Vertex{ position: [-1.0, -1.0,  1.0], normal: [-0.7071, 0.0, -0.7071], uv: [0.0, 1.0] },
+            Vertex{ position: [-1.0,  1.0,  1.0], normal: [-FRAC_1_SQRT_2, 0.0, -FRAC_1_SQRT_2], uv: [0.0, 0.0] },
+            Vertex{ position: [ 1.0,  1.0, -1.0], normal: [-FRAC_1_SQRT_2, 0.0, -FRAC_1_SQRT_2], uv: [1.0, 0.0] },
+            Vertex{ position: [ 1.0, -1.0, -1.0], normal: [-FRAC_1_SQRT_2, 0.0, -FRAC_1_SQRT_2], uv: [1.0, 1.0] },
+            Vertex{ position: [-1.0, -1.0,  1.0], normal: [-FRAC_1_SQRT_2, 0.0, -FRAC_1_SQRT_2], uv: [0.0, 1.0] },
         ],
     }
 }
