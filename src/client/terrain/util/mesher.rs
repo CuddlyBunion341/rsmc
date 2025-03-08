@@ -1,8 +1,3 @@
-use terrain_util::{
-    client_block::{block_properties, MeshRepresentation},
-    TextureManager, TextureName,
-};
-
 use crate::prelude::*;
 
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {

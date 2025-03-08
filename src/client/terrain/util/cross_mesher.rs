@@ -1,5 +1,6 @@
 use terrain_util::{
-    client_block::{block_properties, MeshRepresentation}, create_cube_mesh_from_data, GeometryData, TextureManager, TextureName, Vertex
+    client_block::{block_properties, MeshRepresentation},
+    create_cube_mesh_from_data, GeometryData, TextureManager, TextureName, Vertex,
 };
 
 use crate::prelude::*;
