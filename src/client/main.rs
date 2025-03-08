@@ -5,6 +5,7 @@ pub mod prelude;
 mod chat;
 mod collider;
 mod gui;
+mod materials;
 mod networking;
 mod player;
 mod remote_player;
@@ -13,6 +14,7 @@ mod states;
 mod terrain;
 
 use bevy_flair::FlairPlugin;
+use materials::CustomMaterial;
 use scene::setup_scene;
 
 #[cfg(feature = "wireframe")]
@@ -49,6 +51,7 @@ fn main() {
     let mut app = App::new();
     app.add_plugins((
         default_plugins,
+        MaterialPlugin::<CustomMaterial>::default(),
         FlairPlugin,
         #[cfg(feature = "wireframe")]
         wireframe_config::wireframe_plugin(),

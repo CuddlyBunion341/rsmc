@@ -44,6 +44,19 @@ impl Chunk {
         self.set_unpadded(x + 1, y + 1, z + 1, value);
     }
 
+    pub fn update(&mut self, x: usize, y: usize, z: usize, value: BlockId) {
+        if Self::valid_padded(x, y, z) {
+            self.set(x, y, z, value);
+        }
+
+        if !value.supports_grass()
+            && Self::valid_padded(x, y + 1, z)
+            && self.get(x, y + 1, z) == BlockId::Tallgrass
+        {
+            self.set(x, y + 1, z, BlockId::Air);
+        }
+    }
+
     pub fn set_unpadded(&mut self, x: usize, y: usize, z: usize, value: BlockId) {
         self.data[Self::index(x, y, z)] = value;
     }
@@ -155,7 +168,7 @@ impl ChunkManager {
         self.chunks.get_mut(&[x as i32, y as i32, z as i32])
     }
 
-    pub fn set_block(&mut self, position: Vec3, block: BlockId) {
+    pub fn update_block(&mut self, position: Vec3, block: BlockId) {
         match self.chunk_from_selection(position) {
             Some(chunk) => {
                 let chunk_position = Vec3::new(
@@ -164,7 +177,7 @@ impl ChunkManager {
                     chunk.position[2] * CHUNK_SIZE as f32,
                 );
                 let local_position = (position - chunk_position).floor();
-                chunk.set(
+                chunk.update(
                     local_position.x as usize,
                     local_position.y as usize,
                     local_position.z as usize,
@@ -280,7 +293,7 @@ mod tests {
         let block_position = Vec3::new(1.0, 1.0, 1.0);
         let block_id = BlockId::Stone;
 
-        chunk_manager.set_block(block_position, block_id);
+        chunk_manager.update_block(block_position, block_id);
         let retrieved_block = chunk_manager.get_block(block_position).unwrap();
         assert_eq!(retrieved_block, block_id);
     }
