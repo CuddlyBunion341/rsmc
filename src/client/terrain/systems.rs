@@ -166,6 +166,13 @@ fn add_cross_objects(commands: &mut Commands, chunk: &Chunk, mesher: &Mesher) {
                     chunk.position.y * CHUNK_SIZE as f32 + position.y,
                     chunk.position.z * CHUNK_SIZE as f32 + position.z,
                 ),
+                terrain_components::ChunkMesh {
+                    key: [
+                        chunk.position.x as i32,
+                        chunk.position.y as i32,
+                        chunk.position.z as i32,
+                    ],
+                },
             ));
         }
     }
