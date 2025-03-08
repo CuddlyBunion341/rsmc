@@ -18,7 +18,7 @@ pub enum TextureName {
     Tallgrass,
 }
 
-mod client_block {
+pub mod client_block {
     use super::TextureName;
     use rsmc::BlockId;
 
@@ -39,7 +39,7 @@ mod client_block {
         use TextureName::*;
 
         let touple = match block_id {
-            BlockId::Air => (true, None),
+            BlockId::Air => (false, None),
             BlockId::Grass => (
                 true,
                 Cube([GrassTop, Dirt, GrassSide, GrassSide, GrassSide, GrassSide]),
@@ -57,7 +57,7 @@ mod client_block {
                     OakLogTop, OakLogTop, OakLogSide, OakLogSide, OakLogSide, OakLogSide,
                 ]),
             ),
-            BlockId::Tallgrass => (true, Cross([Tallgrass, Tallgrass])),
+            BlockId::Tallgrass => (false, Cross([Tallgrass, Tallgrass])),
         };
 
         BlockProperties {

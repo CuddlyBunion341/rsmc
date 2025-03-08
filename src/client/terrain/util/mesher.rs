@@ -1,4 +1,4 @@
-use terrain_util::TextureManager;
+use terrain_util::{client_block::{block_properties, MeshRepresentation}, TextureManager};
 
 use crate::prelude::*;
 
@@ -91,8 +91,10 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
             for z in 1..CHUNK_SIZE + 1 {
                 let block_id = chunk.get_unpadded(x, y, z);
 
-                if block_id == BlockId::Air {
-                    continue;
+                match block_properties(block_id).mesh_representation {
+                    MeshRepresentation::None => continue,
+                    MeshRepresentation::Cube(_) => {}
+                    MeshRepresentation::Cross(_) => continue,
                 }
 
                 fn update_mask(

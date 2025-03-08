@@ -202,6 +202,7 @@ impl Generator {
         let z = position.z as usize;
 
         let block = chunk.get_unpadded(x, y, z);
+
         if block == BlockId::Air {
             return block;
         }

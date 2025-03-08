@@ -1,3 +1,5 @@
+use terrain_util::client_block::block_properties;
+
 use crate::prelude::*;
 
 static COLLIDER_GRID_SIZE: u32 = 4;
@@ -56,7 +58,7 @@ pub fn handle_collider_update_events_system(
 
             match block {
                 Some(block) => {
-                    if block != BlockId::Air {
+                    if block_properties(block).has_collider {
                         transform.translation = collider_position + COLLIDER_CUBOID_WIDTH / 2.0;
                     } else {
                         transform.translation = COLLIDER_RESTING_POSITION;
