@@ -4,9 +4,7 @@ use terrain_util::{
 };
 
 use crate::{
-    materials::{
-        create_chunk_material, create_custom_material, create_transparent_material, CustomMaterial,
-    },
+    materials::{create_custom_material, create_transparent_material, CustomMaterial},
     prelude::*,
 };
 
@@ -131,15 +129,15 @@ pub fn handle_chunk_mesh_update_events(
 
 fn add_chunk_objects(
     commands: &mut Commands,
-    asset_server: Res<AssetServer>,
-    meshes: ResMut<Assets<Mesh>>,
-    materials: ResMut<Assets<CustomMaterial>>,
+    asset_server: &Res<AssetServer>,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<CustomMaterial>>,
     chunk: &Chunk,
     texture_manager: &terrain_util::TextureManager,
 ) {
     if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
         let texture_handle = obtain_texture_handle(&asset_server).clone();
-        let material = create_custom_material(asset_server, texture_handle, materials);
+        let material = create_custom_material(texture_handle, materials);
         spawn_chunk(commands, meshes, material, mesh, chunk);
     }
 }
@@ -190,7 +188,7 @@ fn obtain_texture_handle(asset_server: &Res<AssetServer>) -> Handle<Image> {
 
 fn spawn_chunk(
     commands: &mut Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
+    meshes: &mut ResMut<Assets<Mesh>>,
     material: Handle<CustomMaterial>,
     mesh: Mesh,
     chunk: &Chunk,
