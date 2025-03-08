@@ -183,7 +183,7 @@ fn create_transparent_material(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) -> Handle<StandardMaterial> {
     materials.add(StandardMaterial {
-        perceptual_roughness: 0.5,
+        perceptual_roughness: 1.0,
         double_sided: true,
         cull_mode: None,
         reflectance: 0.0,
