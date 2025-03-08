@@ -59,7 +59,7 @@ pub fn generate_world_system(
     mut client: ResMut<RenetClient>,
     mut chunk_manager: ResMut<ChunkManager>,
 ) {
-    let render_distance = Vec3::new(4.0, 4.0, 4.0);
+    let render_distance = Vec3::new(1.0, 1.0, 1.0);
 
     info!("Sending chunk requests for chunks");
 
@@ -184,9 +184,11 @@ fn create_transparent_material(
 ) -> Handle<StandardMaterial> {
     materials.add(StandardMaterial {
         perceptual_roughness: 0.5,
+        double_sided: true,
         reflectance: 0.0,
         unlit: false,
         specular_transmission: 0.0,
+        alpha_mode: AlphaMode::Mask(1.0),
         base_color_texture: Some(texture_handle),
         ..default()
     })
