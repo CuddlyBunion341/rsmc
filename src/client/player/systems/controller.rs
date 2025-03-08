@@ -1,3 +1,5 @@
+use bevy::core_pipeline::prepass::DepthPrepass;
+
 use crate::prelude::*;
 
 #[cfg(feature = "skip_terrain")]
@@ -31,6 +33,7 @@ pub fn setup_player_camera(mut commands: Commands) {
             logical_entity: Entity::from_raw(0),
         },
         player_components::PlayerCamera,
+        DepthPrepass
     ));
 }
 
