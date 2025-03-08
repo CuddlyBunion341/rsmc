@@ -59,7 +59,7 @@ pub fn generate_world_system(
     mut client: ResMut<RenetClient>,
     mut chunk_manager: ResMut<ChunkManager>,
 ) {
-    let render_distance = Vec3::new(1.0, 1.0, 1.0);
+    let render_distance = Vec3::new(4.0, 4.0, 4.0);
 
     info!("Sending chunk requests for chunks");
 
