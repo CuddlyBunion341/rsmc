@@ -105,7 +105,8 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                     y: usize,
                     z: usize,
                 ) {
-                    if chunk.get_unpadded(x, y, z) == BlockId::Air {
+                    if let MeshRepresentation::Cube(_) = block_properties(chunk.get_unpadded(x, y, z)).mesh_representation {
+                    } else {
                         *mask |= value;
                     }
                 }
