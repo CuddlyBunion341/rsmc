@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Serialize, Deserialize, Hash)]
 pub enum BlockId {
     Air,
     Grass,

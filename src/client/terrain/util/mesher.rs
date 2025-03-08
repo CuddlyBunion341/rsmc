@@ -5,6 +5,29 @@ use terrain_util::{
 
 use crate::prelude::*;
 
+pub fn get_cross_block_positions(chunk: &Chunk) -> HashMap<BlockId, Vec<Vec3>> {
+    let mut map: HashMap<BlockId, Vec<Vec3>> = HashMap::new();
+
+    for x in 0..CHUNK_SIZE {
+        for y in 0..CHUNK_SIZE {
+            for z in 0..CHUNK_SIZE {
+                let block_id = chunk.get(x,y,z);
+                let pos = Vec3::new(x as f32, y as f32, z as f32);
+                if let MeshRepresentation::Cross(_) = block_properties(block_id).mesh_representation {
+                    match map.get_mut(&block_id) {
+                        Some(positions) => positions.push(pos),
+                        None => {
+                            map.insert(block_id, vec![pos]);
+                        }
+                    };
+                }
+            }
+        }
+    }
+
+    map
+}
+
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
     let GeometryData {
         position,
