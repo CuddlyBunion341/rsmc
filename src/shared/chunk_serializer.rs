@@ -12,7 +12,6 @@ impl Serialize for Chunk {
     where
         S: serde::Serializer,
     {
-        // let data_as_u8: Vec<u8> = self.data.iter().map(|block_id| *block_id.into()).collect();
         let data_as_u8: Vec<u8> = self
             .data
             .iter()
