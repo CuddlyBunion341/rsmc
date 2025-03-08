@@ -148,8 +148,8 @@ impl Default for TerrainGeneratorParams {
                 max_bush_radius: 5,
             },
             grass: GrassParams {
-                spawn_attempts_per_chunk: 1200
-            }
+                spawn_attempts_per_chunk: 1200,
+            },
         }
     }
 }

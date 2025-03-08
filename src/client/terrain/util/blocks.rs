@@ -20,10 +20,7 @@ pub enum TextureName {
 
 mod client_block {
     use rsmc::BlockId;
-
     use super::TextureName;
-    use super::TextureName::*;
-    use BlockId::*;
 
     pub enum MeshRepresentation {
         None,
@@ -38,25 +35,21 @@ mod client_block {
         pub mesh_representation: MeshRepresentation
     }
 
-    impl BlockProperties {
-        pub fn new(has_collider: bool, mesh_representation: MeshRepresentation) {
-            BlockProperties {has_collider, mesh_representation}
-        } 
-    } 
-
     pub fn block_properties(block_id: BlockId) -> BlockProperties {
-        let touple = match self {
-            Air => (true, None()),
-            Grass => (true, Cube([GrassTop, Dirt, GrassSide, GrassSide, GrassSide, GrassSide])),
-            Dirt => (true, Cube([Dirt; 6])),
-            Stone => (true, Cube([Stone; 6])),
-            CobbleStone => (true, Cube([CobbleStone; 6])),
-            Bedrock => (true, Cube([Bedrock; 6])),
-            IronOre => (true, Cube([IronOre; 6])),
-            CoalOre => (true, Cube([CoalOre; 6])),
-            OakLeaves => (true, Cube([OakLeaves; 6])),
-            OakLog => (true, Cube([OakLogTop, OakLogTop, OakLogSide, OakLogSide, OakLogSide, OakLogSide])),
-            Tallgrass => (true, Cross([Tallgrass, Tallgrass])),
+        use TextureName::*;
+
+        let touple = match block_id {
+            BlockId::Air => (true, None),
+            BlockId::Grass => (true, Cube([GrassTop, Dirt, GrassSide, GrassSide, GrassSide, GrassSide])),
+            BlockId::Dirt => (true, Cube([Dirt; 6])),
+            BlockId::Stone => (true, Cube([Stone; 6])),
+            BlockId::CobbleStone => (true, Cube([CobbleStone; 6])),
+            BlockId::Bedrock => (true, Cube([Bedrock; 6])),
+            BlockId::IronOre => (true, Cube([IronOre; 6])),
+            BlockId::CoalOre => (true, Cube([CoalOre; 6])),
+            BlockId::OakLeaves => (true, Cube([OakLeaves; 6])),
+            BlockId::OakLog => (true, Cube([OakLogTop, OakLogTop, OakLogSide, OakLogSide, OakLogSide, OakLogSide])),
+            BlockId::Tallgrass => (true, Cross([Tallgrass, Tallgrass])),
         };
 
         BlockProperties {
@@ -67,7 +60,7 @@ mod client_block {
 
     pub fn collect_all_texture_names() -> Vec<TextureName> {
         BlockId::values().iter().map(|block_id| {
-            let properties = block_properties(block_id);
+            let properties = block_properties(*block_id);
             let mesh: MeshRepresentation = properties.mesh_representation;
 
             match mesh {
@@ -75,11 +68,10 @@ mod client_block {
                 MeshRepresentation::Cube(textures) => Vec::from(textures),
                 MeshRepresentation::Cross(textures) => Vec::from(textures),            
             }
-        }).flatten()
+        }).flatten().collect()
     }
 }
 
-use bevy_inspector_egui::egui::panel::TopBottomSide;
 use client_block::block_properties;
 use TextureName::*;
 
@@ -147,16 +139,6 @@ pub struct Block {
     pub is_solid: bool,
 }
 
-macro_rules! add_block {
-    ($block_id:expr, $texture_names:expr, $is_solid:expr) => {
-        Block {
-            id: $block_id,
-            texture_names: $texture_names,
-            is_solid: $is_solid,
-        }
-    };
-}
-
 type TextureUV = [f32; 2];
 
 impl Block {
@@ -169,14 +151,14 @@ impl Block {
         let mesh = properties.mesh_representation;
 
         let texture_option: Option<TextureName> = match mesh {
-            client_block::MeshRepresentation::None => None(),
+            client_block::MeshRepresentation::None => None,
             client_block::MeshRepresentation::Cube(textures) => Some(textures[face as usize]),
             client_block::MeshRepresentation::Cross(textures) => Some(textures[face as usize])
         };
 
         match texture_option {
-            Some(texture_name) => Some(texture_manager.get_texture_uv(texture_name).copied()),
-            None() => None()
+            Some(texture_name) => texture_manager.get_texture_uv(texture_name).copied(),
+            None => None
         }
     }
 }

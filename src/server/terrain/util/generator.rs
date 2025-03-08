@@ -79,8 +79,8 @@ impl Generator {
         let y = rand::random_range(0..(CHUNK_SIZE - 1));
         let z = rand::random_range(chunk_range.clone());
 
-        if chunk.get(x,y,z) == BlockId::Grass {
-            chunk.set(x,y + 1, z, BlockId::Tallgrass);
+        if chunk.get(x, y, z) == BlockId::Grass {
+            chunk.set(x, y + 1, z, BlockId::Tallgrass);
         }
     }
 

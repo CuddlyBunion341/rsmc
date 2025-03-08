@@ -12,7 +12,11 @@ impl Serialize for Chunk {
     where
         S: serde::Serializer,
     {
-        let data_as_u8: Vec<u8> = self.data.iter().map(|block_id| block_id.to_u8()).collect();
+        // let data_as_u8: Vec<u8> = self.data.iter().map(|block_id| *block_id.into()).collect();
+        let data_as_u8: Vec<u8> = self.data.iter().map(|block_id| {
+            let block_byte: u8 = (*block_id).into();
+            block_byte
+        }).collect();
         let serialized_data = serialize_buffer(data_as_u8);
         let mut state = serializer.serialize_struct("Chunk", 2)?;
         state.serialize_field("data", &serialized_data)?;
@@ -50,7 +54,7 @@ impl<'de> Deserialize<'de> for Chunk {
         let deserialized_data = deserialize_buffer(bytes_slice);
         let data_as_block_id: [BlockId; CHUNK_LENGTH] = deserialized_data
             .into_iter()
-            .map(|i| BlockId::from_u8(i).unwrap())
+            .map(|i| BlockId::from(i))
             .collect::<Vec<BlockId>>()
             .try_into()
             .map_err(|_| serde::de::Error::custom("Failed to convert data to BlockId array"))?;
