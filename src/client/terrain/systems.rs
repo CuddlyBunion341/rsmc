@@ -1,6 +1,7 @@
-use bevy::asset;
 use terrain_resources::Mesher;
-use terrain_util::{client_block::block_properties, get_cross_block_positions, instance_mesh_for_repr};
+use terrain_util::{
+    client_block::block_properties, get_cross_block_positions, instance_mesh_for_repr,
+};
 
 use crate::prelude::*;
 
@@ -91,7 +92,7 @@ pub fn handle_chunk_mesh_update_events(
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
     texture_manager: ResMut<terrain_util::TextureManager>,
-    mesher: Res<Mesher>
+    mesher: Res<Mesher>,
 ) {
     for event in chunk_mesh_update_events.read() {
         info!(
@@ -114,7 +115,7 @@ pub fn handle_chunk_mesh_update_events(
                     chunk,
                     &texture_manager,
                 );
-                add_cross_objects(&mut commands, &chunk, &mesher);
+                add_cross_objects(&mut commands, chunk, &mesher);
             }
             None => {
                 println!("No chunk found");
@@ -144,15 +145,17 @@ fn add_chunk_objects(
     }
 }
 
-fn add_cross_objects(
-    commands: &mut Commands,
-    chunk: &Chunk,
-    mesher: &Mesher,
-) {
+fn add_cross_objects(commands: &mut Commands, chunk: &Chunk, mesher: &Mesher) {
     let values = get_cross_block_positions(chunk);
     for (mesh_repr, positions) in values {
-        let mesh_handle = mesher.mesh_handles.get(&mesh_repr).expect("Handle is not yet populated");
-        let material_handle = mesher.transparent_material_handle.clone().expect("Material has not yet been set");
+        let mesh_handle = mesher
+            .mesh_handles
+            .get(&mesh_repr)
+            .expect("Handle is not yet populated");
+        let material_handle = mesher
+            .transparent_material_handle
+            .clone()
+            .expect("Material has not yet been set");
 
         for position in positions {
             commands.spawn((
@@ -161,8 +164,8 @@ fn add_cross_objects(
                 Transform::from_xyz(
                     chunk.position.x * CHUNK_SIZE as f32 + position.x,
                     chunk.position.y * CHUNK_SIZE as f32 + position.y,
-                    chunk.position.z * CHUNK_SIZE as f32 + position.z
-                )
+                    chunk.position.z * CHUNK_SIZE as f32 + position.z,
+                ),
             ));
         }
     }

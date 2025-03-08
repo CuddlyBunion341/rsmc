@@ -14,7 +14,7 @@ impl SpawnAreaLoaded {
 #[derive(Resource)]
 pub struct Mesher {
     pub mesh_handles: HashMap<MeshRepresentation, Handle<Mesh>>,
-    pub transparent_material_handle: Option<Handle<StandardMaterial>>
+    pub transparent_material_handle: Option<Handle<StandardMaterial>>,
 }
 
 impl Default for Mesher {

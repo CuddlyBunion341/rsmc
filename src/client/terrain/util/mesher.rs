@@ -38,7 +38,6 @@ fn create_cross_geometry(
             .get_texture_uv(textures[0])
             .expect("Texture is not present in manager");
 
-
         for vertex in face_verticies {
             position.push([
                 vertex.position[0] * 0.5 + 0.5,
@@ -77,16 +76,13 @@ pub fn get_cross_block_positions(chunk: &Chunk) -> HashMap<MeshRepresentation, V
                 let pos = Vec3::new(x as f32, y as f32, z as f32);
                 let mesh_repr = block_properties(block_id).mesh_representation;
 
-                match mesh_repr {
-                    MeshRepresentation::Cross(_) => {
-                        match map.get_mut(&mesh_repr) {
-                            Some(positions) => positions.push(pos),
-                            None => {
-                                map.insert(mesh_repr, vec![pos]);
-                            }
-                        };
-                    }
-                    _ => {}
+                if let MeshRepresentation::Cross(_) = mesh_repr {
+                    match map.get_mut(&mesh_repr) {
+                        Some(positions) => positions.push(pos),
+                        None => {
+                            map.insert(mesh_repr, vec![pos]);
+                        }
+                    };
                 }
             }
         }
@@ -225,9 +221,9 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
 
                 geometry_data.indices.extend(
                     cube_data
-                    .indices
-                    .iter()
-                    .map(|i| i + geometry_data.position.len() as u32),
+                        .indices
+                        .iter()
+                        .map(|i| i + geometry_data.position.len() as u32),
                 );
                 geometry_data.position.extend(cube_data.position);
                 geometry_data.uv.extend(cube_data.uv);
@@ -252,7 +248,7 @@ pub enum CubeFace {
 #[derive(Debug, Clone, Copy)]
 pub enum CrossFace {
     Face1,
-    Face2
+    Face2,
 }
 
 const CUBE_FACES: [CubeFace; 6] = [
