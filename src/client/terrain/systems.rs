@@ -185,6 +185,7 @@ fn create_transparent_material(
     materials.add(StandardMaterial {
         perceptual_roughness: 0.5,
         double_sided: true,
+        cull_mode: None,
         reflectance: 0.0,
         unlit: false,
         specular_transmission: 0.0,

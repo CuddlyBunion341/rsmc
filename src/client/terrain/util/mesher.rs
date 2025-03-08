@@ -31,7 +31,8 @@ fn create_cross_geometry(
 
     let mut index_offset = 0;
 
-    let  cross_faces = [CrossFace::Face1, CrossFace::Face2];
+    // let  cross_faces = [CrossFace::Face1, CrossFace::Face2];
+    let  cross_faces = [CrossFace::Face1];
 
     cross_faces.iter().for_each(|cross_face| {
         let face_verticies = cross_face_vertices(*cross_face);
@@ -54,7 +55,7 @@ fn create_cross_geometry(
             normal.push(vertex.normal);
         }
 
-        let offsets = [0, 1, 2, 2, 1, 3];
+        let offsets = [0, 1, 3, 1, 2, 3];
         offsets.iter().for_each(|offset| {
             indices.push(index_offset + offset);
         });
@@ -326,12 +327,12 @@ fn cross_face_vertices(face: CrossFace) -> [Vertex; 4] {
             Vertex{ position: [-1.0,  1.0, -1.0], normal: [0.0, 0.0, 0.0], uv: [0.0, 0.0] },
             Vertex{ position: [ 1.0,  1.0,  1.0], normal: [0.0, 0.0, 0.0], uv: [1.0, 0.0] },
             Vertex{ position: [ 1.0, -1.0,  1.0], normal: [0.0, 0.0, 0.0], uv: [1.0, 1.0] },
-            Vertex{ position: [-1.0,  1.0, -1.0], normal: [0.0, 0.0, 0.0], uv: [0.0, 1.0] },
+            Vertex{ position: [-1.0, -1.0, -1.0], normal: [0.0, 0.0, 0.0], uv: [0.0, 1.0] },
         ],
         CrossFace::Face2 => [
             Vertex{ position: [-1.0,  1.0,  1.0], normal: [0.0, 0.0, 0.0], uv: [0.0, 0.0] },
             Vertex{ position: [ 1.0,  1.0, -1.0], normal: [0.0, 0.0, 0.0], uv: [1.0, 0.0] },
-            Vertex{ position: [ 1.0, -1.0,  1.0], normal: [0.0, 0.0, 0.0], uv: [1.0, 1.0] },
+            Vertex{ position: [ 1.0, -1.0, -1.0], normal: [0.0, 0.0, 0.0], uv: [1.0, 1.0] },
             Vertex{ position: [-1.0, -1.0,  1.0], normal: [0.0, 0.0, 0.0], uv: [0.0, 1.0] },
         ],
     }
