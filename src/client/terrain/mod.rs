@@ -23,6 +23,7 @@ impl Plugin for TerrainPlugin {
         {
             app.insert_resource(terrain_resources::SpawnAreaLoaded(true));
             app.add_systems(Startup, terrain_systems::generate_simple_ground_system);
+            app.add_systems(Startup, terrain_systems::add_example_cube_system);
         }
         #[cfg(not(feature = "skip_terrain"))]
         {

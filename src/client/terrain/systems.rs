@@ -41,9 +41,25 @@ pub fn generate_simple_ground_system(
     let mesh = Cuboid::new(64.0, 1.0, 64.0);
 
     commands.spawn((
-        Mesh3d(meshes.add(mesh)),
-        MeshMaterial3d(materials.add(Color::srgba(1.0, 0.0, 1.0, 1.0))),
-        Name::new("Simple Ground Plane"),
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(materials.add(Color::srgba(1.0, 0.0, 1.0, 1.0))),
+            Name::new("Simple Ground Plane"),
+    ));
+}
+
+pub fn add_example_cube_system(
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<CustomMaterial>>,
+    asset_server: Res<AssetServer>,
+    mut commands: Commands,
+) {
+    let mesh = Cuboid::new(1.0, 1.0, 1.0);
+    let texture_handle = obtain_texture_handle(&asset_server).clone();
+
+    commands.spawn((
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(create_custom_material(texture_handle, &mut materials)),
+            Transform::from_xyz(0.0, 1.0, 0.0)
     ));
 }
 
@@ -118,7 +134,7 @@ pub fn handle_chunk_mesh_update_events(
                     chunk,
                     &texture_manager,
                 );
-                add_cross_objects(&mut commands, chunk, &mesher);
+                // add_cross_objects(&mut commands, chunk, &mesher);
             }
             None => {
                 println!("No chunk found");
@@ -136,7 +152,7 @@ fn add_chunk_objects(
     texture_manager: &terrain_util::TextureManager,
 ) {
     if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
-        let texture_handle = obtain_texture_handle(&asset_server).clone();
+        let texture_handle = obtain_texture_handle(asset_server).clone();
         let material = create_custom_material(texture_handle, materials);
         spawn_chunk(commands, meshes, material, mesh, chunk);
     }
@@ -156,20 +172,20 @@ fn add_cross_objects(commands: &mut Commands, chunk: &Chunk, mesher: &Mesher) {
 
         for position in positions {
             commands.spawn((
-                Mesh3d(mesh_handle.clone()),
-                MeshMaterial3d(material_handle.clone()),
-                Transform::from_xyz(
-                    chunk.position.x * CHUNK_SIZE as f32 + position.x,
-                    chunk.position.y * CHUNK_SIZE as f32 + position.y,
-                    chunk.position.z * CHUNK_SIZE as f32 + position.z,
-                ),
-                terrain_components::ChunkMesh {
-                    key: [
-                        chunk.position.x as i32,
-                        chunk.position.y as i32,
-                        chunk.position.z as i32,
-                    ],
-                },
+                    Mesh3d(mesh_handle.clone()),
+                    MeshMaterial3d(material_handle.clone()),
+                    Transform::from_xyz(
+                        chunk.position.x * CHUNK_SIZE as f32 + position.x,
+                        chunk.position.y * CHUNK_SIZE as f32 + position.y,
+                        chunk.position.z * CHUNK_SIZE as f32 + position.z,
+                    ),
+                    terrain_components::ChunkMesh {
+                        key: [
+                            chunk.position.x as i32,
+                            chunk.position.y as i32,
+                            chunk.position.z as i32,
+                        ],
+                    },
             ));
         }
     }
@@ -194,21 +210,21 @@ fn spawn_chunk(
     chunk: &Chunk,
 ) {
     commands.spawn((
-        Mesh3d(meshes.add(mesh)),
-        Transform::from_xyz(
-            chunk.position.x * CHUNK_SIZE as f32,
-            chunk.position.y * CHUNK_SIZE as f32,
-            chunk.position.z * CHUNK_SIZE as f32,
-        ),
-        MeshMaterial3d(material),
-        player_components::Raycastable,
-        terrain_components::ChunkMesh {
-            key: [
-                chunk.position.x as i32,
-                chunk.position.y as i32,
-                chunk.position.z as i32,
-            ],
-        },
+            Mesh3d(meshes.add(mesh)),
+            Transform::from_xyz(
+                chunk.position.x * CHUNK_SIZE as f32,
+                chunk.position.y * CHUNK_SIZE as f32,
+                chunk.position.z * CHUNK_SIZE as f32,
+            ),
+            MeshMaterial3d(material),
+            player_components::Raycastable,
+            terrain_components::ChunkMesh {
+                key: [
+                    chunk.position.x as i32,
+                    chunk.position.y as i32,
+                    chunk.position.z as i32,
+                ],
+            },
     ));
 }
 
