@@ -1,5 +1,19 @@
 use crate::prelude::*;
 
+pub fn generate_simple_ground_system(
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut commands: Commands,
+) {
+    let mesh = Cuboid::new(64.0, 1.0, 64.0);
+
+    commands.spawn((
+        Mesh3d(meshes.add(mesh)),
+        MeshMaterial3d(materials.add(Color::srgba(1.0, 0.0, 1.0, 1.0))),
+        Name::new("Simple Ground Plane"),
+    ));
+}
+
 pub fn prepare_spawn_area_system(mut client: ResMut<RenetClient>) {
     info!("Sending chunk requests for spawn area");
 
