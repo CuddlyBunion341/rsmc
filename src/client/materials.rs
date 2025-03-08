@@ -24,12 +24,16 @@ impl Material for CustomMaterial {
     }
 }
 
-pub fn create_custom_material(asset_server: Res<AssetServer>) -> CustomMaterial {
-    CustomMaterial {
+pub fn create_custom_material(
+    asset_server: Res<AssetServer>,
+    _texture_handle: Handle<Image>,
+    mut materials: ResMut<Assets<CustomMaterial>>,
+) -> Handle<CustomMaterial> {
+    materials.add(CustomMaterial {
         color: LinearRgba::BLUE,
         color_texture: Some(asset_server.load("branding/icon.png")),
         alpha_mode: AlphaMode::Blend,
-    }
+    })
 }
 
 pub fn create_transparent_material(

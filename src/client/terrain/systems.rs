@@ -4,7 +4,9 @@ use terrain_util::{
 };
 
 use crate::{
-    materials::{create_chunk_material, create_transparent_material},
+    materials::{
+        create_chunk_material, create_custom_material, create_transparent_material, CustomMaterial,
+    },
     prelude::*,
 };
 
@@ -90,7 +92,7 @@ pub fn handle_chunk_mesh_update_events(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<CustomMaterial>>,
     chunk_manager: ResMut<ChunkManager>,
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
@@ -129,22 +131,16 @@ pub fn handle_chunk_mesh_update_events(
 
 fn add_chunk_objects(
     commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
+    meshes: ResMut<Assets<Mesh>>,
+    materials: ResMut<Assets<CustomMaterial>>,
     chunk: &Chunk,
     texture_manager: &terrain_util::TextureManager,
 ) {
     if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
-        let texture_handle = obtain_texture_handle(asset_server).clone();
-        let material = create_chunk_material(texture_handle, &mut ResMut::reborrow(materials));
-        spawn_chunk(
-            commands,
-            &mut ResMut::reborrow(meshes),
-            material,
-            mesh,
-            chunk,
-        );
+        let texture_handle = obtain_texture_handle(&asset_server).clone();
+        let material = create_custom_material(asset_server, texture_handle, materials);
+        spawn_chunk(commands, meshes, material, mesh, chunk);
     }
 }
 
@@ -194,8 +190,8 @@ fn obtain_texture_handle(asset_server: &Res<AssetServer>) -> Handle<Image> {
 
 fn spawn_chunk(
     commands: &mut Commands,
-    meshes: &mut Mut<Assets<Mesh>>,
-    material: Handle<StandardMaterial>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    material: Handle<CustomMaterial>,
     mesh: Mesh,
     chunk: &Chunk,
 ) {
