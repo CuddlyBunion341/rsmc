@@ -69,4 +69,8 @@ impl BlockId {
             Tallgrass,
         ]
     }
+
+    pub fn supports_grass(&self) -> bool {
+        *self == Grass || *self == Dirt
+    }
 }
