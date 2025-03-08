@@ -35,9 +35,9 @@ impl From<u8> for BlockId {
     }
 }
 
-impl Into<u8> for BlockId {
-    fn into(self) -> u8 {
-        match self {
+impl From<BlockId> for u8 {
+    fn from(val: BlockId) -> Self {
+        match val {
             Air => 0,
             Grass => 1,
             Dirt => 2,

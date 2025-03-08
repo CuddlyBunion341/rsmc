@@ -1,5 +1,4 @@
 use terrain_resources::{Generator, NoiseFunctionParams, TerrainGeneratorParams};
-use terrain_util::Block;
 
 use crate::prelude::*;
 
