@@ -5,13 +5,13 @@ pub mod prelude;
 mod chat;
 mod collider;
 mod gui;
+mod materials;
 mod networking;
 mod player;
 mod remote_player;
 mod scene;
 mod states;
 mod terrain;
-mod materials;
 
 use bevy_flair::FlairPlugin;
 use scene::setup_scene;
