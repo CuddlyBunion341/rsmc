@@ -22,6 +22,7 @@ pub mod client_block {
     use super::TextureName;
     use rsmc::BlockId;
 
+    #[derive(Eq, Hash, PartialEq, Clone)]
     pub enum MeshRepresentation {
         None,
         Cube([TextureName; 6]),

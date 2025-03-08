@@ -1,4 +1,25 @@
+use terrain_resources::Mesher;
+use terrain_util::{client_block::block_properties, instance_mesh_for_repr};
+
 use crate::prelude::*;
+
+pub fn populate_mesher_meshes(
+    mut mesher: ResMut<Mesher>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    texture_manager: ResMut<terrain_util::TextureManager>
+) {
+    BlockId::values().iter().for_each(|block_id| {
+        let mesh_repr = block_properties(*block_id).mesh_representation;
+        let mesh = instance_mesh_for_repr(mesh_repr.clone(), &texture_manager);
+        match mesh {
+            Some(mesh) => {
+                let handle = meshes.add(mesh);
+                mesher.mesh_handles.insert(mesh_repr, handle);
+            },
+            None => {}
+        }
+    });
+}
 
 pub fn generate_simple_ground_system(
     mut meshes: ResMut<Assets<Mesh>>,
