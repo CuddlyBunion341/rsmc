@@ -69,7 +69,7 @@ pub fn generate_world_system(
     });
 }
 
-pub fn handle_chunk_mesh_update_events(
+pub fn handle_chunk_mesh_update_events_system(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     chunk_manager: ResMut<ChunkManager>,
@@ -211,7 +211,7 @@ fn obtain_texture_handle(asset_server: &Res<AssetServer>) -> Handle<Image> {
     asset_server.load("textures/texture_atlas.png")
 }
 
-pub fn handle_terrain_regeneration_events(
+pub fn handle_terrain_regeneration_events_system(
     mut client: ResMut<RenetClient>,
     mut world_regenerate_events: EventReader<terrain_events::WorldRegenerateEvent>,
     chunk_manager: ResMut<ChunkManager>,
