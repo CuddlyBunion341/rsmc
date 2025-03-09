@@ -49,6 +49,10 @@ pub struct HeightAdjustParams {
     pub noise: NoiseFunctionParams,
 }
 
+pub struct GrassParams {
+    pub frequency: u32,
+}
+
 #[derive(Debug)]
 pub struct NoiseFunctionParams {
     pub octaves: u32,
@@ -79,6 +83,7 @@ pub struct TerrainGeneratorParams {
     pub density: DensityParams,
     pub cave: CaveParams,
     pub tree: TreeParams,
+    pub grass: GrassParams,
 }
 
 impl Default for TerrainGeneratorParams {
@@ -142,6 +147,7 @@ impl Default for TerrainGeneratorParams {
                 min_bush_radius: 3,
                 max_bush_radius: 5,
             },
+            grass: GrassParams { frequency: 10 },
         }
     }
 }

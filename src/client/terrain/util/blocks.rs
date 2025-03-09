@@ -15,8 +15,76 @@ pub enum TextureName {
     OakLeaves,
     OakLogTop,
     OakLogSide,
+    Tallgrass,
 }
 
+pub mod client_block {
+    use super::TextureName;
+    use rsmc::BlockId;
+
+    #[derive(Eq, Hash, PartialEq, Clone)]
+    pub enum MeshRepresentation {
+        None,
+        Cube([TextureName; 6]),
+        Cross([TextureName; 2]),
+    }
+
+    use MeshRepresentation::*;
+
+    pub struct BlockProperties {
+        pub has_collider: bool,
+        pub mesh_representation: MeshRepresentation,
+    }
+
+    pub fn block_properties(block_id: BlockId) -> BlockProperties {
+        use TextureName::*;
+
+        let touple = match block_id {
+            BlockId::Air => (false, None),
+            BlockId::Grass => (
+                true,
+                Cube([GrassTop, Dirt, GrassSide, GrassSide, GrassSide, GrassSide]),
+            ),
+            BlockId::Dirt => (true, Cube([Dirt; 6])),
+            BlockId::Stone => (true, Cube([Stone; 6])),
+            BlockId::CobbleStone => (true, Cube([CobbleStone; 6])),
+            BlockId::Bedrock => (true, Cube([Bedrock; 6])),
+            BlockId::IronOre => (true, Cube([IronOre; 6])),
+            BlockId::CoalOre => (true, Cube([CoalOre; 6])),
+            BlockId::OakLeaves => (true, Cube([OakLeaves; 6])),
+            BlockId::OakLog => (
+                true,
+                Cube([
+                    OakLogTop, OakLogTop, OakLogSide, OakLogSide, OakLogSide, OakLogSide,
+                ]),
+            ),
+            BlockId::Tallgrass => (false, Cross([Tallgrass, Tallgrass])),
+        };
+
+        BlockProperties {
+            has_collider: touple.0,
+            mesh_representation: touple.1,
+        }
+    }
+
+    pub fn collect_all_texture_names() -> Vec<TextureName> {
+        BlockId::values()
+            .iter()
+            .flat_map(|block_id| {
+                let properties = block_properties(*block_id);
+                let mesh: MeshRepresentation = properties.mesh_representation;
+
+                match mesh {
+                    MeshRepresentation::None => vec![],
+                    MeshRepresentation::Cube(textures) => Vec::from(textures),
+                    MeshRepresentation::Cross(textures) => Vec::from(textures),
+                }
+            })
+            .collect()
+    }
+}
+
+use client_block::block_properties;
 use TextureName::*;
 
 #[derive(Resource)]
@@ -55,7 +123,7 @@ impl TextureManager {
             [Stone, CobbleStone, GrassTop, OakLeaves],
             [IronOre, Sand, GrassSide, OakLogTop],
             [CoalOre, Bedrock, Dirt, OakLogSide],
-            [Air, Air, Air, Air],
+            [Tallgrass, Air, Air, Air],
         ];
 
         let mut texture_positions = Vec::new();
@@ -83,51 +151,6 @@ pub struct Block {
     pub is_solid: bool,
 }
 
-macro_rules! add_block {
-    ($block_id:expr, $texture_names:expr, $is_solid:expr) => {
-        Block {
-            id: $block_id,
-            texture_names: $texture_names,
-            is_solid: $is_solid,
-        }
-    };
-}
-
-pub static BLOCKS: [Block; 10] = [
-    add_block!(BlockId::Air, [TextureName::Air; 6], false),
-    add_block!(
-        BlockId::Grass,
-        [
-            TextureName::GrassTop,
-            TextureName::Dirt,
-            TextureName::GrassSide,
-            TextureName::GrassSide,
-            TextureName::GrassSide,
-            TextureName::GrassSide,
-        ],
-        true
-    ),
-    add_block!(BlockId::Dirt, [TextureName::Dirt; 6], true),
-    add_block!(BlockId::Stone, [TextureName::Stone; 6], true),
-    add_block!(BlockId::CobbleStone, [TextureName::CobbleStone; 6], true),
-    add_block!(BlockId::Bedrock, [TextureName::Bedrock; 6], true),
-    add_block!(BlockId::IronOre, [TextureName::IronOre; 6], true),
-    add_block!(BlockId::CoalOre, [TextureName::CoalOre; 6], true),
-    add_block!(BlockId::OakLeaves, [TextureName::OakLeaves; 6], true),
-    add_block!(
-        BlockId::OakLog,
-        [
-            TextureName::OakLogTop,
-            TextureName::OakLogTop,
-            TextureName::OakLogSide,
-            TextureName::OakLogSide,
-            TextureName::OakLogSide,
-            TextureName::OakLogSide,
-        ],
-        true
-    ),
-];
-
 type TextureUV = [f32; 2];
 
 impl Block {
@@ -136,8 +159,18 @@ impl Block {
         face: CubeFace,
         texture_manager: &TextureManager,
     ) -> Option<[f32; 2]> {
-        let block = &BLOCKS[block_id as usize];
-        let texture_name = block.texture_names[face as usize];
-        texture_manager.get_texture_uv(texture_name).copied()
+        let properties = block_properties(block_id);
+        let mesh = properties.mesh_representation;
+
+        let texture_option: Option<TextureName> = match mesh {
+            client_block::MeshRepresentation::None => None,
+            client_block::MeshRepresentation::Cube(textures) => Some(textures[face as usize]),
+            client_block::MeshRepresentation::Cross(textures) => Some(textures[face as usize]),
+        };
+
+        match texture_option {
+            Some(texture_name) => texture_manager.get_texture_uv(texture_name).copied(),
+            None => None,
+        }
     }
 }

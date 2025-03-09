@@ -11,7 +11,6 @@ pub const CHUNK_LENGTH: usize = PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE * PADDED_C
 
 #[derive(Debug, Clone, Copy)]
 pub struct Chunk {
-    // #[serde(with = "BigArray")]
     pub data: [BlockId; CHUNK_LENGTH],
     pub position: Vec3,
 }
@@ -25,7 +24,7 @@ impl Chunk {
     }
 
     pub fn valid_padded(x: usize, y: usize, z: usize) -> bool {
-        (1..CHUNK_SIZE).contains(&x) && (1..CHUNK_SIZE).contains(&y) && (1..CHUNK_SIZE).contains(&z)
+        (0..CHUNK_SIZE).contains(&x) && (0..CHUNK_SIZE).contains(&y) && (0..CHUNK_SIZE).contains(&z)
     }
 
     pub fn valid_unpadded(x: usize, y: usize, z: usize) -> bool {
@@ -42,6 +41,17 @@ impl Chunk {
 
     pub fn set(&mut self, x: usize, y: usize, z: usize, value: BlockId) {
         self.set_unpadded(x + 1, y + 1, z + 1, value);
+    }
+
+    pub fn update(&mut self, x: usize, y: usize, z: usize, value: BlockId) {
+        self.set(x, y, z, value);
+
+        if !value.supports_grass()
+            && Self::valid_padded(x, y + 1, z)
+            && self.get(x, y + 1, z) == BlockId::Tallgrass
+        {
+            self.set(x, y + 1, z, BlockId::Air);
+        }
     }
 
     pub fn set_unpadded(&mut self, x: usize, y: usize, z: usize, value: BlockId) {
@@ -155,7 +165,7 @@ impl ChunkManager {
         self.chunks.get_mut(&[x as i32, y as i32, z as i32])
     }
 
-    pub fn set_block(&mut self, position: Vec3, block: BlockId) {
+    pub fn update_block(&mut self, position: Vec3, block: BlockId) {
         match self.chunk_from_selection(position) {
             Some(chunk) => {
                 let chunk_position = Vec3::new(
@@ -164,7 +174,7 @@ impl ChunkManager {
                     chunk.position[2] * CHUNK_SIZE as f32,
                 );
                 let local_position = (position - chunk_position).floor();
-                chunk.set(
+                chunk.update(
                     local_position.x as usize,
                     local_position.y as usize,
                     local_position.z as usize,
@@ -280,7 +290,7 @@ mod tests {
         let block_position = Vec3::new(1.0, 1.0, 1.0);
         let block_id = BlockId::Stone;
 
-        chunk_manager.set_block(block_position, block_id);
+        chunk_manager.update_block(block_position, block_id);
         let retrieved_block = chunk_manager.get_block(block_position).unwrap();
         assert_eq!(retrieved_block, block_id);
     }
@@ -294,5 +304,30 @@ mod tests {
 
         let retrieved_chunk_positions = chunk_manager.get_all_chunk_positions();
         assert_eq!(retrieved_chunk_positions.len(), 3);
+    }
+
+    #[test]
+    #[rustfmt::skip]
+    fn test_tallgrass_update() {
+        let mut chunk_manager = ChunkManager::new();
+        let chunk_position = Vec3::new(0.0, 0.0, 0.0);
+        let chunk = Chunk::new(chunk_position);
+        chunk_manager.set_chunk(chunk_position, chunk);
+
+        let grass_position = Vec3::new(0.0, 0.0, 0.0);
+        let tallgrass_position = Vec3::new(0.0, 1.0, 0.0);
+
+        chunk_manager.update_block(grass_position, BlockId::Grass);
+        assert_eq!(chunk_manager.get_block(grass_position).unwrap(), BlockId::Grass);
+        chunk_manager.update_block(tallgrass_position, BlockId::Tallgrass);
+        assert_eq!(chunk_manager.get_block(tallgrass_position).unwrap(), BlockId::Tallgrass);
+
+        chunk_manager.update_block(grass_position, BlockId::Dirt);
+        assert_eq!(chunk_manager.get_block(grass_position).unwrap(), BlockId::Dirt);
+        assert_eq!(chunk_manager.get_block(tallgrass_position).unwrap(), BlockId::Tallgrass);
+
+        chunk_manager.update_block(grass_position, BlockId::Air);
+        assert_eq!(chunk_manager.get_block(grass_position).unwrap(), BlockId::Air);
+        assert_eq!(chunk_manager.get_block(tallgrass_position).unwrap(), BlockId::Air);
     }
 }

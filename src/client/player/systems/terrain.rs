@@ -8,7 +8,7 @@ pub fn handle_block_update_events(
     mut client: ResMut<RenetClient>,
 ) {
     for event in block_update_events.read() {
-        chunk_manager.set_block(event.position, event.block);
+        chunk_manager.update_block(event.position, event.block);
         info!("Block update message: {:?}", event.position);
 
         chunk_mesh_update_events.send(terrain_events::ChunkMeshUpdateEvent {

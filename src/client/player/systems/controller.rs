@@ -1,8 +1,12 @@
 use crate::prelude::*;
 
-#[cfg(not(feature = "lock_player"))]
+#[cfg(feature = "skip_terrain")]
+const SPAWN_POINT: Vec3 = Vec3::new(0.0, 1.0, 0.0);
+
+#[cfg(all(not(feature = "skip_terrain"), not(feature = "lock_player")))]
 const SPAWN_POINT: Vec3 = Vec3::new(0.0, 64.0, 0.0);
-#[cfg(feature = "lock_player")]
+
+#[cfg(all(not(feature = "skip_terrain"), feature = "lock_player"))]
 const SPAWN_POINT: Vec3 = Vec3::new(128.0, 96.0, -128.0);
 
 pub fn setup_player_camera(mut commands: Commands) {
