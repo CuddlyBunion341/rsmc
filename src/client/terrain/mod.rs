@@ -13,7 +13,7 @@ impl Plugin for TerrainPlugin {
         info!("Building TerrainPlugin");
         app.insert_resource(ChunkManager::new());
         app.insert_resource(util::TextureManager::new());
-        app.insert_resource(resources::Mesher::new());
+        app.insert_resource(resources::RenderMaterials::new());
         app.add_event::<terrain_events::BlockUpdateEvent>();
         app.add_event::<terrain_events::ChunkMeshUpdateEvent>();
         app.add_event::<terrain_events::WorldRegenerateEvent>();

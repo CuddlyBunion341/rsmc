@@ -10,22 +10,22 @@ impl SpawnAreaLoaded {
 }
 
 #[derive(Resource)]
-pub struct Mesher {
-    pub transparent_material_handle: Option<Handle<StandardMaterial>>,
-    pub chunk_material_handle: Option<Handle<StandardMaterial>>,
+pub struct RenderMaterials {
+    pub transparent_material: Option<Handle<StandardMaterial>>,
+    pub chunk_material: Option<Handle<StandardMaterial>>,
 }
 
-impl Default for Mesher {
+impl Default for RenderMaterials {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Mesher {
-    pub fn new() -> Mesher {
-        Mesher {
-            transparent_material_handle: None,
-            chunk_material_handle: None,
+impl RenderMaterials {
+    pub fn new() -> RenderMaterials {
+        RenderMaterials {
+            transparent_material: None,
+            chunk_material: None,
         }
     }
 }

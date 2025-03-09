@@ -1,20 +1,20 @@
-use terrain_resources::Mesher;
+use terrain_resources::RenderMaterials;
 use terrain_util::create_cross_mesh_for_chunk;
 
 use crate::prelude::*;
 
 pub fn prepare_mesher_materials_system(
-    mut mesher: ResMut<Mesher>,
+    mut render_materials: ResMut<RenderMaterials>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
     let texture_handle = obtain_texture_handle(&asset_server);
 
     let material = create_transparent_material(texture_handle.clone());
-    mesher.transparent_material_handle = Some(materials.add(material));
+    render_materials.transparent_material = Some(materials.add(material));
 
     let material = create_chunk_material(texture_handle);
-    mesher.chunk_material_handle = Some(materials.add(material));
+    render_materials.chunk_material = Some(materials.add(material));
 }
 
 pub fn generate_simple_ground_system(
@@ -76,7 +76,7 @@ pub fn handle_chunk_mesh_update_events_system(
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
     texture_manager: ResMut<terrain_util::TextureManager>,
-    mesher: Res<Mesher>,
+    materials: Res<RenderMaterials>,
 ) {
     for event in chunk_mesh_update_events.read() {
         info!(
@@ -91,8 +91,20 @@ pub fn handle_chunk_mesh_update_events_system(
                         commands.entity(entity).despawn();
                     }
                 }
-                add_chunk_objects(&mut commands, &mut meshes, chunk, &texture_manager, &mesher);
-                add_cross_objects(&mut commands, chunk, &mesher, &texture_manager, &mut meshes);
+                add_chunk_objects(
+                    &mut commands,
+                    &mut meshes,
+                    chunk,
+                    &texture_manager,
+                    &materials,
+                );
+                add_cross_objects(
+                    &mut commands,
+                    chunk,
+                    &materials,
+                    &texture_manager,
+                    &mut meshes,
+                );
             }
             None => {
                 println!("No chunk found");
@@ -106,11 +118,11 @@ fn add_chunk_objects(
     meshes: &mut ResMut<Assets<Mesh>>,
     chunk: &Chunk,
     texture_manager: &terrain_util::TextureManager,
-    mesher: &Mesher,
+    materials: &RenderMaterials,
 ) {
     if let Some(mesh) = terrain_util::create_chunk_mesh(chunk, texture_manager) {
-        let material = mesher
-            .chunk_material_handle
+        let material = materials
+            .chunk_material
             .clone()
             .expect("Chunk material not loaded");
 
@@ -138,7 +150,7 @@ fn add_chunk_objects(
 fn add_cross_objects(
     commands: &mut Commands,
     chunk: &Chunk,
-    mesher: &Mesher,
+    materials: &RenderMaterials,
     texture_manager: &terrain_util::TextureManager,
     meshes: &mut ResMut<Assets<Mesh>>,
 ) {
@@ -152,8 +164,8 @@ fn add_cross_objects(
     commands.spawn((
         Mesh3d(mesh_handle),
         MeshMaterial3d(
-            mesher
-                .transparent_material_handle
+            materials
+                .transparent_material
                 .clone()
                 .expect("Material exsits"),
         ),
