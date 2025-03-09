@@ -1,5 +1,3 @@
-use bevy::reflect::List;
-
 use crate::prelude::*;
 
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
