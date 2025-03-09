@@ -155,34 +155,31 @@ fn add_cross_objects(
     texture_manager: &terrain_util::TextureManager,
     meshes: &mut ResMut<Assets<Mesh>>,
 ) {
-    let mesh = create_cross_mesh_for_chunk(chunk, texture_manager);
-    if mesh.is_none() {
-        return;
-    }
-    let mesh = mesh.unwrap();
-    let mesh_handle = meshes.add(mesh);
+    if let Some(mesh) = create_cross_mesh_for_chunk(chunk, texture_manager) {
+        let mesh_handle = meshes.add(mesh);
 
-    commands.spawn((
-        Mesh3d(mesh_handle),
-        MeshMaterial3d(
-            materials
-                .transparent_material
-                .clone()
-                .expect("Transparent material exists"),
-        ),
-        Transform::from_xyz(
-            chunk.position.x * CHUNK_SIZE as f32,
-            chunk.position.y * CHUNK_SIZE as f32,
-            chunk.position.z * CHUNK_SIZE as f32,
-        ),
-        terrain_components::ChunkMesh {
-            key: [
-                chunk.position.x as i32,
-                chunk.position.y as i32,
-                chunk.position.z as i32,
-            ],
-        },
-    ));
+        commands.spawn((
+            Mesh3d(mesh_handle),
+            MeshMaterial3d(
+                materials
+                    .transparent_material
+                    .clone()
+                    .expect("Transparent material exists"),
+            ),
+            Transform::from_xyz(
+                chunk.position.x * CHUNK_SIZE as f32,
+                chunk.position.y * CHUNK_SIZE as f32,
+                chunk.position.z * CHUNK_SIZE as f32,
+            ),
+            terrain_components::ChunkMesh {
+                key: [
+                    chunk.position.x as i32,
+                    chunk.position.y as i32,
+                    chunk.position.z as i32,
+                ],
+            },
+        ));
+    }
 }
 
 fn create_transparent_material(texture_handle: Handle<Image>) -> StandardMaterial {
