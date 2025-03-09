@@ -315,7 +315,7 @@ mod visualizer {
                             add_slider_const!(ui, &mut generator.params.tree.max_bush_radius, 0..=10, "max_bush_radius");
 
                             ui.label("Grass");
-                            add_slider_const!(ui, &mut generator.params.grass.spawn_attempts_per_chunk, 0..=3000, "spawn attempts");
+                            add_slider_const!(ui, &mut generator.params.grass.spawn_attempts_per_chunk, 0..=100, "spawn attempts");
                         });
                     });
 

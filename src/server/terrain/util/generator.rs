@@ -59,27 +59,11 @@ impl Generator {
                 z: z as f32,
             };
 
-            let block = self.decorate_block(chunk, pos);
-            chunk.set_unpadded(x, y, z, block);
+            self.decorate_block(chunk, pos);
         });
 
         for _ in 0..self.params.tree.spawn_attempts_per_chunk {
             self.attempt_spawn_tree(chunk);
-        }
-
-        for _ in 0..self.params.grass.spawn_attempts_per_chunk {
-            self.attempt_spawn_grass(chunk);
-        }
-    }
-
-    fn attempt_spawn_grass(&self, chunk: &mut Chunk) {
-        let chunk_range = 0..CHUNK_SIZE;
-        let x = rand::random_range(chunk_range.clone());
-        let y = rand::random_range(0..(CHUNK_SIZE - 1));
-        let z = rand::random_range(chunk_range.clone());
-
-        if chunk.get(x, y, z) == BlockId::Grass {
-            chunk.set(x, y + 1, z, BlockId::Tallgrass);
         }
     }
 
@@ -196,7 +180,7 @@ impl Generator {
         blocks
     }
 
-    fn decorate_block(&self, chunk: &Chunk, position: Vec3) -> BlockId {
+    fn decorate_block(&self, chunk: &mut Chunk, position: Vec3) {
         let x = position.x as usize;
         let y = position.y as usize;
         let z = position.z as usize;
@@ -204,7 +188,17 @@ impl Generator {
         let block = chunk.get_unpadded(x, y, z);
 
         if block == BlockId::Air {
-            return block;
+            if y > 0
+                && Chunk::valid_unpadded(x, y - 1, z)
+                && chunk.get_unpadded(x, y - 1, z) == BlockId::Grass
+            {
+                let random_number =
+                    rand::random_range(0..=self.params.grass.spawn_attempts_per_chunk);
+                if random_number == 0 {
+                    chunk.set_unpadded(x, y, z, BlockId::Tallgrass);
+                }
+            }
+            return;
         }
 
         let mut depth_below_nearest_air = 0;
@@ -224,11 +218,13 @@ impl Generator {
             depth_below_nearest_air += 1;
         }
 
-        match depth_below_nearest_air {
+        let block = match depth_below_nearest_air {
             0_i32..=1_i32 => BlockId::Grass,
             2..3 => BlockId::Dirt,
             _ => BlockId::Stone,
-        }
+        };
+
+        chunk.set_unpadded(x, y, z, block);
     }
 
     fn generate_block(&self, position: Vec3) -> BlockId {
