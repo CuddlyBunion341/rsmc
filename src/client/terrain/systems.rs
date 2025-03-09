@@ -124,7 +124,7 @@ fn add_chunk_objects(
         let material = materials
             .chunk_material
             .clone()
-            .expect("Chunk material is loaded")
+            .expect("Chunk material is loaded");
 
         let meshes: &mut Mut<Assets<Mesh>> = &mut ResMut::reborrow(meshes);
         commands.spawn((
@@ -143,7 +143,7 @@ fn add_chunk_objects(
                     chunk.position.z as i32,
                 ],
             },
-            Name::from("Transparent Chunk Mesh")
+            Name::from("Transparent Chunk Mesh"),
         ));
     }
 }
