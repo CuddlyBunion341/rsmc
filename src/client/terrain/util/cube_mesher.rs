@@ -40,7 +40,7 @@ pub fn create_cube_geometry_data(
             ]);
             normal.push(vertex.normal);
 
-            color.push([rand::random(), rand::random(), rand::random(), 1.0]);
+            color.push([1.0, 1.0, 1.0, 1.0]);
         }
 
         let offsets = [0, 1, 2, 2, 1, 3];

@@ -86,11 +86,6 @@ pub fn handle_chunk_mesh_update_events_system(
         let chunk_option = chunk_manager.get_chunk(event.position);
         match chunk_option {
             Some(chunk) => {
-                for (entity, chunk_mesh) in mesh_query.iter_mut() {
-                    if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
-                        commands.entity(entity).despawn();
-                    }
-                }
                 add_chunk_objects(
                     &mut commands,
                     &mut meshes,
@@ -105,6 +100,11 @@ pub fn handle_chunk_mesh_update_events_system(
                     &texture_manager,
                     &mut meshes,
                 );
+                for (entity, chunk_mesh) in mesh_query.iter_mut() {
+                    if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
+                        commands.entity(entity).despawn();
+                    }
+                }
             }
             None => {
                 println!("No chunk found");
