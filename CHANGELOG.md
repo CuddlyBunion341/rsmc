@@ -11,6 +11,7 @@
 - Increase world size
 - Fix issue where chunks were only serialized on the client
 - Add feature flags for debug rendering
+- Add grass
 
 ## 0.1.1
 
