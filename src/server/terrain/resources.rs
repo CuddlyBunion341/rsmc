@@ -50,7 +50,7 @@ pub struct HeightAdjustParams {
 }
 
 pub struct GrassParams {
-    pub spawn_attempts_per_chunk: u32,
+    pub frequency: u32,
 }
 
 #[derive(Debug)]
@@ -148,7 +148,7 @@ impl Default for TerrainGeneratorParams {
                 max_bush_radius: 5,
             },
             grass: GrassParams {
-                spawn_attempts_per_chunk: 10,
+                frequency: 10,
             },
         }
     }
