@@ -3,14 +3,18 @@ use terrain_util::create_cross_mesh_for_chunk;
 
 use crate::prelude::*;
 
-pub fn prepare_mesher_materials(
+pub fn prepare_mesher_materials_system(
     mut mesher: ResMut<Mesher>,
-    materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    let texture_handle = obtain_texture_handle(&asset_server).clone();
-    let material_handle = create_transparent_material(texture_handle, materials);
-    mesher.transparent_material_handle = Some(material_handle);
+    let texture_handle = obtain_texture_handle(&asset_server);
+
+    let material = create_transparent_material(texture_handle.clone());
+    mesher.transparent_material_handle = Some(materials.add(material));
+
+    let material = create_chunk_material(texture_handle);
+    mesher.chunk_material_handle = Some(materials.add(material));
 }
 
 pub fn generate_simple_ground_system(
@@ -92,11 +96,10 @@ pub fn handle_chunk_mesh_update_events(
                 }
                 add_chunk_objects(
                     &mut commands,
-                    &asset_server,
                     &mut meshes,
-                    &mut materials,
                     chunk,
                     &texture_manager,
+                    &mesher,
                 );
                 add_cross_objects(&mut commands, chunk, &mesher, &texture_manager, &mut meshes);
             }
@@ -109,15 +112,16 @@ pub fn handle_chunk_mesh_update_events(
 
 fn add_chunk_objects(
     commands: &mut Commands,
-    asset_server: &Res<AssetServer>,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
     chunk: &Chunk,
     texture_manager: &terrain_util::TextureManager,
+    mesher: &Mesher,
 ) {
     if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
-        let texture_handle = obtain_texture_handle(asset_server).clone();
-        let material = create_chunk_material(texture_handle, &mut ResMut::reborrow(materials));
+        let material = mesher
+            .chunk_material_handle
+            .clone()
+            .expect("Chunk material not loaded");
         spawn_chunk(
             commands,
             &mut ResMut::reborrow(meshes),
@@ -172,11 +176,8 @@ fn create_chunk_mesh(
     terrain_util::create_chunk_mesh(chunk, texture_manager)
 }
 
-fn create_transparent_material(
-    texture_handle: Handle<Image>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) -> Handle<StandardMaterial> {
-    materials.add(StandardMaterial {
+fn create_transparent_material(texture_handle: Handle<Image>) -> StandardMaterial {
+    StandardMaterial {
         perceptual_roughness: 1.0,
         double_sided: true,
         cull_mode: None,
@@ -186,34 +187,28 @@ fn create_transparent_material(
         alpha_mode: AlphaMode::Mask(1.0),
         base_color_texture: Some(texture_handle),
         ..default()
-    })
+    }
 }
 
 #[cfg(not(feature = "wireframe"))]
-fn create_chunk_material(
-    texture_handle: Handle<Image>,
-    materials: &mut Mut<Assets<StandardMaterial>>,
-) -> Handle<StandardMaterial> {
-    materials.add(StandardMaterial {
+fn create_chunk_material(texture_handle: Handle<Image>) -> StandardMaterial {
+    StandardMaterial {
         perceptual_roughness: 0.5,
         reflectance: 0.0,
         unlit: false,
         specular_transmission: 0.0,
         base_color_texture: Some(texture_handle),
         ..default()
-    })
+    }
 }
 
 #[cfg(feature = "wireframe")]
-fn create_chunk_material(
-    _texture_handle: Handle<Image>,
-    materials: &mut Mut<Assets<StandardMaterial>>,
-) -> Handle<StandardMaterial> {
-    materials.add(StandardMaterial {
+fn create_chunk_material(_texture_handle: Handle<Image>) -> StandardMaterial {
+    StandardMaterial {
         base_color: Color::srgba(0.0, 0.0, 0.0, 0.0),
         alpha_mode: AlphaMode::Mask(0.5),
         ..default()
-    })
+    }
 }
 
 fn obtain_texture_handle(asset_server: &Res<AssetServer>) -> Handle<Image> {

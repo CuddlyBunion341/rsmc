@@ -15,6 +15,7 @@ impl SpawnAreaLoaded {
 pub struct Mesher {
     pub mesh_handles: HashMap<MeshRepresentation, Handle<Mesh>>,
     pub transparent_material_handle: Option<Handle<StandardMaterial>>,
+    pub chunk_material_handle: Option<Handle<StandardMaterial>>,
 }
 
 impl Default for Mesher {
@@ -28,6 +29,7 @@ impl Mesher {
         Mesher {
             mesh_handles: HashMap::new(),
             transparent_material_handle: None,
+            chunk_material_handle: None,
         }
     }
 }
