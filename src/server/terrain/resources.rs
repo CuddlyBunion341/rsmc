@@ -147,9 +147,7 @@ impl Default for TerrainGeneratorParams {
                 min_bush_radius: 3,
                 max_bush_radius: 5,
             },
-            grass: GrassParams {
-                frequency: 10,
-            },
+            grass: GrassParams { frequency: 10 },
         }
     }
 }

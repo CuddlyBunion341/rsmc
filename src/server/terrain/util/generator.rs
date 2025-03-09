@@ -192,8 +192,7 @@ impl Generator {
                 && Chunk::valid_unpadded(x, y - 1, z)
                 && chunk.get_unpadded(x, y - 1, z) == BlockId::Grass
             {
-                let random_number =
-                    rand::random_range(0..=self.params.grass.frequency);
+                let random_number = rand::random_range(0..=self.params.grass.frequency);
                 if random_number == 0 {
                     chunk.set_unpadded(x, y, z, BlockId::Tallgrass);
                 }
