@@ -12,6 +12,7 @@ pub fn create_cube_geometry_data(
     faces: u8,
     block_id: BlockId,
     texture_manager: &TextureManager,
+    chunk: &Chunk,
 ) -> GeometryData {
     let mut position = Vec::new();
     let mut uv = Vec::new();
@@ -40,7 +41,43 @@ pub fn create_cube_geometry_data(
             ]);
             normal.push(vertex.normal);
 
-            color.push([1.0, 1.0, 1.0, 1.0]);
+            let check = |dx: i32, dy: i32, dz: i32| -> bool {
+                let dx = dx as f32 + 0.5;
+                let dy = dy as f32 + 0.5;
+                let dz = dz as f32 + 0.5;
+
+                if !Chunk::valid_padded(
+                    (vertex.position[0] * 0.5 + x + dx) as usize,
+                    (vertex.position[1] * 0.5 + y + dy) as usize,
+                    (vertex.position[2] * 0.5 + z + dz) as usize,
+                ) {
+                    return false;
+                }
+
+                let neighbor_id = chunk.get_unpadded(
+                    (vertex.position[0] * 0.5 + x + dx) as usize,
+                    (vertex.position[1] * 0.5 + y + dy) as usize,
+                    (vertex.position[2] * 0.5 + z + dz) as usize,
+                );
+                !block_properties(neighbor_id).transparent
+            };
+
+            let checks = [
+                (check(0, 1, 0)),
+                (check(1, 0, 0)),
+                (check(0, 0, 1)),
+                (check(1, 1, 0) && (check(0, 1, 0) || check(1, 0, 0))),
+                (check(0, 1, 1) && (check(0, 1, 0) || check(0, 0, 1))),
+                (check(1, 0, 1) && (check(1, 0, 0) || check(0, 0, 1))),
+                (check(1, 1, 1) && (check(0, 1, 1) || check(1, 0, 1) || check(1, 1, 0))),
+            ];
+
+            let ao_count: f32 = checks.iter().map(|v| *v as u8 as f32).sum();
+            let max_ao: f32 = 8.0;
+
+            let ao_value = (max_ao - ao_count) / max_ao;
+
+            color.push([ao_value, ao_value, ao_value, 1.0]);
         }
 
         let offsets = [0, 1, 2, 2, 1, 3];
@@ -110,6 +147,7 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                     mask,
                     block_id,
                     texture_manager,
+                    chunk,
                 );
 
                 geometry_data.indices.extend(
@@ -222,8 +260,9 @@ mod tests {
     #[test]
     fn test_create_cube_geometry_data() {
         let texture_manager = TextureManager::new();
+        let chunk = Chunk::new(Vec3::ZERO);
         let geometry_data =
-            create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111, BlockId::Stone, &texture_manager);
+            create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111, BlockId::Stone, &texture_manager, &chunk);
 
         assert_eq!(geometry_data.position.len(), 6 * 4);
         assert_eq!(geometry_data.uv.len(), 6 * 4);
