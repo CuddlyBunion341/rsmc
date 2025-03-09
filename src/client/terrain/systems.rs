@@ -69,12 +69,9 @@ pub fn generate_world_system(
     });
 }
 
-#[allow(clippy::too_many_arguments)]
 pub fn handle_chunk_mesh_update_events(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     chunk_manager: ResMut<ChunkManager>,
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
@@ -94,13 +91,7 @@ pub fn handle_chunk_mesh_update_events(
                         commands.entity(entity).despawn();
                     }
                 }
-                add_chunk_objects(
-                    &mut commands,
-                    &mut meshes,
-                    chunk,
-                    &texture_manager,
-                    &mesher,
-                );
+                add_chunk_objects(&mut commands, &mut meshes, chunk, &texture_manager, &mesher);
                 add_cross_objects(&mut commands, chunk, &mesher, &texture_manager, &mut meshes);
             }
             None => {
@@ -117,18 +108,30 @@ fn add_chunk_objects(
     texture_manager: &terrain_util::TextureManager,
     mesher: &Mesher,
 ) {
-    if let Some(mesh) = create_chunk_mesh(chunk, texture_manager) {
+    if let Some(mesh) = terrain_util::create_chunk_mesh(chunk, texture_manager) {
         let material = mesher
             .chunk_material_handle
             .clone()
             .expect("Chunk material not loaded");
-        spawn_chunk(
-            commands,
-            &mut ResMut::reborrow(meshes),
-            material,
-            mesh,
-            chunk,
-        );
+
+        let meshes: &mut Mut<Assets<Mesh>> = &mut ResMut::reborrow(meshes);
+        commands.spawn((
+            Mesh3d(meshes.add(mesh)),
+            Transform::from_xyz(
+                chunk.position.x * CHUNK_SIZE as f32,
+                chunk.position.y * CHUNK_SIZE as f32,
+                chunk.position.z * CHUNK_SIZE as f32,
+            ),
+            MeshMaterial3d(material),
+            player_components::Raycastable,
+            terrain_components::ChunkMesh {
+                key: [
+                    chunk.position.x as i32,
+                    chunk.position.y as i32,
+                    chunk.position.z as i32,
+                ],
+            },
+        ));
     }
 }
 
@@ -169,13 +172,6 @@ fn add_cross_objects(
     ));
 }
 
-fn create_chunk_mesh(
-    chunk: &Chunk,
-    texture_manager: &terrain_util::TextureManager,
-) -> Option<Mesh> {
-    terrain_util::create_chunk_mesh(chunk, texture_manager)
-}
-
 fn create_transparent_material(texture_handle: Handle<Image>) -> StandardMaterial {
     StandardMaterial {
         perceptual_roughness: 1.0,
@@ -213,32 +209,6 @@ fn create_chunk_material(_texture_handle: Handle<Image>) -> StandardMaterial {
 
 fn obtain_texture_handle(asset_server: &Res<AssetServer>) -> Handle<Image> {
     asset_server.load("textures/texture_atlas.png")
-}
-
-fn spawn_chunk(
-    commands: &mut Commands,
-    meshes: &mut Mut<Assets<Mesh>>,
-    material: Handle<StandardMaterial>,
-    mesh: Mesh,
-    chunk: &Chunk,
-) {
-    commands.spawn((
-        Mesh3d(meshes.add(mesh)),
-        Transform::from_xyz(
-            chunk.position.x * CHUNK_SIZE as f32,
-            chunk.position.y * CHUNK_SIZE as f32,
-            chunk.position.z * CHUNK_SIZE as f32,
-        ),
-        MeshMaterial3d(material),
-        player_components::Raycastable,
-        terrain_components::ChunkMesh {
-            key: [
-                chunk.position.x as i32,
-                chunk.position.y as i32,
-                chunk.position.z as i32,
-            ],
-        },
-    ));
 }
 
 pub fn handle_terrain_regeneration_events(
