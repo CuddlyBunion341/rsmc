@@ -21,6 +21,7 @@ fn create_cross_geometry_for_chunk(
     let mut position = vec![];
     let mut uv = vec![];
     let mut normal = vec![];
+    let mut color = vec![];
     let mut indices = vec![];
 
     let mut index_offset = 0;
@@ -52,6 +53,7 @@ fn create_cross_geometry_for_chunk(
                                 face_uv[1] + vertex.uv[1] * 0.25,
                             ]);
                             normal.push(vertex.normal);
+                            color.push([1.0, 1.0, 1.0, 1.0]);
                         }
 
                         let offsets = [0, 1, 3, 1, 2, 3];
@@ -70,6 +72,7 @@ fn create_cross_geometry_for_chunk(
         position,
         uv,
         normal,
+        color,
         indices,
     }
 }

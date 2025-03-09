@@ -32,6 +32,7 @@ pub mod client_block {
     use MeshRepresentation::*;
 
     pub struct BlockProperties {
+        pub transparent: bool,
         pub has_collider: bool,
         pub mesh_representation: MeshRepresentation,
     }
@@ -40,30 +41,33 @@ pub mod client_block {
         use TextureName::*;
 
         let touple = match block_id {
-            BlockId::Air => (false, None),
+            BlockId::Air => (true, false, None),
             BlockId::Grass => (
+                false,
                 true,
                 Cube([GrassTop, Dirt, GrassSide, GrassSide, GrassSide, GrassSide]),
             ),
-            BlockId::Dirt => (true, Cube([Dirt; 6])),
-            BlockId::Stone => (true, Cube([Stone; 6])),
-            BlockId::CobbleStone => (true, Cube([CobbleStone; 6])),
-            BlockId::Bedrock => (true, Cube([Bedrock; 6])),
-            BlockId::IronOre => (true, Cube([IronOre; 6])),
-            BlockId::CoalOre => (true, Cube([CoalOre; 6])),
-            BlockId::OakLeaves => (true, Cube([OakLeaves; 6])),
+            BlockId::Dirt => (false, true, Cube([Dirt; 6])),
+            BlockId::Stone => (false, true, Cube([Stone; 6])),
+            BlockId::CobbleStone => (false, true, Cube([CobbleStone; 6])),
+            BlockId::Bedrock => (false, true, Cube([Bedrock; 6])),
+            BlockId::IronOre => (false, true, Cube([IronOre; 6])),
+            BlockId::CoalOre => (false, true, Cube([CoalOre; 6])),
+            BlockId::OakLeaves => (false, true, Cube([OakLeaves; 6])),
             BlockId::OakLog => (
+                false,
                 true,
                 Cube([
                     OakLogTop, OakLogTop, OakLogSide, OakLogSide, OakLogSide, OakLogSide,
                 ]),
             ),
-            BlockId::Tallgrass => (false, Cross([Tallgrass, Tallgrass])),
+            BlockId::Tallgrass => (true, false, Cross([Tallgrass, Tallgrass])),
         };
 
         BlockProperties {
-            has_collider: touple.0,
-            mesh_representation: touple.1,
+            transparent: touple.0,
+            has_collider: touple.1,
+            mesh_representation: touple.2,
         }
     }
 

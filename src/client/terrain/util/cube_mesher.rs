@@ -12,10 +12,12 @@ pub fn create_cube_geometry_data(
     faces: u8,
     block_id: BlockId,
     texture_manager: &TextureManager,
+    chunk: &Chunk,
 ) -> GeometryData {
     let mut position = Vec::new();
     let mut uv = Vec::new();
     let mut normal = Vec::new();
+    let mut color = Vec::new();
     let mut indices = Vec::new();
     let mut index_offset = 0;
 
@@ -38,6 +40,41 @@ pub fn create_cube_geometry_data(
                 block_uvs[1] + (1.0 - vertex.uv[1]) * 0.25,
             ]);
             normal.push(vertex.normal);
+
+            let check = |dx: i32, dy: i32, dz: i32| -> bool {
+                let dx = dx as f32 + 0.5;
+                let dy = dy as f32 + 0.5;
+                let dz = dz as f32 + 0.5;
+
+                let cx = (vertex.position[0] * 0.5 + x + dx) as usize;
+                let cy = (vertex.position[1] * 0.5 + y + dy) as usize;
+                let cz = (vertex.position[2] * 0.5 + z + dz) as usize;
+
+                if !Chunk::valid_padded(cx, cy, cz) {
+                    return false;
+                }
+
+                let neighbor_id = chunk.get_unpadded(cx, cy, cz);
+                !block_properties(neighbor_id).transparent
+            };
+
+            let checks = [
+                (check(0, 1, 0)),
+                (check(1, 0, 0)),
+                (check(0, 0, 1)),
+                (check(1, 1, 0) && (check(0, 1, 0) || check(1, 0, 0))),
+                (check(0, 1, 1) && (check(0, 1, 0) || check(0, 0, 1))),
+                (check(1, 0, 1) && (check(1, 0, 0) || check(0, 0, 1))),
+                (check(1, 1, 1) && (check(0, 1, 1) || check(1, 0, 1) || check(1, 1, 0))),
+            ];
+
+            let ao_count: f32 = checks.iter().map(|v| *v as u8 as f32).sum();
+            let max_ao: f32 = 8.0;
+
+            let mut ao_value = (max_ao - ao_count) / max_ao;
+            ao_value += 0.5;
+
+            color.push([ao_value, ao_value, ao_value, 1.0]);
         }
 
         let offsets = [0, 1, 2, 2, 1, 3];
@@ -51,6 +88,7 @@ pub fn create_cube_geometry_data(
         position,
         uv,
         normal,
+        color,
         indices,
     }
 }
@@ -60,6 +98,7 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
         position: Vec::new(),
         uv: Vec::new(),
         normal: Vec::new(),
+        color: Vec::new(),
         indices: Vec::new(),
     };
 
@@ -105,6 +144,7 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                     mask,
                     block_id,
                     texture_manager,
+                    chunk,
                 );
 
                 geometry_data.indices.extend(
@@ -116,6 +156,7 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                 geometry_data.position.extend(cube_data.position);
                 geometry_data.uv.extend(cube_data.uv);
                 geometry_data.normal.extend(cube_data.normal);
+                geometry_data.color.extend(cube_data.color);
             }
         }
     }
@@ -200,6 +241,12 @@ mod tests {
             ],
             uv: vec![[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
             normal: vec![[0.0, 0.0, 1.0]; 4],
+            color: vec![
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+            ],
             indices: vec![0, 1, 2, 2, 3, 0],
         };
 
@@ -210,12 +257,21 @@ mod tests {
     #[test]
     fn test_create_cube_geometry_data() {
         let texture_manager = TextureManager::new();
-        let geometry_data =
-            create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111, BlockId::Stone, &texture_manager);
+        let chunk = Chunk::new(Vec3::ZERO);
+        let geometry_data = create_cube_geometry_data(
+            0.0,
+            0.0,
+            0.0,
+            0b111111,
+            BlockId::Stone,
+            &texture_manager,
+            &chunk,
+        );
 
         assert_eq!(geometry_data.position.len(), 6 * 4);
         assert_eq!(geometry_data.uv.len(), 6 * 4);
         assert_eq!(geometry_data.normal.len(), 6 * 4);
+        assert_eq!(geometry_data.color.len(), 6 * 4);
         assert_eq!(geometry_data.indices.len(), 6 * 6);
     }
 }
