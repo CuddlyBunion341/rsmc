@@ -11,7 +11,6 @@ pub const CHUNK_LENGTH: usize = PADDED_CHUNK_SIZE * PADDED_CHUNK_SIZE * PADDED_C
 
 #[derive(Debug, Clone, Copy)]
 pub struct Chunk {
-    // #[serde(with = "BigArray")]
     pub data: [BlockId; CHUNK_LENGTH],
     pub position: Vec3,
 }
@@ -45,9 +44,7 @@ impl Chunk {
     }
 
     pub fn update(&mut self, x: usize, y: usize, z: usize, value: BlockId) {
-        if Self::valid_padded(x, y, z) {
-            self.set(x, y, z, value);
-        }
+        self.set(x, y, z, value);
 
         if !value.supports_grass()
             && Self::valid_padded(x, y + 1, z)
