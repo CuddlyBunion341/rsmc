@@ -24,7 +24,7 @@ impl Chunk {
     }
 
     pub fn valid_padded(x: usize, y: usize, z: usize) -> bool {
-        (1..CHUNK_SIZE).contains(&x) && (1..CHUNK_SIZE).contains(&y) && (1..CHUNK_SIZE).contains(&z)
+        (0..CHUNK_SIZE).contains(&x) && (0..CHUNK_SIZE).contains(&y) && (0..CHUNK_SIZE).contains(&z)
     }
 
     pub fn valid_unpadded(x: usize, y: usize, z: usize) -> bool {
@@ -304,5 +304,47 @@ mod tests {
 
         let retrieved_chunk_positions = chunk_manager.get_all_chunk_positions();
         assert_eq!(retrieved_chunk_positions.len(), 3);
+    }
+
+    #[test]
+    fn test_tallgrass_update() {
+        let mut chunk_manager = ChunkManager::new();
+        let chunk_position = Vec3::new(0.0, 0.0, 0.0);
+        let chunk = Chunk::new(chunk_position);
+        chunk_manager.set_chunk(chunk_position, chunk);
+
+        let grass_position = Vec3::new(0.0, 0.0, 0.0);
+        let tallgrass_position = Vec3::new(0.0, 1.0, 0.0);
+
+        chunk_manager.update_block(grass_position, BlockId::Grass);
+        assert_eq!(
+            chunk_manager.get_block(grass_position).unwrap(),
+            BlockId::Grass
+        );
+        chunk_manager.update_block(tallgrass_position, BlockId::Tallgrass);
+        assert_eq!(
+            chunk_manager.get_block(tallgrass_position).unwrap(),
+            BlockId::Tallgrass
+        );
+
+        chunk_manager.update_block(grass_position, BlockId::Dirt);
+        assert_eq!(
+            chunk_manager.get_block(grass_position).unwrap(),
+            BlockId::Dirt
+        );
+        assert_eq!(
+            chunk_manager.get_block(tallgrass_position).unwrap(),
+            BlockId::Tallgrass
+        );
+
+        chunk_manager.update_block(grass_position, BlockId::Air);
+        assert_eq!(
+            chunk_manager.get_block(grass_position).unwrap(),
+            BlockId::Air
+        );
+        assert_eq!(
+            chunk_manager.get_block(tallgrass_position).unwrap(),
+            BlockId::Air
+        );
     }
 }
