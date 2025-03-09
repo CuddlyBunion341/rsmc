@@ -46,19 +46,15 @@ pub fn create_cube_geometry_data(
                 let dy = dy as f32 + 0.5;
                 let dz = dz as f32 + 0.5;
 
-                if !Chunk::valid_padded(
-                    (vertex.position[0] * 0.5 + x + dx) as usize,
-                    (vertex.position[1] * 0.5 + y + dy) as usize,
-                    (vertex.position[2] * 0.5 + z + dz) as usize,
-                ) {
+                let cx = (vertex.position[0] * 0.5 + x + dx) as usize;
+                let cy = (vertex.position[1] * 0.5 + y + dy) as usize;
+                let cz = (vertex.position[2] * 0.5 + z + dz) as usize;
+
+                if !Chunk::valid_padded(cx, cy, cz) {
                     return false;
                 }
 
-                let neighbor_id = chunk.get_unpadded(
-                    (vertex.position[0] * 0.5 + x + dx) as usize,
-                    (vertex.position[1] * 0.5 + y + dy) as usize,
-                    (vertex.position[2] * 0.5 + z + dz) as usize,
-                );
+                let neighbor_id = chunk.get_unpadded(cx, cy, cz);
                 !block_properties(neighbor_id).transparent
             };
 
@@ -75,7 +71,8 @@ pub fn create_cube_geometry_data(
             let ao_count: f32 = checks.iter().map(|v| *v as u8 as f32).sum();
             let max_ao: f32 = 8.0;
 
-            let ao_value = (max_ao - ao_count) / max_ao;
+            let mut ao_value = (max_ao - ao_count) / max_ao;
+            ao_value += 0.5;
 
             color.push([ao_value, ao_value, ao_value, 1.0]);
         }
@@ -261,8 +258,15 @@ mod tests {
     fn test_create_cube_geometry_data() {
         let texture_manager = TextureManager::new();
         let chunk = Chunk::new(Vec3::ZERO);
-        let geometry_data =
-            create_cube_geometry_data(0.0, 0.0, 0.0, 0b111111, BlockId::Stone, &texture_manager, &chunk);
+        let geometry_data = create_cube_geometry_data(
+            0.0,
+            0.0,
+            0.0,
+            0b111111,
+            BlockId::Stone,
+            &texture_manager,
+            &chunk,
+        );
 
         assert_eq!(geometry_data.position.len(), 6 * 4);
         assert_eq!(geometry_data.uv.len(), 6 * 4);
