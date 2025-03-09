@@ -1,24 +1,7 @@
 use terrain_resources::Mesher;
-use terrain_util::{
-    client_block::block_properties, get_cross_block_positions, instance_mesh_for_repr,
-};
+use terrain_util::create_cross_mesh_for_chunk;
 
 use crate::prelude::*;
-
-pub fn populate_mesher_meshes(
-    mut mesher: ResMut<Mesher>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    texture_manager: ResMut<terrain_util::TextureManager>,
-) {
-    BlockId::values().iter().for_each(|block_id| {
-        let mesh_repr = block_properties(*block_id).mesh_representation;
-        let mesh = instance_mesh_for_repr(mesh_repr.clone(), &texture_manager);
-        if let Some(mesh) = mesh {
-            let handle = meshes.add(mesh);
-            mesher.mesh_handles.insert(mesh_repr, handle);
-        }
-    });
-}
 
 pub fn prepare_mesher_materials(
     mut mesher: ResMut<Mesher>,
@@ -115,7 +98,7 @@ pub fn handle_chunk_mesh_update_events(
                     chunk,
                     &texture_manager,
                 );
-                add_cross_objects(&mut commands, chunk, &mesher);
+                add_cross_objects(&mut commands, chunk, &mesher, &texture_manager, &mut meshes);
             }
             None => {
                 println!("No chunk found");
@@ -145,37 +128,41 @@ fn add_chunk_objects(
     }
 }
 
-fn add_cross_objects(commands: &mut Commands, chunk: &Chunk, mesher: &Mesher) {
-    let values = get_cross_block_positions(chunk);
-    for (mesh_repr, positions) in values {
-        let mesh_handle = mesher
-            .mesh_handles
-            .get(&mesh_repr)
-            .expect("Handle is not yet populated");
-        let material_handle = mesher
-            .transparent_material_handle
-            .clone()
-            .expect("Material has not yet been set");
-
-        for position in positions {
-            commands.spawn((
-                Mesh3d(mesh_handle.clone()),
-                MeshMaterial3d(material_handle.clone()),
-                Transform::from_xyz(
-                    chunk.position.x * CHUNK_SIZE as f32 + position.x,
-                    chunk.position.y * CHUNK_SIZE as f32 + position.y,
-                    chunk.position.z * CHUNK_SIZE as f32 + position.z,
-                ),
-                terrain_components::ChunkMesh {
-                    key: [
-                        chunk.position.x as i32,
-                        chunk.position.y as i32,
-                        chunk.position.z as i32,
-                    ],
-                },
-            ));
-        }
+fn add_cross_objects(
+    commands: &mut Commands,
+    chunk: &Chunk,
+    mesher: &Mesher,
+    texture_manager: &terrain_util::TextureManager,
+    meshes: &mut ResMut<Assets<Mesh>>,
+) {
+    let mesh = create_cross_mesh_for_chunk(chunk, texture_manager);
+    if mesh.is_none() {
+        return;
     }
+    let mesh = mesh.unwrap();
+    let mesh_handle = meshes.add(mesh);
+
+    commands.spawn((
+        Mesh3d(mesh_handle),
+        MeshMaterial3d(
+            mesher
+                .transparent_material_handle
+                .clone()
+                .expect("Material exsits"),
+        ),
+        Transform::from_xyz(
+            chunk.position.x * CHUNK_SIZE as f32,
+            chunk.position.y * CHUNK_SIZE as f32,
+            chunk.position.z * CHUNK_SIZE as f32,
+        ),
+        terrain_components::ChunkMesh {
+            key: [
+                chunk.position.x as i32,
+                chunk.position.y as i32,
+                chunk.position.z as i32,
+            ],
+        },
+    ));
 }
 
 fn create_chunk_mesh(

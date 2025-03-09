@@ -34,7 +34,7 @@ pub fn create_cube_geometry_data(
 
             let block_uvs = Block::get_block_face_uvs(block_id, *face, texture_manager).unwrap();
             uv.push([
-                block_uvs[0] + vertex.uv[0] * 0.25 - 0.001,
+                block_uvs[0] + vertex.uv[0] * 0.25,
                 block_uvs[1] + (1.0 - vertex.uv[1]) * 0.25,
             ]);
             normal.push(vertex.normal);
