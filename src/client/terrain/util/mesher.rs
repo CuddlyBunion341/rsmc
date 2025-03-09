@@ -1,3 +1,5 @@
+use bevy::reflect::List;
+
 use crate::prelude::*;
 
 pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
@@ -5,11 +7,16 @@ pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
         position,
         uv,
         normal,
+        color,
         indices,
     } = geometry_data;
 
-    if (position.is_empty() || uv.is_empty() || normal.is_empty() || indices.is_empty())
-        || (position.len() != uv.len() || uv.len() != normal.len())
+    if (position.is_empty()
+        || uv.is_empty()
+        || normal.is_empty()
+        || indices.is_empty()
+        || color.is_empty())
+        || (position.len() != uv.len() || uv.len() != normal.len() || normal.len() != color.len())
     {
         return None;
     }
@@ -22,6 +29,7 @@ pub fn create_cube_mesh_from_data(geometry_data: GeometryData) -> Option<Mesh> {
         .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, position)
         .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uv)
         .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normal)
+        .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, color)
         .with_inserted_indices(Indices::U32(indices)),
     )
 }
@@ -37,4 +45,5 @@ pub struct GeometryData {
     pub uv: Vec<[f32; 2]>,
     pub normal: Vec<[f32; 3]>,
     pub indices: Vec<u32>,
+    pub color: Vec<[f32; 4]>,
 }

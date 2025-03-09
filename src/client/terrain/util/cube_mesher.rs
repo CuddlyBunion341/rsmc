@@ -16,6 +16,7 @@ pub fn create_cube_geometry_data(
     let mut position = Vec::new();
     let mut uv = Vec::new();
     let mut normal = Vec::new();
+    let mut color = Vec::new();
     let mut indices = Vec::new();
     let mut index_offset = 0;
 
@@ -38,6 +39,8 @@ pub fn create_cube_geometry_data(
                 block_uvs[1] + (1.0 - vertex.uv[1]) * 0.25,
             ]);
             normal.push(vertex.normal);
+
+            color.push([rand::random(), rand::random(), rand::random(), 1.0]);
         }
 
         let offsets = [0, 1, 2, 2, 1, 3];
@@ -51,6 +54,7 @@ pub fn create_cube_geometry_data(
         position,
         uv,
         normal,
+        color,
         indices,
     }
 }
@@ -60,6 +64,7 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
         position: Vec::new(),
         uv: Vec::new(),
         normal: Vec::new(),
+        color: Vec::new(),
         indices: Vec::new(),
     };
 
@@ -116,6 +121,7 @@ pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Opt
                 geometry_data.position.extend(cube_data.position);
                 geometry_data.uv.extend(cube_data.uv);
                 geometry_data.normal.extend(cube_data.normal);
+                geometry_data.color.extend(cube_data.color);
             }
         }
     }
@@ -200,6 +206,12 @@ mod tests {
             ],
             uv: vec![[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
             normal: vec![[0.0, 0.0, 1.0]; 4],
+            color: vec![
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0],
+            ],
             indices: vec![0, 1, 2, 2, 3, 0],
         };
 
@@ -216,6 +228,7 @@ mod tests {
         assert_eq!(geometry_data.position.len(), 6 * 4);
         assert_eq!(geometry_data.uv.len(), 6 * 4);
         assert_eq!(geometry_data.normal.len(), 6 * 4);
+        assert_eq!(geometry_data.color.len(), 6 * 4);
         assert_eq!(geometry_data.indices.len(), 6 * 6);
     }
 }
