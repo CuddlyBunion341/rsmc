@@ -1,5 +1,7 @@
+use bevy::{ecs::world::CommandQueue, tasks::{block_on, futures_lite::future, AsyncComputeTaskPool}};
+use terrain_components::FutureChunk;
 use terrain_resources::RenderMaterials;
-use terrain_util::create_cross_mesh_for_chunk;
+use terrain_util::{create_cross_geometry_for_chunk, create_cross_mesh_for_chunk, GeometryData};
 
 use crate::prelude::*;
 
@@ -25,9 +27,9 @@ pub fn generate_simple_ground_system(
     let mesh = Cuboid::new(64.0, 1.0, 64.0);
 
     commands.spawn((
-        Mesh3d(meshes.add(mesh)),
-        MeshMaterial3d(materials.add(Color::srgba(1.0, 0.0, 1.0, 1.0))),
-        Name::new("Simple Ground Plane"),
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(materials.add(Color::srgba(1.0, 0.0, 1.0, 1.0))),
+            Name::new("Simple Ground Plane"),
     ));
 }
 
@@ -91,20 +93,48 @@ pub fn handle_chunk_mesh_update_events_system(
                         commands.entity(entity).despawn();
                     }
                 }
-                add_chunk_objects(
-                    &mut commands,
-                    &mut meshes,
-                    chunk,
-                    &texture_manager,
-                    &materials,
-                );
-                add_cross_objects(
-                    &mut commands,
-                    chunk,
-                    &materials,
-                    &texture_manager,
-                    &mut meshes,
-                );
+                // add_chunk_objects(
+                //     &mut commands,
+                //     &mut meshes,
+                //     chunk,
+                //     &texture_manager,
+                //     &materials,
+                // );
+
+                let entity = commands.spawn_empty().id();
+                let     thread_pool = AsyncComputeTaskPool::get();
+
+                let chunk_position = chunk.position.clone();
+
+                let task = thread_pool.spawn(async move {
+
+                    let geometry_data = create_cross_geometry_for_chunk(chunk, &texture_manager);
+
+                    // command_queue.push(move |world: &mut World| {
+                    //     world.entity_mut(entity).insert((
+                    //             Mesh3d(mesh_handle),
+                    //             MeshMaterial3d(
+                    //                 transparent_material,
+                    //             ),
+                    //             Transform::from_xyz(
+                    //                 chunk_position.x * CHUNK_SIZE as f32,
+                    //                 chunk_position.y * CHUNK_SIZE as f32,
+                    //                 chunk_position.z * CHUNK_SIZE as f32,
+                    //             ),
+                    //             terrain_components::ChunkMesh {
+                    //                 key: [
+                    //                     chunk_position.x as i32,
+                    //                     chunk_position.y as i32,
+                    //                     chunk_position.z as i32,
+                    //                 ],
+                    //             },
+                    //     )).remove::<ComputeTransform>();
+                    // });
+
+                    (chunk_position, geometry_data)
+                });
+
+                commands.entity(entity).insert(FutureChunk(task));
             }
             None => {
                 println!("No chunk found");
@@ -113,6 +143,62 @@ pub fn handle_chunk_mesh_update_events_system(
     }
 }
 
+pub fn handle_future_chunks_system(mut commands: Commands, mut materials: ResMut<Asset<Material>>, mut chunks_query: Query<(Entity, &FutureChunk)>) {
+
+    for (entity, future) in chunks_query.iter() {
+
+        if let Some(mut commands_queue) = block_on(future::poll_once(&mut future.0)) {
+
+            // append the returned command queue to have it execute later
+
+            commands.append(&mut commands_queue);
+
+        }
+
+        commands.entity(entity).insert(
+            (                Mesh3d(mesh_handle),
+            MeshMaterial3d(
+                transparent_material,
+            ),
+            Transform::from_xyz(
+                chunk_position.x * CHUNK_SIZE as f32,
+                chunk_position.y * CHUNK_SIZE as f32,
+                chunk_position.z * CHUNK_SIZE as f32,
+            ),
+            terrain_components::ChunkMesh {
+                key: [
+                    chunk_position.x as i32,
+                    chunk_position.y as i32,
+                    chunk_position.z as i32,
+                ],
+            },
+            )
+            ).remove::<FutureChunk>();
+    }
+
+    commands.spawn(
+        insert((
+                Mesh3d(mesh_handle),
+                MeshMaterial3d(
+                    transparent_material,
+                ),
+                Transform::from_xyz(
+                    chunk_position.x * CHUNK_SIZE as f32,
+                    chunk_position.y * CHUNK_SIZE as f32,
+                    chunk_position.z * CHUNK_SIZE as f32,
+                ),
+                terrain_components::ChunkMesh {
+                    key: [
+                        chunk_position.x as i32,
+                        chunk_position.y as i32,
+                        chunk_position.z as i32,
+                    ],
+                },
+        )).remove::<ComputeTransform>();
+    });
+}
+
+
 fn add_chunk_objects(
     commands: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
@@ -120,6 +206,7 @@ fn add_chunk_objects(
     texture_manager: &terrain_util::TextureManager,
     materials: &RenderMaterials,
 ) {
+    // create_chunk_mesh is probably the blocker and should be moved to a task queue
     if let Some(mesh) = terrain_util::create_chunk_mesh(chunk, texture_manager) {
         let material = materials
             .chunk_material
@@ -128,56 +215,22 @@ fn add_chunk_objects(
 
         let meshes: &mut Mut<Assets<Mesh>> = &mut ResMut::reborrow(meshes);
         commands.spawn((
-            Mesh3d(meshes.add(mesh)),
-            Transform::from_xyz(
-                chunk.position.x * CHUNK_SIZE as f32,
-                chunk.position.y * CHUNK_SIZE as f32,
-                chunk.position.z * CHUNK_SIZE as f32,
-            ),
-            MeshMaterial3d(material),
-            player_components::Raycastable,
-            terrain_components::ChunkMesh {
-                key: [
-                    chunk.position.x as i32,
-                    chunk.position.y as i32,
-                    chunk.position.z as i32,
-                ],
-            },
-            Name::from("Transparent Chunk Mesh"),
-        ));
-    }
-}
-
-fn add_cross_objects(
-    commands: &mut Commands,
-    chunk: &Chunk,
-    materials: &RenderMaterials,
-    texture_manager: &terrain_util::TextureManager,
-    meshes: &mut ResMut<Assets<Mesh>>,
-) {
-    if let Some(mesh) = create_cross_mesh_for_chunk(chunk, texture_manager) {
-        let mesh_handle = meshes.add(mesh);
-
-        commands.spawn((
-            Mesh3d(mesh_handle),
-            MeshMaterial3d(
-                materials
-                    .transparent_material
-                    .clone()
-                    .expect("Transparent material exists"),
-            ),
-            Transform::from_xyz(
-                chunk.position.x * CHUNK_SIZE as f32,
-                chunk.position.y * CHUNK_SIZE as f32,
-                chunk.position.z * CHUNK_SIZE as f32,
-            ),
-            terrain_components::ChunkMesh {
-                key: [
-                    chunk.position.x as i32,
-                    chunk.position.y as i32,
-                    chunk.position.z as i32,
-                ],
-            },
+                Mesh3d(meshes.add(mesh)),
+                Transform::from_xyz(
+                    chunk.position.x * CHUNK_SIZE as f32,
+                    chunk.position.y * CHUNK_SIZE as f32,
+                    chunk.position.z * CHUNK_SIZE as f32,
+                ),
+                MeshMaterial3d(material),
+                player_components::Raycastable,
+                terrain_components::ChunkMesh {
+                    key: [
+                        chunk.position.x as i32,
+                        chunk.position.y as i32,
+                        chunk.position.z as i32,
+                    ],
+                },
+                Name::from("Transparent Chunk Mesh"),
         ));
     }
 }
