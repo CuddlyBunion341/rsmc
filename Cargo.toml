@@ -27,6 +27,7 @@ renet_visualizer = { git = "https://github.com/CuddlyBunion341/renet.git", featu
 ] }
 egui_plot = "0.30.0"
 flamegraph = "0.6.7"
+async-std = "1.13.0"
 
 [profile.dev.package."*"]
 opt-level = 3
