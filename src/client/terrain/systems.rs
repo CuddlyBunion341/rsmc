@@ -1,7 +1,7 @@
 use bevy::{ecs::world::CommandQueue, tasks::{block_on, futures_lite::future, AsyncComputeTaskPool}};
 use terrain_components::FutureChunk;
 use terrain_resources::RenderMaterials;
-use terrain_util::{create_cross_geometry_for_chunk, create_cross_mesh_for_chunk, GeometryData};
+use terrain_util::{create_chunk_mesh, create_cross_geometry_for_chunk, create_cross_mesh_for_chunk, create_cube_geometry_data, create_cube_mesh_from_data, GeometryData};
 
 use crate::prelude::*;
 
@@ -74,7 +74,7 @@ pub fn generate_world_system(
 pub fn handle_chunk_mesh_update_events_system(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    chunk_manager: ResMut<ChunkManager>,
+    chunk_manager: Res<ChunkManager>,
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
     texture_manager: ResMut<terrain_util::TextureManager>,
@@ -93,45 +93,28 @@ pub fn handle_chunk_mesh_update_events_system(
                         commands.entity(entity).despawn();
                     }
                 }
-                // add_chunk_objects(
-                //     &mut commands,
-                //     &mut meshes,
-                //     chunk,
-                //     &texture_manager,
-                //     &materials,
-                // );
+
+                //add_cross_chunk_objects(
+                //    &mut commands,
+                //    &mut meshes,
+                //    chunk,
+                //    &texture_manager,
+                //    &materials,
+                //);
 
                 let entity = commands.spawn_empty().id();
-                let     thread_pool = AsyncComputeTaskPool::get();
+                let thread_pool = AsyncComputeTaskPool::get();
 
                 let chunk_position = chunk.position.clone();
+                // TODO: improve performance by not cloning?
+                let texture_manager = texture_manager.clone();
+                let chunk = chunk.clone();
 
                 let task = thread_pool.spawn(async move {
+                    let mesh = create_chunk_mesh(&chunk, &texture_manager);
+                    async_std::task::sleep(std::time::Duration::from_millis(0)).await;
 
-                    let geometry_data = create_cross_geometry_for_chunk(chunk, &texture_manager);
-
-                    // command_queue.push(move |world: &mut World| {
-                    //     world.entity_mut(entity).insert((
-                    //             Mesh3d(mesh_handle),
-                    //             MeshMaterial3d(
-                    //                 transparent_material,
-                    //             ),
-                    //             Transform::from_xyz(
-                    //                 chunk_position.x * CHUNK_SIZE as f32,
-                    //                 chunk_position.y * CHUNK_SIZE as f32,
-                    //                 chunk_position.z * CHUNK_SIZE as f32,
-                    //             ),
-                    //             terrain_components::ChunkMesh {
-                    //                 key: [
-                    //                     chunk_position.x as i32,
-                    //                     chunk_position.y as i32,
-                    //                     chunk_position.z as i32,
-                    //                 ],
-                    //             },
-                    //     )).remove::<ComputeTransform>();
-                    // });
-
-                    (chunk_position, geometry_data)
+                    (chunk_position, mesh)
                 });
 
                 commands.entity(entity).insert(FutureChunk(task));
@@ -143,41 +126,24 @@ pub fn handle_chunk_mesh_update_events_system(
     }
 }
 
-pub fn handle_future_chunks_system(mut commands: Commands, mut materials: ResMut<Asset<Material>>, mut chunks_query: Query<(Entity, &FutureChunk)>) {
+pub fn handle_future_chunks_system(
+    mut commands: Commands, 
+    materials: Res<RenderMaterials>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut chunks_query: Query<(Entity, &mut FutureChunk)>) {
+    for (entity, mut future) in chunks_query.iter_mut() {
+        let (chunk_position, mesh_option) = block_on(&mut future.0);
 
-    for (entity, future) in chunks_query.iter() {
-
-        if let Some(mut commands_queue) = block_on(future::poll_once(&mut future.0)) {
-
-            // append the returned command queue to have it execute later
-
-            commands.append(&mut commands_queue);
-
+        if mesh_option.is_none() {
+            continue;
         }
+        let mesh = mesh_option.unwrap();
+        let transparent_material = materials.chunk_material.clone().expect("Material is loaded");
+
+        let mesh_handle = meshes.add(mesh);
 
         commands.entity(entity).insert(
-            (                Mesh3d(mesh_handle),
-            MeshMaterial3d(
-                transparent_material,
-            ),
-            Transform::from_xyz(
-                chunk_position.x * CHUNK_SIZE as f32,
-                chunk_position.y * CHUNK_SIZE as f32,
-                chunk_position.z * CHUNK_SIZE as f32,
-            ),
-            terrain_components::ChunkMesh {
-                key: [
-                    chunk_position.x as i32,
-                    chunk_position.y as i32,
-                    chunk_position.z as i32,
-                ],
-            },
-            )
-            ).remove::<FutureChunk>();
-    }
-
-    commands.spawn(
-        insert((
+            (                
                 Mesh3d(mesh_handle),
                 MeshMaterial3d(
                     transparent_material,
@@ -194,8 +160,9 @@ pub fn handle_future_chunks_system(mut commands: Commands, mut materials: ResMut
                         chunk_position.z as i32,
                     ],
                 },
-        )).remove::<ComputeTransform>();
-    });
+            )
+        ).remove::<FutureChunk>();
+    }
 }
 
 
