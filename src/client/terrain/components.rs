@@ -1,4 +1,4 @@
-use bevy::{ecs::{component::Component, world::CommandQueue}, math::Vec3, prelude::Mesh, tasks::Task};
+use bevy::{ecs::{component::Component, world::CommandQueue}, math::Vec3, tasks::Task};
 
 use super::util::GeometryData;
 
@@ -8,4 +8,4 @@ pub struct ChunkMesh {
 }
 
 #[derive(Component)]
-pub struct FutureChunk(pub Task<(Vec3, Option<Mesh>)>);
+pub struct FutureChunk(pub Task<(Vec3, GeometryData)>);
