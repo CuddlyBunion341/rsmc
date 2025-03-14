@@ -14,7 +14,7 @@ pub fn create_cross_mesh_for_chunk(
     create_cube_mesh_from_data(geometry_data)
 }
 
-pub fn create_cross_geometry_for_chunk(
+fn create_cross_geometry_for_chunk(
     chunk: &Chunk,
     texture_manager: &TextureManager,
 ) -> GeometryData {
