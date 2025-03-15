@@ -1,4 +1,5 @@
-use terrain_resources::RenderMaterials;
+use bevy::tasks::AsyncComputeTaskPool;
+use terrain_resources::{MesherTask, RenderMaterials};
 use terrain_util::create_cross_mesh_for_chunk;
 
 use crate::prelude::*;
@@ -91,14 +92,14 @@ pub fn handle_chunk_mesh_update_events_system(
                         commands.entity(entity).despawn();
                     }
                 }
-                add_chunk_objects(
+                create_cube_mesher_task(
                     &mut commands,
                     &mut meshes,
                     chunk,
                     &texture_manager,
                     &materials,
                 );
-                add_cross_objects(
+                create_cross( 
                     &mut commands,
                     chunk,
                     &materials,
@@ -113,42 +114,20 @@ pub fn handle_chunk_mesh_update_events_system(
     }
 }
 
-fn add_chunk_objects(
-    commands: &mut Commands,
-    meshes: &mut ResMut<Assets<Mesh>>,
+fn create_cube_mesher_task(
     chunk: &Chunk,
     texture_manager: &terrain_util::TextureManager,
-    materials: &RenderMaterials,
-) {
-    if let Some(mesh) = terrain_util::create_chunk_mesh(chunk, texture_manager) {
-        let material = materials
-            .chunk_material
-            .clone()
-            .expect("Chunk material is loaded");
+) -> MesherTask {
+    let task_pool = AsyncComputeTaskPool::get();
 
-        let meshes: &mut Mut<Assets<Mesh>> = &mut ResMut::reborrow(meshes);
-        commands.spawn((
-            Mesh3d(meshes.add(mesh)),
-            Transform::from_xyz(
-                chunk.position.x * CHUNK_SIZE as f32,
-                chunk.position.y * CHUNK_SIZE as f32,
-                chunk.position.z * CHUNK_SIZE as f32,
-            ),
-            MeshMaterial3d(material),
-            player_components::Raycastable,
-            terrain_components::ChunkMesh {
-                key: [
-                    chunk.position.x as i32,
-                    chunk.position.y as i32,
-                    chunk.position.z as i32,
-                ],
-            },
-            Name::from("Transparent Chunk Mesh"),
-        ));
-    }
+    let task = task_pool.spawn(async move {
+        terrain_util::create_chunk_mesh(chunk, texture_manager)
+    });
+
+    MesherTask(task)
 }
 
-fn add_cross_objects(
+fn create_cross( 
     commands: &mut Commands,
     chunk: &Chunk,
     materials: &RenderMaterials,

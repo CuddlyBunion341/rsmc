@@ -1,3 +1,5 @@
+use bevy::tasks::Task;
+
 use crate::prelude::*;
 
 #[derive(Resource)]
@@ -6,6 +8,21 @@ pub struct SpawnAreaLoaded(pub bool);
 impl SpawnAreaLoaded {
     pub fn is_loaded(resource: Res<SpawnAreaLoaded>) -> bool {
         resource.0
+    }
+}
+
+pub struct MesherTask(pub Task<Option<Mesh>>);
+
+#[derive(Resource)]
+pub struct MesherTasks {
+    pub task_list: Vec<(Vec3, MesherTask)>,
+}
+
+impl MesherTasks {
+    pub fn new() -> Self {
+        MesherTasks {
+            task_list: Vec::new()
+        }
     }
 }
 
