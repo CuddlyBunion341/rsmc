@@ -55,7 +55,7 @@ pub fn create_cube_geometry_data(
     }
 }
 
-pub fn create_chunk_mesh(chunk: &Chunk, texture_manager: &TextureManager) -> Option<Mesh> {
+pub fn create_cube_mesh_for_chunk(chunk: &Chunk, texture_manager: &TextureManager) -> Option<Mesh> {
     let mut geometry_data = GeometryData {
         position: Vec::new(),
         uv: Vec::new(),

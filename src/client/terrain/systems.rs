@@ -117,7 +117,7 @@ fn create_cube_mesher_task(
     let chunk = *chunk;
     let texture_manager = texture_manager.clone();
 
-    MeshTask(task_pool.spawn(async move { terrain_util::create_chunk_mesh(&chunk, &texture_manager) }))
+    MeshTask(task_pool.spawn(async move { terrain_util::create_cube_mesh_for_chunk(&chunk, &texture_manager) }))
 }
 
 fn create_cross_mesher_task(
@@ -129,8 +129,7 @@ fn create_cross_mesher_task(
     let chunk = *chunk;
     let texture_manager = texture_manager.clone();
 
-    MeshTask(task_pool
-        .spawn(async move { terrain_util::create_cross_mesh_for_chunk(&chunk, &texture_manager) }))
+    MeshTask(task_pool .spawn(async move { terrain_util::create_cross_mesh_for_chunk(&chunk, &texture_manager) }))
 }
 
 pub fn handle_chunk_tasks_system(
