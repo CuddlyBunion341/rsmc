@@ -11,11 +11,21 @@ impl SpawnAreaLoaded {
     }
 }
 
-pub struct MesherTask(pub Task<Option<Mesh>>);
+pub enum MeshType {
+    Solid,
+    Transparent
+} 
+
+pub struct MeshTask(pub Task<Option<Mesh>>);
+pub struct FutureChunkMesh {
+    pub position: Vec3,
+    pub mesh_task: MeshTask,
+    pub mesh_type: MeshType
+}
 
 #[derive(Resource)]
 pub struct MesherTasks {
-    pub task_list: Vec<(Vec3, MesherTask)>,
+    pub task_list: Vec<FutureChunkMesh>,
 }
 
 impl MesherTasks {
