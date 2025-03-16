@@ -23,17 +23,9 @@ pub struct FutureChunkMesh {
     pub mesh_type: MeshType,
 }
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct MesherTasks {
     pub task_list: Vec<FutureChunkMesh>,
-}
-
-impl MesherTasks {
-    pub fn new() -> Self {
-        MesherTasks {
-            task_list: Vec::new(),
-        }
-    }
 }
 
 #[derive(Resource)]

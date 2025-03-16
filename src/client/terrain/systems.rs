@@ -120,8 +120,14 @@ macro_rules! create_mesher_task {
     };
 }
 
-create_mesher_task!(create_cube_mesher_task, terrain_util::create_cube_mesh_for_chunk);
-create_mesher_task!(create_cross_mesher_task, terrain_util::create_cross_mesh_for_chunk);
+create_mesher_task!(
+    create_cube_mesher_task,
+    terrain_util::create_cube_mesh_for_chunk
+);
+create_mesher_task!(
+    create_cross_mesher_task,
+    terrain_util::create_cross_mesh_for_chunk
+);
 
 pub fn handle_chunk_tasks_system(
     mut commands: Commands,
