@@ -70,10 +70,8 @@ pub fn generate_world_system(
 }
 
 pub fn handle_chunk_mesh_update_events_system(
-    mut commands: Commands,
     chunk_manager: ResMut<ChunkManager>,
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
-    mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
     texture_manager: ResMut<terrain_util::TextureManager>,
     mut tasks: ResMut<MesherTasks>,
 ) {
@@ -85,11 +83,6 @@ pub fn handle_chunk_mesh_update_events_system(
         let chunk_option = chunk_manager.get_chunk(event.position);
         match chunk_option {
             Some(chunk) => {
-                for (entity, chunk_mesh) in mesh_query.iter_mut() {
-                    if Chunk::key_eq_pos(chunk_mesh.key, chunk.position) {
-                        commands.entity(entity).despawn();
-                    }
-                }
                 tasks.task_list.push(FutureChunkMesh {
                     position: chunk.position,
                     mesh_task: create_cube_mesher_task(chunk, &texture_manager),
@@ -134,6 +127,7 @@ pub fn handle_chunk_tasks_system(
     materials: Res<RenderMaterials>,
     mut tasks: ResMut<MesherTasks>,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
 ) {
     let mut next_poll_indicies: Vec<usize> = Vec::new();
     tasks
@@ -141,6 +135,7 @@ pub fn handle_chunk_tasks_system(
         .iter_mut()
         .enumerate()
         .for_each(|(index, future_chunk)| {
+            let mesh_type = future_chunk.mesh_type.clone();
             let chunk_position = future_chunk.position;
             let task_result =
                 bevy::tasks::block_on(future::poll_once(&mut future_chunk.mesh_task.0));
@@ -156,6 +151,14 @@ pub fn handle_chunk_tasks_system(
             let mesh = mesh_option.expect("Mesh exists");
             let mesh_handle = meshes.add(mesh);
 
+            for (old_chunk, old_mesh) in mesh_query.iter_mut() {
+                if Chunk::key_eq_pos(old_mesh.key, chunk_position)
+                    && old_mesh.mesh_type == mesh_type
+                {
+                    commands.entity(old_chunk).despawn();
+                }
+            }
+
             let entity = commands
                 .spawn((
                     Mesh3d(mesh_handle),
@@ -170,6 +173,7 @@ pub fn handle_chunk_tasks_system(
                             chunk_position.y as i32,
                             chunk_position.z as i32,
                         ],
+                        mesh_type,
                     },
                 ))
                 .id();

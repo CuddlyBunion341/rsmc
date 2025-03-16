@@ -11,6 +11,7 @@ impl SpawnAreaLoaded {
     }
 }
 
+#[derive(Clone, PartialEq)]
 pub enum MeshType {
     Solid,
     Transparent,
