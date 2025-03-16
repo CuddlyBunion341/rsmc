@@ -156,27 +156,41 @@ pub fn handle_chunk_tasks_system(
             let mesh = mesh_option.expect("Mesh exists");
             let mesh_handle = meshes.add(mesh);
 
-            let material_handle = match future_chunk.mesh_type {
-                MeshType::Solid => materials.chunk_material.clone(),
-                MeshType::Transparent => materials.transparent_material.clone(),
-            };
+            let entity = commands
+                .spawn((
+                    Mesh3d(mesh_handle),
+                    Transform::from_xyz(
+                        chunk_position.x * CHUNK_SIZE as f32,
+                        chunk_position.y * CHUNK_SIZE as f32,
+                        chunk_position.z * CHUNK_SIZE as f32,
+                    ),
+                    terrain_components::ChunkMesh {
+                        key: [
+                            chunk_position.x as i32,
+                            chunk_position.y as i32,
+                            chunk_position.z as i32,
+                        ],
+                    },
+                ))
+                .id();
 
-            commands.spawn((
-                Mesh3d(mesh_handle),
-                MeshMaterial3d(material_handle.expect("Material exists")),
-                Transform::from_xyz(
-                    chunk_position.x * CHUNK_SIZE as f32,
-                    chunk_position.y * CHUNK_SIZE as f32,
-                    chunk_position.z * CHUNK_SIZE as f32,
-                ),
-                terrain_components::ChunkMesh {
-                    key: [
-                        chunk_position.x as i32,
-                        chunk_position.y as i32,
-                        chunk_position.z as i32,
-                    ],
-                },
-            ));
+            match future_chunk.mesh_type {
+                MeshType::Solid => commands.entity(entity).insert((
+                    MeshMaterial3d(
+                        materials
+                            .chunk_material
+                            .clone()
+                            .expect("Solid material exists"),
+                    ),
+                    player_components::Raycastable,
+                )),
+                MeshType::Transparent => commands.entity(entity).insert(MeshMaterial3d(
+                    materials
+                        .transparent_material
+                        .clone()
+                        .expect("Solid material exists"),
+                )),
+            };
         });
 
     let mut index = 0;
