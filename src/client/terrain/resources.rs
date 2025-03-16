@@ -13,14 +13,14 @@ impl SpawnAreaLoaded {
 
 pub enum MeshType {
     Solid,
-    Transparent
-} 
+    Transparent,
+}
 
 pub struct MeshTask(pub Task<Option<Mesh>>);
 pub struct FutureChunkMesh {
     pub position: Vec3,
     pub mesh_task: MeshTask,
-    pub mesh_type: MeshType
+    pub mesh_type: MeshType,
 }
 
 #[derive(Resource)]
@@ -28,10 +28,16 @@ pub struct MesherTasks {
     pub task_list: Vec<FutureChunkMesh>,
 }
 
+impl Default for MesherTasks {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MesherTasks {
     pub fn new() -> Self {
         MesherTasks {
-            task_list: Vec::new()
+            task_list: Vec::new(),
         }
     }
 }

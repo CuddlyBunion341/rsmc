@@ -1,12 +1,5 @@
-use std::thread::sleep_ms;
-
-use bevy::tasks::{
-    block_on,
-    futures_lite::{future, FutureExt},
-    AsyncComputeTaskPool,
-};
+use bevy::tasks::{futures_lite::future, AsyncComputeTaskPool};
 use terrain_resources::{FutureChunkMesh, MeshTask, MeshType, MesherTasks, RenderMaterials};
-use terrain_util::create_cross_mesh_for_chunk;
 
 use crate::prelude::*;
 
@@ -78,12 +71,10 @@ pub fn generate_world_system(
 
 pub fn handle_chunk_mesh_update_events_system(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
     chunk_manager: ResMut<ChunkManager>,
     mut chunk_mesh_update_events: EventReader<terrain_events::ChunkMeshUpdateEvent>,
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
     texture_manager: ResMut<terrain_util::TextureManager>,
-    materials: Res<RenderMaterials>,
     mut tasks: ResMut<MesherTasks>,
 ) {
     for event in chunk_mesh_update_events.read() {
@@ -99,15 +90,15 @@ pub fn handle_chunk_mesh_update_events_system(
                         commands.entity(entity).despawn();
                     }
                 }
-                tasks.task_list.push(FutureChunkMesh{
-                    position: chunk.position.clone(),
+                tasks.task_list.push(FutureChunkMesh {
+                    position: chunk.position,
                     mesh_task: create_cube_mesher_task(chunk, &texture_manager),
-                    mesh_type: terrain_resources::MeshType::Solid
+                    mesh_type: terrain_resources::MeshType::Solid,
                 });
                 tasks.task_list.push(FutureChunkMesh {
-                    position: chunk.position.clone(),
+                    position: chunk.position,
                     mesh_task: create_cross_mesher_task(chunk, &texture_manager),
-                    mesh_type: terrain_resources::MeshType::Transparent
+                    mesh_type: terrain_resources::MeshType::Transparent,
                 });
             }
             None => {
@@ -123,12 +114,11 @@ fn create_cube_mesher_task(
 ) -> MeshTask {
     let task_pool = AsyncComputeTaskPool::get();
 
-    let chunk = chunk.clone();
+    let chunk = *chunk;
     let texture_manager = texture_manager.clone();
 
-    let task = task_pool.spawn(async move {
-        terrain_util::create_chunk_mesh(&chunk, &texture_manager)
-    });
+    let task =
+        task_pool.spawn(async move { terrain_util::create_chunk_mesh(&chunk, &texture_manager) });
 
     MeshTask(task)
 }
@@ -139,12 +129,11 @@ fn create_cross_mesher_task(
 ) -> MeshTask {
     let task_pool = AsyncComputeTaskPool::get();
 
-    let chunk = chunk.clone();
+    let chunk = *chunk;
     let texture_manager = texture_manager.clone();
 
-    let task = task_pool.spawn(async move {
-        terrain_util::create_cross_mesh_for_chunk(&chunk, &texture_manager)
-    });
+    let task = task_pool
+        .spawn(async move { terrain_util::create_cross_mesh_for_chunk(&chunk, &texture_manager) });
 
     MeshTask(task)
 }
@@ -156,46 +145,48 @@ pub fn handle_chunk_tasks_system(
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
     let mut next_poll_indicies: Vec<usize> = Vec::new();
-    tasks.task_list.iter_mut().enumerate().for_each(|( index, future_chunk)| {
-        let chunk_position = future_chunk.position;
-        let task_result = bevy::tasks::block_on(future::poll_once(&mut future_chunk.mesh_task.0));
-        if task_result.is_none() {
-            // Check next poll
-            next_poll_indicies.push(index);
-            return;
-        }
-        let mesh_option = task_result.unwrap();
-        if mesh_option.is_none() {
-            return;
-        }
-        let mesh = mesh_option.expect("Mesh exists");
-        let mesh_handle = meshes.add(mesh);
+    tasks
+        .task_list
+        .iter_mut()
+        .enumerate()
+        .for_each(|(index, future_chunk)| {
+            let chunk_position = future_chunk.position;
+            let task_result =
+                bevy::tasks::block_on(future::poll_once(&mut future_chunk.mesh_task.0));
+            if task_result.is_none() {
+                // Check next poll
+                next_poll_indicies.push(index);
+                return;
+            }
+            let mesh_option = task_result.unwrap();
+            if mesh_option.is_none() {
+                return;
+            }
+            let mesh = mesh_option.expect("Mesh exists");
+            let mesh_handle = meshes.add(mesh);
 
-        let material_handle = match future_chunk.mesh_type {
-            MeshType::Solid => materials.chunk_material.clone(),
-            MeshType::Transparent => materials.transparent_material.clone()
-        };
+            let material_handle = match future_chunk.mesh_type {
+                MeshType::Solid => materials.chunk_material.clone(),
+                MeshType::Transparent => materials.transparent_material.clone(),
+            };
 
-        commands.spawn((
-            Mesh3d(mesh_handle),
-            MeshMaterial3d(
-                material_handle
-                    .expect("Material exists"),
-            ),
-            Transform::from_xyz(
-                chunk_position.x * CHUNK_SIZE as f32,
-                chunk_position.y * CHUNK_SIZE as f32,
-                chunk_position.z * CHUNK_SIZE as f32,
-            ),
-            terrain_components::ChunkMesh {
-                key: [
-                    chunk_position.x as i32,
-                    chunk_position.y as i32,
-                    chunk_position.z as i32,
-                ],
-            },
-        ));
-    });
+            commands.spawn((
+                Mesh3d(mesh_handle),
+                MeshMaterial3d(material_handle.expect("Material exists")),
+                Transform::from_xyz(
+                    chunk_position.x * CHUNK_SIZE as f32,
+                    chunk_position.y * CHUNK_SIZE as f32,
+                    chunk_position.z * CHUNK_SIZE as f32,
+                ),
+                terrain_components::ChunkMesh {
+                    key: [
+                        chunk_position.x as i32,
+                        chunk_position.y as i32,
+                        chunk_position.z as i32,
+                    ],
+                },
+            ));
+        });
 
     let mut index = 0;
     tasks.task_list.retain(|_| {
