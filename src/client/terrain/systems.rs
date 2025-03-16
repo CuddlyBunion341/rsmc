@@ -108,29 +108,20 @@ pub fn handle_chunk_mesh_update_events_system(
     }
 }
 
-fn create_cube_mesher_task(
-    chunk: &Chunk,
-    texture_manager: &terrain_util::TextureManager,
-) -> MeshTask {
-    let task_pool = AsyncComputeTaskPool::get();
+macro_rules! create_mesher_task {
+    ($fn_name:ident, $mesher_fn:expr) => {
+        fn $fn_name(chunk: &Chunk, texture_manager: &terrain_util::TextureManager) -> MeshTask {
+            let task_pool = AsyncComputeTaskPool::get();
+            let chunk = *chunk;
+            let texture_manager = texture_manager.clone();
 
-    let chunk = *chunk;
-    let texture_manager = texture_manager.clone();
-
-    MeshTask(task_pool.spawn(async move { terrain_util::create_cube_mesh_for_chunk(&chunk, &texture_manager) }))
+            MeshTask(task_pool.spawn(async move { $mesher_fn(&chunk, &texture_manager) }))
+        }
+    };
 }
 
-fn create_cross_mesher_task(
-    chunk: &Chunk,
-    texture_manager: &terrain_util::TextureManager,
-) -> MeshTask {
-    let task_pool = AsyncComputeTaskPool::get();
-
-    let chunk = *chunk;
-    let texture_manager = texture_manager.clone();
-
-    MeshTask(task_pool .spawn(async move { terrain_util::create_cross_mesh_for_chunk(&chunk, &texture_manager) }))
-}
+create_mesher_task!(create_cube_mesher_task, terrain_util::create_cube_mesh_for_chunk);
+create_mesher_task!(create_cross_mesher_task, terrain_util::create_cross_mesh_for_chunk);
 
 pub fn handle_chunk_tasks_system(
     mut commands: Commands,
