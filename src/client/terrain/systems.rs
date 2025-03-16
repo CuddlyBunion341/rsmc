@@ -140,7 +140,6 @@ pub fn handle_chunk_tasks_system(
             let task_result =
                 bevy::tasks::block_on(future::poll_once(&mut future_chunk.mesh_task.0));
             if task_result.is_none() {
-                // Check next poll
                 next_poll_indicies.push(index);
                 return;
             }
