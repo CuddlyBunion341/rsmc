@@ -28,12 +28,6 @@ pub struct MesherTasks {
     pub task_list: Vec<FutureChunkMesh>,
 }
 
-impl Default for MesherTasks {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl MesherTasks {
     pub fn new() -> Self {
         MesherTasks {
