@@ -37,6 +37,10 @@ impl Plugin for TerrainPlugin {
                 Update,
                 terrain_systems::handle_terrain_regeneration_events_system,
             );
+            app.add_systems(
+                Update,
+                terrain_systems::handle_chunk_tasks_system,
+            );
         }
     }
 }

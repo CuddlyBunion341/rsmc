@@ -1,5 +1,11 @@
-use bevy::tasks::AsyncComputeTaskPool;
-use terrain_resources::{MesherTask, RenderMaterials};
+use std::thread::sleep_ms;
+
+use bevy::tasks::{
+    block_on,
+    futures_lite::{future, FutureExt},
+    AsyncComputeTaskPool,
+};
+use terrain_resources::{MesherTask, MesherTasks, RenderMaterials};
 use terrain_util::create_cross_mesh_for_chunk;
 
 use crate::prelude::*;
@@ -78,6 +84,7 @@ pub fn handle_chunk_mesh_update_events_system(
     mut mesh_query: Query<(Entity, &terrain_components::ChunkMesh)>,
     texture_manager: ResMut<terrain_util::TextureManager>,
     materials: Res<RenderMaterials>,
+    mut tasks: ResMut<MesherTasks>,
 ) {
     for event in chunk_mesh_update_events.read() {
         info!(
@@ -92,20 +99,17 @@ pub fn handle_chunk_mesh_update_events_system(
                         commands.entity(entity).despawn();
                     }
                 }
-                create_cube_mesher_task(
-                    &mut commands,
-                    &mut meshes,
-                    chunk,
-                    &texture_manager,
-                    &materials,
-                );
-                create_cross( 
-                    &mut commands,
-                    chunk,
-                    &materials,
-                    &texture_manager,
-                    &mut meshes,
-                );
+                tasks.task_list.push((
+                    chunk.position.clone(),
+                    create_cube_mesher_task(chunk, &texture_manager),
+                ));
+                // create_cross(
+                //     &mut commands,
+                //     chunk,
+                //     &materials,
+                //     &texture_manager,
+                //     &mut meshes,
+                // );
             }
             None => {
                 println!("No chunk found");
@@ -120,14 +124,17 @@ fn create_cube_mesher_task(
 ) -> MesherTask {
     let task_pool = AsyncComputeTaskPool::get();
 
+    let chunk = chunk.clone();
+    let texture_manager = texture_manager.clone();
+
     let task = task_pool.spawn(async move {
-        terrain_util::create_chunk_mesh(chunk, texture_manager)
+        terrain_util::create_chunk_mesh(&chunk, &texture_manager)
     });
 
     MesherTask(task)
 }
 
-fn create_cross( 
+fn create_cross(
     commands: &mut Commands,
     chunk: &Chunk,
     materials: &RenderMaterials,
@@ -159,6 +166,59 @@ fn create_cross(
             },
         ));
     }
+}
+
+pub fn handle_chunk_tasks_system(
+    mut commands: Commands,
+    materials: Res<RenderMaterials>,
+    mut tasks: ResMut<MesherTasks>,
+    mut meshes: ResMut<Assets<Mesh>>,
+) {
+    let mut filter_indicies: Vec<usize> = Vec::new();
+    tasks.task_list.iter_mut().enumerate().for_each(|( index, touple)| {
+        let chunk_position = touple.0;
+        let mesh_option = bevy::tasks::block_on(future::poll_once(&mut touple.1 .0));
+        if mesh_option.is_none() {
+            return;
+        }
+        filter_indicies.push(index);
+        let mesh_option = mesh_option.unwrap();
+        if mesh_option.is_none() {
+            filter_indicies.push(index);
+            return;
+        }
+        let mesh = mesh_option.expect("Mesh exists");
+        let mesh_handle = meshes.add(mesh);
+
+        commands.spawn((
+            Mesh3d(mesh_handle),
+            MeshMaterial3d(
+                materials
+                    .transparent_material
+                    .clone()
+                    .expect("Transparent material exists"),
+            ),
+            Transform::from_xyz(
+                chunk_position.x * CHUNK_SIZE as f32,
+                chunk_position.y * CHUNK_SIZE as f32,
+                chunk_position.z * CHUNK_SIZE as f32,
+            ),
+            terrain_components::ChunkMesh {
+                key: [
+                    chunk_position.x as i32,
+                    chunk_position.y as i32,
+                    chunk_position.z as i32,
+                ],
+            },
+        ));
+    });
+
+    let mut index = 0;
+    tasks.task_list.retain(|v| {
+        let contains = !filter_indicies.contains(&index);
+            index += 1;
+        contains
+    })
 }
 
 fn create_transparent_material(texture_handle: Handle<Image>) -> StandardMaterial {
