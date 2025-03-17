@@ -1,4 +1,5 @@
 use bevy::tasks::{futures_lite::future, AsyncComputeTaskPool};
+use terrain_components::ChunkMesh;
 use terrain_resources::{
     ChunkMeshes, FutureChunkMesh, MeshTask, MeshType, MesherTasks, RenderMaterials,
 };
@@ -133,59 +134,26 @@ pub fn handle_chunk_tasks_system(
 
             if mesh_option.cross_mesh.is_some() {
                 let mesh = mesh_option.cross_mesh.unwrap();
-                let mesh_handle = meshes.add(mesh);
-
-                commands.spawn((
-                    Mesh3d(mesh_handle),
-                    MeshMaterial3d(
-                        materials
-                            .transparent_material
-                            .clone()
-                            .expect("Solid material exists"),
-                    ),
-                    Transform::from_xyz(
-                        chunk_position.x * CHUNK_SIZE as f32,
-                        chunk_position.y * CHUNK_SIZE as f32,
-                        chunk_position.z * CHUNK_SIZE as f32,
-                    ),
-                    terrain_components::ChunkMesh {
-                        key: [
-                            chunk_position.x as i32,
-                            chunk_position.y as i32,
-                            chunk_position.z as i32,
-                        ],
-                        mesh_type: MeshType::Transparent,
-                    },
+                commands.spawn(create_chunk_bundle(
+                    meshes.add(mesh),
+                    chunk_position,
+                    MeshType::Transparent,
+                    materials.transparent_material.clone().unwrap(),
                 ));
             }
 
             if mesh_option.cube_mesh.is_some() {
                 let mesh = mesh_option.cube_mesh.unwrap();
-                let mesh_handle = meshes.add(mesh);
+                let id = commands
+                    .spawn(create_chunk_bundle(
+                        meshes.add(mesh),
+                        chunk_position,
+                        MeshType::Solid,
+                        materials.chunk_material.clone().unwrap(),
+                    ))
+                    .id();
 
-                commands.spawn((
-                    Mesh3d(mesh_handle),
-                    Transform::from_xyz(
-                        chunk_position.x * CHUNK_SIZE as f32,
-                        chunk_position.y * CHUNK_SIZE as f32,
-                        chunk_position.z * CHUNK_SIZE as f32,
-                    ),
-                    terrain_components::ChunkMesh {
-                        key: [
-                            chunk_position.x as i32,
-                            chunk_position.y as i32,
-                            chunk_position.z as i32,
-                        ],
-                        mesh_type: MeshType::Transparent,
-                    },
-                    MeshMaterial3d(
-                        materials
-                            .chunk_material
-                            .clone()
-                            .expect("Solid material exists"),
-                    ),
-                    player_components::Raycastable,
-                ));
+                commands.entity(id).insert(player_components::Raycastable);
             }
 
             for (old_chunk, old_mesh) in mesh_query.iter_mut() {
@@ -201,6 +169,36 @@ pub fn handle_chunk_tasks_system(
         index += 1;
         contains
     })
+}
+
+fn create_chunk_bundle(
+    mesh_handle: Handle<Mesh>,
+    chunk_position: Vec3,
+    mesh_type: MeshType,
+    material_handle: Handle<StandardMaterial>,
+) -> (
+    bevy::prelude::Mesh3d,
+    bevy::prelude::Transform,
+    ChunkMesh,
+    bevy::prelude::MeshMaterial3d<StandardMaterial>,
+) {
+    (
+        Mesh3d(mesh_handle),
+        Transform::from_xyz(
+            chunk_position.x * CHUNK_SIZE as f32,
+            chunk_position.y * CHUNK_SIZE as f32,
+            chunk_position.z * CHUNK_SIZE as f32,
+        ),
+        terrain_components::ChunkMesh {
+            key: [
+                chunk_position.x as i32,
+                chunk_position.y as i32,
+                chunk_position.z as i32,
+            ],
+            mesh_type,
+        },
+        MeshMaterial3d(material_handle),
+    )
 }
 
 fn create_transparent_material(texture_handle: Handle<Image>) -> StandardMaterial {
