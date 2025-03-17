@@ -1,5 +1,7 @@
 use bevy::tasks::{futures_lite::future, AsyncComputeTaskPool};
-use terrain_resources::{FutureChunkMesh, MeshTask, MeshType, MesherTasks, RenderMaterials};
+use terrain_resources::{
+    ChunkMeshes, FutureChunkMesh, MeshTask, MeshType, MesherTasks, RenderMaterials,
+};
 
 use crate::prelude::*;
 
@@ -46,7 +48,7 @@ pub fn generate_world_system(
     mut client: ResMut<RenetClient>,
     mut chunk_manager: ResMut<ChunkManager>,
 ) {
-    let render_distance = Vec3::new(4.0, 4.0, 4.0);
+    let render_distance = Vec3::new(8.0, 4.0, 8.0);
 
     info!("Sending chunk requests for chunks");
 
@@ -85,13 +87,7 @@ pub fn handle_chunk_mesh_update_events_system(
             Some(chunk) => {
                 tasks.task_list.push(FutureChunkMesh {
                     position: chunk.position,
-                    mesh_task: create_cube_mesher_task(chunk, &texture_manager),
-                    mesh_type: terrain_resources::MeshType::Solid,
-                });
-                tasks.task_list.push(FutureChunkMesh {
-                    position: chunk.position,
-                    mesh_task: create_cross_mesher_task(chunk, &texture_manager),
-                    mesh_type: terrain_resources::MeshType::Transparent,
+                    meshes_task: create_mesher_task(chunk, &texture_manager),
                 });
             }
             None => {
@@ -101,26 +97,17 @@ pub fn handle_chunk_mesh_update_events_system(
     }
 }
 
-macro_rules! create_mesher_task {
-    ($fn_name:ident, $mesher_fn:expr) => {
-        fn $fn_name(chunk: &Chunk, texture_manager: &terrain_util::TextureManager) -> MeshTask {
-            let task_pool = AsyncComputeTaskPool::get();
-            let chunk = *chunk;
-            let texture_manager = texture_manager.clone();
-
-            MeshTask(task_pool.spawn(async move { $mesher_fn(&chunk, &texture_manager) }))
+fn create_mesher_task(chunk: &Chunk, texture_manager: &terrain_util::TextureManager) -> MeshTask {
+    let task_pool = AsyncComputeTaskPool::get();
+    let chunk = *chunk;
+    let texture_manager = texture_manager.clone();
+    MeshTask(task_pool.spawn(async move {
+        ChunkMeshes {
+            cube_mesh: (terrain_util::create_cube_mesh_for_chunk)(&chunk, &texture_manager),
+            cross_mesh: (terrain_util::create_cross_mesh_for_chunk)(&chunk, &texture_manager),
         }
-    };
+    }))
 }
-
-create_mesher_task!(
-    create_cube_mesher_task,
-    terrain_util::create_cube_mesh_for_chunk
-);
-create_mesher_task!(
-    create_cross_mesher_task,
-    terrain_util::create_cross_mesh_for_chunk
-);
 
 pub fn handle_chunk_tasks_system(
     mut commands: Commands,
@@ -135,31 +122,48 @@ pub fn handle_chunk_tasks_system(
         .iter_mut()
         .enumerate()
         .for_each(|(index, future_chunk)| {
-            let mesh_type = future_chunk.mesh_type.clone();
             let chunk_position = future_chunk.position;
             let task_result =
-                bevy::tasks::block_on(future::poll_once(&mut future_chunk.mesh_task.0));
+                bevy::tasks::block_on(future::poll_once(&mut future_chunk.meshes_task.0));
             if task_result.is_none() {
                 next_poll_indicies.push(index);
                 return;
             }
             let mesh_option = task_result.unwrap();
-            if mesh_option.is_none() {
-                return;
-            }
-            let mesh = mesh_option.expect("Mesh exists");
-            let mesh_handle = meshes.add(mesh);
 
-            for (old_chunk, old_mesh) in mesh_query.iter_mut() {
-                if Chunk::key_eq_pos(old_mesh.key, chunk_position)
-                    && old_mesh.mesh_type == mesh_type
-                {
-                    commands.entity(old_chunk).despawn();
-                }
+            if mesh_option.cross_mesh.is_some() {
+                let mesh = mesh_option.cross_mesh.unwrap();
+                let mesh_handle = meshes.add(mesh);
+
+                commands.spawn((
+                    Mesh3d(mesh_handle),
+                    MeshMaterial3d(
+                        materials
+                            .transparent_material
+                            .clone()
+                            .expect("Solid material exists"),
+                    ),
+                    Transform::from_xyz(
+                        chunk_position.x * CHUNK_SIZE as f32,
+                        chunk_position.y * CHUNK_SIZE as f32,
+                        chunk_position.z * CHUNK_SIZE as f32,
+                    ),
+                    terrain_components::ChunkMesh {
+                        key: [
+                            chunk_position.x as i32,
+                            chunk_position.y as i32,
+                            chunk_position.z as i32,
+                        ],
+                        mesh_type: MeshType::Transparent,
+                    },
+                ));
             }
 
-            let entity = commands
-                .spawn((
+            if mesh_option.cube_mesh.is_some() {
+                let mesh = mesh_option.cube_mesh.unwrap();
+                let mesh_handle = meshes.add(mesh);
+
+                commands.spawn((
                     Mesh3d(mesh_handle),
                     Transform::from_xyz(
                         chunk_position.x * CHUNK_SIZE as f32,
@@ -172,13 +176,8 @@ pub fn handle_chunk_tasks_system(
                             chunk_position.y as i32,
                             chunk_position.z as i32,
                         ],
-                        mesh_type,
+                        mesh_type: MeshType::Transparent,
                     },
-                ))
-                .id();
-
-            match future_chunk.mesh_type {
-                MeshType::Solid => commands.entity(entity).insert((
                     MeshMaterial3d(
                         materials
                             .chunk_material
@@ -186,14 +185,14 @@ pub fn handle_chunk_tasks_system(
                             .expect("Solid material exists"),
                     ),
                     player_components::Raycastable,
-                )),
-                MeshType::Transparent => commands.entity(entity).insert(MeshMaterial3d(
-                    materials
-                        .transparent_material
-                        .clone()
-                        .expect("Solid material exists"),
-                )),
-            };
+                ));
+            }
+
+            for (old_chunk, old_mesh) in mesh_query.iter_mut() {
+                if Chunk::key_eq_pos(old_mesh.key, chunk_position) {
+                    commands.entity(old_chunk).despawn();
+                }
+            }
         });
 
     let mut index = 0;

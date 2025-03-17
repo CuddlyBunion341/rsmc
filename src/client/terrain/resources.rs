@@ -17,11 +17,15 @@ pub enum MeshType {
     Transparent,
 }
 
-pub struct MeshTask(pub Task<Option<Mesh>>);
+pub struct ChunkMeshes {
+    pub cube_mesh: Option<Mesh>,
+    pub cross_mesh: Option<Mesh>,
+}
+
+pub struct MeshTask(pub Task<ChunkMeshes>);
 pub struct FutureChunkMesh {
     pub position: Vec3,
-    pub mesh_task: MeshTask,
-    pub mesh_type: MeshType,
+    pub meshes_task: MeshTask,
 }
 
 #[derive(Resource, Default)]
