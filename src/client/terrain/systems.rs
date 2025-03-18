@@ -124,7 +124,8 @@ pub fn handle_chunk_tasks_system(
         .enumerate()
         .for_each(|(index, future_chunk)| {
             let chunk_position = future_chunk.position;
-            let task_result = bevy::tasks::block_on(future::poll_once(&mut future_chunk.meshes_task.0));
+            let task_result =
+                bevy::tasks::block_on(future::poll_once(&mut future_chunk.meshes_task.0));
             if task_result.is_none() {
                 next_poll_indicies.push(index);
                 return;
