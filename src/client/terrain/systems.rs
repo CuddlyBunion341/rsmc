@@ -124,8 +124,7 @@ pub fn handle_chunk_tasks_system(
         .enumerate()
         .for_each(|(index, future_chunk)| {
             let chunk_position = future_chunk.position;
-            let task_result =
-                bevy::tasks::block_on(future::poll_once(&mut future_chunk.meshes_task.0));
+            let task_result = bevy::tasks::block_on(future::poll_once(&mut future_chunk.meshes_task.0));
             if task_result.is_none() {
                 next_poll_indicies.push(index);
                 return;
@@ -133,9 +132,8 @@ pub fn handle_chunk_tasks_system(
             let mesh_option = task_result.unwrap();
 
             if mesh_option.cross_mesh.is_some() {
-                let mesh = mesh_option.cross_mesh.unwrap();
                 commands.spawn(create_chunk_bundle(
-                    meshes.add(mesh),
+                    meshes.add(mesh_option.cross_mesh.unwrap()),
                     chunk_position,
                     MeshType::Transparent,
                     materials.transparent_material.clone().unwrap(),
@@ -143,17 +141,14 @@ pub fn handle_chunk_tasks_system(
             }
 
             if mesh_option.cube_mesh.is_some() {
-                let mesh = mesh_option.cube_mesh.unwrap();
-                let id = commands
+                commands
                     .spawn(create_chunk_bundle(
-                        meshes.add(mesh),
+                        meshes.add(mesh_option.cube_mesh.unwrap()),
                         chunk_position,
                         MeshType::Solid,
                         materials.chunk_material.clone().unwrap(),
                     ))
-                    .id();
-
-                commands.entity(id).insert(player_components::Raycastable);
+                    .insert(player_components::Raycastable);
             }
 
             for (old_chunk, old_mesh) in mesh_query.iter_mut() {
