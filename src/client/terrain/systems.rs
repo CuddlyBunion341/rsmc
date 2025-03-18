@@ -88,7 +88,7 @@ pub fn handle_chunk_mesh_update_events_system(
             Some(chunk) => {
                 tasks.task_list.push(FutureChunkMesh {
                     position: chunk.position,
-                    meshes_task: create_mesher_task(chunk, &texture_manager),
+                    meshes_task: create_mesh_task(chunk, &texture_manager),
                 });
             }
             None => {
@@ -98,14 +98,14 @@ pub fn handle_chunk_mesh_update_events_system(
     }
 }
 
-fn create_mesher_task(chunk: &Chunk, texture_manager: &terrain_util::TextureManager) -> MeshTask {
+fn create_mesh_task(chunk: &Chunk, texture_manager: &terrain_util::TextureManager) -> MeshTask {
     let task_pool = AsyncComputeTaskPool::get();
     let chunk = *chunk;
     let texture_manager = texture_manager.clone();
     MeshTask(task_pool.spawn(async move {
         ChunkMeshes {
-            cube_mesh: (terrain_util::create_cube_mesh_for_chunk)(&chunk, &texture_manager),
-            cross_mesh: (terrain_util::create_cross_mesh_for_chunk)(&chunk, &texture_manager),
+            cube_mesh: terrain_util::create_cube_mesh_for_chunk(&chunk, &texture_manager),
+            cross_mesh: terrain_util::create_cross_mesh_for_chunk(&chunk, &texture_manager),
         }
     }))
 }
