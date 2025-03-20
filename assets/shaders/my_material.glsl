@@ -5,7 +5,7 @@
 
 #ifdef PREPASS_PIPELINE
 #import bevy_pbr::{
-    prepass_io::{VertexOutput, FragmentOutput},
+    prepass_io::{VertexInput, VertexOutput, FragmentOutput},
     pbr_deferred_functions::deferred_output,
 }
 #else
@@ -21,6 +21,22 @@ struct MyExtendedMaterial {
 
 @group(2) @binding(100)
 var<uniform> my_extended_material: MyExtendedMaterial;
+
+struct Vertex {
+    @location(0) position: vec3<f32>,
+    @location(1) blend_color: vec4<f32>,
+};
+
+@vertex
+fn vertex(vertex: Vertex) -> VertexOutput {
+    var out: VertexOutput;
+    out.clip_position = mesh_position_local_to_clip(
+        get_world_from_local(vertex.instance_index),
+        vec4<f32>(vertex.position, 1.0),
+    );
+    out.blend_color = vertex.blend_color;
+    return out;
+}
 
 @fragment
 fn fragment(

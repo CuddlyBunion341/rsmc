@@ -214,7 +214,7 @@ fn create_transparent_material(
             base_color_texture: Some(texture_handle),
             ..default()
         },
-        extension: MyExtension { quantize_steps: 0 },
+        extension: MyExtension { quantize_steps: 12 },
     }
 }
 

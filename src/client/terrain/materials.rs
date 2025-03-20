@@ -1,8 +1,6 @@
 use crate::prelude::*;
 use bevy::{
-    pbr::MaterialExtension,
-    reflect::Reflect,
-    render::render_resource::{AsBindGroup, ShaderRef},
+    color::palettes::css::RED, pbr::MaterialExtension, reflect::Reflect, render::render_resource::{AsBindGroup, ShaderRef}
 };
 
 const SHADER_ASSET_PATH: &str = "shaders/my_material.glsl";
@@ -16,28 +14,53 @@ pub struct MyExtension {
 }
 
 impl MaterialExtension for MyExtension {
-    fn fragment_shader() -> ShaderRef {
+    fn vertex_shader() -> ShaderRef {
         SHADER_ASSET_PATH.into()
     }
 
+    fn fragment_shader() -> ShaderRef {
+        ShaderRef::Default
+    }
+
+    fn prepass_vertex_shader() -> ShaderRef {
+        ShaderRef::Default
+    }
+
+    fn prepass_fragment_shader() -> ShaderRef {
+        ShaderRef::Default
+    }
+
+    fn deferred_vertex_shader() -> ShaderRef {
+        ShaderRef::Default
+    }
+
     fn deferred_fragment_shader() -> ShaderRef {
-        SHADER_ASSET_PATH.into()
+        ShaderRef::Default
+    }
+
+    fn specialize(
+        pipeline: &MaterialExtensionPipeline,
+        descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
+        layout: &bevy::render::mesh::MeshVertexBufferLayoutRef,
+        key: MaterialExtensionKey<Self>,
+    ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+        Ok(())
     }
 }
 
 pub fn create_base_material(
-    _foo: Handle<Image>,
+    texture_handle: Handle<Image>,
 ) -> ExtendedMaterial<StandardMaterial, MyExtension> {
     ExtendedMaterial {
         base: StandardMaterial {
-            opaque_render_method: OpaqueRendererMethod::Deferred,
+            opaque_render_method: OpaqueRendererMethod::Auto,
             perceptual_roughness: 0.5,
             reflectance: 0.0,
             unlit: false,
             specular_transmission: 0.0,
-            // base_color_texture: Some(texture_handle),
+            base_color_texture: Some(texture_handle),
             ..default()
         },
-        extension: MyExtension { quantize_steps: 0 },
+        extension: MyExtension { quantize_steps: 12 },
     }
 }
