@@ -2,6 +2,8 @@ use bevy::tasks::Task;
 
 use crate::prelude::*;
 
+use super::materials::MyExtension;
+
 #[derive(Resource)]
 pub struct SpawnAreaLoaded(pub bool);
 
@@ -35,8 +37,8 @@ pub struct MesherTasks {
 
 #[derive(Resource)]
 pub struct RenderMaterials {
-    pub transparent_material: Option<Handle<StandardMaterial>>,
-    pub chunk_material: Option<Handle<StandardMaterial>>,
+    pub transparent_material: Option<Handle<ExtendedMaterial<StandardMaterial, MyExtension>>>,
+    pub chunk_material: Option<Handle<ExtendedMaterial<StandardMaterial, MyExtension>>>,
 }
 
 impl Default for RenderMaterials {
