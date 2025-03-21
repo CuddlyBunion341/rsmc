@@ -6,9 +6,11 @@ use terrain_resources::{
 
 use crate::prelude::*;
 
+use super::materials::{create_base_material, MyExtension};
+
 pub fn prepare_mesher_materials_system(
     mut render_materials: ResMut<RenderMaterials>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<ExtendedMaterial<StandardMaterial, MyExtension>>>,
     asset_server: Res<AssetServer>,
 ) {
     let texture_handle = obtain_texture_handle(&asset_server);
@@ -16,7 +18,7 @@ pub fn prepare_mesher_materials_system(
     let material = create_transparent_material(texture_handle.clone());
     render_materials.transparent_material = Some(materials.add(material));
 
-    let material = create_chunk_material(texture_handle);
+    let material = create_base_material(texture_handle);
     render_materials.chunk_material = Some(materials.add(material));
 }
 
@@ -171,12 +173,12 @@ fn create_chunk_bundle(
     mesh_handle: Handle<Mesh>,
     chunk_position: Vec3,
     mesh_type: MeshType,
-    material_handle: Handle<StandardMaterial>,
+    material_handle: Handle<ExtendedMaterial<StandardMaterial, MyExtension>>,
 ) -> (
     bevy::prelude::Mesh3d,
     bevy::prelude::Transform,
     ChunkMesh,
-    bevy::prelude::MeshMaterial3d<StandardMaterial>,
+    bevy::prelude::MeshMaterial3d<ExtendedMaterial<StandardMaterial, MyExtension>>,
 ) {
     (
         Mesh3d(mesh_handle),
@@ -197,17 +199,22 @@ fn create_chunk_bundle(
     )
 }
 
-fn create_transparent_material(texture_handle: Handle<Image>) -> StandardMaterial {
-    StandardMaterial {
-        perceptual_roughness: 1.0,
-        double_sided: true,
-        cull_mode: None,
-        reflectance: 0.0,
-        unlit: false,
-        specular_transmission: 0.0,
-        alpha_mode: AlphaMode::Mask(1.0),
-        base_color_texture: Some(texture_handle),
-        ..default()
+fn create_transparent_material(
+    texture_handle: Handle<Image>,
+) -> ExtendedMaterial<StandardMaterial, MyExtension> {
+    ExtendedMaterial {
+        base: StandardMaterial {
+            perceptual_roughness: 1.0,
+            double_sided: true,
+            cull_mode: None,
+            reflectance: 0.0,
+            unlit: false,
+            specular_transmission: 0.0,
+            alpha_mode: AlphaMode::Mask(1.0),
+            base_color_texture: Some(texture_handle),
+            ..default()
+        },
+        extension: MyExtension { quantize_steps: 12 },
     }
 }
 
