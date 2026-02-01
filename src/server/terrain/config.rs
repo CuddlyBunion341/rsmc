@@ -9,7 +9,7 @@ pub struct WorldConfig {
     pub world_extension: String,
     pub world_save_interval_seconds: i64,
     pub world_backup_interval_seconds: i64,
-    pub spawn_area_distance: IVec3
+    pub spawn_area_distance: IVec3,
 }
 
 impl Default for WorldConfig {
