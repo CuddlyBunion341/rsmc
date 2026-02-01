@@ -1,3 +1,5 @@
+use fastrand::Rng;
+
 use crate::{
     prelude::*,
     terrain::{
@@ -42,6 +44,9 @@ impl Generator {
     }
 
     pub fn generate_chunk(&self, chunk: &mut Chunk) {
+        let mut rng = fastrand::Rng::new();
+        rng.seed(chunk.rng_seed());
+
         for_each_chunk_coordinate!(chunk, |x, y, z, world_position| {
             let block = self.generate_block(world_position);
             chunk.set_unpadded(x, y, z, block);
@@ -49,17 +54,16 @@ impl Generator {
 
         for_each_chunk_coordinate!(chunk, |x, y, z, _| {
             let pos = IVec3::new(x as i32, y as i32, z as i32);
-
-            self.decorate_block(chunk, pos);
+            self.decorate_block(&mut rng, chunk, pos);
         });
 
         for _ in 0..self.params.tree.spawn_attempts_per_chunk {
-            self.attempt_spawn_tree(chunk);
+            self.attempt_spawn_tree(&mut rng, chunk);
         }
     }
 
-    fn attempt_spawn_tree(&self, chunk: &mut Chunk) {
-        let proposal = Self::propose_tree_blocks(self);
+    fn attempt_spawn_tree(&self, rng: &mut Rng, chunk: &mut Chunk) {
+        let proposal = self.propose_tree_blocks(rng);
 
         struct Bounds {
             min: IVec3,
@@ -85,15 +89,12 @@ impl Generator {
             },
         );
 
-        let sapling_x: i32 = rand::random_range(
-            proposal_bounds.min.x.abs()..(CHUNK_SIZE as i32 - proposal_bounds.max.x),
-        );
-        let sapling_y: i32 = rand::random_range(
-            proposal_bounds.min.y.abs()..(CHUNK_SIZE as i32 - proposal_bounds.max.y),
-        );
-        let sapling_z: i32 = rand::random_range(
-            proposal_bounds.min.z.abs()..(CHUNK_SIZE as i32 - proposal_bounds.max.z),
-        );
+        let sapling_x =
+            rng.i32(proposal_bounds.min.x.abs()..(CHUNK_SIZE as i32 - proposal_bounds.max.x));
+        let sapling_y =
+            rng.i32(proposal_bounds.min.y.abs()..(CHUNK_SIZE as i32 - proposal_bounds.max.y));
+        let sapling_z =
+            rng.i32(proposal_bounds.min.z.abs()..(CHUNK_SIZE as i32 - proposal_bounds.max.z));
 
         if chunk.get(sapling_x, sapling_y, sapling_z) != BlockId::Grass {
             return;
@@ -102,14 +103,11 @@ impl Generator {
         let proposal_valid = proposal.iter().all(|(relative_pos, _block)| {
             let IVec3 { x, y, z } = relative_pos;
             Chunk::is_within_padded_bounds(
-                sapling_x as i32 + { *x },
-                sapling_y as i32 + { *y },
-                sapling_z as i32 + { *z },
-            ) && chunk.get(
-                sapling_x as i32 + { *x },
-                sapling_y as i32 + { *y },
-                sapling_z as i32 + { *z },
-            ) == BlockId::Air
+                sapling_x + { *x },
+                sapling_y + { *y },
+                sapling_z + { *z },
+            ) && chunk.get(sapling_x + { *x }, sapling_y + { *y }, sapling_z + { *z })
+                == BlockId::Air
         });
 
         if !proposal_valid {
@@ -119,26 +117,24 @@ impl Generator {
         proposal.iter().for_each(|(relative_pos, block_id)| {
             let IVec3 { x, y, z } = relative_pos;
             chunk.set(
-                sapling_x as i32 + { *x },
-                sapling_y as i32 + { *y },
-                sapling_z as i32 + { *z },
+                sapling_x + { *x },
+                sapling_y + { *y },
+                sapling_z + { *z },
                 *block_id,
             );
         });
     }
 
-    fn propose_tree_blocks(&self) -> Vec<(IVec3, BlockId)> {
+    fn propose_tree_blocks(&self, rng: &mut Rng) -> Vec<(IVec3, BlockId)> {
         let mut blocks = Vec::new();
 
         let min_tree_stump_height = self.params.tree.min_stump_height;
         let max_tree_stump_height = self.params.tree.max_stump_height;
 
-        let tree_stump_height =
-            rand::random_range(min_tree_stump_height..max_tree_stump_height) as i32;
+        let tree_stump_height = rng.u32(min_tree_stump_height..max_tree_stump_height) as i32;
 
         let bush_radius: i32 =
-            rand::random_range(self.params.tree.min_bush_radius..self.params.tree.max_bush_radius)
-                as i32;
+            rng.u32(self.params.tree.min_bush_radius..self.params.tree.max_bush_radius) as i32;
 
         for dx in -bush_radius..bush_radius {
             for dz in -bush_radius..bush_radius {
@@ -165,7 +161,7 @@ impl Generator {
         blocks
     }
 
-    fn decorate_block(&self, chunk: &mut Chunk, position: IVec3) {
+    fn decorate_block(&self, rng: &mut Rng, chunk: &mut Chunk, position: IVec3) {
         let x = position.x as usize;
         let y = position.y as usize;
         let z = position.z as usize;
@@ -177,7 +173,7 @@ impl Generator {
                 && Chunk::valid_unpadded(x, y - 1, z)
                 && chunk.get_unpadded(x, y - 1, z) == BlockId::Grass
             {
-                let random_number = rand::random_range(0..=self.params.grass.frequency);
+                let random_number = rng.u32(0..=self.params.grass.frequency);
                 if random_number == 0 {
                     chunk.set_unpadded(x, y, z, BlockId::Tallgrass);
                 }

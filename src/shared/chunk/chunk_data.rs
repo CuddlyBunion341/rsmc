@@ -1,3 +1,5 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use bevy::math::IVec3;
 
 use crate::*;
@@ -78,5 +80,11 @@ impl Chunk {
 
     pub fn key_eq_pos(key: [i32; 3], position: IVec3) -> bool {
         position.x == key[0] && position.y == key[1] && position.z == key[2]
+    }
+
+    pub fn rng_seed(&self) -> u64 {
+        let mut s = DefaultHasher::new();
+        self.position.hash(&mut s);
+        s.finish()
     }
 }

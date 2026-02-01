@@ -149,7 +149,7 @@ impl<'de> Deserialize<'de> for Username {
     }
 }
 
-pub const DEFAULT_SPAWN_POINT: IVec3 = IVec3::new(0, 43, 0); // TODO: determine spawn point from terain
+pub const DEFAULT_SPAWN_POINT: IVec3 = IVec3::new(0, 43, 0);
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 pub struct PlayerState {
