@@ -37,7 +37,7 @@ impl Generator {
     pub fn new(seed: u32) -> Generator {
         Generator {
             noise: Noise::new(seed),
-            params: TerrainGeneratorParams::default(),
+            params: CONFIG.generator.clone(),
         }
     }
 
