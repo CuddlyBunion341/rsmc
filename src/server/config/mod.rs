@@ -17,12 +17,19 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
         match std::fs::read_to_string(PathBuf::from(CONFIG_PATH)) {
             Ok(string) => match toml::from_str(&string) {
                 Ok(config) => config,
-                Err(_) => panic!("Could not parse config file at '{CONFIG_PATH}'"),
+                Err(err) => {
+                    use std::process;
+
+                    eprintln!("Could not parse config file at '{CONFIG_PATH}'");
+                    eprintln!("Err: {err}");
+                    process::exit(0);
+                },
             },
-            Err(_) => {
+            Err(err) => {
                 eprintln!(
                     "Could not read config file at '{CONFIG_PATH}', proceeding with defaults"
                 );
+                eprintln!("Err: {err}");
                 Config::default()
             }
         }
