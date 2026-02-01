@@ -1,8 +1,9 @@
-use terrain_resources::{Generator, NoiseFunctionParams, TerrainGeneratorParams};
-
 use crate::{
     prelude::*,
-    terrain::resources::{Noise, NoiseSample},
+    terrain::{
+        config::{NoiseFunctionParams, TerrainGeneratorParams},
+        resources::{Generator, Noise, NoiseSample},
+    },
 };
 
 macro_rules! for_each_chunk_coordinate {

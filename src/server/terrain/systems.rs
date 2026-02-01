@@ -145,9 +145,11 @@ mod visualizer {
     use renet::{DefaultChannel, RenetServer};
     use rsmc::{Chunk, ChunkManager, NetworkingMessage, CHUNK_SIZE};
 
+    use crate::terrain::config::NoiseFunctionParams;
+
     use super::{
         terrain_events,
-        terrain_resources::{self, NoiseFunctionParams, TextureType},
+        terrain_resources::{self, TextureType},
     };
 
     fn map_range(value: f64, min: f64, max: f64, new_min: f64, new_max: f64) -> f64 {

@@ -32,30 +32,11 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::prelude::*;
+
 #[derive(Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct Config {
-    pub world: WorldConfig,
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(default)]
-pub struct WorldConfig {
-    pub backups_dir: String,
-    pub worlds_dir: String,
-    pub world_extension: String,
-    pub world_save_interval_seconds: i64,
-    pub world_backup_interval_seconds: i64,
-}
-
-impl Default for WorldConfig {
-    fn default() -> Self {
-        Self {
-            backups_dir: String::from("backups/"),
-            worlds_dir: String::from("worlds/"),
-            world_extension: String::from(".rsmcw"),
-            world_save_interval_seconds: 30,
-            world_backup_interval_seconds: 180,
-        }
-    }
+    pub world: terrain_config::WorldConfig,
+    pub generator: terrain_config::TerrainGeneratorParams,
 }
