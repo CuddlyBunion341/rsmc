@@ -3,8 +3,29 @@ use std::sync::LazyLock;
 pub mod commands;
 
 pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
-    // TODO: read from file
-    Config::default()
+    #[cfg(test)]
+    {
+        Config::default()
+    }
+
+    #[cfg(not(test))]
+    {
+        use std::path::PathBuf;
+        const CONFIG_PATH: &str = "server.toml";
+
+        match std::fs::read_to_string(PathBuf::from(CONFIG_PATH)) {
+            Ok(string) => match toml::from_str(&string) {
+                Ok(config) => config,
+                Err(_) => panic!("Could not parse config file at '{CONFIG_PATH}'"),
+            },
+            Err(_) => {
+                eprintln!(
+                    "Could not read config file at '{CONFIG_PATH}', proceeding with defaults"
+                );
+                Config::default()
+            }
+        }
+    }
 });
 
 use serde::Deserialize;
