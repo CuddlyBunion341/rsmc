@@ -1,8 +1,5 @@
+use crate::prelude::*;
 use std::path::Path;
-
-use clap::Subcommand;
-
-use crate::config::{Config, CONFIG, CONFIG_PATH};
 
 #[derive(Debug, Subcommand)]
 pub enum ConfigCommands {

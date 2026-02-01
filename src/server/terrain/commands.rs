@@ -1,7 +1,6 @@
-use clap::Subcommand;
-use rand::RngCore;
-
+use crate::prelude::*;
 use crate::terrain::TerrainPlugin;
+use rand::RngCore;
 
 #[derive(Debug, Subcommand)]
 pub enum WorldCommands {

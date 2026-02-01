@@ -29,6 +29,7 @@ pub use rayon::iter::IntoParallelIterator;
 pub use rayon::iter::IntoParallelRefMutIterator;
 pub use rayon::iter::ParallelIterator;
 
+pub use clap::{Parser, Subcommand};
 pub use lib::*;
 pub use noise::NoiseFn;
 pub use noise::Perlin;
@@ -52,3 +53,4 @@ pub use crate::chat::resources as chat_resources;
 pub use crate::chat::systems as chat_systems;
 
 pub use crate::config::commands as config_commands;
+pub use crate::config::{Config, CONFIG, CONFIG_PATH};
