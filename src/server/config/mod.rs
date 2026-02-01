@@ -10,7 +10,6 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
         Config::default()
     }
 
-
     #[cfg(not(test))]
     {
         use std::path::PathBuf;
