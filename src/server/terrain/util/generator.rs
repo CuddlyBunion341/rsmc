@@ -1,7 +1,7 @@
 use crate::{
     prelude::*,
     terrain::{
-        config::{NoiseFunctionParams, TerrainGeneratorParams},
+        config::NoiseFunctionParams,
         resources::{Generator, Noise, NoiseSample},
     },
 };
