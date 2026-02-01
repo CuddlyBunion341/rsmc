@@ -40,7 +40,7 @@ pub fn perform_command(commands: &ConfigCommands) {
             println!(
                 "{}",
                 toml::to_string(&Config::default())
-                    .expect("Loaded config should always be serializable")
+                    .expect("Default config should always be serializable")
             );
         }
     }
