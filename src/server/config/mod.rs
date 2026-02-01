@@ -10,6 +10,7 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
         Config::default()
     }
 
+
     #[cfg(not(test))]
     {
         use std::path::PathBuf;
@@ -22,8 +23,8 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
 
                     eprintln!("Could not parse config file at '{CONFIG_PATH}'");
                     eprintln!("Err: {err}");
-                    process::exit(0);
-                },
+                    process::exit(1);
+                }
             },
             Err(err) => {
                 eprintln!(
@@ -42,7 +43,7 @@ use serde::Serialize;
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Default)]
-#[serde(default)]
+#[serde(default, deny_unknown_fields)]
 pub struct Config {
     pub world: terrain_config::WorldConfig,
     pub generator: terrain_config::TerrainGeneratorParams,
