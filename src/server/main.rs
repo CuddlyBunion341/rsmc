@@ -5,6 +5,8 @@ pub mod player;
 pub mod prelude;
 pub mod terrain;
 
+use std::path::Path;
+
 use bevy::app::TerminalCtrlCHandlerPlugin;
 use clap::{Parser, Subcommand};
 
@@ -16,7 +18,10 @@ pub mod gui;
 #[cfg(not(feature = "egui_layer"))]
 use bevy::log::LogPlugin;
 
-use crate::prelude::*;
+use crate::{
+    config::{Config, CONFIG, CONFIG_PATH},
+    prelude::*,
+};
 
 #[derive(Debug, Parser)]
 #[command(version)]
@@ -63,11 +68,42 @@ fn main() {
                 }
             };
         }
-        MainCommands::Config(config_commands) => match config_commands {
-            config_commands::ConfigCommands::Init => todo!("Init"),
-            config_commands::ConfigCommands::Show => todo!("Show"),
-            config_commands::ConfigCommands::Defaults => todo!("Defaults"),
-        },
+        MainCommands::Config(config_commands) => {
+            match config_commands {
+                config_commands::ConfigCommands::Init => {
+                    if Path::new(&CONFIG_PATH).is_file() {
+                        eprintln!("Config file is already initialized at '{CONFIG_PATH}'.");
+                        eprintln!("If you want to reinitialize it with defaults, remove it:");
+                        eprintln!("rm '{CONFIG_PATH}'");
+                    } else {
+                        let config = Config::default();
+                        let config_str = toml::to_string(&config)
+                            .expect("Default config should be serializable");
+
+                        if let Err(err) = std::fs::write(CONFIG_PATH, config_str) {
+                            eprintln!("Error writing to file: {err}");
+                        } else {
+                            println!("Initialized config file '{CONFIG_PATH}'");
+                        }
+                    }
+                }
+                config_commands::ConfigCommands::Show => {
+                    println!(
+                        "{}",
+                        toml::to_string(&*CONFIG)
+                            .expect("Loaded config should always be serializable")
+                    );
+                }
+                config_commands::ConfigCommands::Defaults => {
+                    println!(
+                        "{}",
+                        toml::to_string(&Config::default())
+                            .expect("Loaded config should always be serializable")
+                    );
+                }
+            }
+            return;
+        }
     }
 
     app.add_plugins(player::PlayerPlugin);

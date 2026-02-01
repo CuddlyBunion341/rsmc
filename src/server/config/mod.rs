@@ -2,6 +2,8 @@ use std::sync::LazyLock;
 
 pub mod commands;
 
+pub const CONFIG_PATH: &str = "server.toml";
+
 pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
     #[cfg(test)]
     {
@@ -11,7 +13,6 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
     #[cfg(not(test))]
     {
         use std::path::PathBuf;
-        const CONFIG_PATH: &str = "server.toml";
 
         match std::fs::read_to_string(PathBuf::from(CONFIG_PATH)) {
             Ok(string) => match toml::from_str(&string) {
@@ -29,13 +30,14 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
 });
 
 use serde::Deserialize;
+use serde::Serialize;
 
-#[derive(Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct Config {
     pub world: WorldConfig,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct WorldConfig {
     pub backups_dir: String,
     pub worlds_dir: String,
