@@ -1,6 +1,6 @@
-use std::collections::VecDeque;
-
 use crate::prelude::*;
+
+use std::collections::VecDeque;
 
 use chrono::{DateTime, TimeDelta, Utc};
 use rand::distr::{Alphanumeric, SampleString};
@@ -75,7 +75,7 @@ impl WorldBackupTimer {
 
 impl Default for WorldBackupTimer {
     fn default() -> Self {
-        Self(SaveTimer::new(TimeDelta::seconds(180)))
+        Self(SaveTimer::new(TimeDelta::seconds(CONFIG.world.world_backup_interval_seconds)))
     }
 }
 
@@ -94,7 +94,7 @@ impl WorldSaveTimer {
 
 impl Default for WorldSaveTimer {
     fn default() -> Self {
-        Self(SaveTimer::new(TimeDelta::seconds(30)))
+        Self(SaveTimer::new(TimeDelta::seconds(CONFIG.world.world_save_interval_seconds)))
     }
 }
 
