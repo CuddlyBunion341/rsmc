@@ -29,6 +29,7 @@ pub use rayon::iter::IntoParallelIterator;
 pub use rayon::iter::IntoParallelRefMutIterator;
 pub use rayon::iter::ParallelIterator;
 
+pub use clap::{Parser, Subcommand};
 pub use lib::*;
 pub use noise::NoiseFn;
 pub use noise::Perlin;
@@ -42,6 +43,7 @@ pub use crate::player::resources as player_resources;
 pub use crate::player::systems as player_systems;
 
 pub use crate::terrain::commands as terrain_commands;
+pub use crate::terrain::config as terrain_config;
 pub use crate::terrain::events as terrain_events;
 pub use crate::terrain::resources as terrain_resources;
 pub use crate::terrain::systems as terrain_systems;
@@ -50,3 +52,6 @@ pub use crate::terrain::util as terrain_util;
 pub use crate::chat::events as chat_events;
 pub use crate::chat::resources as chat_resources;
 pub use crate::chat::systems as chat_systems;
+
+pub use crate::config::commands as config_commands;
+pub use crate::config::{Config, CONFIG, CONFIG_PATH};

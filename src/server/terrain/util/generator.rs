@@ -1,8 +1,9 @@
-use terrain_resources::{Generator, NoiseFunctionParams, TerrainGeneratorParams};
-
 use crate::{
     prelude::*,
-    terrain::resources::{Noise, NoiseSample},
+    terrain::{
+        config::NoiseFunctionParams,
+        resources::{Generator, Noise, NoiseSample},
+    },
 };
 
 macro_rules! for_each_chunk_coordinate {
@@ -36,7 +37,7 @@ impl Generator {
     pub fn new(seed: u32) -> Generator {
         Generator {
             noise: Noise::new(seed),
-            params: TerrainGeneratorParams::default(),
+            params: CONFIG.generator.clone(),
         }
     }
 

@@ -4,5 +4,9 @@
 tree-sitter-rust
 *-E
 
+# default world locations
 backups/
 worlds/
+
+# local config files
+server.toml

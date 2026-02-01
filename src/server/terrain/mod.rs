@@ -3,6 +3,7 @@ use std::io::ErrorKind::{NotFound, PermissionDenied};
 use crate::{prelude::*, terrain::persistence::WorldSave};
 
 pub mod commands;
+pub mod config;
 pub mod events;
 pub mod resources;
 pub mod systems;

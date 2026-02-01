@@ -1,11 +1,11 @@
 pub mod chat;
+pub mod config;
 pub mod networking;
 pub mod player;
 pub mod prelude;
 pub mod terrain;
 
 use bevy::app::TerminalCtrlCHandlerPlugin;
-use clap::Parser;
 
 #[cfg(feature = "egui_layer")]
 use bevy::DefaultPlugins;
@@ -22,7 +22,15 @@ use crate::prelude::*;
 #[command(long_about = None)]
 struct Cli {
     #[command(subcommand)]
-    world_commands: terrain_commands::WorldCommands,
+    commands: MainCommands,
+}
+
+#[derive(Debug, Subcommand)]
+enum MainCommands {
+    #[command(flatten)]
+    World(terrain_commands::WorldCommands),
+    #[command(subcommand, about = "Actions regarding server configuration")]
+    Config(config_commands::ConfigCommands),
 }
 
 fn main() {
@@ -44,13 +52,18 @@ fn main() {
     }
 
     let args = Cli::parse();
-    match terrain::TerrainPlugin::from_command(args.world_commands) {
-        Ok(terrain_plugin) => app.add_plugins(terrain_plugin),
-        Err(error) => {
-            eprintln!("Error: {}", error);
+    match args.commands {
+        MainCommands::World(world_commands) => {
+            match terrain::TerrainPlugin::from_command(world_commands) {
+                Ok(terrain_plugin) => app.add_plugins(terrain_plugin),
+                Err(error) => return eprintln!("Error: {}", error),
+            };
+        }
+        MainCommands::Config(config_commands) => {
+            config_commands::perform_command(&config_commands);
             return;
         }
-    };
+    }
 
     app.add_plugins(player::PlayerPlugin);
     app.add_plugins(networking::NetworkingPlugin);

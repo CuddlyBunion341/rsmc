@@ -8,11 +8,10 @@ pub fn setup_world_system(
     mut chunk_manager: ResMut<ChunkManager>,
     generator: Res<terrain_resources::Generator>,
 ) {
-    let render_distance = IVec3::new(4, 3, 4);
-
     info!("Generating chunks");
 
-    let mut chunks = ChunkManager::instantiate_chunks(IVec3::ZERO, render_distance);
+    let mut chunks =
+        ChunkManager::instantiate_chunks(IVec3::ZERO, CONFIG.world.spawn_area_distance);
 
     chunks.par_iter_mut().for_each(|chunk| {
         info!("Generating chunk at {:?}", chunk.position);
@@ -145,9 +144,11 @@ mod visualizer {
     use renet::{DefaultChannel, RenetServer};
     use rsmc::{Chunk, ChunkManager, NetworkingMessage, CHUNK_SIZE};
 
+    use crate::terrain::config::NoiseFunctionParams;
+
     use super::{
         terrain_events,
-        terrain_resources::{self, NoiseFunctionParams, TextureType},
+        terrain_resources::{self, TextureType},
     };
 
     fn map_range(value: f64, min: f64, max: f64, new_min: f64, new_max: f64) -> f64 {

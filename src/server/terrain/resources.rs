@@ -1,6 +1,6 @@
-use std::collections::VecDeque;
+use crate::{prelude::*, terrain::config::TerrainGeneratorParams};
 
-use crate::prelude::*;
+use std::collections::VecDeque;
 
 use chrono::{DateTime, TimeDelta, Utc};
 use rand::distr::{Alphanumeric, SampleString};
@@ -75,7 +75,9 @@ impl WorldBackupTimer {
 
 impl Default for WorldBackupTimer {
     fn default() -> Self {
-        Self(SaveTimer::new(TimeDelta::seconds(180)))
+        Self(SaveTimer::new(TimeDelta::seconds(
+            CONFIG.world.world_backup_interval_seconds,
+        )))
     }
 }
 
@@ -94,7 +96,9 @@ impl WorldSaveTimer {
 
 impl Default for WorldSaveTimer {
     fn default() -> Self {
-        Self(SaveTimer::new(TimeDelta::seconds(30)))
+        Self(SaveTimer::new(TimeDelta::seconds(
+            CONFIG.world.world_save_interval_seconds,
+        )))
     }
 }
 
@@ -121,6 +125,18 @@ pub struct PastBlockUpdates {
 pub struct Generator {
     pub noise: Noise,
     pub params: TerrainGeneratorParams,
+}
+
+impl Default for Generator {
+    fn default() -> Self {
+        Self::new(0)
+    }
+}
+
+impl Generator {
+    pub fn with_seed(seed: u32) -> Self {
+        Self::new(seed)
+    }
 }
 
 #[derive(Clone)]
@@ -167,143 +183,6 @@ impl<'de> Deserialize<'de> for Noise {
     {
         let seed = u32::deserialize(deserializer)?;
         Ok(Noise::new(seed))
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct HeightParams {
-    pub noise: NoiseFunctionParams,
-    pub splines: Vec<Vec2>,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct DensityParams {
-    pub noise: NoiseFunctionParams,
-    pub squash_factor: f64,
-    pub height_offset: f64,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct CaveParams {
-    pub noise: NoiseFunctionParams,
-    pub base_value: f64,
-    pub threshold: f64,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct HeightAdjustParams {
-    pub noise: NoiseFunctionParams,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct GrassParams {
-    pub frequency: u32,
-}
-
-#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
-pub struct NoiseFunctionParams {
-    pub octaves: u32,
-    pub height: f64,
-    pub lacuranity: f64,
-    pub frequency: f64,
-    pub amplitude: f64,
-    pub persistence: f64,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct TreeParams {
-    pub spawn_attempts_per_chunk: u32,
-    pub min_stump_height: u32,
-    pub max_stump_height: u32,
-    pub min_bush_radius: u32,
-    pub max_bush_radius: u32,
-}
-
-impl Default for Generator {
-    fn default() -> Self {
-        Self::new(0)
-    }
-}
-
-impl Generator {
-    pub fn with_seed(seed: u32) -> Self {
-        Self::new(seed)
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct TerrainGeneratorParams {
-    pub height: HeightParams,
-    pub height_adjust: HeightAdjustParams,
-    pub density: DensityParams,
-    pub cave: CaveParams,
-    pub tree: TreeParams,
-    pub grass: GrassParams,
-}
-
-impl Default for TerrainGeneratorParams {
-    fn default() -> Self {
-        Self {
-            height: HeightParams {
-                splines: vec![
-                    Vec2::new(-1.0, 4.0),
-                    Vec2::new(0.0, 0.0),
-                    Vec2::new(0.0, 0.0),
-                    Vec2::new(0.05, 20.0),
-                    Vec2::new(1.0, 35.0),
-                ],
-                noise: NoiseFunctionParams {
-                    octaves: 4,
-                    height: 0.0,
-                    lacuranity: 2.0,
-                    frequency: 1.0 / 300.0,
-                    amplitude: 30.0,
-                    persistence: 0.5,
-                },
-            },
-            height_adjust: HeightAdjustParams {
-                noise: NoiseFunctionParams {
-                    octaves: 4,
-                    height: 0.0,
-                    lacuranity: 2.0,
-                    frequency: 1.0 / 120.0,
-                    amplitude: 30.0,
-                    persistence: 0.5,
-                },
-            },
-            density: DensityParams {
-                squash_factor: 1.0 / 100.0,
-                height_offset: -20.0,
-                noise: NoiseFunctionParams {
-                    octaves: 4,
-                    height: 0.0,
-                    lacuranity: 2.0,
-                    frequency: 1.0 / 60.0,
-                    amplitude: 10.0,
-                    persistence: 0.5,
-                },
-            },
-            cave: CaveParams {
-                noise: NoiseFunctionParams {
-                    octaves: 2,
-                    height: 0.0,
-                    lacuranity: 0.03,
-                    frequency: 1.0 / 20.0,
-                    amplitude: 30.0,
-                    persistence: 0.59,
-                },
-                base_value: 0.0,
-                threshold: 0.25,
-            },
-            tree: TreeParams {
-                spawn_attempts_per_chunk: 500,
-                min_stump_height: 2,
-                max_stump_height: 20,
-                min_bush_radius: 3,
-                max_bush_radius: 5,
-            },
-            grass: GrassParams { frequency: 10 },
-        }
     }
 }
 

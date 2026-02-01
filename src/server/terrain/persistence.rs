@@ -10,10 +10,6 @@ use std::{
 
 use crate::{prelude::*, terrain::resources::Generator};
 
-const BACKUPS_DIR: &str = "backups/";
-const WORLDS_DIR: &str = "worlds/";
-const WORLD_EXTENSION: &str = ".rsmcw";
-
 #[derive(Serialize, Deserialize, Default)]
 pub struct WorldSave {
     pub name: String,
@@ -28,6 +24,8 @@ impl Display for WorldSave {
 }
 
 mod path_helpers {
+    use crate::config::CONFIG;
+
     use super::*;
 
     impl WorldSave {
@@ -41,8 +39,8 @@ mod path_helpers {
     }
 
     pub fn path_for_world(world_name: &str) -> PathBuf {
-        let file_name = format!("{}{}", world_name, WORLD_EXTENSION);
-        PathBuf::from(WORLDS_DIR).join(file_name)
+        let file_name = format!("{}{}", world_name, CONFIG.world.world_extension);
+        PathBuf::from(&CONFIG.world.worlds_dir).join(file_name)
     }
 
     pub fn path_for_world_backup(world_name: &str, timestamp: DateTime<Utc>) -> PathBuf {
@@ -50,9 +48,9 @@ mod path_helpers {
             "{}_{}{}.bak",
             world_name,
             timestamp.format("%Y%m%d%H%M%S%3f"),
-            WORLD_EXTENSION,
+            CONFIG.world.world_extension,
         );
-        PathBuf::from(BACKUPS_DIR).join(file_name)
+        PathBuf::from(&CONFIG.world.backups_dir).join(file_name)
     }
 }
 
