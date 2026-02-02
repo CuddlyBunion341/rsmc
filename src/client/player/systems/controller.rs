@@ -36,7 +36,7 @@ pub fn setup_controller_on_area_ready_system(
 
     let logical_entity = commands
         .spawn((
-            Collider::cylinder(0.5, 1.5),
+            Collider::cylinder(0.25, 1.5),
             Friction {
                 dynamic_coefficient: 0.0,
                 static_coefficient: 0.0,
@@ -77,6 +77,8 @@ pub fn setup_controller_on_area_ready_system(
                 crouch_height: 1.2,
                 air_acceleration: 80.0,
                 radius: 0.75,
+                experimental_step_offset: 0.1,
+                experimental_enable_ledge_cling: true,
                 ..default()
             },
         ))
