@@ -4,6 +4,7 @@ pub mod resources;
 pub mod systems;
 
 use crate::prelude::*;
+use avian3d::PhysicsPlugins;
 
 pub struct PlayerPlugin;
 
@@ -12,9 +13,9 @@ impl Plugin for PlayerPlugin {
         debug!("Building PlayerPlugin");
         info!("Building PlayerPlugin");
         app.add_plugins(FpsControllerPlugin);
-        app.add_plugins(RapierPhysicsPlugin::<NoUserData>::default());
+        app.add_plugins(PhysicsPlugins::default());
         #[cfg(feature = "physics_debug")]
-        app.add_plugins(RapierDebugRenderPlugin::default());
+        app.add_plugins(PhysicsDebugPlugin::default());
         app.add_message::<player_events::PlayerColliderUpdateEvent>();
         app.insert_resource(player_resources::BlockSelection::new());
         app.insert_resource(player_resources::PlayerSpawned(false));
