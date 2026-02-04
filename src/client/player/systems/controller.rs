@@ -36,7 +36,7 @@ pub fn setup_controller_on_area_ready_system(
 
     let logical_entity = commands
         .spawn((
-            Collider::capsule(0.5, 1.0),
+            Collider::cylinder(0.25, 1.5),
             Friction {
                 dynamic_coefficient: 0.0,
                 static_coefficient: 0.0,
@@ -46,7 +46,6 @@ pub fn setup_controller_on_area_ready_system(
                 coefficient: 0.0,
                 combine_rule: CoefficientCombine::Min,
             },
-            CollisionLayers::new(GameLayer::Player, [GameLayer::Terrain]),
             LinearVelocity::ZERO,
             #[cfg(feature = "lock_player")]
             RigidBody::Static,

@@ -2,57 +2,73 @@ use terrain_util::client_block::block_properties;
 
 use crate::prelude::*;
 
-const COLLIDER_GRID_SIZE: i32 = 4;
-const COLLIDER_HALF_SIZE: i32 = COLLIDER_GRID_SIZE / 2;
+static COLLIDER_GRID_SIZE: u32 = 4;
+static COLLIDER_RESTING_POSITION: Vec3 = Vec3::MIN;
+static COLLIDER_CUBOID_WIDTH: f32 = 1.0;
 
 pub fn setup_coliders_system(mut commands: Commands) {
-    let empty_shapes: Vec<(Vec3, Quat, Collider)> = vec![];
+    let collider_range = 0..COLLIDER_GRID_SIZE;
+
     commands.spawn((
-        collider_components::TerrainCollider,
-        RigidBody::Static,
-        Collider::compound(empty_shapes),
-        CollisionLayers::new(GameLayer::Terrain, [GameLayer::Player]),
-        Transform::default(),
+        Collider::cuboid(256.0, 1.0, 256.0),
+        Transform::from_translation(COLLIDER_RESTING_POSITION),
     ));
+
+    for x in collider_range.clone() {
+        for y in collider_range.clone() {
+            for z in collider_range.clone() {
+                commands
+                    .spawn((
+                        RigidBody::Static,
+                        Collider::cuboid(
+                            COLLIDER_CUBOID_WIDTH,
+                            COLLIDER_CUBOID_WIDTH,
+                            COLLIDER_CUBOID_WIDTH,
+                        ),
+                        Transform::from_xyz(x as f32, y as f32, z as f32),
+                    ))
+                    .insert(collider_components::BlockCollider {
+                        relative_position: Vec3 {
+                            x: x as f32 - (COLLIDER_GRID_SIZE as f32) / 2.0,
+                            y: y as f32 - (COLLIDER_GRID_SIZE as f32) / 2.0,
+                            z: z as f32 - (COLLIDER_GRID_SIZE as f32) / 2.0,
+                        },
+                    });
+            }
+        }
+    }
 }
 
 pub fn handle_collider_update_events_system(
     mut collider_grid_events: MessageReader<collider_events::ColliderUpdateEvent>,
-    mut query: Query<&mut Collider, With<collider_components::TerrainCollider>>,
+    mut query: Query<(&mut Transform, &collider_components::BlockCollider)>,
     chunk_manager: Res<ChunkManager>,
 ) {
     for event in collider_grid_events.read() {
-        let center = IVec3::new(
-            event.grid_center_position[0] as i32,
-            event.grid_center_position[1] as i32,
-            event.grid_center_position[2] as i32,
-        );
+        let event_position = Vec3::new(
+            event.grid_center_position[0],
+            event.grid_center_position[1],
+            event.grid_center_position[2],
+        )
+        .floor();
+        for (mut transform, collider) in query.iter_mut() {
+            let relative_position = collider.relative_position;
+            let collider_position = (event_position + relative_position).floor();
 
-        let mut shapes: Vec<(Vec3, Quat, Collider)> = Vec::with_capacity(
-            (COLLIDER_GRID_SIZE * COLLIDER_GRID_SIZE * COLLIDER_GRID_SIZE) as usize,
-        );
+            let block = chunk_manager.get_block(collider_position.as_ivec3());
 
-        for x in -COLLIDER_HALF_SIZE..COLLIDER_HALF_SIZE {
-            for y in -COLLIDER_HALF_SIZE..COLLIDER_HALF_SIZE {
-                for z in -COLLIDER_HALF_SIZE..COLLIDER_HALF_SIZE {
-                    let block_pos = center + IVec3::new(x, y, z);
-
-                    if let Some(block) = chunk_manager.get_block(block_pos) {
-                        if block_properties(block).has_collider {
-                            let position = Vec3::new(
-                                block_pos.x as f32 + 0.5,
-                                block_pos.y as f32 + 0.5,
-                                block_pos.z as f32 + 0.5,
-                            );
-                            shapes.push((position, Quat::IDENTITY, Collider::cuboid(0.5, 0.5, 0.5)));
-                        }
+            match block {
+                Some(block) => {
+                    if block_properties(block).has_collider {
+                        transform.translation = collider_position + COLLIDER_CUBOID_WIDTH / 2.0;
+                    } else {
+                        transform.translation = COLLIDER_RESTING_POSITION;
                     }
                 }
+                None => {
+                    transform.translation = COLLIDER_RESTING_POSITION;
+                }
             }
-        }
-
-        if let Ok(mut collider) = query.single_mut() {
-            *collider = Collider::compound(shapes);
         }
     }
 }
@@ -62,7 +78,6 @@ mod tests {
     use collider_events::ColliderUpdateEvent;
 
     use super::*;
-
     fn setup_app() -> App {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins);
@@ -78,10 +93,10 @@ mod tests {
 
         let mut colliders_query = app
             .world_mut()
-            .query::<&collider_components::TerrainCollider>();
+            .query::<&collider_components::BlockCollider>();
         let colliders_count = colliders_query.iter(app.world_mut()).count();
 
-        assert_eq!(colliders_count, 1);
+        assert_eq!(colliders_count, 4 * 4 * 4);
     }
 
     #[test]
@@ -92,10 +107,22 @@ mod tests {
         app.add_systems(Update, handle_collider_update_events_system);
         app.insert_resource(ChunkManager::new());
 
-        let empty_shapes: Vec<(Vec3, Quat, Collider)> = vec![];
         app.world_mut().spawn((
-            collider_components::TerrainCollider,
-            Collider::compound(empty_shapes),
+            Transform {
+                translation: Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                },
+                ..Default::default()
+            },
+            collider_components::BlockCollider {
+                relative_position: Vec3 {
+                    x: 1.0,
+                    y: 2.0,
+                    z: 3.0,
+                },
+            },
         ));
 
         let block = BlockId::Dirt;
@@ -105,17 +132,23 @@ mod tests {
         resource.update_block(IVec3 { x: 6, y: 7, z: 8 }, block);
 
         app.world_mut().write_message(ColliderUpdateEvent {
-            grid_center_position: [6.0, 7.0, 8.0],
+            grid_center_position: [5.0, 5.0, 5.0],
         });
 
         app.update();
 
         let mut collider_query = app
             .world_mut()
-            .query::<&Collider>();
+            .query::<(&Transform, &collider_components::BlockCollider)>();
         let world_mut = app.world_mut();
-        let collider = collider_query.single(world_mut).unwrap();
-
-        assert!(collider.shape().as_compound().is_some());
+        let (collider_transform, _) = collider_query.single(world_mut).unwrap();
+        assert_eq!(
+            Vec3 {
+                x: 6.5,
+                y: 7.5,
+                z: 8.5
+            },
+            collider_transform.translation
+        );
     }
 }

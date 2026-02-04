@@ -39,7 +39,6 @@ pub use rsmc as lib;
 
 pub use crate::collider::components as collider_components;
 pub use crate::collider::events as collider_events;
-pub use crate::collider::layers::GameLayer;
 pub use crate::collider::systems as collider_systems;
 
 pub use crate::networking::commands as networking_commands;
