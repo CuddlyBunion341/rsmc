@@ -89,7 +89,10 @@ pub fn save_world_system(
     if timer.is_ready() {
         timer.reset();
         info!("Saving world...");
-        save_world(&world_name.0, &chunk_manager, &generator);
+        match save_world(&world_name.0, &chunk_manager, &generator) {
+            Ok(_) => info!("World has been saved!"),
+            Err(err) => error!("Err saving world: {err}"),
+        }
     }
 }
 
@@ -102,7 +105,10 @@ pub fn backup_world_system(
     if timer.is_ready() {
         timer.reset();
         info!("Backing up world...");
-        backup_world(&world_name.0, &chunk_manager, &generator);
+        match backup_world(&world_name.0, &chunk_manager, &generator) {
+            Ok(_) => info!("World has been backed up!"),
+            Err(err) => error!("Err backing up world: {err}"),
+        }
     }
 }
 
