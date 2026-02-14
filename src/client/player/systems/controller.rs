@@ -36,26 +36,24 @@ pub fn setup_controller_on_area_ready_system(
 
     let logical_entity = commands
         .spawn((
-            Collider::capsule(Vec3::Y * 0.5, Vec3::Y * 1.5, 0.5),
+            Collider::cylinder(0.25, 1.5),
             Friction {
-                coefficient: 0.0,
-                combine_rule: CoefficientCombineRule::Min,
+                dynamic_coefficient: 0.0,
+                static_coefficient: 0.0,
+                combine_rule: CoefficientCombine::Min,
             },
             Restitution {
                 coefficient: 0.0,
-                combine_rule: CoefficientCombineRule::Min,
+                combine_rule: CoefficientCombine::Min,
             },
-            ActiveEvents::COLLISION_EVENTS,
-            Velocity::zero(),
+            LinearVelocity::ZERO,
             #[cfg(feature = "lock_player")]
-            RigidBody::Fixed,
+            RigidBody::Static,
             #[cfg(not(feature = "lock_player"))]
             RigidBody::Dynamic,
-            Sleeping::disabled(),
             LockedAxes::ROTATION_LOCKED,
-            AdditionalMassProperties::Mass(1.0),
+            Mass(1.0),
             GravityScale(0.0),
-            Ccd { enabled: true },
             Transform::from_translation(spawn_position),
             LogicalPlayer,
             #[cfg(not(feature = "lock_player"))]
@@ -79,6 +77,8 @@ pub fn setup_controller_on_area_ready_system(
                 crouch_height: 1.2,
                 air_acceleration: 80.0,
                 radius: 0.75,
+                experimental_step_offset: 0.1,
+                experimental_enable_ledge_cling: true,
                 ..default()
             },
         ))

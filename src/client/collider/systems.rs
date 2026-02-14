@@ -19,10 +19,11 @@ pub fn setup_coliders_system(mut commands: Commands) {
             for z in collider_range.clone() {
                 commands
                     .spawn((
+                        RigidBody::Static,
                         Collider::cuboid(
-                            COLLIDER_CUBOID_WIDTH / 2.0,
-                            COLLIDER_CUBOID_WIDTH / 2.0,
-                            COLLIDER_CUBOID_WIDTH / 2.0,
+                            COLLIDER_CUBOID_WIDTH,
+                            COLLIDER_CUBOID_WIDTH,
+                            COLLIDER_CUBOID_WIDTH,
                         ),
                         Transform::from_xyz(x as f32, y as f32, z as f32),
                     ))

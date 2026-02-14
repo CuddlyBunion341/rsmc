@@ -14,11 +14,8 @@ pub use bevy::prelude::*;
 pub use bevy::transform::components::Transform;
 pub use bevy::window::*;
 
+pub use avian3d::prelude::*;
 pub use bevy_fps_controller::controller::*;
-
-pub use bevy_rapier3d::geometry::Collider;
-pub use bevy_rapier3d::{dynamics::*, geometry::*};
-pub use bevy_rapier3d::{plugin::*, render::RapierDebugRenderPlugin};
 
 // networking crates
 pub use renet::{ClientId, ConnectionConfig, DefaultChannel, RenetClient};

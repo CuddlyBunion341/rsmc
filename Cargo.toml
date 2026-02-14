@@ -13,8 +13,8 @@ bevy_asset = "0.17.3"
 bevy_camera = "0.17.3"
 bevy_mesh = "0.17.3"
 bevy_dev_tools = "0.17.3"
-bevy_fps_controller = {version = "17.1.0", features = ["rapier"]}
-bevy_rapier3d = {version ="0.32"}
+bevy_fps_controller = {version = "17.1.0", features = ["avian"]}
+avian3d = {version="0.4", features = ["debug-plugin"]}
 bevy_flair = "0.6.0"
 bevy_egui = { version = "0.38.1", features = ["immutable_ctx"]}
 bevy_diagnostic = "0.17.3"
@@ -51,6 +51,9 @@ opt-level = 3
 
 [profile.release]
 opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
 
 [[bin]]
 name = "client"
