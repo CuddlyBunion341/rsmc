@@ -48,7 +48,7 @@ impl LastPlayerPosition {
         Self(IVec3::ZERO)
     }
 
-    pub fn chunk_position(&self) -> IVec3 {
+    pub fn chunk_position(&self) -> IVec2 {
         Self::chunk_pos(self.0)
     }
 
@@ -56,7 +56,7 @@ impl LastPlayerPosition {
         Self::chunk_pos(self.0) == Self::chunk_pos(other_world_position)
     }
 
-    fn chunk_pos(world_pos: IVec3) -> IVec3 {
+    fn chunk_pos(world_pos: IVec3) -> IVec2 {
         ChunkManager::world_position_to_chunk_position(world_pos)
     }
 }

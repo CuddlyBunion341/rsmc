@@ -26,7 +26,8 @@ macro_rules! for_each_chunk_coordinate {
 
                     let chunk_origin = $chunk.position * CHUNK_SIZE as i32;
                     let local_position = IVec3::new(x as i32, y as i32, z as i32);
-                    let world_position = chunk_origin + local_position;
+                    let world_position =
+                        IVec3::new(chunk_origin[0], 0, chunk_origin[1]) + local_position;
 
                     $body(x, y, z, world_position);
                 }
@@ -337,7 +338,7 @@ mod tests {
     #[test]
     fn test_generate_chunk() {
         let generator = Generator::default();
-        let mut chunk = Chunk::new(IVec3::ZERO);
+        let mut chunk = Chunk::new(IVec2::ZERO);
 
         generator.generate_chunk(&mut chunk);
 

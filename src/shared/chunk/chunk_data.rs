@@ -1,5 +1,6 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
+use bevy::math::IVec2;
 use bevy::math::IVec3;
 
 use crate::*;
@@ -7,17 +8,17 @@ use crate::*;
 #[derive(Debug, Clone, Copy)]
 pub struct Chunk {
     pub data: [BlockId; CHUNK_LENGTH],
-    pub position: IVec3,
+    pub position: IVec2,
 }
 
 impl Default for Chunk {
     fn default() -> Self {
-        Self::new(IVec3::ZERO)
+        Self::new(IVec2::ZERO)
     }
 }
 
 impl Chunk {
-    pub fn new(position: IVec3) -> Self {
+    pub fn new(position: IVec2) -> Self {
         Self {
             position,
             data: [BlockId::Air; CHUNK_LENGTH],

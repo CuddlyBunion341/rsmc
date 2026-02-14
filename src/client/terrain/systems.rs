@@ -8,9 +8,9 @@ use terrain_resources::{
 
 use crate::prelude::*;
 
-const RENDER_DISTANCE: IVec3 = IVec3::new(4, 4, 4);
-const CLEANUP_DISTANCE: IVec3 = IVec3::new(6, 6, 6);
-const MIN_SPAWN_AREA_DISTANCE: IVec3 = IVec3::new(1, 1, 1);
+const RENDER_DISTANCE: IVec2 = IVec2::new(4, 4);
+const CLEANUP_DISTANCE: IVec2 = IVec2::new(6, 6);
+const MIN_SPAWN_AREA_DISTANCE: IVec2 = IVec2::new(1, 1);
 
 pub fn prepare_mesher_materials_system(
     mut render_materials: ResMut<RenderMaterials>,
@@ -60,7 +60,7 @@ pub fn handle_chunk_request_chunk_batch_event_system(
         return;
     }
 
-    let mut new_positions: HashSet<IVec3> = HashSet::new();
+    let mut new_positions: HashSet<IVec2> = HashSet::new();
     for batch_event in batch_events.read() {
         batch_event.positions.iter().for_each(|position| {
             new_positions.insert(*position);
@@ -68,8 +68,8 @@ pub fn handle_chunk_request_chunk_batch_event_system(
     }
 
     let old_positions = &all_requests.previous_chunks;
-    let diff: HashSet<&IVec3> = new_positions.difference(old_positions).collect();
-    let diff: Vec<IVec3> = diff.into_iter().copied().collect();
+    let diff: HashSet<&IVec2> = new_positions.difference(old_positions).collect();
+    let diff: Vec<IVec2> = diff.into_iter().copied().collect();
 
     let batched_positions = diff.chunks(32);
 
@@ -166,7 +166,7 @@ pub fn handle_chunk_tasks_system(
 
         completed += 1;
         let pos = future_chunk.position;
-        let pos_vec = pos.as_vec3();
+        let pos_vec = pos.as_vec2();
 
         if let Some(entities) = chunk_entities.remove(pos) {
             entities.iter().for_each(|entity| {
@@ -246,7 +246,7 @@ pub fn check_if_spawn_area_is_loaded_system(
 
 fn create_chunk_bundle(
     mesh_handle: Handle<Mesh>,
-    chunk_position: Vec3,
+    chunk_position: Vec2,
     mesh_type: MeshType,
     material_handle: Handle<StandardMaterial>,
 ) -> (
@@ -258,16 +258,12 @@ fn create_chunk_bundle(
     (
         Mesh3d(mesh_handle),
         Transform::from_xyz(
-            chunk_position.x * CHUNK_SIZE as f32,
-            chunk_position.y * CHUNK_SIZE as f32,
-            chunk_position.z * CHUNK_SIZE as f32,
+            chunk_position[0] * CHUNK_SIZE as f32,
+            0.0,
+            chunk_position[1] * CHUNK_SIZE as f32,
         ),
         terrain_components::ChunkMesh {
-            key: [
-                chunk_position.x as i32,
-                chunk_position.y as i32,
-                chunk_position.z as i32,
-            ],
+            key: [chunk_position[0] as i32, chunk_position[1] as i32],
             mesh_type,
         },
         MeshMaterial3d(material_handle),

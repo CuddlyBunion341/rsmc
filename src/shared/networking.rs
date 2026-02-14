@@ -5,7 +5,7 @@ use std::{
 
 use bevy::{
     ecs::resource::Resource,
-    math::{IVec3, Quat, Vec3},
+    math::{IVec2, IVec3, Quat, Vec3},
 };
 use bevy_renet::netcode::NETCODE_USER_DATA_BYTES;
 use chrono::DateTime;
@@ -211,7 +211,7 @@ pub enum NetworkingMessage {
     PlayerLeave(Username),
     PlayerUpdate(PlayerState),
     PlayerSync(HashMap<Username, PlayerState>),
-    ChunkBatchRequest(Vec<IVec3>),
+    ChunkBatchRequest(Vec<IVec2>),
     ChunkBatchResponse(Vec<Chunk>),
     ChatMessageSend(String),
     SingleChatMessageSync(ChatMessage),

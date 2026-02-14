@@ -127,7 +127,7 @@ mod tests {
 
         let block = BlockId::Dirt;
         let mut resource = app.world_mut().get_resource_mut::<ChunkManager>().unwrap();
-        let chunks = ChunkManager::instantiate_chunks(IVec3::ZERO, IVec3::ONE);
+        let chunks = ChunkManager::instantiate_chunks(IVec2::ZERO, IVec2::ONE);
         resource.insert_chunks(chunks);
         resource.update_block(IVec3 { x: 6, y: 7, z: 8 }, block);
 
