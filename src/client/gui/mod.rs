@@ -24,7 +24,7 @@ impl Plugin for GuiPlugin {
                     ..default()
                 },
                 text_color: Color::srgb(0.0, 1.0, 0.0),
-                refresh_interval: core::time::Duration::from_millis(10),
+                refresh_interval: core::time::Duration::from_millis(200),
                 enabled: true,
                 frame_time_graph_config: FrameTimeGraphConfig {
                     enabled: true,
