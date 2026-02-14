@@ -75,7 +75,7 @@ impl Chunk {
         let n  = PADDED_CHUNK_SIZE;
         assert!(x <  n && y < n && z < n, "Index out of bounds: ({}, {}, {})", x,y,z);
 
-        x + n * (y + n * z)
+        z + n * (y + n * x)
     }
 
     pub fn key_eq_pos(key: [i32; 3], position: IVec3) -> bool {
