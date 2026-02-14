@@ -7,7 +7,7 @@ rust-version = "1.90.0"
 
 
 [dependencies]
-egui = "0.33.3"
+egui = {version = "0.33.3", optional = true}
 bevy = "0.17.3"
 bevy_asset = "0.17.3"
 bevy_camera = "0.17.3"
@@ -16,13 +16,13 @@ bevy_dev_tools = "0.17.3"
 bevy_fps_controller = {version = "17.1.0", features = ["rapier"]}
 bevy_rapier3d = {version ="0.32"}
 bevy_flair = "0.6.0"
-bevy_egui = { version = "0.38.1", features = ["immutable_ctx"]}
+bevy_egui = { version = "0.38.1", features = ["immutable_ctx"], optional = true}
 bevy_diagnostic = "0.17.3"
-bevy-inspector-egui = {version = "0.35", features = ["bevy_render"]}
+bevy-inspector-egui = {version = "0.35", features = ["bevy_render"], optional = true}
 bevy_renet = "3.0.0"
 bevy_mod_billboard = "0.7.0"
-renet_visualizer = {version="1.1.0", features=["bevy"]}
-egui_plot = "0.34.0"
+renet_visualizer = {version="1.1.0", features=["bevy"], optional = true}
+egui_plot = {version = "0.34.0", optional = true}
 
 noise = "0.9.0"
 cgmath = "0.18.0"
@@ -68,14 +68,14 @@ dynamic_linking = ["bevy/dynamic_linking"]
 chat = []
 
 # server
-renet_visualizer = ["egui_layer"]
-generator_visualizer = ["egui_layer"]
-egui_layer = []
+renet_visualizer = ["egui_layer", "dep:renet_visualizer", "dep:bevy-inspector-egui"]
+generator_visualizer = ["egui_layer", "dep:egui_plot", "dep:bevy-inspector-egui"]
+egui_layer = ["dep:bevy_egui", "dep:egui"]
 skip_chunk_padding = []
 
 # client
 wireframe = []
-debug_ui = []
+debug_ui = ["dep:bevy-inspector-egui"]
 ortho_camera = []
 lock_player = []
 physics_debug = []
