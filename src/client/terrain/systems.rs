@@ -258,9 +258,9 @@ fn create_chunk_bundle(
     (
         Mesh3d(mesh_handle),
         Transform::from_xyz(
-            chunk_position[0] * CHUNK_SIZE as f32,
+            chunk_position.x * CHUNK_SIZE as f32,
             0.0,
-            chunk_position[1] * CHUNK_SIZE as f32,
+            chunk_position.z * CHUNK_SIZE as f32,
         ),
         terrain_components::ChunkMesh {
             key: [chunk_position[0] as i32, chunk_position[1] as i32],
