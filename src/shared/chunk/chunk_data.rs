@@ -50,6 +50,10 @@ impl ChunkPosition {
     pub fn as_vec2(self) -> bevy::math::Vec2 {
         bevy::math::Vec2::new(self.x as f32, self.z as f32)
     }
+
+    pub fn as_ivec3(self) -> IVec3 {
+        IVec3::new(self.x, 0, self.z)
+    }
 }
 
 impl std::ops::Index<usize> for ChunkPosition {
