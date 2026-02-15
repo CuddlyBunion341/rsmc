@@ -48,10 +48,6 @@ impl LastPlayerPosition {
         Self(IVec3::ZERO)
     }
 
-    pub fn chunk_position(&self) -> ChunkPosition {
-        Self::chunk_pos(self.0)
-    }
-
     pub fn has_same_chunk_position_as(&self, other_world_position: IVec3) -> bool {
         Self::chunk_pos(self.0) == Self::chunk_pos(other_world_position)
     }
