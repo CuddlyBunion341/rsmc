@@ -31,10 +31,10 @@ impl Chunk {
 
     pub fn is_within_padded_bounds(x: i32, y: i32, z: i32) -> bool {
         x >= -1
-            && y >= -1
+            && y >= 0
             && z >= -1
             && x <= CHUNK_SIZE as i32
-            && y <= CHUNK_HEIGHT as i32
+            && y < CHUNK_HEIGHT as i32
             && z <= CHUNK_SIZE as i32
     }
 
@@ -45,6 +45,14 @@ impl Chunk {
     pub fn get(&self, x: i32, y: i32, z: i32) -> BlockId {
         assert!(Self::is_within_padded_bounds(x, y, z));
         self.get_unpadded((x + 1) as usize, y as usize, (z + 1) as usize)
+    }
+
+    pub fn get_safe(&self, x: i32, y: i32, z: i32) -> Option<BlockId> {
+        if Self::is_within_padded_bounds(x, y, z) {
+            Some(self.get_unpadded((x + 1) as usize, y as usize, (z + 1) as usize))
+        } else {
+            None
+        }
     }
 
     pub fn get_unpadded(&self, x: usize, y: usize, z: usize) -> BlockId {

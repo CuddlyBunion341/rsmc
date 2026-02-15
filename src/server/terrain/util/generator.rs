@@ -11,16 +11,10 @@ use crate::{
 macro_rules! for_each_chunk_coordinate {
     ($chunk:expr, $body:expr) => {
         for x in 0..CHUNK_SIZE + 2 {
-            for y in 0..CHUNK_SIZE + 2 {
+            for y in 0..CHUNK_HEIGHT {
                 for z in 0..CHUNK_SIZE + 2 {
                     #[cfg(feature = "skip_chunk_padding")]
-                    if x == 0
-                        || x == CHUNK_SIZE + 1
-                        || y == 0
-                        || y == CHUNK_SIZE + 1
-                        || z == 0
-                        || z == CHUNK_SIZE + 1
-                    {
+                    if false || x == 0 || x == CHUNK_SIZE + 1 || z == 0 || z == CHUNK_SIZE + 1 {
                         continue;
                     }
 
