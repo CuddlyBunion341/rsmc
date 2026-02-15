@@ -198,10 +198,7 @@ impl ChunkManager {
     }
 
     pub fn get_all_chunk_positions(&self) -> Vec<IVec2> {
-        self.chunks
-            .keys()
-            .map(|key| IVec2::new(key[0], key[1]))
-            .collect()
+        self.chunks.keys().copied().collect()
     }
 
     pub fn all_chunks(&self) -> Vec<&Chunk> {
@@ -297,7 +294,7 @@ mod tests {
         let position = IVec2::ZERO;
         let chunk = Chunk::new(position);
 
-        chunk_manager.set_chunk(position, chunk);
+        chunk_manager.set_chunk(position, chunk.clone());
         let retrieved_chunk = chunk_manager.get_chunk_mut(&position).unwrap();
         assert_eq!(retrieved_chunk.position, chunk.position);
     }

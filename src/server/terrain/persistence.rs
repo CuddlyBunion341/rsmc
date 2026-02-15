@@ -72,7 +72,7 @@ fn build_world_save_from_resources(
     chunk_manager: &ChunkManager,
     generator: &Generator,
 ) -> WorldSave {
-    let chunks = chunk_manager.all_chunks().into_iter().copied().collect();
+    let chunks = chunk_manager.all_chunks().into_iter().cloned().collect();
     let generator = generator.clone();
 
     WorldSave {

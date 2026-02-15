@@ -44,10 +44,11 @@ pub fn process_user_chunk_requests_system(
         let existing_chunks: Vec<Chunk> = existing
             .into_iter()
             .map(|pos| {
-                *chunk_manager
+                chunk_manager
                     .get_chunk(&pos)
                     .expect("Chunk must exist, as it is inside the 'existing' partition")
             })
+            .cloned()
             .collect();
 
         let generated_chunks: Vec<Chunk> = generated
@@ -60,7 +61,7 @@ pub fn process_user_chunk_requests_system(
             .collect();
 
         for chunk in &generated_chunks {
-            chunk_manager.insert_chunk(*chunk);
+            chunk_manager.insert_chunk(chunk.clone());
         }
 
         let chunks: Vec<Chunk> = existing_chunks

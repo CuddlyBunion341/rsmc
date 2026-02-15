@@ -131,8 +131,8 @@ pub fn handle_chunk_rerequests_system(
 
 fn create_mesh_task(chunk: &Chunk, texture_manager: &terrain_util::TextureManager) -> MeshTask {
     let task_pool = AsyncComputeTaskPool::get();
-    let chunk = *chunk;
     let texture_manager = texture_manager.clone();
+    let chunk = chunk.clone();
     MeshTask(task_pool.spawn(async move {
         ChunkMeshes {
             cube_mesh: terrain_util::create_cube_mesh_for_chunk(&chunk, &texture_manager),

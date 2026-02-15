@@ -5,9 +5,9 @@ use bevy::math::IVec3;
 
 use crate::*;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Chunk {
-    pub data: [BlockId; CHUNK_LENGTH],
+    pub data: Box<[BlockId; CHUNK_LENGTH]>,
     pub position: IVec2,
 }
 
@@ -21,12 +21,12 @@ impl Chunk {
     pub fn new(position: IVec2) -> Self {
         Self {
             position,
-            data: [BlockId::Air; CHUNK_LENGTH],
+            data: Box::new([BlockId::Air; CHUNK_LENGTH]),
         }
     }
 
     pub fn valid_local(x: usize, y: usize, z: usize) -> bool {
-        x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE
+        x < CHUNK_SIZE && y < CHUNK_HEIGHT && z < CHUNK_SIZE
     }
 
     pub fn is_within_padded_bounds(x: i32, y: i32, z: i32) -> bool {
@@ -34,17 +34,17 @@ impl Chunk {
             && y >= -1
             && z >= -1
             && x <= CHUNK_SIZE as i32
-            && y <= CHUNK_SIZE as i32
+            && y <= CHUNK_HEIGHT as i32
             && z <= CHUNK_SIZE as i32
     }
 
     pub fn valid_unpadded(x: usize, y: usize, z: usize) -> bool {
-        x < PADDED_CHUNK_SIZE && y < PADDED_CHUNK_SIZE && z < PADDED_CHUNK_SIZE
+        x < PADDED_CHUNK_SIZE && y < CHUNK_HEIGHT && z < PADDED_CHUNK_SIZE
     }
 
     pub fn get(&self, x: i32, y: i32, z: i32) -> BlockId {
         assert!(Self::is_within_padded_bounds(x, y, z));
-        self.get_unpadded((x + 1) as usize, (y + 1) as usize, (z + 1) as usize)
+        self.get_unpadded((x + 1) as usize, y as usize, (z + 1) as usize)
     }
 
     pub fn get_unpadded(&self, x: usize, y: usize, z: usize) -> BlockId {
@@ -53,7 +53,7 @@ impl Chunk {
 
     pub fn set(&mut self, x: i32, y: i32, z: i32, value: BlockId) {
         assert!(Self::is_within_padded_bounds(x, y, z));
-        self.set_unpadded((x + 1) as usize, (y + 1) as usize, (z + 1) as usize, value);
+        self.set_unpadded((x + 1) as usize, y as usize, (z + 1) as usize, value);
     }
 
     pub fn update(&mut self, x: i32, y: i32, z: i32, value: BlockId) {
@@ -74,9 +74,10 @@ impl Chunk {
     #[rustfmt::skip]
     pub fn index(x: usize, y: usize, z: usize) -> usize {
         let n  = PADDED_CHUNK_SIZE;
-        assert!(x <  n && y < n && z < n, "Index out of bounds: ({}, {}, {})", x,y,z);
+        let h = CHUNK_HEIGHT;
+        assert!(x <  n && y < h && z < n, "Index out of bounds: ({}, {}, {})", x,y,z);
 
-        z + n * (y + n * x)
+        z + n * (y + h * x)
     }
 
     pub fn key_eq_pos(key: [i32; 3], position: IVec3) -> bool {
