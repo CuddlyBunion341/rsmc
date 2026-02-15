@@ -2,22 +2,22 @@ use crate::prelude::*;
 
 #[derive(Message)]
 pub struct ChunkMeshUpdateEvent {
-    pub chunk_position: IVec2,
+    pub chunk_position: ChunkPosition,
 }
 
 #[derive(Message)]
 pub struct RerequestChunks {
-    pub center_chunk_position: IVec2,
+    pub center_chunk_position: ChunkPosition,
 }
 
 #[derive(Message)]
 pub struct RequestChunkBatch {
-    pub positions: Vec<IVec2>,
+    pub positions: Vec<ChunkPosition>,
 }
 
 #[derive(Message)]
 pub struct CleanupChunksAroundOrigin {
-    pub center_chunk_position: IVec2,
+    pub center_chunk_position: ChunkPosition,
 }
 
 #[derive(Message)]

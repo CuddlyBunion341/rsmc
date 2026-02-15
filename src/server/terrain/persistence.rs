@@ -147,7 +147,7 @@ mod tests {
         generator.params.density.squash_factor = 6.7;
 
         let mut chunk_manager = ChunkManager::new();
-        let mut chunks = ChunkManager::instantiate_chunks(IVec2::ZERO, IVec2::ONE);
+        let mut chunks = ChunkManager::instantiate_chunks(ChunkPosition::ZERO, IVec2::ONE);
 
         assert!(!chunks.is_empty());
 
@@ -168,7 +168,7 @@ mod tests {
     #[test]
     fn test_world_continuation() {
         let generator = Generator::with_seed(0);
-        let mut possible_new_chunk = Chunk::new(IVec2::new(20, 20));
+        let mut possible_new_chunk = Chunk::new(ChunkPosition::new(20, 20));
         generator.generate_chunk(&mut possible_new_chunk);
 
         save_world("my_world", &ChunkManager::new(), &generator).unwrap();
@@ -176,7 +176,7 @@ mod tests {
         let world = read_world_save_by_name("my_world").unwrap();
         let generator = world.generator;
 
-        let mut actual_new_chunk = Chunk::new(IVec2::new(20, 20));
+        let mut actual_new_chunk = Chunk::new(ChunkPosition::new(20, 20));
         generator.generate_chunk(&mut actual_new_chunk);
 
         assert_eq!(possible_new_chunk.data, actual_new_chunk.data);

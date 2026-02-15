@@ -60,7 +60,7 @@ pub fn handle_chunk_request_chunk_batch_event_system(
         return;
     }
 
-    let mut new_positions: HashSet<IVec2> = HashSet::new();
+    let mut new_positions: HashSet<ChunkPosition> = HashSet::new();
     for batch_event in batch_events.read() {
         batch_event.positions.iter().for_each(|position| {
             new_positions.insert(*position);
@@ -68,8 +68,8 @@ pub fn handle_chunk_request_chunk_batch_event_system(
     }
 
     let old_positions = &all_requests.previous_chunks;
-    let diff: HashSet<&IVec2> = new_positions.difference(old_positions).collect();
-    let diff: Vec<IVec2> = diff.into_iter().copied().collect();
+    let diff: HashSet<&ChunkPosition> = new_positions.difference(old_positions).collect();
+    let diff: Vec<ChunkPosition> = diff.into_iter().copied().collect();
 
     let batched_positions = diff.chunks(32);
 

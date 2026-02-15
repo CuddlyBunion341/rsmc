@@ -11,7 +11,7 @@ pub fn setup_world_system(
     info!("Generating chunks");
 
     let mut chunks =
-        ChunkManager::instantiate_chunks(IVec2::ZERO, CONFIG.world.spawn_area_distance);
+        ChunkManager::instantiate_chunks(ChunkPosition::ZERO, CONFIG.world.spawn_area_distance);
 
     chunks.par_iter_mut().for_each(|chunk| {
         info!("Generating chunk at {:?}", chunk.position);
@@ -35,7 +35,7 @@ pub fn process_user_chunk_requests_system(
         }
 
         let take_count = min(MAX_REQUESTS_PER_CYCLE_PER_PLAYER, positions.len());
-        let positions_to_process: Vec<IVec2> = positions.drain(0..take_count).collect();
+        let positions_to_process: Vec<ChunkPosition> = positions.drain(0..take_count).collect();
 
         let (existing, generated): (Vec<_>, Vec<_>) = positions_to_process
             .into_iter()

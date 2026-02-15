@@ -5,7 +5,7 @@ use std::{
 
 use bevy::{
     ecs::resource::Resource,
-    math::{IVec2, IVec3, Quat, Vec3},
+    math::{IVec3, Quat, Vec3},
 };
 use bevy_renet::netcode::NETCODE_USER_DATA_BYTES;
 use chrono::DateTime;
@@ -13,7 +13,7 @@ use renet::{ChannelConfig, ClientId, ConnectionConfig, SendType};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use super::{BlockId, Chunk};
+use super::{BlockId, Chunk, ChunkPosition};
 
 pub const SERVER_USERNAME: &str = "SERVER";
 pub const MAX_USERNAME_LENGTH_BYTES: usize = 50;
@@ -211,7 +211,7 @@ pub enum NetworkingMessage {
     PlayerLeave(Username),
     PlayerUpdate(PlayerState),
     PlayerSync(HashMap<Username, PlayerState>),
-    ChunkBatchRequest(Vec<IVec2>),
+    ChunkBatchRequest(Vec<ChunkPosition>),
     ChunkBatchResponse(Vec<Chunk>),
     ChatMessageSend(String),
     SingleChatMessageSync(ChatMessage),

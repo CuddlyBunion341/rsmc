@@ -15,7 +15,7 @@ impl SpawnRegionLoaded {
 
 #[derive(Resource, Default)]
 pub struct RequestedChunks {
-    pub previous_chunks: HashSet<IVec2>,
+    pub previous_chunks: HashSet<ChunkPosition>,
 }
 
 #[derive(Eq, Hash, Clone, PartialEq)]
@@ -31,7 +31,7 @@ pub struct ChunkMeshes {
 
 pub struct MeshTask(pub Task<ChunkMeshes>);
 pub struct FutureChunkMesh {
-    pub position: IVec2,
+    pub position: ChunkPosition,
     pub meshes_task: MeshTask,
 }
 
@@ -42,12 +42,12 @@ pub struct MesherTasks {
 
 #[derive(Resource, Default)]
 pub struct ChunkEntityMap {
-    map: HashMap<IVec2, Vec<Entity>>,
+    map: HashMap<ChunkPosition, Vec<Entity>>,
 }
 
 #[derive(Resource, Default)]
 pub struct SpawnRegion {
-    pub origin_chunk_position: IVec2,
+    pub origin_chunk_position: ChunkPosition,
 }
 
 impl SpawnRegion {
@@ -63,23 +63,23 @@ impl ChunkEntityMap {
         self.map.len()
     }
 
-    pub fn add(&mut self, chunk_position: IVec2, entity: Entity) {
+    pub fn add(&mut self, chunk_position: ChunkPosition, entity: Entity) {
         self.map.entry(chunk_position).or_default().push(entity);
     }
 
-    pub fn remove(&mut self, chunk_position: IVec2) -> Option<Vec<Entity>> {
+    pub fn remove(&mut self, chunk_position: ChunkPosition) -> Option<Vec<Entity>> {
         self.map.remove(&chunk_position)
     }
 
     pub fn extract_outside_distance(
         &mut self,
-        origin: &IVec2,
+        origin: &ChunkPosition,
         distance: &IVec2,
-    ) -> Vec<(IVec2, Vec<Entity>)> {
-        let extracted: HashMap<IVec2, Vec<Entity>> = self
+    ) -> Vec<(ChunkPosition, Vec<Entity>)> {
+        let extracted: HashMap<ChunkPosition, Vec<Entity>> = self
             .map
             .extract_if(|k, _v| {
-                (k[0] - origin[0]).abs() > distance[0] || (k[1] - origin[1]).abs() > distance[1]
+                (k.x - origin.x).abs() > distance[0] || (k.z - origin.z).abs() > distance[1]
             })
             .collect();
 

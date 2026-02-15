@@ -2,8 +2,8 @@ use crate::deserialize_buffer;
 use crate::serialize_buffer;
 use crate::BlockId;
 use crate::Chunk;
+use crate::ChunkPosition;
 use crate::CHUNK_LENGTH;
-use bevy::math::IVec2;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize};
 
@@ -48,7 +48,7 @@ impl<'de> Deserialize<'de> for Chunk {
         #[derive(Deserialize)]
         struct ChunkData {
             data: BytesVec,
-            position: IVec2,
+            position: ChunkPosition,
         }
 
         let ChunkData { data, position } = ChunkData::deserialize(deserializer)?;

@@ -332,7 +332,7 @@ mod tests {
     #[test]
     fn test_generate_chunk() {
         let generator = Generator::default();
-        let mut chunk = Chunk::new(IVec2::ZERO);
+        let mut chunk = Chunk::new(ChunkPosition::ZERO);
 
         generator.generate_chunk(&mut chunk);
 

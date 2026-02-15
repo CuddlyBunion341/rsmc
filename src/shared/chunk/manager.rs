@@ -6,7 +6,7 @@ use crate::*;
 
 #[derive(Resource)]
 pub struct ChunkManager {
-    pub chunks: HashMap<IVec2, Chunk>,
+    pub chunks: HashMap<ChunkPosition, Chunk>,
 }
 
 impl Default for ChunkManager {
@@ -23,7 +23,7 @@ impl ChunkManager {
     }
 
     pub fn with_chunks(chunks: Vec<Chunk>) -> Self {
-        let chunks: HashMap<IVec2, Chunk> = chunks
+        let chunks: HashMap<ChunkPosition, Chunk> = chunks
             .into_iter()
             .map(|chunk| (chunk.position, chunk))
             .collect();
@@ -31,7 +31,7 @@ impl ChunkManager {
         Self { chunks }
     }
 
-    pub fn instantiate_chunks(position: IVec2, render_distance: IVec2) -> Vec<Chunk> {
+    pub fn instantiate_chunks(position: ChunkPosition, render_distance: IVec2) -> Vec<Chunk> {
         let render_distance_x = render_distance[0];
         let render_distance_z = render_distance[1];
 
@@ -39,7 +39,7 @@ impl ChunkManager {
 
         for x in -render_distance_x..render_distance_x {
             for z in -render_distance_z..render_distance_z {
-                let chunk_position = IVec2::new(x + position[0], z + position[1]);
+                let chunk_position = position + ChunkPosition::new(x, z);
                 let chunk = Chunk::new(chunk_position);
                 chunks.push(chunk);
             }
@@ -48,7 +48,11 @@ impl ChunkManager {
         chunks
     }
 
-    pub fn sorted_new_chunk_positions(&self, origin: IVec2, distance: IVec2) -> Vec<IVec2> {
+    pub fn sorted_new_chunk_positions(
+        &self,
+        origin: ChunkPosition,
+        distance: IVec2,
+    ) -> Vec<ChunkPosition> {
         let all_positions = Self::get_sorted_chunk_positions_in_range(origin, distance);
         all_positions
             .into_iter()
@@ -56,24 +60,27 @@ impl ChunkManager {
             .collect()
     }
 
-    pub fn get_sorted_chunk_positions_in_range(origin: IVec2, distance: IVec2) -> Vec<IVec2> {
+    pub fn get_sorted_chunk_positions_in_range(
+        origin: ChunkPosition,
+        distance: IVec2,
+    ) -> Vec<ChunkPosition> {
         let distance_x = distance[0];
         let distance_z = distance[1];
 
-        let mut positions: Vec<IVec2> =
+        let mut positions: Vec<ChunkPosition> =
             Vec::with_capacity(((distance_x * 2 + 1) * (distance_z * 2 + 1)) as usize);
 
         for x in -distance_x..=distance_x {
             for z in -distance_z..=distance_z {
-                let chunk_position = IVec2::new(x + origin[0], z + origin[1]);
+                let chunk_position = ChunkPosition::new(x + origin.x, z + origin.z);
                 positions.push(chunk_position);
             }
         }
 
         positions.sort_by(|a, b| {
-            (a - origin)
+            (*a - origin)
                 .length_squared()
-                .cmp(&(b - origin).length_squared())
+                .cmp(&(*b - origin).length_squared())
         });
 
         positions
@@ -89,19 +96,19 @@ impl ChunkManager {
         }
     }
 
-    pub fn set_chunk(&mut self, position: IVec2, chunk: Chunk) {
+    pub fn set_chunk(&mut self, position: ChunkPosition, chunk: Chunk) {
         self.chunks.insert(position, chunk);
     }
 
-    pub fn get_chunk(&self, position: &IVec2) -> Option<&Chunk> {
+    pub fn get_chunk(&self, position: &ChunkPosition) -> Option<&Chunk> {
         self.chunks.get(position)
     }
 
-    pub fn has_chunk(&self, position: &IVec2) -> bool {
+    pub fn has_chunk(&self, position: &ChunkPosition) -> bool {
         self.chunks.contains_key(position)
     }
 
-    pub fn get_chunk_mut(&mut self, position: &IVec2) -> Option<&mut Chunk> {
+    pub fn get_chunk_mut(&mut self, position: &ChunkPosition) -> Option<&mut Chunk> {
         self.chunks.get_mut(position)
     }
 
@@ -109,17 +116,16 @@ impl ChunkManager {
         position.y >= 0 && position.y < CHUNK_HEIGHT as i32
     }
 
-    pub fn update_block(&mut self, position: IVec3, block: BlockId) -> Vec<IVec2> {
+    pub fn update_block(&mut self, position: IVec3, block: BlockId) -> Vec<ChunkPosition> {
         Self::chunk_positions_containing_world_pos(position)
             .iter()
             .flat_map(|chunk_position| {
-                let chunk_option =
-                    self.get_chunk_mut(&IVec2::new(chunk_position[0], chunk_position[1]));
+                let chunk_option = self.get_chunk_mut(chunk_position);
                 match chunk_option {
                     Some(chunk) => {
                         let chunk_origin = *chunk_position * CHUNK_SIZE as i32;
                         let local_position =
-                            position - IVec3::new(chunk_origin[0], 0, chunk_origin[1]);
+                            position - IVec3::new(chunk_origin.x, 0, chunk_origin.z);
 
                         info!("Performing local update at {:?}", local_position);
 
@@ -131,10 +137,7 @@ impl ChunkManager {
 
                         Some(*chunk_position)
                     }
-                    None => {
-                        // FIXME: we should do something about updates in unloaded chunks..
-                        None
-                    }
+                    None => None,
                 }
             })
             .collect()
@@ -143,10 +146,11 @@ impl ChunkManager {
     pub fn get_block(&self, position: IVec3) -> Option<BlockId> {
         match self.chunk_at_position(position) {
             Some(chunk) => {
+                // TODO: inline into ChunkPosition
                 let chunk_position = IVec3::new(
-                    chunk.position[0] * CHUNK_SIZE as i32,
+                    chunk.position.x * CHUNK_SIZE as i32,
                     0,
-                    chunk.position[1] * CHUNK_SIZE as i32,
+                    chunk.position.z * CHUNK_SIZE as i32,
                 );
                 let local_position = position - chunk_position;
                 chunk.get_safe(local_position.x, local_position.y, local_position.z)
@@ -158,7 +162,7 @@ impl ChunkManager {
         }
     }
 
-    fn chunk_positions_containing_world_pos(position: IVec3) -> Vec<IVec2> {
+    fn chunk_positions_containing_world_pos(position: IVec3) -> Vec<ChunkPosition> {
         fn axis_chunks(world: i32) -> Vec<i32> {
             let size = CHUNK_SIZE as i32;
             let base = world.div_euclid(size);
@@ -182,15 +186,15 @@ impl ChunkManager {
 
         for x in xs {
             for z in &zs {
-                out.push(IVec2::new(x, *z));
+                out.push(ChunkPosition::new(x, *z));
             }
         }
 
         out
     }
 
-    pub fn world_position_to_chunk_position(world_position: IVec3) -> IVec2 {
-        IVec2::new(
+    pub fn world_position_to_chunk_position(world_position: IVec3) -> ChunkPosition {
+        ChunkPosition::new(
             world_position.x.div_euclid(CHUNK_SIZE as i32),
             world_position.z.div_euclid(CHUNK_SIZE as i32),
         )
@@ -201,7 +205,7 @@ impl ChunkManager {
         self.get_chunk(&chunk_position)
     }
 
-    pub fn get_all_chunk_positions(&self) -> Vec<IVec2> {
+    pub fn get_all_chunk_positions(&self) -> Vec<ChunkPosition> {
         self.chunks.keys().copied().collect()
     }
 
@@ -231,26 +235,26 @@ mod tests {
         assert_eq!(
             ChunkManager::chunk_positions_containing_world_pos(IVec3::ZERO),
             vec![
-                IVec2::new(-1, -1),
-                IVec2::new(-1, 0),
-                IVec2::new(0, -1),
-                IVec2::new(0, 0)
+                ChunkPosition::new(-1, -1),
+                ChunkPosition::new(-1, 0),
+                ChunkPosition::new(0, -1),
+                ChunkPosition::new(0, 0)
             ]
         );
 
         assert_eq!(
             ChunkManager::chunk_positions_containing_world_pos(IVec3::ONE),
-            vec![IVec2::new(0, 0),]
+            vec![ChunkPosition::new(0, 0),]
         );
 
         assert_eq!(
             ChunkManager::chunk_positions_containing_world_pos(IVec3::new(0, 1, 1)),
-            vec![IVec2::new(-1, 0), IVec2::new(0, 0),]
+            vec![ChunkPosition::new(-1, 0), ChunkPosition::new(0, 0),]
         );
 
         assert_eq!(
             ChunkManager::chunk_positions_containing_world_pos(IVec3::new(CHUNK_SIZE as i32, 1, 1)),
-            vec![IVec2::new(0, 0), IVec2::new(1, 0),]
+            vec![ChunkPosition::new(0, 0), ChunkPosition::new(1, 0),]
         );
     }
 
@@ -262,7 +266,7 @@ mod tests {
 
     #[test]
     fn test_instantiate_chunks() {
-        let position = IVec2::new(0, 0);
+        let position = ChunkPosition::ZERO;
 
         let width = 2;
         let depth = 4;
@@ -276,7 +280,7 @@ mod tests {
     #[test]
     fn test_insert_chunks() {
         let mut chunk_manager = ChunkManager::new();
-        let position = IVec2::new(0, 0);
+        let position = ChunkPosition::ZERO;
         let render_distance = 2;
         let chunks = ChunkManager::instantiate_chunks(
             position,
@@ -295,7 +299,7 @@ mod tests {
     #[test]
     fn test_set_and_get_chunk_mut() {
         let mut chunk_manager = ChunkManager::new();
-        let position = IVec2::ZERO;
+        let position = ChunkPosition::ZERO;
         let chunk = Chunk::new(position);
 
         chunk_manager.set_chunk(position, chunk.clone());
@@ -306,7 +310,7 @@ mod tests {
     #[test]
     fn test_set_and_get_block() {
         let mut chunk_manager = ChunkManager::new();
-        let position = IVec2::ZERO;
+        let position = ChunkPosition::ZERO;
         let chunk = Chunk::new(position);
 
         chunk_manager.set_chunk(position, chunk);
@@ -321,9 +325,9 @@ mod tests {
     #[test]
     fn test_get_all_chunk_positions() {
         let mut chunk_manager = ChunkManager::new();
-        chunk_manager.set_chunk(IVec2::new(0, 0), Chunk::default());
-        chunk_manager.set_chunk(IVec2::new(2, 0), Chunk::default());
-        chunk_manager.set_chunk(IVec2::new(1, 3), Chunk::default());
+        chunk_manager.set_chunk(ChunkPosition::new(0, 0), Chunk::default());
+        chunk_manager.set_chunk(ChunkPosition::new(2, 0), Chunk::default());
+        chunk_manager.set_chunk(ChunkPosition::new(1, 3), Chunk::default());
 
         let retrieved_chunk_positions = chunk_manager.get_all_chunk_positions();
         assert_eq!(retrieved_chunk_positions.len(), 3);
@@ -333,7 +337,7 @@ mod tests {
     #[rustfmt::skip]
     fn test_tallgrass_update() {
         let mut chunk_manager = ChunkManager::new();
-        let chunk_position = IVec2::ZERO;
+        let chunk_position = ChunkPosition::ZERO;
         let chunk = Chunk::new(chunk_position);
         chunk_manager.set_chunk(chunk_position, chunk);
 
