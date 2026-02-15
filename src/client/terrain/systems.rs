@@ -165,10 +165,9 @@ pub fn handle_chunk_tasks_system(
         };
 
         completed += 1;
-        let pos = future_chunk.position;
-        let pos_vec = pos.as_vec2();
+        let chunk_position = future_chunk.position;
 
-        if let Some(entities) = chunk_entities.remove(pos) {
+        if let Some(entities) = chunk_entities.remove(chunk_position) {
             entities.iter().for_each(|entity| {
                 commands.entity(*entity).despawn();
             })
@@ -178,25 +177,25 @@ pub fn handle_chunk_tasks_system(
             let entity = commands
                 .spawn(create_chunk_bundle(
                     meshes.add(mesh),
-                    pos_vec,
+                    chunk_position,
                     MeshType::Transparent,
                     materials.transparent_material.clone().unwrap(),
                 ))
                 .id();
-            chunk_entities.add(pos, entity);
+            chunk_entities.add(chunk_position, entity);
         }
 
         if let Some(mesh) = mesh_option.cube_mesh {
             let entity = commands
                 .spawn(create_chunk_bundle(
                     meshes.add(mesh),
-                    pos_vec,
+                    chunk_position,
                     MeshType::Solid,
                     materials.chunk_material.clone().unwrap(),
                 ))
                 .insert(player_components::Raycastable)
                 .id();
-            chunk_entities.add(pos, entity);
+            chunk_entities.add(chunk_position, entity);
         }
 
         DISCARD
@@ -246,7 +245,7 @@ pub fn check_if_spawn_area_is_loaded_system(
 
 fn create_chunk_bundle(
     mesh_handle: Handle<Mesh>,
-    chunk_position: Vec2,
+    chunk_position: ChunkPosition,
     mesh_type: MeshType,
     material_handle: Handle<StandardMaterial>,
 ) -> (
@@ -258,12 +257,12 @@ fn create_chunk_bundle(
     (
         Mesh3d(mesh_handle),
         Transform::from_xyz(
-            chunk_position.x * CHUNK_SIZE as f32,
+            chunk_position.x as f32 * CHUNK_SIZE as f32,
             0.0,
-            chunk_position.z * CHUNK_SIZE as f32,
+            chunk_position.z as f32 * CHUNK_SIZE as f32,
         ),
         terrain_components::ChunkMesh {
-            key: [chunk_position[0] as i32, chunk_position[1] as i32],
+            key: [chunk_position.x, chunk_position.z],
             mesh_type,
         },
         MeshMaterial3d(material_handle),
