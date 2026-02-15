@@ -50,6 +50,10 @@ impl ChunkPosition {
     pub fn as_ivec3(self) -> IVec3 {
         IVec3::new(self.x, 0, self.z)
     }
+
+    pub fn to_world_position(self) -> IVec3 {
+        IVec3::new(self.x * CHUNK_SIZE as i32, 0, self.z * CHUNK_SIZE as i32)
+    }
 }
 
 impl std::ops::Index<usize> for ChunkPosition {

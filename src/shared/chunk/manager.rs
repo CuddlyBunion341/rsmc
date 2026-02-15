@@ -147,13 +147,7 @@ impl ChunkManager {
     pub fn get_block(&self, position: IVec3) -> Option<BlockId> {
         match self.chunk_at_position(position) {
             Some(chunk) => {
-                // TODO: inline into ChunkPosition
-                let chunk_position = IVec3::new(
-                    chunk.position.x * CHUNK_SIZE as i32,
-                    0,
-                    chunk.position.z * CHUNK_SIZE as i32,
-                );
-                let local_position = position - chunk_position;
+                let local_position = position - chunk.position.to_world_position();
                 chunk.get_safe(local_position.x, local_position.y, local_position.z)
             }
             None => {
