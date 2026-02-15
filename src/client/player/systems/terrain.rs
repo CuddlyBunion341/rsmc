@@ -9,6 +9,10 @@ pub fn handle_block_update_events(
 ) {
     for event in block_update_events.read() {
         info!("Block update message: {:?}", event.position);
+        if !ChunkManager::inside_world(&event.position) {
+            warn!("Player attempted to set block outside of the world");
+            continue;
+        }
         chunk_manager
             .update_block(event.position, event.block)
             .iter()

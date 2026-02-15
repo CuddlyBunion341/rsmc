@@ -105,6 +105,10 @@ impl ChunkManager {
         self.chunks.get_mut(position)
     }
 
+    pub fn inside_world(position: &IVec3) -> bool {
+        position.y >= 0 && position.y < CHUNK_HEIGHT as i32
+    }
+
     pub fn update_block(&mut self, position: IVec3, block: BlockId) -> Vec<IVec2> {
         Self::chunk_positions_containing_world_pos(position)
             .iter()
