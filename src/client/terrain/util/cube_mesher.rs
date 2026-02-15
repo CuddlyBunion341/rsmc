@@ -64,7 +64,7 @@ pub fn create_cube_mesh_for_chunk(chunk: &Chunk, texture_manager: &TextureManage
     };
 
     for x in 1..CHUNK_SIZE + 1 {
-        for y in 1..CHUNK_SIZE + 1 {
+        for y in 0..CHUNK_HEIGHT {
             for z in 1..CHUNK_SIZE + 1 {
                 let block_id = chunk.get_unpadded(x, y, z);
 
@@ -89,8 +89,17 @@ pub fn create_cube_mesh_for_chunk(chunk: &Chunk, texture_manager: &TextureManage
 
                 let mut mask = 0b000000;
 
-                update_mask(chunk, &mut mask, 0b000001, x, y + 1, z);
-                update_mask(chunk, &mut mask, 0b000010, x, y - 1, z);
+                if y >= 1 {
+                    update_mask(chunk, &mut mask, 0b000010, x, y - 1, z);
+                } else {
+                    // Don't render faces at bottom of world
+                }
+
+                if y < CHUNK_HEIGHT - 1 {
+                    update_mask(chunk, &mut mask, 0b000001, x, y + 1, z);
+                } else {
+                    mask |= 0b000001
+                }
 
                 update_mask(chunk, &mut mask, 0b000100, x + 1, y, z);
                 update_mask(chunk, &mut mask, 0b001000, x - 1, y, z);
@@ -100,7 +109,7 @@ pub fn create_cube_mesh_for_chunk(chunk: &Chunk, texture_manager: &TextureManage
 
                 let cube_data = create_cube_geometry_data(
                     (x - 1) as f32,
-                    (y - 1) as f32,
+                    (y) as f32,
                     (z - 1) as f32,
                     mask,
                     block_id,

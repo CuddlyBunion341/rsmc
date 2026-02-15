@@ -2,8 +2,8 @@ use crate::deserialize_buffer;
 use crate::serialize_buffer;
 use crate::BlockId;
 use crate::Chunk;
+use crate::ChunkPosition;
 use crate::CHUNK_LENGTH;
-use bevy::math::IVec3;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize};
 
@@ -48,7 +48,7 @@ impl<'de> Deserialize<'de> for Chunk {
         #[derive(Deserialize)]
         struct ChunkData {
             data: BytesVec,
-            position: IVec3,
+            position: ChunkPosition,
         }
 
         let ChunkData { data, position } = ChunkData::deserialize(deserializer)?;
@@ -63,7 +63,7 @@ impl<'de> Deserialize<'de> for Chunk {
             .map_err(|_| serde::de::Error::custom("Failed to convert data to BlockId array"))?;
 
         Ok(Chunk {
-            data: data_as_block_id,
+            data: Box::new(data_as_block_id),
             position,
         })
     }

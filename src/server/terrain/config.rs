@@ -9,7 +9,7 @@ pub struct WorldConfig {
     pub world_extension: String,
     pub world_save_interval_seconds: i64,
     pub world_backup_interval_seconds: i64,
-    pub spawn_area_distance: IVec3,
+    pub spawn_area_distance: IVec2,
 }
 
 impl Default for WorldConfig {
@@ -20,7 +20,7 @@ impl Default for WorldConfig {
             world_extension: String::from(".rsmcw"),
             world_save_interval_seconds: 30,
             world_backup_interval_seconds: 180,
-            spawn_area_distance: IVec3::new(4, 3, 4),
+            spawn_area_distance: IVec2::new(4, 4),
         }
     }
 }

@@ -9,11 +9,15 @@ use terrain_events::BlockUpdateEvent;
 
 #[derive(Resource, Default)]
 pub struct ClientChunkRequests {
-    queues: HashMap<ClientId, VecDeque<IVec3>>,
+    queues: HashMap<ClientId, VecDeque<ChunkPosition>>,
 }
 
 impl ClientChunkRequests {
-    pub fn enqueue_bulk(&mut self, client_id: ClientId, chunk_positions: &mut VecDeque<IVec3>) {
+    pub fn enqueue_bulk(
+        &mut self,
+        client_id: ClientId,
+        chunk_positions: &mut VecDeque<ChunkPosition>,
+    ) {
         self.queues
             .entry(client_id)
             .or_default()
@@ -26,7 +30,7 @@ impl ClientChunkRequests {
 
     pub fn retain<F>(&mut self, f: F)
     where
-        F: FnMut(&ClientId, &mut VecDeque<IVec3>) -> bool,
+        F: FnMut(&ClientId, &mut VecDeque<ChunkPosition>) -> bool,
     {
         self.queues.retain(f)
     }

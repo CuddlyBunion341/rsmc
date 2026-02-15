@@ -15,7 +15,7 @@ impl SpawnRegionLoaded {
 
 #[derive(Resource, Default)]
 pub struct RequestedChunks {
-    pub previous_chunks: HashSet<IVec3>,
+    pub previous_chunks: HashSet<ChunkPosition>,
 }
 
 #[derive(Eq, Hash, Clone, PartialEq)]
@@ -31,7 +31,7 @@ pub struct ChunkMeshes {
 
 pub struct MeshTask(pub Task<ChunkMeshes>);
 pub struct FutureChunkMesh {
-    pub position: IVec3,
+    pub position: ChunkPosition,
     pub meshes_task: MeshTask,
 }
 
@@ -42,12 +42,12 @@ pub struct MesherTasks {
 
 #[derive(Resource, Default)]
 pub struct ChunkEntityMap {
-    map: HashMap<IVec3, Vec<Entity>>,
+    map: HashMap<ChunkPosition, Vec<Entity>>,
 }
 
 #[derive(Resource, Default)]
 pub struct SpawnRegion {
-    pub origin_chunk_position: IVec3,
+    pub origin_chunk_position: ChunkPosition,
 }
 
 impl SpawnRegion {
@@ -63,25 +63,23 @@ impl ChunkEntityMap {
         self.map.len()
     }
 
-    pub fn add(&mut self, chunk_position: IVec3, entity: Entity) {
+    pub fn add(&mut self, chunk_position: ChunkPosition, entity: Entity) {
         self.map.entry(chunk_position).or_default().push(entity);
     }
 
-    pub fn remove(&mut self, chunk_position: IVec3) -> Option<Vec<Entity>> {
+    pub fn remove(&mut self, chunk_position: ChunkPosition) -> Option<Vec<Entity>> {
         self.map.remove(&chunk_position)
     }
 
     pub fn extract_outside_distance(
         &mut self,
-        origin: &IVec3,
-        distance: &IVec3,
-    ) -> Vec<(IVec3, Vec<Entity>)> {
-        let extracted: HashMap<IVec3, Vec<Entity>> = self
+        origin: &ChunkPosition,
+        distance: &IVec2,
+    ) -> Vec<(ChunkPosition, Vec<Entity>)> {
+        let extracted: HashMap<ChunkPosition, Vec<Entity>> = self
             .map
             .extract_if(|k, _v| {
-                (k.x - origin.x).abs() > distance.x
-                    || (k.y - origin.y).abs() > distance.y
-                    || (k.z - origin.z).abs() > distance.z
+                (k.x - origin.x).abs() > distance[0] || (k.z - origin.z).abs() > distance[1]
             })
             .collect();
 
