@@ -89,12 +89,16 @@ pub fn create_cube_mesh_for_chunk(chunk: &Chunk, texture_manager: &TextureManage
 
                 let mut mask = 0b000000;
 
-                if y > 0 {
+                if y >= 1 {
                     update_mask(chunk, &mut mask, 0b000010, x, y - 1, z);
+                } else {
+                    // Don't render faces at bottom of world
                 }
 
-                if y < CHUNK_HEIGHT {
+                if y < CHUNK_HEIGHT - 1 {
                     update_mask(chunk, &mut mask, 0b000001, x, y + 1, z);
+                } else {
+                    mask |= 0b000001
                 }
 
                 update_mask(chunk, &mut mask, 0b000100, x + 1, y, z);
