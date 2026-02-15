@@ -110,7 +110,7 @@ impl ChunkManager {
             .iter()
             .flat_map(|chunk_position| {
                 let chunk_option =
-                    self.get_chunk_mut(&IVec2::new(chunk_position[0], chunk_position[2]));
+                    self.get_chunk_mut(&IVec2::new(chunk_position[0], chunk_position[1]));
                 match chunk_option {
                     Some(chunk) => {
                         let chunk_origin = *chunk_position * CHUNK_SIZE as i32;
@@ -141,7 +141,7 @@ impl ChunkManager {
             Some(chunk) => {
                 let chunk_position = IVec3::new(
                     chunk.position[0] * CHUNK_SIZE as i32,
-                    position.y,
+                    0,
                     chunk.position[1] * CHUNK_SIZE as i32,
                 );
                 let local_position = position - chunk_position;
@@ -232,10 +232,6 @@ mod tests {
             vec![
                 IVec2::new(-1, -1),
                 IVec2::new(-1, 0),
-                IVec2::new(-1, -1),
-                IVec2::new(-1, 0),
-                IVec2::new(0, -1),
-                IVec2::new(0, -0),
                 IVec2::new(0, -1),
                 IVec2::new(0, 0)
             ]
@@ -291,7 +287,7 @@ mod tests {
         chunk_manager.insert_chunks(chunks);
         assert_eq!(
             chunk_manager.chunks.len(),
-            (render_diameter * render_diameter * render_diameter) as usize
+            (render_diameter * render_diameter) as usize
         );
     }
 
@@ -313,7 +309,7 @@ mod tests {
         let chunk = Chunk::new(position);
 
         chunk_manager.set_chunk(position, chunk);
-        let block_position = IVec3::new(1, 1, 1);
+        let block_position = IVec3::ONE;
         let block_id = BlockId::Stone;
 
         chunk_manager.update_block(block_position, block_id);
