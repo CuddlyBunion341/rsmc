@@ -78,9 +78,10 @@ impl ChunkManager {
         }
 
         positions.sort_by(|a, b| {
-            (*a - origin)
-                .length_squared()
-                .cmp(&(*b - origin).length_squared())
+            let a = (*a - origin).as_ivec3();
+            let b = (*b - origin).as_ivec3();
+
+            a.length_squared().cmp(&b.length_squared())
         });
 
         positions

@@ -43,10 +43,6 @@ impl ChunkPosition {
         Self { x, z }
     }
 
-    pub fn length_squared(self) -> i32 {
-        self.x * self.x + self.z * self.z
-    }
-
     pub fn as_vec2(self) -> bevy::math::Vec2 {
         bevy::math::Vec2::new(self.x as f32, self.z as f32)
     }
